@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<EConnectionSettings>
+    <url>jdbc:db2://s-dadcb01p.muc.allianz:50000/DADCB01P</url>
+    <user>tu02141</user>
+    <pw>BD62895CBF32CF3A0E7E3B4DA92DA81C43D3199B269744CF2C19E72AADFEE431</pw>
+    <driver>com.ibm.db2.jcc.DB2Driver</driver>
+    <keyfile>./conf/howto.key</keyfile>
+</EConnectionSettings>
