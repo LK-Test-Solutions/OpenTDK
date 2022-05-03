@@ -19,10 +19,23 @@ A java application is using a DataContainer to load settings from a **.propertie
 `DataContainer dc = new DataContainer(settingsFile);`<br>
 `dc.getValue("Language");`<br>
 
-
-
 ## Dispatcher
-The package **org.opentdk.api.dispatcher** is designed to define ENUM like objects that represent a field within a DataContainer. A field can be cells of a column or row (tabular formats) or nodes (tree formats).
+The package **org.opentdk.api.dispatcher** is designed to implement classes with constants that have attributes and methods, similar to the standard Java Enum type. The constants will be declared as objects of type **org.opentdk.api.dispatcher.BaseDispatcherComponent** and each object represents a field within a **org.opentdk.api.datastorage.DataContainer**. This allows to pre-define the data model of a **org.opentdk.api.datastorage.DataContainer** within a dispatcher class and to perform all getter, setter and other methods on the fields within the **org.opentdk.api.datastorage.DataContainer**.<br>
+### Sample usage:
+A dispatcher class is defined to setup the logger settings of an application within an XML file.<br>
+- Dispatcher Class<br>
+`public class EBaseSettings extends BaseDispatcher {`<br>
+&emsp;`public static final BaseDispatchComponent APP_LOGFILE = new BaseDispatchComponent(EBaseSettings.class, "Logfile", "/AppSettings", "./logs/Application.log");`<br>
+&emsp;`public static final BaseDispatchComponent APP_LOGFILE_LIMIT = new BaseDispatchComponent(EBaseSettings.class, "LogFileLimit", "/AppSettings", "4000");`<br>
+&emsp;`public static final BaseDispatchComponent APP_LOGFILE_KEEP_AGE = new BaseDispatchComponent(EBaseSettings.class, "LogKeepAge", "/AppSettings", "90");`<br>
+&emsp;`public static final BaseDispatchComponent APP_TRACE_LEVEL = new BaseDispatchComponent(EBaseSettings.class, "TraceLevel", "/AppSettings", "1");`<br>
+`}`<br><br>
+- Usage within application
+`/* Assign XML file to the dispatcher */`<br>
+`EBaseSettings.setDataContainer(EBaseSettings.class, "config/myAppSettings.xml");`<br>
+`/* Get value from a constant that corresponds with a XML tag within the file */`<br>
+`EBaseSettings.`
+
 
 ## Logger
 The class **org.opentdk.api.logger.MLogger** can be used in a static way without any further setup or initialization, to log messages at runtime of an application into a log file. <br>
