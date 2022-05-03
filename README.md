@@ -30,12 +30,16 @@ A dispatcher class is defined to setup the logger settings of an application wit
 &emsp;`public static final BaseDispatchComponent APP_LOGFILE_KEEP_AGE = new BaseDispatchComponent(EBaseSettings.class, "LogKeepAge", "/AppSettings", "90");`<br>
 &emsp;`public static final BaseDispatchComponent APP_TRACE_LEVEL = new BaseDispatchComponent(EBaseSettings.class, "TraceLevel", "/AppSettings", "1");`<br>
 `}`<br><br>
-- Usage within application
+- Usage within application<br>
 `/* Assign XML file to the dispatcher */`<br>
 `EBaseSettings.setDataContainer(EBaseSettings.class, "config/myAppSettings.xml");`<br>
 `/* Get value from a constant that corresponds with a XML tag within the file */`<br>
-`EBaseSettings.`
-
+`EBaseSettings.APP_TRACE_LEVEL.getValue(); // returns 3 (the value defined in myAppSettings.xml)`<br><br>
+- Content of myAppSettings.xml<br>
+`<?xml version="1.0" encoding="UTF-8" standalone="no"?>`<br>
+`<AppSettings>`<br>
+&emsp;`<TraceLevel>3</TraceLevel>`<br>
+`</AppSettings>`<br>
 
 ## Logger
 The class **org.opentdk.api.logger.MLogger** can be used in a static way without any further setup or initialization, to log messages at runtime of an application into a log file. <br>
