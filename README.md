@@ -22,7 +22,7 @@ A java application is using a DataContainer to load settings from a **.propertie
 ## Dispatcher
 The package **org.opentdk.api.dispatcher** is designed to implement classes with constants that have attributes and methods, similar to the standard Java Enum type. The constants will be declared as objects of type **org.opentdk.api.dispatcher.BaseDispatcherComponent** and each object represents a field within a **org.opentdk.api.datastorage.DataContainer**. This allows to pre-define the data model of a **org.opentdk.api.datastorage.DataContainer** within a dispatcher class and to perform all getter, setter and other methods on the fields within the **org.opentdk.api.datastorage.DataContainer**.<br>
 ### Sample usage:
-A dispatcher class is defined to setup the logger settings of an application within an XML file.<br>
+A dispatcher class is defined to setup the logger settings for an application and the values assigned to the constants are read within the application by calling their getValue method. <br>
 - Dispatcher Class<br>
 `public class EBaseSettings extends BaseDispatcher {`<br>
 &emsp;`public static final BaseDispatchComponent APP_LOGFILE = new BaseDispatchComponent(EBaseSettings.class, "Logfile", "/AppSettings", "./logs/Application.log");`<br>
@@ -34,6 +34,7 @@ A dispatcher class is defined to setup the logger settings of an application wit
 `/* Assign XML file to the dispatcher */`<br>
 `EBaseSettings.setDataContainer(EBaseSettings.class, "config/myAppSettings.xml");`<br>
 `/* Get value from a constant that corresponds with a XML tag within the file */`<br>
+`EBaseSettings.APP_LOGFILE.getValue(); // returns ./logs/Application.log (the defautl value defined in declaration of the constant APP_LOGFILE)`<br><
 `EBaseSettings.APP_TRACE_LEVEL.getValue(); // returns 3 (the value defined in myAppSettings.xml)`<br><br>
 - Content of myAppSettings.xml<br>
 `<?xml version="1.0" encoding="UTF-8" standalone="no"?>`<br>
