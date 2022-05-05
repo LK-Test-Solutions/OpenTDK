@@ -25,20 +25,14 @@ module opentdk.api {
 	exports Tests.Logging to junit;
 	exports Tests.Utility to junit;
 
-	requires transitive java.scripting;
-	requires transitive java.sql;
-	requires transitive java.desktop; 
-	requires transitive java.xml;
-	requires transitive java.logging;
+	requires java.scripting;
+	requires java.sql;
+	requires java.desktop; 
+	requires java.xml;
+	requires java.logging;
 	
-	requires transitive org.apache.httpcomponents.httpclient;
-	requires transitive org.apache.httpcomponents.httpcore;
-	requires transitive org.apache.httpcomponents.httpmime;
-	requires transitive org.apache.commons.io;
-//	requires transitive org.apache.commons.codec;
-	requires transitive org.json;
-//	requires transitive com.h2database;
-	requires transitive commons.math3;
+	requires org.apache.commons.io;
+	requires commons.math3;
 	
-	requires transitive junit;
+	requires junit;
 }
