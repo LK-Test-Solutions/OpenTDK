@@ -141,7 +141,7 @@ public class BaseDispatchComponent {
 	}
 
 	/**
-	 * This constructor is used to declare variables for tree formats like XML, JSON or JAML.
+	 * This constructor is used to declare variables for tree formats like XML, JSON or YAML.
 	 * 
 	 * @param parentClass - The dispatcher class where the BaseDispatchComponent variable is declared. If the class is an extended subclass, then the superclass needs to be used.
 	 * @param paramName - Name of a node, associated with the variable
@@ -155,7 +155,7 @@ public class BaseDispatchComponent {
 	}
 	
 	/**
-	 * This constructor is used to declare variables for tree formats like XML, JSON or JAML.
+	 * This constructor is used to declare variables for tree formats like XML, JSON or YAML.
 	 * 
 	 * @param setKey - Name of the dispatcher class where the BaseDispatchComponent variable is declared. If the class is an extended subclass, then the name of the superclass needs to be used.
 	 * @param paramName - Name of a node, associated with the variable

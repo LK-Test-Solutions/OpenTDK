@@ -37,7 +37,7 @@ public abstract class BaseContainer {
 		RESULTSET(EHeader.COLUMN),
 		XML(EHeader.TREE),
 		JSON(EHeader.TREE),
-		JAML(EHeader.TREE);
+		YAML(EHeader.TREE);
 		
 		private EHeader headerType;
 		

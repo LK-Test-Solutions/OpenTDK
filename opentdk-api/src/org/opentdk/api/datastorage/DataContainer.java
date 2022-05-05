@@ -1,11 +1,9 @@
 package org.opentdk.api.datastorage;
 
-import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
-import java.nio.charset.StandardCharsets;
 import java.sql.ResultSet;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -21,9 +19,6 @@ import org.opentdk.api.io.FileUtil;
 import org.opentdk.api.io.XFileWriter;
 import org.opentdk.api.io.XMLEditor;
 import org.opentdk.api.logger.*;
-
-import RegressionTests.Dispatcher.EDesignSteps;
-import RegressionTests.Dispatcher.EQCStepField;
 
 /**
  * Class used to store data from different sources at runtime of an application in an <code>ArrayList</code>. The source data needs to be in a structured format, and keys can be assigned to the
