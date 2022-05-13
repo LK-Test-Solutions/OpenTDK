@@ -116,8 +116,8 @@ public class XMLDataContainer implements CustomContainer {
 			String[] splittedTags = expr.split("/");
 			// last element of the splited xPath is the tagname
 			String targetTag = splittedTags[splittedTags.length - 1];
-			// string excluding the tagname is the parent xPath
-			String parentExpr = expr.substring(0, expr.indexOf(targetTag) - 1);
+			// delete tagname from the string to get the parent xPath
+			String parentExpr = expr.substring(0, expr.length() - targetTag.length() - 1);
 			// get DOM element of the tags parent
 			Element e = xEdit.getElement(parentExpr);
 			// search all child elements that match to the target tagname
