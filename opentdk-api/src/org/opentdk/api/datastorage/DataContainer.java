@@ -286,7 +286,7 @@ public class DataContainer extends BaseContainer {
 		for (int i = 0; i < values.size(); i++) {
 			String[] newArr = Arrays.copyOf(values.get(i), values.get(i).length + 1);
 			newArr[newArr.length - 1] = "";
-			values.set(headerNames.size(), newArr);
+			values.set(i, newArr);
 		}
 	}
 	
@@ -1452,12 +1452,12 @@ public class DataContainer extends BaseContainer {
 			instance.setFieldValues(headerName, indexes, value, fltr);
 			break;
 		default:
-			if(values.size() <= 0) {
+			if(values.isEmpty()) {
 				setFieldValue(headerName, 0, value);
 			}else {
-				List<Integer> occ = new ArrayList<Integer>();
+				List<Integer> occ = new ArrayList<>();
 				int[] rowIDs = getRowsIndexes(fltr);
-				if(indexes[0] == -1) {
+				if(indexes.length != 0 && indexes[0] == -1) {
 					occ = Arrays.stream(rowIDs).boxed().collect(Collectors.toList());
 				}else {
 					occ = Arrays.stream(indexes).boxed().collect(Collectors.toList());
