@@ -12,7 +12,7 @@
 
 # Other files
 #*.xml
-*.txt
+#*.txt
 *.png
 *.jpg
 *.lst
