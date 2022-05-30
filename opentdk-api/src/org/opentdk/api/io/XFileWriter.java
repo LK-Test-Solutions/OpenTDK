@@ -108,7 +108,7 @@ public class XFileWriter {
 	 * the possibility to append data.
 	 * 
 	 * @param fileName {@link #fileName}
-	 * @param apnd     {@link #append}
+	 * @param append     {@link #append}
 	 * @throws IOException If any IO error occurs when creating the XFileWriter
 	 *                     instance with the committed file.
 	 */

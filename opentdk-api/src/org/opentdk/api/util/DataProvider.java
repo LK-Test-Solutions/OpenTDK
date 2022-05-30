@@ -35,7 +35,8 @@ import java.util.Random;
  * Usage:
  * 
  * <pre>
- * 
+ * DataProvider provider = new DataProvider(MIN, MAX);
+ * provider.data();
  * </pre>
  */
 public class DataProvider {
@@ -71,8 +72,8 @@ public class DataProvider {
 	private boolean bothDouble = false;
 
 	/**
-	 * Initialize a new test data generator for numbers. After initialization the {@link #data()} gets
-	 * used to get the next random value in the defined range.
+	 * Initialize a new test data generator for numbers. After initialization the
+	 * {@link #data()} gets used to get the next random value in the defined range.
 	 * 
 	 * @param min {@link #min}
 	 * @param max {@link #max}

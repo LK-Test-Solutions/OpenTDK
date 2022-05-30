@@ -332,7 +332,7 @@ public class BaseDispatchComponent {
 	/**
 	 * Removes all the mappings from the DataContainer HashMap.
 	 * 
-	 * @see {@link java.util.Map#clear()}
+	 * @see java.util.Map#clear
 	 */
 	public static void clearDataContainer() {
 		dcMap.clear();
@@ -563,7 +563,7 @@ public class BaseDispatchComponent {
 	 * Returns the parameterName property of the {@link org.opentdk.api.dispatcher.BaseDispatchComponent}.
 	 * 
 	 * @return The value of the parameterName property as string
-	 * @see {@link org.opentdk.api.dispatcher.BaseDispatchComponent#parameterName}
+	 * @see org.opentdk.api.dispatcher.BaseDispatchComponent#parameterName
 	 */
 	public String getName() {
 		return parameterName;
@@ -766,9 +766,9 @@ public class BaseDispatchComponent {
 	 * ECollectorSettings.setDataContainer(ECollectorSettings.class, stream);
 	 * </pre>
 	 * 
-	 * @param setKey - Name of the key where the DataContainer is stored within the HashMap.
+	 * @param keyName - Name of the key where the DataContainer is stored within the HashMap.
 	 * @param inStream - A InputStream with content in a format of any supported {@link org.opentdk.api.datastorage.DataContainer}
-	 * @see {@link org.opentdk.api.datastorage.DataContainer#DataContainer(InputStream)}
+	 * @see org.opentdk.api.datastorage.DataContainer#DataContainer(InputStream)
 	 */
 	public static void setDataContainer(String keyName, InputStream inStream) {
 		dcMap.put(keyName, new DataContainer(inStream));

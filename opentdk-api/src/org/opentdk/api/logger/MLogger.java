@@ -133,8 +133,6 @@ public final class MLogger {
 	 * <code>MLogger.getInstance().log(Level.SEVERE, "Message", "mainClassName", "thisClassName", "thisMethod");</code>
 	 * 
 	 * @return an instance of this class
-	 * 
-	 * @see com.lk.java.lib.logger.MLogger
 	 */
 	public static MLogger getInstance() {
 		if (instance == null) {
@@ -175,7 +173,7 @@ public final class MLogger {
 	 * 
 	 * @param level   One of the trace level of {@link java.util.logging.Level}
 	 * @param message The message to report
-	 * @return Call log(Level level, Exception e, String methodName) of {@link com.lk.java.lib.logger.MLogger}
+	 * @return Call log(Level level, Exception e, String methodName)
 	 */
 	public boolean log(Level level, String message) {
 		return log(level, message, "", "");

@@ -26,9 +26,9 @@ import org.opentdk.api.datastorage.DataContainer;
 public class BaseDispatcher {
 
 	/**
-	 * Removes all the mappings from the DataContainer HashMap.
-	 * 
-	 * @see {@link BaseDispatchComponent#clearDataContainer()}
+	 * Removes all the mappings from the DataContainer HashMap.<br>
+	 * <br>
+	 * {@link BaseDispatchComponent#clearDataContainer()}
 	 */
 	public static void clearDataContainer() {
 		BaseDispatchComponent.clearDataContainer();
@@ -46,7 +46,7 @@ public class BaseDispatcher {
 	 * 	<code><b>EChessAppSettings.getDataContainer(EBaseSettings.class.getSimpleName());</b></code>
 	 * </pre>
 	 * 
-	 * @param settingsClassName - The simple name of the dispatcher class where the {@link BaseDispatchComponent} variables are declared. In case the dispatcher class 
+	 * @param dispatcherClassName The simple name of the dispatcher class where the {@link BaseDispatchComponent} variables are declared. In case the dispatcher class 
 	 * 							  extends a super class with inherited declarations of {@link BaseDispatchComponent}, then the simple name of the super class needs to be used.
 	 * 							  This will not effect the super class {@link #BaseDispatcher()}, because BaseDispatcher does not include declarations of {@link BaseDispatchComponent}.
 	 * @return object of type {@link org.opentdk.api.datastorage.DataContainer} 

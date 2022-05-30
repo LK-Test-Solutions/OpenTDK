@@ -84,7 +84,7 @@ interface CustomContainer {
     }
 
     /**
-     * The {@link #delegeField(String, String, String, Filter)} method can be implemented within the specific <code>DataContainer</code>
+     * The {@link #deleteField(String, String, String, Filter)} method can be implemented within the specific <code>DataContainer</code>
      * to delete an attribute name and value from a field within the data source. Primarily the method is designed for data formats, 
      * where single nodes or similar elements can be addressed, instead of columns or rows with multiple values. e.g. the 
      * implemented method {@link XMLDataContainer#deleteField(String, String, String, Filter)} deletes an attribute name and value 
@@ -103,10 +103,10 @@ interface CustomContainer {
      * The {@link #getAttributes(String, String)} method can be implemented within the specific <code>DataContainer</code> 
      * in case that the fields of the data source have additional attributes attached. 
      * e.g.: The {@link XMLDataContainer#getAttributes(String, String)} searches for all tags with specific attributes
-     * like <code>&lt;CountryCode name="Germany"&gt;+49&lt;/CountryCode&gt;<code>
+     * like <code>&lt;CountryCode name="Germany"&gt;+49&lt;/CountryCode&gt;</code>
      *  
-     * @param expr		Element to search for -> the individual purpose of this parameter will be specified within the implementing classes
-     * @param attrName	Name of the attribute to search for -> the individual purpose of this parameter will be specified within the implementing classes
+     * @param expr		Element to search for {@literal ->} the individual purpose of this parameter will be specified within the implementing classes
+     * @param attrName	Name of the attribute to search for {@literal ->} the individual purpose of this parameter will be specified within the implementing classes
      * @return			String Array with all attribute values found by the search expression and attribute name
      */
     default String[] getAttributes(String expr, String attrName) {
@@ -120,7 +120,6 @@ interface CustomContainer {
      * @param headerName	Name of the column header, where the method will get the values from.
      * @param rowFilter		The row filter defines the conditions for values found in the column. Only values that match the conditions will be retrieved. 
      * @return				Array with all resulting values.
-     * @throws Exception
      */
 	default Object[] getColumn(String headerName, Filter rowFilter) throws Exception {
 		return new String[0];

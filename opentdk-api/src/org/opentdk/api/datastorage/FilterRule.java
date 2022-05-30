@@ -75,7 +75,6 @@ public class FilterRule {
 	 * rule elements like headerName, value, filterOperator and
 	 * ruleConcatenationOperator and the properties of these elements will
 	 * automatically be set with the identified values.
-	 * 
 	 */
 	public FilterRule(String ruleStr) {
 		setRuleString(ruleStr);

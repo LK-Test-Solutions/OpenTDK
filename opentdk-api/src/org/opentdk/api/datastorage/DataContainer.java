@@ -305,7 +305,6 @@ public class DataContainer extends BaseContainer {
 	 * @param	headerName 	Name of the field or node that will be added.
 	 * @param	value      	Value that will be assigned to the field or node.
 	 * @param	fltr       	The filter object to insert the new node at the right position as demonstrated above.
-	 * @return 				The string that was inserted or an empty string if BaseContainer.EHeader.TREE is not the current header type.
 	 */
 	public void addField(String headerName, String value, Filter fltr) {
 		switch (getContainerFormat().getHeaderType()) {
@@ -334,7 +333,6 @@ public class DataContainer extends BaseContainer {
 	 * @param	attributeName   Name of the attribute that will be assigned to the field or node.
 	 * @param   attributeValue 	Value that will be assigned to the attribute of the field or node.
 	 * @param	fltr       		The filter object to insert the new node at the right position as demonstrated above.
-	 * @return 					The string that was inserted or an empty string if BaseContainer.EHeader.TREE is not the current header type.
 	 */	
 	public void addField(String headerName, String attributeName, String attributeValue, Filter fltr) {
 		switch (getContainerFormat().getHeaderType()) {
@@ -366,7 +364,6 @@ public class DataContainer extends BaseContainer {
 	 * @param	oldAttrValue	The attribute value that will be replaced, in case it exists.
 	 * @param   attributeValue 	Value that will be assigned to the attribute of the field or node.
 	 * @param	fltr       		The filter object to insert the new node at the right position as demonstrated above.
-	 * @return 					The string that was inserted or an empty string if BaseContainer.EHeader.TREE is not the current header type.
 	 */	
 	public void addField(String headerName, String attributeName, String oldAttrValue, String attributeValue, Filter fltr) {
 		switch (getContainerFormat().getHeaderType()) {
@@ -468,13 +465,10 @@ public class DataContainer extends BaseContainer {
 	 * This method reads data from a specified source file and appends it to the existing data within the container.
 	 * 
 	 * @param	fileName        		Full path and name of the source file, from which the data will be added to the <code>DataContainer</code>
-	 * @param 	srcHeader       		The header orientation (column or row header)
 	 * @param 	columnDelimiter 		The column separator to structure the data.
 	 * @throws 	FileNotFoundException 	If the committed file does not exist.
-	 *
 	 */
 	public void appendData(String fileName, String columnDelimiter) throws FileNotFoundException {
-
 		setFileName(fileName);
 		setColumnDelimiter(columnDelimiter);
 
@@ -493,7 +487,6 @@ public class DataContainer extends BaseContainer {
 	 * 
 	 * @param 	fileName 				Full path and name of the source file, from which the data will be added to the <code>DataContainer</code>
 	 * @throws 	FileNotFoundException 	If the committed file does not exist.
-	 *
 	 */
 	public void appendData(String fileName) throws FileNotFoundException {
 		if (getColumnDelimiter() == null) {
@@ -1086,7 +1079,7 @@ public class DataContainer extends BaseContainer {
 	 */
 	public List<String> getValuesAsDistinctedList(String headerName) {
 		List<String> values = getValuesAsList(headerName, new int[0], new Filter());
-		Set<String> uniqueValues = new HashSet<String>(values);
+		Set<String> uniqueValues = new HashSet<>(values);
 		return Arrays.asList(uniqueValues.toArray(new String[uniqueValues.size()]));
 	}
 
@@ -1183,7 +1176,7 @@ public class DataContainer extends BaseContainer {
 	 *
 	 * @param 	headerName 	The name of the header
 	 * @param 	rowIndexes	int array with index numbers of the rows that will be retrieved
-	 * @param 	rowFilter  	Object of type {@link org.opentdk.api.datastorage.Filter} which defines rules for matching rows
+	 * @param 	fltr  	Object of type {@link org.opentdk.api.datastorage.Filter} which defines rules for matching rows
 	 * @return 	List of type String with all selected values
 	 */
 	public List<String> getValuesAsList(String headerName, int[] rowIndexes, Filter fltr) {
@@ -1363,7 +1356,6 @@ public class DataContainer extends BaseContainer {
 	 *
 	 * @param headerName Name of the sequence header
 	 * @param value      Value as String that will be set to the field
-	 * @return The value that was set to the field as String
 	 */
 	public void setValue(String headerName, String value) {
 		setValue(headerName, 0, value, new Filter());
@@ -1377,7 +1369,6 @@ public class DataContainer extends BaseContainer {
 	 * @param headerName Name of the sequence header
 	 * @param index      Index of the field within the DataSet
 	 * @param value      Value as String that will be set to the field
-	 * @return The value that was set to the field as String
 	 */
 	public void setValue(String headerName, int index, String value) {
 		setValue(headerName, index, value, new Filter());
@@ -1391,7 +1382,6 @@ public class DataContainer extends BaseContainer {
 	 * @param headerName 	Name of the sequence header
 	 * @param value     	Value as String that will be set to the field
 	 * @param fltr 			Filter for selection of the target dataset (row or column)
-	 * @return 				The value that was set to the field as String
 	 */
 	public void setValue(String headerName, String value, Filter fltr) {
 		setValue(headerName, 0, value, fltr);
@@ -1406,7 +1396,6 @@ public class DataContainer extends BaseContainer {
 	 * @param index			zero based index that defines the position of the field in case that multiple fields were found
 	 * @param value     	Value as String that will be set to the field
 	 * @param fltr 			Filter for selection of the target dataset (row or column)
-	 * @return 				The value that was set to the field as String
 	 */
 	public void setValue(String headerName, int index, String value, Filter fltr) {
 		setValues(headerName, new int[] { index }, value, fltr);
@@ -1420,7 +1409,6 @@ public class DataContainer extends BaseContainer {
 	 * @param headerName 	Name of the sequence header
 	 * @param value     	Value as String that will be set to the field
 	 * @param fltr 			Filter for selection of the target dataset (row or column)
-	 * @return 				The value that was set to the field as String
 	 */
 	public void setValues(String headerName, String value, Filter fltr) {
 		setValues(headerName, new int[0], value, fltr);
@@ -1443,9 +1431,7 @@ public class DataContainer extends BaseContainer {
 	 * @param indexes		Array with indexes, defining the position of all fields which will be overwritten
 	 * @param value     	Value as String that will be set to the field
 	 * @param fltr 			Filter for selection of the target dataset (row or column)
-	 * @return 				The value that was set to the field as String
 	 */
-
 	public void setValues(String headerName, int[] indexes, String value, Filter fltr) {
 		switch (getContainerFormat().getHeaderType()) {
 		case TREE:

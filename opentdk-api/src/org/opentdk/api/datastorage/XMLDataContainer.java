@@ -7,17 +7,15 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import org.opentdk.api.datastorage.BaseContainer.EContainerFormat;
-import org.opentdk.api.datastorage.BaseContainer.EHeader;
 import org.opentdk.api.io.XMLEditor;
 import org.w3c.dom.Element;
-import org.w3c.dom.NodeList;
 
 /**
  * SubClass of {@link DataContainer} which provides all methods for reading and writing
  * from or to Ascii files in XML format, and store the data at runtime within the DataContainer.
  * 
  * @author LK Test Solutions
- * @See com.lk.java.lib.datastorage.DataContainer
+ * @see org.opentdk.api.datastorage.DataContainer
  */
 public class XMLDataContainer implements CustomContainer {
 
@@ -53,7 +51,7 @@ public class XMLDataContainer implements CustomContainer {
 	 * the structure of a XML is fundamentally different from the datacontainer
 	 * instance, only references of the values are stored in the container as
 	 * "X-Paths". Every XML-Tag has its own column in the container. The references
-	 * alone are useless, they need to be read out by <code>getValue<code>.
+	 * alone are useless, they need to be read out by <code>getValue</code>.
 	 *
 	 * @param filter Has no effect here.
 	 */

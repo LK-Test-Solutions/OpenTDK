@@ -196,7 +196,7 @@ public class DateUtil {
 	 * Retrieves the first date or time or time stamp depending on the committed type.
 	 * 
 	 * @param type   The field to use e.g. <code>ChronoField.DAY_OF_WEEK</code> gets the first day of the week.
-	 * @param formatThe preferred date/time format e.g. yyyyMMdd.
+	 * @param format The preferred date/time format e.g. yyyyMMdd.
 	 * @return The resulting date/time string in the committed format.
 	 */
 	public static String getFirstOf(ChronoField type, String format) {

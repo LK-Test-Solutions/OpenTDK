@@ -9,7 +9,7 @@ module opentdk.api {
 	exports org.opentdk.api.util;							
 
 	requires java.scripting;
-	requires java.sql;
+	requires transitive java.sql;
 	requires java.desktop; 
 	requires java.xml;
 	requires java.logging;
