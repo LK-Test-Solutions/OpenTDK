@@ -1,0 +1,8 @@
+module:opentdk.api
+org.opentdk.api.application
+org.opentdk.api.datastorage
+org.opentdk.api.dispatcher
+org.opentdk.api.io
+org.opentdk.api.logger
+org.opentdk.api.meter
+org.opentdk.api.util
