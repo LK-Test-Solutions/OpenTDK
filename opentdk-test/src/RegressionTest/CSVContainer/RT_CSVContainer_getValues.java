@@ -44,7 +44,7 @@ public class RT_CSVContainer_getValues extends BaseRegression {
 
 	public void test3(DataContainer dc) {
 		List<String> expResults1 = new ArrayList<>();
-		expResults1.add("München");
+		expResults1.add("Mï¿½nchen");
 		testResult(dc.getValue(3, 2), "getValue(headerindex,rowindex) - Column 4, Row 3", expResults1.get(0));
 	}
 
@@ -96,15 +96,15 @@ public class RT_CSVContainer_getValues extends BaseRegression {
 	public void test8(DataContainer dc) {	
 		String allValues = dc.getValuesAsString();
 		StringBuilder sb = new StringBuilder();
-		sb.append("LK Test Solutions GmbH;Walter;81675;München;Schneckenburgerstraße;32;089/45709053;hwa@lk-test.com").append("\n");
-		sb.append("Muster AG;Mustermann;12345;Musterhausen;Musterstraße;1;0123/4567890;max@muster.mu").append("\n");
-		sb.append("LK Test Solutions GmbH;Meisinger;86450;München;Schneckenburgerstraße;32;null;fme@lk-test.de").append("\n");
-		sb.append("LK Test Solutions GmbH;Winkler;81675;München;Schneckenburgerstraße;32;null;lwi@lk-test.de").append("\n");
+		sb.append("LK Test Solutions GmbH;Walter;81675;Mï¿½nchen;Schneckenburgerstraï¿½e;32;089/45709053;hwa@lk-test.com").append("\n");
+		sb.append("Muster AG;Mustermann;12345;Musterhausen;Musterstraï¿½e;1;0123/4567890;max@muster.mu").append("\n");
+		sb.append("LK Test Solutions GmbH;Meisinger;86450;Mï¿½nchen;Schneckenburgerstraï¿½e;32;null;fme@lk-test.de").append("\n");
+		sb.append("LK Test Solutions GmbH;Winkler;81675;Mï¿½nchen;Schneckenburgerstraï¿½e;32;null;lwi@lk-test.de").append("\n");
 		
 		boolean valuesEqual = allValues.equals(sb.toString());
 		testResult(String.valueOf(valuesEqual), "getValuesAsString() - values equal", "true");
 		
-		List<String> uniqueValues = dc.getValuesAsDistinctedList("Straße");
+		List<String> uniqueValues = dc.getValuesAsDistinctedList("Straï¿½e");
 		testResult(String.valueOf(uniqueValues.size()), "getValuesAsDistinctedList(header) - size", "2");
 	}
 	
