@@ -97,7 +97,7 @@ public class BaseDispatchComponent {
 	 * Sample XPath definition for XML structure: "/parserRules/rule[@name='{param_1}']/element[@name='{param_2}']"
 	 */
 	private String parentXPath;
-	
+		
 	/**
 	 * This property is used to assign a default value to the BaseDispatchComponent variable which will be returned by the getValue method
 	 * in case that no settings file entry with the XPath and node name exists. 

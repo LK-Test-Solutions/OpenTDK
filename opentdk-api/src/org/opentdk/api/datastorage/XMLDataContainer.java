@@ -58,6 +58,7 @@ public class XMLDataContainer implements CustomContainer {
 	@Override
 	public void readData(Filter filter) {
 		if(!dc.getFileName().isEmpty()) {
+			
 			xEdit = new XMLEditor(new File(dc.getFileName()));
 		} else if(dc.getInputStream() != null) {
 			xEdit = new XMLEditor(dc.getInputStream());

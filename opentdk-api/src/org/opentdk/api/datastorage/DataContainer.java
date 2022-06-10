@@ -579,13 +579,15 @@ public class DataContainer extends BaseContainer {
 			if (fileName.endsWith(".properties")) {
 				return EContainerFormat.PROPERTIES;
 			} else if (fileName.endsWith(".xml")) {
-				if(FileUtil.checkFile(fileName)) {
-					if(XMLEditor.validateXMLFile(new File(fileName))) {
-						return EContainerFormat.XML;
-					}
-				} else {
-					return EContainerFormat.XML;
-				}
+				return EContainerFormat.XML;
+				// ToDo: Validation of XML file need to be re-defined. The current implementation fails when the file is empty.
+//				if(FileUtil.checkFile(fileName)) {
+//					if(XMLEditor.validateXMLFile(new File(fileName))) {
+//						return EContainerFormat.XML;
+//					}
+//				} else {
+//					return EContainerFormat.XML;
+//				}
 			} else {
 				return EContainerFormat.CSV;
 			}
