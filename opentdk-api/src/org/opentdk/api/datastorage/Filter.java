@@ -94,7 +94,12 @@ public class Filter {
 	public void addFilterRule(String headerName, String value, BaseDispatchComponent mode) {
 		addFilterRule(headerName, value, mode, false);
 	}
+	
+	public void addFilterRule(String headerName, String value, BaseDispatchComponent mode, FilterRule.ERuleFormat ruleFormat) {
+		addFilterRule(headerName, new String[] { value }, mode, ruleFormat);
+	}
 
+	@Deprecated
 	public void addFilterRule(String headerName, String value, BaseDispatchComponent mode, boolean quoteRuleString) {
 		addFilterRule(headerName, new String[] { value }, mode, quoteRuleString);
 	}
@@ -124,6 +129,17 @@ public class Filter {
 		addFilterRule(headerName, values, mode, false);
 	}
 
+	public void addFilterRule(String headerName, String[] values, BaseDispatchComponent mode, FilterRule.ERuleFormat ruleFormat) {
+		if (plausibleHeaders.isEmpty() || checkHeader(headerName)) {
+			try {
+				rules.add(new FilterRule(headerName, values, mode, ruleFormat));
+			} catch (Exception e) {
+				MLogger.getInstance().log(Level.SEVERE, e);
+			}
+		}
+	}
+	
+	@Deprecated
 	public void addFilterRule(String headerName, String[] values, BaseDispatchComponent mode, boolean quoteRuleString) {
 		if (plausibleHeaders.isEmpty() || checkHeader(headerName)) {
 			try {
@@ -138,6 +154,11 @@ public class Filter {
 		addFilterRule(headerName, value, mode, concat, false);
 	}
 
+	public void addFilterRule(String headerName, String value, BaseDispatchComponent mode, BaseDispatchComponent concat, FilterRule.ERuleFormat ruleFormat) {
+		addFilterRule(headerName, new String[] { value }, mode, concat, ruleFormat);
+	}
+	
+	@Deprecated
 	public void addFilterRule(String headerName, String value, BaseDispatchComponent mode, BaseDispatchComponent concat, boolean quoteRuleString) {
 		addFilterRule(headerName, new String[] { value }, mode, concat, quoteRuleString);
 	}
@@ -146,6 +167,17 @@ public class Filter {
 		addFilterRule(headerName, values, mode, concat, false);
 	}
 
+	public void addFilterRule(String headerName, String[] values, BaseDispatchComponent mode, BaseDispatchComponent concat, FilterRule.ERuleFormat ruleFormat) {
+		if (plausibleHeaders.isEmpty() || checkHeader(headerName)) {
+			try {
+				rules.add(new FilterRule(headerName, values, mode, concat, ruleFormat));
+			} catch (Exception e) {
+				MLogger.getInstance().log(Level.SEVERE, e);
+			}
+		}
+	}
+	
+	@Deprecated
 	public void addFilterRule(String headerName, String[] values, BaseDispatchComponent mode, BaseDispatchComponent concat, boolean quoteRuleString) {
 		if (plausibleHeaders.isEmpty() || checkHeader(headerName)) {
 			try {

@@ -6,6 +6,7 @@ import java.util.List;
 import org.opentdk.api.datastorage.DataContainer;
 import org.opentdk.api.datastorage.EOperator;
 import org.opentdk.api.datastorage.Filter;
+import org.opentdk.api.datastorage.FilterRule;
 
 import RegressionTest.BaseRegression;
 
@@ -19,15 +20,42 @@ public class RT_CSVContainer_getValues extends BaseRegression {
 	@Override
 	public void runTest() {
 		DataContainer dc = new DataContainer("./testdata/RegressionTestData/CSVContainer_Contacts.csv");
+		System.out.println("        ******** test1 ********");
 		test1(dc);
+		
+		System.out.println("        ******** test2 ********");
 		test2(dc);
+		
+		System.out.println("        ******** test3 ********");
 		test3(dc);
+
+		System.out.println("        ******** test4 ********");
+		test4(dc);
+		
+		System.out.println("        ******** test5 ********");
 		test5(dc);
-		test5(dc);
+		
+		System.out.println("        ******** test6 ********");
 		test6(dc);
+		
+		System.out.println("        ******** test7 ********");
 		test7(dc);
+		
+		System.out.println("        ******** test8 ********");
 		test8(dc);
+		
+		System.out.println("        ******** test9 ********");
 		test9(dc);
+		
+		System.out.println("        ******** test10 ********");
+		test10(dc);
+		
+		System.out.println("        ******** test11 ********");
+		test11(dc);
+		
+		System.out.println("        ******** test12 ********");
+		test12(dc);
+
 	}
 	
 	public void test1(DataContainer dc) {
@@ -117,6 +145,46 @@ public class RT_CSVContainer_getValues extends BaseRegression {
 		
 		int biggestValue = dc.getMaxLen("Firma");
 		testResult(String.valueOf(biggestValue), "getMaxLen(header) - values", "22");
+	}
+	
+	public void test10(DataContainer dc) {
+		StringBuilder sb = new StringBuilder();
+		sb.append("Walter").append(";");
+		sb.append("Meisinger").append(";");
+		sb.append("Winkler");
+		
+		Filter fltr = new Filter();
+		fltr.addFilterRule("Firma", "\s+Test\s+", EOperator.CONTAINS, FilterRule.ERuleFormat.REGEX);
+		List<String> outList = dc.getValuesAsList("Nachname", fltr);
+		boolean valuesEqual = String.join(";", outList.toArray(new String[outList.size()])).equals(sb.toString());
+		testResult(String.valueOf(valuesEqual), "getValuesAsList() RegEx Filter - values equal", "true");
+		testResult(String.valueOf(outList.size()), "getValuesAsList(\"Nachname\", fltr) - size", "3");
+	}
+	
+	public void test11(DataContainer dc) {
+		StringBuilder sb = new StringBuilder();
+		sb.append("Walter").append(";");
+		sb.append("Meisinger").append(";");
+		sb.append("Winkler");
+
+		Filter fltr = new Filter();
+		fltr.addFilterRule("Firma", ".*\s+TEST\s+.*", EOperator.EQUALS_IGNORE_CASE, FilterRule.ERuleFormat.REGEX);
+		List<String> outList = dc.getValuesAsList("Nachname", fltr);
+		boolean valuesEqual = String.join(";", outList.toArray(new String[outList.size()])).equals(sb.toString());
+		testResult(String.valueOf(valuesEqual), "getValuesAsList() RegEx Filter - values equal", "true");
+		testResult(String.valueOf(outList.size()), "getValuesAsList(\"Nachname\", fltr) - size", "3");
+	}
+	
+	public void test12(DataContainer dc) {
+		StringBuilder sb = new StringBuilder();
+		sb.append("Mustermann");
+
+		Filter fltr = new Filter();
+		fltr.addFilterRule("Firma", ".*\s+Test\s+.*", EOperator.NOT_EQUALS, FilterRule.ERuleFormat.REGEX);
+		List<String> outList = dc.getValuesAsList("Nachname", fltr);
+		boolean valuesEqual = String.join(";", outList.toArray(new String[outList.size()])).equals(sb.toString());
+		testResult(String.valueOf(valuesEqual), "getValuesAsList() RegEx Filter - values equal", "true");
+		testResult(String.valueOf(outList.size()), "getValuesAsList(\"Nachname\", fltr) - size", "1");
 	}
 
 }

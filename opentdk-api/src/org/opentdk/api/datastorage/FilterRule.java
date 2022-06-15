@@ -3,6 +3,8 @@ package org.opentdk.api.datastorage;
 import java.sql.Time;
 import java.sql.Timestamp;
 import java.util.logging.Level;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.opentdk.api.dispatcher.BaseDispatchComponent;
 import org.opentdk.api.logger.MLogger;
@@ -32,7 +34,17 @@ import org.opentdk.api.util.EFormat;
  *
  */
 public class FilterRule {
-
+	
+	/**
+	 * This enum object is used to specify the format of the rule value. 
+	 */
+	public enum ERuleFormat{
+		STRING,
+		QUOTED_STRING,
+		REGEX,
+		QUOTED_REGEX;
+	}
+	
 	/**
 	 * headerName defines the name of the sequence, where the rules for specified
 	 * value(s) will be checked. A sequence can be a column or row.
@@ -52,14 +64,12 @@ public class FilterRule {
 	/**
 	 * The operator used by check operation for the defined value of the rule.
 	 */
-//	private EOperator filterOperator;
 	private BaseDispatchComponent filterOperator;
 
 	/**
 	 * The operator used to concatenate the rule with other rules of this filter
 	 * instance.
 	 */
-//	private EOperator ruleConcatenationOperator;
 	private BaseDispatchComponent ruleConcatenationOperator;
 
 	/**
@@ -68,6 +78,9 @@ public class FilterRule {
 	 * e.g. "and company = 'LK Test Solutions GmbH'"
 	 */
 	private String ruleString;
+	
+	private ERuleFormat ruleFormat = ERuleFormat.STRING;
+	private Boolean quoteRule = false;
 
 	/**
 	 * Constructor that is called when creating an instance of FilterRule with the
@@ -75,6 +88,8 @@ public class FilterRule {
 	 * rule elements like headerName, value, filterOperator and
 	 * ruleConcatenationOperator and the properties of these elements will
 	 * automatically be set with the identified values.
+	 * 
+	 * @param ruleStr complete rule as string
 	 */
 	public FilterRule(String ruleStr) {
 		setRuleString(ruleStr);
@@ -99,9 +114,27 @@ public class FilterRule {
 	 * @param value String value, used by the check operation of the FilterRule.
 	 */
 	public FilterRule(String hName, String value) {
-		this(hName, value, false);
+		this(hName, value, ERuleFormat.STRING);
 	}
 
+	/**
+	 * Constructor that is called when creating an instance of FilterRule with the arguments
+	 * for header name, value and format. In this case EOperator.EQUALS will be used as 
+	 * default operator for checking the rule against a single value. The format argument
+	 * can be used to defines how the input value will be transformed when assigning the 
+	 * value to the instance of FilterRule and/or how to interpret the value when checking
+	 * the values validity.
+	 * 
+	 * @param hName String value with the Header name of the DataSet to which the
+	 *              rule applies.
+	 * @param value String value, used by the check operation of the FilterRule.
+	 * @param format 
+	 */
+	public FilterRule(String hName, String value, ERuleFormat format) {
+		this(hName, new String[] { value }, format);
+	}
+	
+	@Deprecated
 	public FilterRule(String hName, String value, boolean quoteRuleString) {
 		this(hName, new String[] { value }, quoteRuleString);
 	}
@@ -121,6 +154,19 @@ public class FilterRule {
 		this(hName, values, false);
 	}
 
+	public FilterRule(String hName, String[] values, ERuleFormat format) {
+		this.headerName = hName;
+		if (values.length == 1) {
+			this.value = values[0];
+		}
+		this.values = values;
+		this.filterOperator = EOperator.EQUALS;
+		this.ruleConcatenationOperator = EOperator.AND;
+		this.ruleFormat = format;
+		assignRuleString();
+	}
+	
+	@Deprecated
 	public FilterRule(String hName, String[] values, boolean quoteRuleString) {
 		this.headerName = hName;
 		if (values.length == 1) {
@@ -129,7 +175,8 @@ public class FilterRule {
 		this.values = values;
 		this.filterOperator = EOperator.EQUALS;
 		this.ruleConcatenationOperator = EOperator.AND;
-		assignRuleString(quoteRuleString);
+		this.quoteRule = quoteRuleString;
+		assignRuleString();
 	}
 
 	/**
@@ -148,6 +195,11 @@ public class FilterRule {
 		this(hName, value, m, false);
 	}
 
+	public FilterRule(String hName, String value, BaseDispatchComponent m, ERuleFormat ruleFormat) throws Exception {
+		this(hName, new String[] { value }, m, ruleFormat);
+	}
+	
+	@Deprecated
 	public FilterRule(String hName, String value, BaseDispatchComponent m, boolean quoteRuleString) throws Exception {
 		this(hName, new String[] { value }, m, quoteRuleString);
 	}
@@ -169,6 +221,22 @@ public class FilterRule {
 		this(hName, values, m, false);
 	}
 
+	public FilterRule(String hName, String[] values, BaseDispatchComponent m, ERuleFormat ruleFormat) throws Exception {
+		if (isValidOperator(values, m)) {
+			this.headerName = hName;
+			if (values.length == 1) {
+				this.value = values[0];
+			}
+			this.values = values;
+			this.filterOperator = m;
+			this.ruleConcatenationOperator = EOperator.AND;
+			assignRuleString(ruleFormat);
+		} else {
+			throw new Exception("Operator doesn't comply to values!");
+		}
+	}
+	
+	@Deprecated
 	public FilterRule(String hName, String[] values, BaseDispatchComponent m, boolean quoteRuleString) throws Exception {
 		if (isValidOperator(values, m)) {
 			this.headerName = hName;
@@ -203,6 +271,11 @@ public class FilterRule {
 		this(hName, value, m, concat, false);
 	}
 
+	public FilterRule(String hName, String value, BaseDispatchComponent m, BaseDispatchComponent concat, ERuleFormat ruleFormat) throws Exception {
+		this(hName, new String[] { value }, m, concat, ruleFormat);
+	}
+
+	@Deprecated
 	public FilterRule(String hName, String value, BaseDispatchComponent m, BaseDispatchComponent concat, boolean quoteRuleString) throws Exception {
 		this(hName, new String[] { value }, m, concat, quoteRuleString);
 	}
@@ -226,6 +299,22 @@ public class FilterRule {
 		this(hName, values, m, concat, false);
 	}
 
+	public FilterRule(String hName, String[] values, BaseDispatchComponent m, BaseDispatchComponent concat, ERuleFormat ruleFormat) throws Exception {
+		if (isValidOperator(values, m)) {
+			this.headerName = hName;
+			if (values.length == 1) {
+				this.value = values[0];
+			}
+			this.values = values;
+			this.filterOperator = m;
+			this.ruleConcatenationOperator = concat;
+			assignRuleString(ruleFormat);
+		} else {
+			throw new Exception("Operator doesn't comply to values!");
+		}
+	}
+	
+	@Deprecated
 	public FilterRule(String hName, String[] values, BaseDispatchComponent m, BaseDispatchComponent concat, boolean quoteRuleString) throws Exception {
 		if (isValidOperator(values, m)) {
 			this.headerName = hName;
@@ -240,80 +329,19 @@ public class FilterRule {
 			throw new Exception("Operator doesn't comply to values!");
 		}
 	}
-
-	/**
-	 * Get the value of the <code>headerName</code> property,
-	 * 
-	 * @return Value of type string
-	 */
-	public String getHeaderName() {
-		return headerName;
+	
+	public void assignRuleString(ERuleFormat format) {
+		this.ruleFormat = format;
+		assignRuleString();
 	}
 
-	/**
-	 * Get the value, used by check operation of the rule.
-	 * 
-	 * @return Value of type string
-	 */
-	public String getValue() {
-		return value;
-	}
-
-	/**
-	 * @return the values Array, used by check operation of the rule.
-	 */
-	public Object[] getValues() {
-		return values;
-	}
-
-	/**
-	 * Get the filterOperator attribute which is used for validation of the filtered
-	 * values.
-	 * 
-	 * @return filterOperator of type EOperator.
-	 */
-	public BaseDispatchComponent getFilterOperator() {
-		return filterOperator;
-	}
-
-	/**
-	 * Get the ruleConcatenationOperator attribute which is used to concatenate
-	 * multiple filter rules. Valid operators can be <code>EOperator.AND</code> and
-	 * <code>EOperator.OR</code>.
-	 * 
-	 * @return The Operator of type EOperator.
-	 */
-	public BaseDispatchComponent getRuleConcatenationOperator() {
-		return ruleConcatenationOperator;
-	}
-
-	/**
-	 * Get the complete rule including ruleConcatenationOperator, headerName,
-	 * filterOperator and value as String.<br>
-	 * e.g. <code>"and company = 'LK Test Solutions GmbH'"</code>
-	 * 
-	 * @return complete rule as String
-	 */
-	public String getRuleString() {
-		return ruleString;
-	}
-
-	/**
-	 * Set the ruleString property with the complete rule including
-	 * ruleConcatenationOperator, headerName, filterOperator and value.<br>
-	 * e.g. <code>"and company = 'LK Test Solutions GmbH'"</code>
-	 * 
-	 * @param ruleStr Complete filter rule with all rule elements as String
-	 */
-	public void setRuleString(String ruleStr) {
-		ruleString = ruleStr;
-	}
-
-	public void assignRuleString() {
-		assignRuleString(true);
-	}
-
+	@Deprecated
 	public void assignRuleString(boolean quoteRuleString) {
+		this.quoteRule = quoteRuleString;
+		assignRuleString();
+	}
+	
+	public void assignRuleString() {
 		StringBuffer sb = new StringBuffer();
 		sb.append(ruleConcatenationOperator.getValue());
 		sb.append(" ");
@@ -323,7 +351,17 @@ public class FilterRule {
 		sb.append(" ");
 
 		String quote = "";
-		if (quoteRuleString) {
+		switch(ruleFormat){
+			case QUOTED_STRING:
+			case QUOTED_REGEX:
+				quote = "'";
+				break;
+			default:
+		}
+		
+		// for backward compatibility, until the methods using quoteRuleString will be removed
+		// Boolean quoteString has been replaced by ERuleFormat ruleFormat [hwa; 2022-06-06]
+		if((ruleFormat.equals(ERuleFormat.STRING)) && (quoteRule)) {
 			quote = "'";
 		}
 
@@ -356,7 +394,7 @@ public class FilterRule {
 		}
 		ruleString = sb.toString();
 	}
-
+	
 	/**
 	 * Checks, if the defined rule matches to a given value.
 	 * 
@@ -367,7 +405,7 @@ public class FilterRule {
 	public boolean checkValue(String val) {
 		boolean returnCode = false;
 		if (val != null) {
-			for (Object filterValue : values) {
+			for (Object filterValue : values) {				
 				returnCode = isValidValue(val, String.valueOf(filterValue));
 				if (returnCode) {
 					break;
@@ -376,80 +414,87 @@ public class FilterRule {
 		}
 		return returnCode;
 	}
+	
+	@Override
+	public boolean equals(Object o) {
+		boolean ret = false;
+		if (o != null) {
+			if (o.getClass().equals(this.getClass())) {
+				FilterRule rule = (FilterRule) o;
+				if (this.getValue() != null) {
+					if (this.getHeaderName().equals(rule.getHeaderName()) && this.getValue().equals(rule.getValue()) && this.getFilterOperator().equals(rule.getFilterOperator()))
+						ret = true;
+				} else if (this.getValues() != null) {
+					if (this.getHeaderName().equals(rule.getHeaderName()) && this.getValues().equals(rule.getValues()) && this.getFilterOperator().equals(rule.getFilterOperator()))
+						ret = true;
+				}
+			}
+		}
+		return ret;
+	}
 
 	/**
-	 * Calls the comparison operation for the rule and returns true (rule matches)
-	 * or false (rule doesn't match).
+	 * Get the filterOperator attribute which is used for validation of the filtered
+	 * values.
 	 * 
-	 * @param val         Value of DataSet, where the rule will apply to
-	 * @param filterValue Value to compare with: defined in the filter rule
-	 * @return boolean value; true = rule matches to the defined value; false = rule
-	 *         doesn't match to the defined value.
+	 * @return filterOperator of type EOperator.
 	 */
-	public boolean isValidValue(String val, String filterValue) {
-		if(filterOperator.equals(EOperator.CONTAINS)) {
-			return val.trim().contains(filterValue);
-		} else if(filterOperator.equals(EOperator.CONTAINS_DATE)) {
-			if (DateUtil.compare(DateUtil.parse(val, EFormat.getDateEFormat(filterValue).getFormatPattern()), filterValue) == 0) {
-				return true;
-			}
-		} else if(filterOperator.equals(EOperator.CONTAINS_DATE_AFTER)) {
-			if (DateUtil.compare(DateUtil.parse(val, EFormat.getDateEFormat(filterValue).getFormatPattern()), filterValue) > 0) {
-				return true;
-			}
-		} else if(filterOperator.equals(EOperator.CONTAINS_DATE_BEFORE)) {
-			if (DateUtil.compare(DateUtil.parse(val, EFormat.getDateEFormat(filterValue).getFormatPattern()), filterValue) < 0) {
-				return true;
-			}
-		} else if(filterOperator.equals(EOperator.CONTAINS_IGNORE_CASE)) {
-			return val.trim().toUpperCase().contains(filterValue.toUpperCase());
-		} else if(filterOperator.equals(EOperator.DATE_AFTER)) {
-			if (DateUtil.compare(val, filterValue) > 0) {
-				return true;
-			}
-		} else if(filterOperator.equals(EOperator.DATE_BEFORE)) {
-			if (DateUtil.compare(val, filterValue) < 0) {
-				return true;
-			}
-		} else if(filterOperator.equals(EOperator.DATE_EQUALS)) {
-			if (DateUtil.compare(val, filterValue) == 0) {
-				return true;
-			}
-		} else if(filterOperator.equals(EOperator.ENDS_WITH)) {
-			return val.trim().endsWith(filterValue);
-		} else if(filterOperator.equals(EOperator.ENDS_WITH_IGNORE_CASE)) {
-			return val.trim().toUpperCase().endsWith(filterValue.toUpperCase());
-		} else if(filterOperator.equals(EOperator.EQUALS)) {
-			return val.trim().equals(filterValue);
-		} else if(filterOperator.equals(EOperator.EQUALS_IGNORE_CASE)) {
-			return val.trim().equalsIgnoreCase(filterValue);
-		} else if(filterOperator.equals(EOperator.GREATER_THAN)) {
-			if (Integer.valueOf(val) > Integer.valueOf(filterValue)) {
-				return true;
-			}
-		} else if(filterOperator.equals(EOperator.LESS_THAN)) {
-			if (Integer.valueOf(val) < Integer.valueOf(filterValue)) {
-				return true;
-			}
-		} else if(filterOperator.equals(EOperator.NOT_EQUALS)) {
-			if (!val.trim().equals(filterValue)) {
-				return true;
-			}
-		} else if(filterOperator.equals(EOperator.NOT_EQUALS_IGNORE_CASE)) {
-			if (!val.trim().equalsIgnoreCase(filterValue)) {
-				return true;
-			}
-		} else if(filterOperator.equals(EOperator.STARTS_WITH)) {
-			return val.trim().startsWith(filterValue);
-		} else if(filterOperator.equals(EOperator.STARTS_WITH_IGNORE_CASE)) {
-			return val.trim().toUpperCase().startsWith(filterValue.toUpperCase());
-		} else {
-			return false;
-		}
-		
-		return false;
+	public BaseDispatchComponent getFilterOperator() {
+		return filterOperator;
+	}
+
+	/**
+	 * Get the value of the <code>headerName</code> property,
+	 * 
+	 * @return Value of type string
+	 */
+	public String getHeaderName() {
+		return headerName;
 	}
 	
+	/**
+	 * Get the ruleConcatenationOperator attribute which is used to concatenate
+	 * multiple filter rules. Valid operators can be <code>EOperator.AND</code> and
+	 * <code>EOperator.OR</code>.
+	 * 
+	 * @return The Operator of type EOperator.
+	 */
+	public BaseDispatchComponent getRuleConcatenationOperator() {
+		return ruleConcatenationOperator;
+	}
+
+	
+	public ERuleFormat getRuleFormat() {
+		return ruleFormat;
+	}
+	
+	/**
+	 * Get the complete rule including ruleConcatenationOperator, headerName,
+	 * filterOperator and value as String.<br>
+	 * e.g. <code>"and company = 'LK Test Solutions GmbH'"</code>
+	 * 
+	 * @return complete rule as String
+	 */
+	public String getRuleString() {
+		return ruleString;
+	}
+
+	/**
+	 * Get the value, used by check operation of the rule.
+	 * 
+	 * @return Value of type string
+	 */
+	public String getValue() {
+		return value;
+	}
+
+	/**
+	 * @return the values Array, used by check operation of the rule.
+	 */
+	public Object[] getValues() {
+		return values;
+	}
+
 	/**
 	 * Checks if the operator is applicable to the value.
 	 * 
@@ -490,22 +535,211 @@ public class FilterRule {
 		return ret;
 	}
 
-	@Override
-	public boolean equals(Object o) {
-		boolean ret = false;
-		if (o != null) {
-			if (o.getClass().equals(this.getClass())) {
-				FilterRule rule = (FilterRule) o;
-				if (this.getValue() != null) {
-					if (this.getHeaderName().equals(rule.getHeaderName()) && this.getValue().equals(rule.getValue()) && this.getFilterOperator().equals(rule.getFilterOperator()))
-						ret = true;
-				} else if (this.getValues() != null) {
-					if (this.getHeaderName().equals(rule.getHeaderName()) && this.getValues().equals(rule.getValues()) && this.getFilterOperator().equals(rule.getFilterOperator()))
-						ret = true;
+	/**
+	 * Calls the comparison operation for the rule and returns true (rule matches)
+	 * or false (rule doesn't match).
+	 * 
+	 * @param val         Value of DataSet, where the rule will apply to
+	 * @param filterValue Value to compare with: defined in the filter rule
+	 * @return boolean value; true = rule matches to the defined value; false = rule
+	 *         doesn't match to the defined value.
+	 */
+	public boolean isValidValue(String val, String filterValue) {
+		if(filterOperator.equals(EOperator.CONTAINS)) {
+			
+			if((ruleFormat.equals(ERuleFormat.QUOTED_REGEX)) || (ruleFormat.equals(ERuleFormat.REGEX))) {
+				return isValidExpression(".*" + filterValue + ".*", val, false);
+				
+			}else {
+				return val.trim().contains(filterValue);
+			}
+		} else if(filterOperator.equals(EOperator.CONTAINS_DATE)) {
+			if (DateUtil.compare(DateUtil.parse(val, EFormat.getDateEFormat(filterValue).getFormatPattern()), filterValue) == 0) {
+				return true;
+			}
+		} else if(filterOperator.equals(EOperator.CONTAINS_DATE_AFTER)) {
+			if (DateUtil.compare(DateUtil.parse(val, EFormat.getDateEFormat(filterValue).getFormatPattern()), filterValue) > 0) {
+				return true;
+			}
+		} else if(filterOperator.equals(EOperator.CONTAINS_DATE_BEFORE)) {
+			if (DateUtil.compare(DateUtil.parse(val, EFormat.getDateEFormat(filterValue).getFormatPattern()), filterValue) < 0) {
+				return true;
+			}
+		} else if(filterOperator.equals(EOperator.CONTAINS_IGNORE_CASE)) {
+			
+			if((ruleFormat.equals(ERuleFormat.QUOTED_REGEX)) || (ruleFormat.equals(ERuleFormat.REGEX))) {
+				return isValidExpression(".*" + filterValue + ".*", val, true);
+				
+			}else {
+				return val.trim().toUpperCase().contains(filterValue.toUpperCase());
+			}
+		} else if(filterOperator.equals(EOperator.DATE_AFTER)) {
+			if (DateUtil.compare(val, filterValue) > 0) {
+				return true;
+			}
+		} else if(filterOperator.equals(EOperator.DATE_BEFORE)) {
+			if (DateUtil.compare(val, filterValue) < 0) {
+				return true;
+			}
+		} else if(filterOperator.equals(EOperator.DATE_EQUALS)) {
+			if (DateUtil.compare(val, filterValue) == 0) {
+				return true;
+			}
+		} else if(filterOperator.equals(EOperator.ENDS_WITH)) {
+			
+			if((ruleFormat.equals(ERuleFormat.QUOTED_REGEX)) || (ruleFormat.equals(ERuleFormat.REGEX))) {
+				return isValidExpression(".*" + filterValue, val, false);
+				
+			}else {
+				return val.trim().endsWith(filterValue);
+			}
+		} else if(filterOperator.equals(EOperator.ENDS_WITH_IGNORE_CASE)) {
+			
+			if((ruleFormat.equals(ERuleFormat.QUOTED_REGEX)) || (ruleFormat.equals(ERuleFormat.REGEX))) {
+				return isValidExpression(".*" + filterValue, val, true);
+				
+			}else {
+				return val.trim().toUpperCase().endsWith(filterValue.toUpperCase());
+			}
+		} else if(filterOperator.equals(EOperator.EQUALS)) {
+			
+			if((ruleFormat.equals(ERuleFormat.QUOTED_REGEX)) || (ruleFormat.equals(ERuleFormat.REGEX))) {
+				return isValidExpression(filterValue, val, false);
+				
+			}else {
+				return val.trim().equals(filterValue);
+			}
+		} else if(filterOperator.equals(EOperator.EQUALS_IGNORE_CASE)) {
+			
+			if((ruleFormat.equals(ERuleFormat.QUOTED_REGEX)) || (ruleFormat.equals(ERuleFormat.REGEX))) {
+				return isValidExpression(filterValue, val, true);
+				
+			}else {
+				return val.trim().equalsIgnoreCase(filterValue);
+			}
+		} else if(filterOperator.equals(EOperator.GREATER_THAN)) {
+			if (Integer.valueOf(val) > Integer.valueOf(filterValue)) {
+				return true;
+			}
+		} else if(filterOperator.equals(EOperator.LESS_THAN)) {
+			if (Integer.valueOf(val) < Integer.valueOf(filterValue)) {
+				return true;
+			}
+		} else if(filterOperator.equals(EOperator.NOT_EQUALS)) {
+			
+			if((ruleFormat.equals(ERuleFormat.QUOTED_REGEX)) || (ruleFormat.equals(ERuleFormat.REGEX))) {
+				if(!isValidExpression(filterValue, val, false)) {
+					return true;
+				}
+			}else {
+				if (!val.trim().equals(filterValue)) {
+					return true;
 				}
 			}
+		} else if(filterOperator.equals(EOperator.NOT_EQUALS_IGNORE_CASE)) {
+			if((ruleFormat.equals(ERuleFormat.QUOTED_REGEX)) || (ruleFormat.equals(ERuleFormat.REGEX))) {
+				
+				if(!isValidExpression(filterValue, val, true)) {
+					return true;
+				}
+				
+			}else {
+				if (!val.trim().equalsIgnoreCase(filterValue)) {
+					return true;
+				}
+			}
+		} else if(filterOperator.equals(EOperator.STARTS_WITH)) {
+			
+			if((ruleFormat.equals(ERuleFormat.QUOTED_REGEX)) || (ruleFormat.equals(ERuleFormat.REGEX))) {
+				return isValidExpression(filterValue + ".*", val, false);
+				
+			}else {
+				return val.trim().startsWith(filterValue);
+			}
+		} else if(filterOperator.equals(EOperator.STARTS_WITH_IGNORE_CASE)) {
+			
+			if((ruleFormat.equals(ERuleFormat.QUOTED_REGEX)) || (ruleFormat.equals(ERuleFormat.REGEX))) {
+				return isValidExpression(filterValue + ".*", val, true);
+				
+			}else {
+				return val.trim().toUpperCase().startsWith(filterValue.toUpperCase());
+			}
 		}
-		return ret;
+		return false;
 	}
+	
+	private boolean isValidExpression(String filterValue, String val, boolean ignoreCase) {
+		Pattern pat = null;
+		if(ignoreCase) {
+			pat = Pattern.compile(filterValue, Pattern.CASE_INSENSITIVE);
+		}else {
+			pat = Pattern.compile(filterValue);
+		}
+		Matcher match = pat.matcher(val);
+		if(match.matches()) {
+			return true;
+		}
+		return false;
+	}
+
+	public void setRuleFormat(ERuleFormat format) {
+		ruleFormat = format;
+	}
+
+	/**
+	 * Set the ruleString property with the complete rule including
+	 * ruleConcatenationOperator, headerName, filterOperator and value.<br>
+	 * e.g. <code>"and company = 'LK Test Solutions GmbH'"</code>
+	 * 
+	 * @param ruleStr Complete filter rule with all rule elements as String
+	 */
+	public void setRuleString(String ruleStr) {
+		ruleString = ruleStr;
+	}
+
+
+//	public void assignRuleString(boolean quoteRuleString) {
+//		StringBuffer sb = new StringBuffer();
+//		sb.append(ruleConcatenationOperator.getValue());
+//		sb.append(" ");
+//		sb.append(headerName);
+//		sb.append(" ");
+//		sb.append(filterOperator.getValue());
+//		sb.append(" ");
+//
+//		String quote = "";
+//		if (quoteRuleString) {
+//			quote = "'";
+//		}
+//
+//		if (filterOperator.equals(EOperator.IN)) {
+//			sb.append("(");
+//		}
+//
+//		sb.append(quote);
+//		
+//		if (values.length > 1) {
+//			for (int i = 0; i < values.length; i++) {
+//				Object val = values[i];
+//				if (i > 0 && i < values.length) {
+//					sb.append(",");
+//				}
+//				if (val instanceof String || val instanceof Timestamp || val instanceof Time) {
+//					sb.append("'" + val + "'");
+//				} else {
+//					sb.append(val);
+//				}
+//			}
+//		} else {
+//			sb.append(values[0]);
+//		}
+//		
+//		sb.append(quote);
+//
+//		if (filterOperator.equals(EOperator.IN)) {
+//			sb.append(")");
+//		}
+//		ruleString = sb.toString();
+//	}
 
 }
