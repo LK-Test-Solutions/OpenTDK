@@ -9,7 +9,7 @@ The package `org.opentdk.api.application` is used to implement base classes that
 The package `org.opentdk.api.datastorage` implements a concept to access data from different source using unified methods for several tabular and tree formats. The methods for accessing data are defined within the class `org.opentdk.api.datastorage.DataContainer` which adapts container classes for specific formats. Currently available are the following container classes:<br>
 * CSVDataContainer: Adapts the functionality to access data in tabular format that can be read from and written to column separated files
 * PropertiesDataContainer: Adapts funktionality to access data of properties files with key/value pairs per row, separated by = symbol
-* RSDataContainer: Adapts functionality to acces data from tabular result sets recieved by SQL requests
+* RSDataContainer: Adapts functionality to acces data from tabular result sets received by SQL requests
 * XMLDataContainer: Adapts funktionality to acces data in XML format<br>
 Due to the adaption technique, the package can be extended for nearly any tabular or tree format by implementing format specific DataContainers. There are nearly no code changes required in case that the data source of a DataContainer object will change.<br> 
 
