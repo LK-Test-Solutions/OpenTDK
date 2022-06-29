@@ -42,7 +42,7 @@ public class CSVDataContainer implements CustomContainer {
 	public CSVDataContainer(DataContainer dCont) {
 		dc = dCont;
 		dc.containerFormat = EContainerFormat.CSV;
-	}
+	}	
 	
 	/**
 	 * Empties a field (set value to null) within the {@link BaseContainer#values} ArrayList.<br>

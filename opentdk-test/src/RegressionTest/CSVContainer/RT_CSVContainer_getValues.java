@@ -47,14 +47,14 @@ public class RT_CSVContainer_getValues extends BaseRegression {
 		System.out.println("        ******** test9 ********");
 		test9(dc);
 		
-		System.out.println("        ******** test10 ********");
-		test10(dc);
-		
-		System.out.println("        ******** test11 ********");
-		test11(dc);
-		
-		System.out.println("        ******** test12 ********");
-		test12(dc);
+//		System.out.println("        ******** test10 ********");
+//		test10(dc);
+//		
+//		System.out.println("        ******** test11 ********");
+//		test11(dc);
+//		
+//		System.out.println("        ******** test12 ********");
+//		test12(dc);
 
 	}
 	
@@ -147,44 +147,44 @@ public class RT_CSVContainer_getValues extends BaseRegression {
 		testResult(String.valueOf(biggestValue), "getMaxLen(header) - values", "22");
 	}
 	
-	public void test10(DataContainer dc) {
-		StringBuilder sb = new StringBuilder();
-		sb.append("Walter").append(";");
-		sb.append("Meisinger").append(";");
-		sb.append("Winkler");
-		
-		Filter fltr = new Filter();
-		fltr.addFilterRule("Firma", "\s+Test\s+", EOperator.CONTAINS, FilterRule.ERuleFormat.REGEX);
-		List<String> outList = dc.getValuesAsList("Nachname", fltr);
-		boolean valuesEqual = String.join(";", outList.toArray(new String[outList.size()])).equals(sb.toString());
-		testResult(String.valueOf(valuesEqual), "getValuesAsList() RegEx Filter - values equal", "true");
-		testResult(String.valueOf(outList.size()), "getValuesAsList(\"Nachname\", fltr) - size", "3");
-	}
-	
-	public void test11(DataContainer dc) {
-		StringBuilder sb = new StringBuilder();
-		sb.append("Walter").append(";");
-		sb.append("Meisinger").append(";");
-		sb.append("Winkler");
-
-		Filter fltr = new Filter();
-		fltr.addFilterRule("Firma", ".*\s+TEST\s+.*", EOperator.EQUALS_IGNORE_CASE, FilterRule.ERuleFormat.REGEX);
-		List<String> outList = dc.getValuesAsList("Nachname", fltr);
-		boolean valuesEqual = String.join(";", outList.toArray(new String[outList.size()])).equals(sb.toString());
-		testResult(String.valueOf(valuesEqual), "getValuesAsList() RegEx Filter - values equal", "true");
-		testResult(String.valueOf(outList.size()), "getValuesAsList(\"Nachname\", fltr) - size", "3");
-	}
-	
-	public void test12(DataContainer dc) {
-		StringBuilder sb = new StringBuilder();
-		sb.append("Mustermann");
-
-		Filter fltr = new Filter();
-		fltr.addFilterRule("Firma", ".*\s+Test\s+.*", EOperator.NOT_EQUALS, FilterRule.ERuleFormat.REGEX);
-		List<String> outList = dc.getValuesAsList("Nachname", fltr);
-		boolean valuesEqual = String.join(";", outList.toArray(new String[outList.size()])).equals(sb.toString());
-		testResult(String.valueOf(valuesEqual), "getValuesAsList() RegEx Filter - values equal", "true");
-		testResult(String.valueOf(outList.size()), "getValuesAsList(\"Nachname\", fltr) - size", "1");
-	}
+//	public void test10(DataContainer dc) {
+//		StringBuilder sb = new StringBuilder();
+//		sb.append("Walter").append(";");
+//		sb.append("Meisinger").append(";");
+//		sb.append("Winkler");
+//		
+//		Filter fltr = new Filter();
+//		fltr.addFilterRule("Firma", "\s+Test\s+", EOperator.CONTAINS, FilterRule.ERuleFormat.REGEX);
+//		List<String> outList = dc.getValuesAsList("Nachname", fltr);
+//		boolean valuesEqual = String.join(";", outList.toArray(new String[outList.size()])).equals(sb.toString());
+//		testResult(String.valueOf(valuesEqual), "getValuesAsList() RegEx Filter - values equal", "true");
+//		testResult(String.valueOf(outList.size()), "getValuesAsList(\"Nachname\", fltr) - size", "3");
+//	}
+//	
+//	public void test11(DataContainer dc) {
+//		StringBuilder sb = new StringBuilder();
+//		sb.append("Walter").append(";");
+//		sb.append("Meisinger").append(";");
+//		sb.append("Winkler");
+//
+//		Filter fltr = new Filter();
+//		fltr.addFilterRule("Firma", ".*\s+TEST\s+.*", EOperator.EQUALS_IGNORE_CASE, FilterRule.ERuleFormat.REGEX);
+//		List<String> outList = dc.getValuesAsList("Nachname", fltr);
+//		boolean valuesEqual = String.join(";", outList.toArray(new String[outList.size()])).equals(sb.toString());
+//		testResult(String.valueOf(valuesEqual), "getValuesAsList() RegEx Filter - values equal", "true");
+//		testResult(String.valueOf(outList.size()), "getValuesAsList(\"Nachname\", fltr) - size", "3");
+//	}
+//	
+//	public void test12(DataContainer dc) {
+//		StringBuilder sb = new StringBuilder();
+//		sb.append("Mustermann");
+//
+//		Filter fltr = new Filter();
+//		fltr.addFilterRule("Firma", ".*\s+Test\s+.*", EOperator.NOT_EQUALS, FilterRule.ERuleFormat.REGEX);
+//		List<String> outList = dc.getValuesAsList("Nachname", fltr);
+//		boolean valuesEqual = String.join(";", outList.toArray(new String[outList.size()])).equals(sb.toString());
+//		testResult(String.valueOf(valuesEqual), "getValuesAsList() RegEx Filter - values equal", "true");
+//		testResult(String.valueOf(outList.size()), "getValuesAsList(\"Nachname\", fltr) - size", "1");
+//	}
 
 }
