@@ -60,6 +60,7 @@ public class RSDataContainer implements CustomContainer {
                 dc.resultSet.close();
 			} catch (SQLException e) {
 				MLogger.getInstance().log(Level.SEVERE, e, "putResultSet");
+				throw new RuntimeException(e);
 			}
 		}
 	}

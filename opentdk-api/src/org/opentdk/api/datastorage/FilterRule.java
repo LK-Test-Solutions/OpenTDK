@@ -189,18 +189,17 @@ public class FilterRule {
 	 *              rule applies.
 	 * @param value String value, used by the check operation of the FilterRule.
 	 * @param m     Value of type EOperator, used for the check operation.
-	 * @throws Exception If any error occurs, it should be logged with the MLogger.
 	 */
-	public FilterRule(String hName, String value, BaseDispatchComponent m) throws Exception {
+	public FilterRule(String hName, String value, BaseDispatchComponent m) {
 		this(hName, value, m, false);
 	}
 
-	public FilterRule(String hName, String value, BaseDispatchComponent m, ERuleFormat ruleFormat) throws Exception {
+	public FilterRule(String hName, String value, BaseDispatchComponent m, ERuleFormat ruleFormat) {
 		this(hName, new String[] { value }, m, ruleFormat);
 	}
 	
 	@Deprecated
-	public FilterRule(String hName, String value, BaseDispatchComponent m, boolean quoteRuleString) throws Exception {
+	public FilterRule(String hName, String value, BaseDispatchComponent m, boolean quoteRuleString) {
 		this(hName, new String[] { value }, m, quoteRuleString);
 	}
 
@@ -215,13 +214,12 @@ public class FilterRule {
 	 * @param values Array of Strings, used by the check operation of the
 	 *               FilterRule.
 	 * @param m      Value of type EOperator, used for the check operation.
-	 * @throws Exception If any error occurs, it should be logged with the MLogger.
 	 */
-	public FilterRule(String hName, String[] values, BaseDispatchComponent m) throws Exception {
+	public FilterRule(String hName, String[] values, BaseDispatchComponent m) {
 		this(hName, values, m, false);
 	}
 
-	public FilterRule(String hName, String[] values, BaseDispatchComponent m, ERuleFormat ruleFormat) throws Exception {
+	public FilterRule(String hName, String[] values, BaseDispatchComponent m, ERuleFormat ruleFormat) {
 		if (isValidOperator(values, m)) {
 			this.headerName = hName;
 			if (values.length == 1) {
@@ -232,12 +230,12 @@ public class FilterRule {
 			this.ruleConcatenationOperator = EOperator.AND;
 			assignRuleString(ruleFormat);
 		} else {
-			throw new Exception("Operator doesn't comply to values!");
+			throw new RuntimeException("Operator doesn't comply to values!");
 		}
 	}
 	
 	@Deprecated
-	public FilterRule(String hName, String[] values, BaseDispatchComponent m, boolean quoteRuleString) throws Exception {
+	public FilterRule(String hName, String[] values, BaseDispatchComponent m, boolean quoteRuleString) {
 		if (isValidOperator(values, m)) {
 			this.headerName = hName;
 			if (values.length == 1) {
@@ -248,7 +246,7 @@ public class FilterRule {
 			this.ruleConcatenationOperator = EOperator.AND;
 			assignRuleString(quoteRuleString);
 		} else {
-			throw new Exception("Operator doesn't comply to values!");
+			throw new RuntimeException("Operator doesn't comply to values!");
 		}
 	}
 
@@ -265,18 +263,17 @@ public class FilterRule {
 	 * @param concat Value of type EOperator, used for concatenating multiple filter
 	 *               conditions (e.g. EOperator.CONCATENATE_AND,
 	 *               EOperator.CONCATENATE_OR)
-	 * @throws Exception If any error occurs, it should be logged with the MLogger.
 	 */
-	public FilterRule(String hName, String value, BaseDispatchComponent m, BaseDispatchComponent concat) throws Exception {
+	public FilterRule(String hName, String value, BaseDispatchComponent m, BaseDispatchComponent concat) {
 		this(hName, value, m, concat, false);
 	}
 
-	public FilterRule(String hName, String value, BaseDispatchComponent m, BaseDispatchComponent concat, ERuleFormat ruleFormat) throws Exception {
+	public FilterRule(String hName, String value, BaseDispatchComponent m, BaseDispatchComponent concat, ERuleFormat ruleFormat) {
 		this(hName, new String[] { value }, m, concat, ruleFormat);
 	}
 
 	@Deprecated
-	public FilterRule(String hName, String value, BaseDispatchComponent m, BaseDispatchComponent concat, boolean quoteRuleString) throws Exception {
+	public FilterRule(String hName, String value, BaseDispatchComponent m, BaseDispatchComponent concat, boolean quoteRuleString) {
 		this(hName, new String[] { value }, m, concat, quoteRuleString);
 	}
 
@@ -293,13 +290,12 @@ public class FilterRule {
 	 * @param m      Value of type EOperator, used for the check operation.
 	 * @param concat The operator that gets used to add the rule string to the one
 	 *               before.
-	 * @throws Exception If any error occurs, it should be logged with the MLogger.
 	 */
-	public FilterRule(String hName, String[] values, BaseDispatchComponent m, BaseDispatchComponent concat) throws Exception {
+	public FilterRule(String hName, String[] values, BaseDispatchComponent m, BaseDispatchComponent concat) {
 		this(hName, values, m, concat, false);
 	}
 
-	public FilterRule(String hName, String[] values, BaseDispatchComponent m, BaseDispatchComponent concat, ERuleFormat ruleFormat) throws Exception {
+	public FilterRule(String hName, String[] values, BaseDispatchComponent m, BaseDispatchComponent concat, ERuleFormat ruleFormat) {
 		if (isValidOperator(values, m)) {
 			this.headerName = hName;
 			if (values.length == 1) {
@@ -310,12 +306,12 @@ public class FilterRule {
 			this.ruleConcatenationOperator = concat;
 			assignRuleString(ruleFormat);
 		} else {
-			throw new Exception("Operator doesn't comply to values!");
+			throw new RuntimeException("Operator doesn't comply to values!");
 		}
 	}
 	
 	@Deprecated
-	public FilterRule(String hName, String[] values, BaseDispatchComponent m, BaseDispatchComponent concat, boolean quoteRuleString) throws Exception {
+	public FilterRule(String hName, String[] values, BaseDispatchComponent m, BaseDispatchComponent concat, boolean quoteRuleString) {
 		if (isValidOperator(values, m)) {
 			this.headerName = hName;
 			if (values.length == 1) {
@@ -326,7 +322,7 @@ public class FilterRule {
 			this.ruleConcatenationOperator = concat;
 			assignRuleString(quoteRuleString);
 		} else {
-			throw new Exception("Operator doesn't comply to values!");
+			throw new RuntimeException("Operator doesn't comply to values!");
 		}
 	}
 	

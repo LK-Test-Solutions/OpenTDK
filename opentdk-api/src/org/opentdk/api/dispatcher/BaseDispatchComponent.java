@@ -6,22 +6,18 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.Field;
 import java.nio.charset.StandardCharsets;
-import java.time.temporal.ChronoUnit;
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.logging.Level;
 
 import org.opentdk.api.application.EBaseSettings;
-import org.opentdk.api.datastorage.BaseContainer.EHeader;
 import org.opentdk.api.datastorage.DataContainer;
 import org.opentdk.api.datastorage.EOperator;
 import org.opentdk.api.datastorage.Filter;
 import org.opentdk.api.io.FileUtil;
 import org.opentdk.api.io.XMLEditor;
-import org.opentdk.api.util.DateUtil;
-import org.opentdk.api.util.EFormat;
+import org.opentdk.api.logger.MLogger;
 import org.opentdk.api.util.ListUtil;
 
 /**
@@ -291,8 +287,9 @@ public class BaseDispatchComponent {
 	 * @param fileName - Full name of the file to check.
 	 * @param rootNode - The value of this parameter defines the expected name of the root node within tree formated file.
 	 * @return true = rootNode matches with the first node within the file ; false = rootNode does not match to the first node within the file
+	 * @throws IOException
 	 */
-	public static boolean checkDispatcherFile(String fileName, String rootNode) {
+	public static boolean checkDispatcherFile(String fileName, String rootNode) throws IOException {
 		return checkDispatcherFile(fileName, rootNode, false);
 	}
 
@@ -304,7 +301,12 @@ public class BaseDispatchComponent {
 	 * @return true = rootNode matches with the first node within the file ; false = rootNode does not match to the first node within the file
 	 */
 	public static boolean checkDispatcherFile(DataContainer dc, String rootNode) {
-		return checkDispatcherFile(dc.getFileName(), rootNode, false);
+		try {
+			return checkDispatcherFile(dc.getFileName(), rootNode, false);
+		} catch (IOException e) {
+			MLogger.getInstance().log(Level.SEVERE, e, "readData");
+			throw new RuntimeException(e);
+		}
 	}
 
 	/**
@@ -314,15 +316,12 @@ public class BaseDispatchComponent {
 	 * @param rootNode - The value of this parameter defines the expected name of the root node within tree formated file.
 	 * @param createNew - defines the behavior if the file does not exist.<br> true = create new file with first node and return true<br> false = do nothing and return false
 	 * @return true = rootNode matches with the first node within the file ; false = rootNode does not match to the first node within the file
+	 * @throws IOException
 	 */
-	public static boolean checkDispatcherFile(String fileName, String rootNode, boolean createNew) {
+	public static boolean checkDispatcherFile(String fileName, String rootNode, boolean createNew) throws IOException {
 		boolean res = false;
 		if (createNew || !new File(fileName).exists()) {
-			try {
-				FileUtil.deleteFile(fileName);
-			} catch (IOException e) {
-				e.printStackTrace();
-			}
+			FileUtil.deleteFile(fileName);
 			XMLEditor xEdit = new XMLEditor(fileName, rootNode);
 			xEdit.save(fileName);
 		}

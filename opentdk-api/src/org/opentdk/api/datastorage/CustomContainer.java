@@ -1,5 +1,8 @@
 package org.opentdk.api.datastorage;
 
+import java.io.FileNotFoundException;
+import java.io.IOException;
+
 /**
  * The <code>CustomContainer</code> interface groups related methods with empty bodies for every
  * specific <code>DataContainer</code>, like {@link PropertiesDataContainer}, {@link XMLDataContainer} 
@@ -29,8 +32,9 @@ interface CustomContainer {
      * into a file.
      * 
      * @param srcFileName   The name of the source file to write to
+     * @throws FileNotFoundException
      */
-    void writeData(String srcFileName);
+    void writeData(String srcFileName) throws IOException;
     
     /*
      * The default methods within this interface can be implemented in the specific classes, but they do not need to.

@@ -2,7 +2,6 @@ package org.opentdk.api.datastorage;
 
 import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.FileReader;
 import java.util.ArrayList;
@@ -69,59 +68,56 @@ public class CSVDataContainer implements CustomContainer {
 	 * @param fileName        The filename of the file to read from.
 	 * @param columnDelimiter The column delimiter used to separate columns in the
 	 *                        CSV-file.
+     * @throws IOException 
 	 * 
 	 */
-	private void putDatasetColumns(String fileName, String columnDelimiter) {
+	private void putDatasetColumns(String fileName, String columnDelimiter) throws IOException {
 		List<List<String>> tmpRowsList = new ArrayList<List<String>>();
 		String s;
 		int rowIndex = -1;
-		try {
-			File prmFile = new File(fileName);
-			FileReader fr_in = new FileReader(prmFile);
-			BufferedReader br = new BufferedReader(fr_in);
-			while ((s = br.readLine()) != null) {
-				rowIndex++;
-				String[] valArray = dc.cleanValues(s.split(columnDelimiter));
-				int firstValueIndex = 0;
-				for (int i = 0; i < valArray.length; i++) {
-					// if withHeaders = true, add values in the first column to the headers HashMap,
-					// and start values at index 1
-					if (i == 0) {
-						if (!dc.getHeaders().containsValue(rowIndex)) {
-							dc.getHeaders().put(valArray[0], rowIndex);
-						}
-						firstValueIndex = 1;
+		File prmFile = new File(fileName);
+		FileReader fr_in = new FileReader(prmFile);
+		BufferedReader br = new BufferedReader(fr_in);
+		while ((s = br.readLine()) != null) {
+			rowIndex++;
+			String[] valArray = dc.cleanValues(s.split(columnDelimiter));
+			int firstValueIndex = 0;
+			for (int i = 0; i < valArray.length; i++) {
+				// if withHeaders = true, add values in the first column to the headers HashMap,
+				// and start values at index 1
+				if (i == 0) {
+					if (!dc.getHeaders().containsValue(rowIndex)) {
+						dc.getHeaders().put(valArray[0], rowIndex);
 					}
-					// initialize one tmpRowsList for each value in valArray
-					while (tmpRowsList.size() < valArray.length - firstValueIndex) {
-						tmpRowsList.add(new ArrayList<String>());
-					}
-					// write all values into temporary lists
-					if (i >= firstValueIndex) {
-						tmpRowsList.get(i - firstValueIndex).add(valArray[i]);
-					}
+					firstValueIndex = 1;
+				}
+				// initialize one tmpRowsList for each value in valArray
+				while (tmpRowsList.size() < valArray.length - firstValueIndex) {
+					tmpRowsList.add(new ArrayList<String>());
+				}
+				// write all values into temporary lists
+				if (i >= firstValueIndex) {
+					tmpRowsList.get(i - firstValueIndex).add(valArray[i]);
 				}
 			}
-			fr_in.close();
-			br.close();
-			for (int i = 0; i < tmpRowsList.size(); i++) {
-				// get existing values from 'values' List Object
-				String[] currentValues = new String[0];
-				if ((!dc.values.isEmpty()) && (rowIndex <= dc.values.size() - 1)) {
-					currentValues = Arrays.copyOf(dc.values.get(rowIndex), dc.values.get(rowIndex).length);
-				}
-				String[] newValues = tmpRowsList.get(i).toArray(new String[tmpRowsList.get(i).size()]);
-				List<String> both = new ArrayList<String>(currentValues.length + newValues.length);
-				Collections.addAll(both, currentValues);
-				Collections.addAll(both, newValues);
-				if (rowIndex <= dc.values.size() - 1) {
-					dc.setRow(rowIndex, both.toArray(new String[both.size()]));
-				} else {
-					dc.addRow(both.toArray(new String[both.size()]));
-				}
+		}
+		fr_in.close();
+		br.close();
+		for (int i = 0; i < tmpRowsList.size(); i++) {
+			// get existing values from 'values' List Object
+			String[] currentValues = new String[0];
+			if ((!dc.values.isEmpty()) && (rowIndex <= dc.values.size() - 1)) {
+				currentValues = Arrays.copyOf(dc.values.get(rowIndex), dc.values.get(rowIndex).length);
 			}
-		} catch (Exception e) {
-			MLogger.getInstance().log(Level.SEVERE, e, "putDataSetColumns");
+			String[] newValues = tmpRowsList.get(i).toArray(new String[tmpRowsList.get(i).size()]);
+			List<String> both = new ArrayList<String>(currentValues.length + newValues.length);
+			Collections.addAll(both, currentValues);
+			Collections.addAll(both, newValues);
+			if (rowIndex <= dc.values.size() - 1) {
+				dc.setRow(rowIndex, both.toArray(new String[both.size()]));
+			} else {
+				dc.addRow(both.toArray(new String[both.size()]));
+			}
 		}
 	}
 	
@@ -133,52 +129,49 @@ public class CSVDataContainer implements CustomContainer {
 	 * @param fileName        The filename of the file to read from.
 	 * @param columnDelimiter The column delimiter used to separate columns in the
 	 *                        CSV-file.
-	 * 
+	 * @throws IOException
 	 */
-	private void putDatasetRows(String fileName, String columnDelimiter) {
+	private void putDatasetRows(String fileName, String columnDelimiter) throws IOException {
 		String s;
 		int rowIndex = -1, headerState = 0;
 		HashMap<Integer, Integer> sortMap = null;
-		try {
-			File prmFile = new File(fileName);
-			FileReader fr_in = new FileReader(prmFile);
-			BufferedReader br = new BufferedReader(fr_in);
-			while ((s = br.readLine()) != null) {
-				rowIndex++;
-				String[] valArray = dc.cleanValues(s.split(columnDelimiter, -1));
-				if (rowIndex < dc.getHeaderRowIndex()) {
-					MLogger.getInstance().log(Level.INFO, "Skipping row with index " + String.valueOf(rowIndex) + "! Just rows after the headerRowIndex will be loaded into DataContainer.", this.getClass().getSimpleName(), "putDataSetRows");
-				} else if (rowIndex == dc.getHeaderRowIndex()) {
-					if (dc.getHeaders().isEmpty()) {
-						dc.setHeaders(valArray);
-					}
-					headerState = dc.checkHeader(valArray);
-					if (headerState < 0) {
-						for (String h : valArray) {
-							if (!dc.getHeaders().containsKey(h)) {
-								dc.addColumn(h);
-							}
+
+		File prmFile = new File(fileName);
+		FileReader fr_in = new FileReader(prmFile);
+		BufferedReader br = new BufferedReader(fr_in);
+		while ((s = br.readLine()) != null) {
+			rowIndex++;
+			String[] valArray = dc.cleanValues(s.split(columnDelimiter, -1));
+			if (rowIndex < dc.getHeaderRowIndex()) {
+				MLogger.getInstance().log(Level.INFO, "Skipping row with index " + String.valueOf(rowIndex) + "! Just rows after the headerRowIndex will be loaded into DataContainer.", this.getClass().getSimpleName(), "putDataSetRows");
+			} else if (rowIndex == dc.getHeaderRowIndex()) {
+				if (dc.getHeaders().isEmpty()) {
+					dc.setHeaders(valArray);
+				}
+				headerState = dc.checkHeader(valArray);
+				if (headerState < 0) {
+					for (String h : valArray) {
+						if (!dc.getHeaders().containsKey(h)) {
+							dc.addColumn(h);
 						}
-					}
-					if (headerState != 0)
-						sortMap = sortHeadersIndexes(valArray);
-				} else {
-					if (dc.addMetaValues(valArray).length == dc.getHeaders().size()) {
-						if (headerState == 0) {
-							dc.addRow(valArray);
-						} else {
-							dc.addRow(sortValues(sortMap, valArray));
-						}
-					} else {
-						MLogger.getInstance().log(Level.WARNING, "The number of values doesn't match to the number of headers! Values will not be added to DataContainer.", this.getClass().getSimpleName(), "putDataSetRows");
 					}
 				}
-			}
+				if (headerState != 0)
+					sortMap = sortHeadersIndexes(valArray);
+			} else {
+				if (dc.addMetaValues(valArray).length == dc.getHeaders().size()) {
+					if (headerState == 0) {
+						dc.addRow(valArray);
+					} else {
+						dc.addRow(sortValues(sortMap, valArray));
+					}
+				} else {
+					MLogger.getInstance().log(Level.WARNING, "The number of values doesn't match to the number of headers! Values will not be added to DataContainer.", this.getClass().getSimpleName(), "putDataSetRows");
+				}
+			}		
 			fr_in.close();
 			br.close();
-		} catch (Exception e) {
-			MLogger.getInstance().log(Level.SEVERE, e, "putDataSetRows");
-		}
+		} 
 	}
 
 	/**
@@ -191,9 +184,10 @@ public class CSVDataContainer implements CustomContainer {
 	 *                        data in the CSV-file.
 	 * @param columnDelimiter The column delimiter used to separate columns in the
 	 *                        CSV-file.
+     * @throws IOException 
 	 * 
 	 */
-	private void putFile(String fileName, String columnDelimiter) {
+	private void putFile(String fileName, String columnDelimiter) throws IOException {
 		switch (dc.getContainerFormat().getHeaderType()) {
 		case COLUMN:
 			putDatasetRows(fileName, columnDelimiter);
@@ -218,7 +212,12 @@ public class CSVDataContainer implements CustomContainer {
 	 *               use here)
 	 */
 	public void readData(Filter filter) {
-		putFile(dc.fileName, dc.columnDelimiter);
+		try {
+			putFile(dc.fileName, dc.columnDelimiter);
+		} catch (IOException e) {
+			MLogger.getInstance().log(Level.SEVERE, e, "readData");
+			throw new RuntimeException(e);
+		}
 	}
 
 	/**
@@ -296,10 +295,9 @@ public class CSVDataContainer implements CustomContainer {
 			XFileWriter writer = new XFileWriter(new File(fileName));
 			writer.writeLines(writeable);
 			writer.close();
-		} catch (FileNotFoundException e) {
-			MLogger.getInstance().log(Level.SEVERE, e);
 		} catch (IOException e) {
-			MLogger.getInstance().log(Level.SEVERE, e);
+			MLogger.getInstance().log(Level.SEVERE, e, "writeData");
+			throw new RuntimeException(e);
 		}
 	}
 }

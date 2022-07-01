@@ -15,7 +15,6 @@ import java.util.Set;
 import java.util.logging.Level;
 import java.util.stream.Collectors;
 
-import org.opentdk.api.io.FileUtil;
 import org.opentdk.api.io.XFileWriter;
 import org.opentdk.api.io.XMLEditor;
 import org.opentdk.api.logger.*;
@@ -511,8 +510,9 @@ public class DataContainer extends BaseContainer {
 				if (!checkValuesFilter(row, filter)) {
 					return;
 				}
-			} catch (Exception e) {
+			} catch (NoSuchHeaderException e) {
 				MLogger.getInstance().log(Level.SEVERE, e);
+				throw new RuntimeException(e);
 			}
 		}
 		values.add(addMetaValues(row));
@@ -600,7 +600,7 @@ public class DataContainer extends BaseContainer {
 				for (int j = 0; j < getColumnCount(); j++) {
 					try {
 						row[j] = dc.getValuesAsList(getHeadersIndexed().get(j)).get(i);
-					} catch (Exception e) {
+					} catch (RuntimeException e) {
 						row[j] = null;
 					}
 				}
@@ -719,11 +719,11 @@ public class DataContainer extends BaseContainer {
 	public void exportContainer(String fileName, String columnDelimiter) throws IOException {
 		HashMap<Integer, String> hm = getHeadersIndexed();
 		XFileWriter writer = null;
-		try {
+//		try {
 			writer = new XFileWriter(new File(fileName));
-		} catch (FileNotFoundException e) {
-			MLogger.getInstance().log(Level.SEVERE, e);
-		}
+//		} catch (FileNotFoundException e) {
+//			MLogger.getInstance().log(Level.SEVERE, e);
+//		}
 		if (writer != null) {
 			switch (getContainerFormat().getHeaderType()) {
 			case COLUMN:
@@ -935,7 +935,8 @@ public class DataContainer extends BaseContainer {
 				try {
 					colList.add((String[]) instance.getColumn(headerName, rowFilter));
 				} catch (Exception e) {
-					MLogger.getInstance().log(Level.SEVERE, e);
+					MLogger.getInstance().log(Level.SEVERE, e, "getColumnsList");
+					throw new RuntimeException(e);
 				}
 			}
 			break;
@@ -1075,7 +1076,8 @@ public class DataContainer extends BaseContainer {
 					indexBuffer.append(String.valueOf(i));
 				}
 			} catch (NoSuchHeaderException e) {
-				MLogger.getInstance().log(Level.SEVERE, e);
+				MLogger.getInstance().log(Level.SEVERE, e, "getRowsIndexes");
+				throw new RuntimeException(e);
 			}
 		}
 		if (indexBuffer.length() > 0) {
@@ -1168,8 +1170,9 @@ public class DataContainer extends BaseContainer {
 							outValues.add(rowArray);
 						}
 					}
-				} catch (Exception e) {
-					MLogger.getInstance().log(Level.SEVERE, e);
+				} catch (NoSuchHeaderException e) {
+					MLogger.getInstance().log(Level.SEVERE, e, "getRowsList");
+					throw new RuntimeException(e);
 				}
 			}
 		}
@@ -1202,7 +1205,12 @@ public class DataContainer extends BaseContainer {
 				values.remove(index);
 			}
 			if (!fileName.isEmpty()) {
-				writeData(fileName);
+				try {
+					writeData(fileName);
+				} catch (FileNotFoundException e) {
+					MLogger.getInstance().log(Level.SEVERE, e, "getRowsList");
+					throw new RuntimeException(e);
+				}
 			}
 		}
 	}
@@ -1720,7 +1728,12 @@ public class DataContainer extends BaseContainer {
 				}
 			}
 			if (!fileName.isEmpty()) {
-				writeData(fileName);
+				try {
+					writeData(fileName);
+				} catch (IOException e) {
+					MLogger.getInstance().log(Level.SEVERE, e, "setValues");
+					throw new RuntimeException(e);
+				}
 			}
 			break;
 		}
@@ -1732,9 +1745,15 @@ public class DataContainer extends BaseContainer {
 	 * output file.
 	 *
 	 * @param srcFile The path to the source file.
+	 * @throws FileNotFoundException
 	 */
-	public void writeData(String srcFile) {
-		instance.writeData(srcFile);
+	public void writeData(String srcFile) throws FileNotFoundException {
+		try {
+			instance.writeData(srcFile);
+		} catch (IOException e) {
+			MLogger.getInstance().log(Level.SEVERE, e, "setValues");
+			throw new RuntimeException(e);
+		}
 	}
 
 }

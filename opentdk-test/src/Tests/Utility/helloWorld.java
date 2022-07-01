@@ -1,11 +1,13 @@
 package Tests.Utility;
 
+import java.io.IOException;
+
 import org.opentdk.api.application.EBaseSettings;
 import org.opentdk.api.logger.MLogger;
 
 public class helloWorld {
 
-	public static void main(String[] args) {
+	public static void main(String[] args) throws IOException {
 		ESettings.setDataContainer(EBaseSettings.class, "logs/helloWorld.xml", "AppSettings");
 		
 		MLogger.getInstance().setLogFile(ESettings.APP_LOGFILE.getValue());

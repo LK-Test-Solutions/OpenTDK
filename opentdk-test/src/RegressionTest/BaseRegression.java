@@ -27,7 +27,7 @@ public abstract class BaseRegression {
 		System.out.println();
 		try {
 			runTest();
-		} catch(Exception e) {
+		} catch(Throwable e) {
 			System.err.println(e.getMessage());
 		}
 		System.out.println();
