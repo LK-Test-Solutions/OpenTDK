@@ -53,13 +53,19 @@ public class Counter {
 	/**
 	 * Stores pairs of transactions and counters.
 	 */
-	private static Map<String, Integer> storage;
-
-	/**
+	private static Map<String, Integer> storage;	
+	/*
 	 * Initializes the {@link #storage}.
 	 */
+	static {
+		storage = new HashMap<>();
+	}
+	
+	/**
+	 * See {@link org.opentdk.api.meter.Counter}
+	 */
 	public Counter() {
-		storage = new HashMap<String, Integer>();
+		super();
 	}
 
 	/**

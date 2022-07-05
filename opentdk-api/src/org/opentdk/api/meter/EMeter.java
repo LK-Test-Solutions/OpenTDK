@@ -39,6 +39,11 @@ package org.opentdk.api.meter;
  *
  */
 public class EMeter {
+	
+	private EMeter() {
+		super();
+	}
+	
 	/**
 	 * Used to store transaction response times.
 	 */

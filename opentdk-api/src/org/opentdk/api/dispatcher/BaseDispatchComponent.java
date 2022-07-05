@@ -14,7 +14,6 @@ import java.util.List;
 import java.util.Map;
 
 import org.opentdk.api.application.EBaseSettings;
-import org.opentdk.api.datastorage.BaseContainer.EHeader;
 import org.opentdk.api.datastorage.DataContainer;
 import org.opentdk.api.datastorage.EOperator;
 import org.opentdk.api.datastorage.Filter;
