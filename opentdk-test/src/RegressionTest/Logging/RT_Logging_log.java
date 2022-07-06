@@ -37,12 +37,8 @@ public class RT_Logging_log extends BaseRegression {
 		success = MLogger.getInstance().log("Message");
 		BaseRegression.testResult(String.valueOf(success), "Log message", "true");
 
-		try {
-			success = FileUtil.checkDir(defaultLogFile);
-			BaseRegression.testResult(String.valueOf(success), "Default log file exists", "true");
-		} catch (IOException e) {
-			throw new RuntimeException(e);
-		}
+		success = FileUtil.checkDir(defaultLogFile);
+		BaseRegression.testResult(String.valueOf(success), "Default log file exists", "true");
 
 		MLogger.getInstance().setLogFile(logFile);
 
@@ -60,12 +56,8 @@ public class RT_Logging_log extends BaseRegression {
 		success = MLogger.getInstance().log(Level.SEVERE, new Exception());
 		BaseRegression.testResult(String.valueOf(success), "Log error", "true");
 
-		try {
-			success = FileUtil.checkDir(logFile);
-			BaseRegression.testResult(String.valueOf(success), "Log file exists", "true");
-		} catch (IOException e) {
-			throw new RuntimeException(e);
-		}
+		success = FileUtil.checkDir(logFile);
+		BaseRegression.testResult(String.valueOf(success), "Log file exists", "true");
 
 		MLogger.getInstance().printExceptions(true);
 		MLogger.getInstance().setTraceLevel(Level.OFF);

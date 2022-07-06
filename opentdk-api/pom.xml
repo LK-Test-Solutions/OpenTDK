@@ -8,7 +8,7 @@
 	<name>opentdk-api</name>
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-  		<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+		<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
 	</properties>
 	<build>
 		<sourceDirectory>src</sourceDirectory>
@@ -39,7 +39,7 @@
 						<goals>
 							<goal>jar</goal>
 						</goals>
-					</execution>	
+					</execution>
 				</executions>
 			</plugin>
 			<plugin>
@@ -74,6 +74,11 @@
 			<groupId>org.apache.commons</groupId>
 			<artifactId>commons-math3</artifactId>
 			<version>3.6.1</version>
+		</dependency>
+		<dependency>
+			<groupId>org.json</groupId>
+			<artifactId>json</artifactId>
+			<version>20220320</version>
 		</dependency>
 	</dependencies>
 </project>

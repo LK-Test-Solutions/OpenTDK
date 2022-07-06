@@ -16,4 +16,5 @@ module opentdk.api {
 	
 	requires org.apache.commons.io;
 	requires commons.math3;
+	requires org.json;
 }

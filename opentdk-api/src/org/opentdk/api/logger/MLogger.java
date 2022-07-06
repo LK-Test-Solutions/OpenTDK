@@ -240,36 +240,28 @@ public final class MLogger {
 		if (level == null || message == null || mainName == null || className == null || methodName == null) {
 			logger.log(Level.SEVERE, "Null arguments committed");
 			ret = false;
-		} else if(message.isBlank() && mainName.isBlank() && className.isBlank() && methodName.isBlank()) {
+		} else if (message.isBlank() && mainName.isBlank() && className.isBlank() && methodName.isBlank()) {
 			logger.log(Level.SEVERE, "Only blank arguments committed");
 			ret = false;
 		}
 		if (ret) {
 			File file = new File(getLogFile());
-			try {
-				if (file.getParent() != null) {
-					FileUtil.checkDir(file.getParent(), true);
-				}
-				ret = true;
-			} catch (IOException e) {
-				logger.log(Level.SEVERE, e.getMessage());
-				ret = false;
+			if (file.getParent() != null) {
+				FileUtil.checkDir(file.getParent(), true);
 			}
-			if (ret) {
-				archiveLogFile();
-				setFileHandler();
-				mainName += " " + className;
-				
-				logger.logp(level, mainName, methodName, message);
+			archiveLogFile();
+			setFileHandler();
+			mainName += " " + className;
 
-				for (Handler handler : logger.getHandlers()) {
-					handler.flush();
-					if (handler instanceof FileHandler) {
-						handler.close(); // Releases the log file
-					}
+			logger.logp(level, mainName, methodName, message);
+
+			for (Handler handler : logger.getHandlers()) {
+				handler.flush();
+				if (handler instanceof FileHandler) {
+					handler.close(); // Releases the log file
 				}
-				ret = true;
 			}
+			ret = true;
 		}
 		return ret;
 	}
@@ -457,7 +449,7 @@ public final class MLogger {
 		if (f.exists()) {
 			if (f.length() / 1024 > logSizeLimit) {
 				boolean success = f.renameTo(new File(f.getParent() + DateUtil.get(EFormat.DATE_1.getDateFormat()) + "_" + f.getName()));
-				if(!success) {
+				if (!success) {
 					logger.log(Level.SEVERE, "Log file could not be archived");
 				}
 				f.delete();

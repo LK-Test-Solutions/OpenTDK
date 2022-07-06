@@ -15,6 +15,8 @@ import java.util.Set;
 import java.util.logging.Level;
 import java.util.stream.Collectors;
 
+import org.json.JSONObject;
+import org.opentdk.api.io.FileUtil;
 import org.opentdk.api.io.XFileWriter;
 import org.opentdk.api.io.XMLEditor;
 import org.opentdk.api.logger.*;
@@ -482,6 +484,9 @@ public class DataContainer extends BaseContainer {
 				}
 			};
 			break;
+		case JSON:
+			instance = new JSONDataContainer(this);
+			break;
 		default:
 			instance = new CSVDataContainer(this);
 			return;
@@ -666,6 +671,8 @@ public class DataContainer extends BaseContainer {
 				if (inputStream.available() > 0) {
 					if (XMLEditor.validateXMLString(inputStream)) {
 						return EContainerFormat.XML;
+					} else if(!new JSONObject(FileUtil.getContent(inputStream)).isEmpty()) {
+						return EContainerFormat.JSON;
 					}
 				}
 			} catch (IOException e) {
@@ -686,6 +693,8 @@ public class DataContainer extends BaseContainer {
 //				} else {
 //					return EContainerFormat.XML;
 //				}
+			} else if (fileName.endsWith(".json")) {
+				return EContainerFormat.JSON;
 			} else {
 				return EContainerFormat.CSV;
 			}
