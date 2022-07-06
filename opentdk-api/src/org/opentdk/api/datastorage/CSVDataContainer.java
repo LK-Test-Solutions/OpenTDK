@@ -16,8 +16,8 @@ import org.opentdk.api.io.XFileWriter;
 import org.opentdk.api.logger.MLogger;
 
 /**
- * SubClass of {@link DataContainer} which provides all methods for reading and writing
- * from or to Ascii files that are column separated, and store the data at
+ * Sub class of {@link DataContainer} which provides all methods for reading and writing
+ * from or to ASCII files that are column separated, and store the data at
  * runtime within the DataContainer.
  * 
  * @author LK Test Solutions
@@ -28,7 +28,7 @@ public class CSVDataContainer implements CustomContainer {
 
 	/**
 	 * An instance of the DataContainer that should be filled with the data from the
-	 * connected source file. -> Task of the specific data containers.
+	 * connected source file. Task of the specific data containers.
 	 */
 	private final DataContainer dc;
 
@@ -38,7 +38,7 @@ public class CSVDataContainer implements CustomContainer {
 	 * @param dCont the <code>DataContainer</code> instance to use it in the read
 	 *              and write methods of this specific data container
 	 */
-	public CSVDataContainer(DataContainer dCont) {
+	CSVDataContainer(DataContainer dCont) {
 		dc = dCont;
 		dc.containerFormat = EContainerFormat.CSV;
 	}	
@@ -211,6 +211,7 @@ public class CSVDataContainer implements CustomContainer {
 	 * @param filter Filter parameter to accomplish interface requirement (has no
 	 *               use here)
 	 */
+	@Override
 	public void readData(Filter filter) {
 		try {
 			putFile(dc.fileName, dc.columnDelimiter);
