@@ -1214,12 +1214,7 @@ public class DataContainer extends BaseContainer {
 				values.remove(index);
 			}
 			if (!fileName.isEmpty()) {
-				try {
-					writeData(fileName);
-				} catch (FileNotFoundException e) {
-					MLogger.getInstance().log(Level.SEVERE, e, "getRowsList");
-					throw new RuntimeException(e);
-				}
+				writeData(fileName);
 			}
 		}
 	}
@@ -1737,12 +1732,7 @@ public class DataContainer extends BaseContainer {
 				}
 			}
 			if (!fileName.isEmpty()) {
-				try {
-					writeData(fileName);
-				} catch (IOException e) {
-					MLogger.getInstance().log(Level.SEVERE, e, "setValues");
-					throw new RuntimeException(e);
-				}
+				writeData(fileName);
 			}
 			break;
 		}
@@ -1756,7 +1746,7 @@ public class DataContainer extends BaseContainer {
 	 * @param srcFile The path to the source file.
 	 * @throws FileNotFoundException
 	 */
-	public void writeData(String srcFile) throws FileNotFoundException {
+	public void writeData(String srcFile) {
 		try {
 			instance.writeData(srcFile);
 		} catch (IOException e) {

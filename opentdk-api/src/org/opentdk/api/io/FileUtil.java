@@ -627,7 +627,37 @@ public class FileUtil {
 				writer.append(System.getProperty("line.separator"));
 			}
 		} catch (IOException e) {
-			MLogger.getInstance().log(Level.SEVERE, e, "writeOutputFile");
+			MLogger.getInstance().log(Level.SEVERE, e);
+			throw new RuntimeException(e);
+		} finally {
+			try {
+				if (writer != null) {
+					writer.flush();
+					writer.close();
+				}
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+
+		}
+	}
+	
+	/**
+	 * Transfers the content of a string into a defined file. Existing files with the same name
+	 * will be overwritten.
+	 * 
+	 * @param content     Object of type String which content will be written into the output file.
+	 * @param fileName Full path and name of the file, where content of the list will be written.
+	 */
+	public static void writeOutputFile(String content, String fileName) {
+		FileWriter writer = null;
+		try {
+			FileUtil.createFile(fileName, true);
+			writer = new FileWriter(fileName);
+			writer.append(content);
+		} catch (IOException e) {
+			MLogger.getInstance().log(Level.SEVERE, e);
+			throw new RuntimeException(e);
 		} finally {
 			try {
 				if (writer != null) {

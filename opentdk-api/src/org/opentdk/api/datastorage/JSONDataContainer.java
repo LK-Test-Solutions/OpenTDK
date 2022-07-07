@@ -1,9 +1,14 @@
 package org.opentdk.api.datastorage;
 
+import java.io.BufferedInputStream;
 import java.io.File;
+import java.io.FileWriter;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.logging.Level;
 
+import org.json.JSONException;
 import org.json.JSONObject;
 import org.opentdk.api.datastorage.BaseContainer.EContainerFormat;
 import org.opentdk.api.io.FileUtil;
@@ -15,6 +20,10 @@ public class JSONDataContainer implements CustomContainer {
 	 * An instance of the DataContainer that should be filled with the data from the connected source file. Task of the specific data containers.
 	 */
 	private final DataContainer dc;
+	/**
+	 * Container object for the JSON data.
+	 */
+	private JSONObject json;
 
 	/**
 	 * Construct a new specific <code>DataContainer</code> for JSON files.
@@ -28,52 +37,39 @@ public class JSONDataContainer implements CustomContainer {
 
 	@Override
 	public void readData(Filter filter) {
-		// ORG JSON
-		
 		String content = null;
-		if (!dc.fileName.isEmpty()) {
-			content = FileUtil.getContent(dc.fileName);
-		} else if (dc.inputStream != null) {
-			content = FileUtil.getContent(dc.inputStream);
+		if (!dc.getFileName().isEmpty()) {
+			content = FileUtil.getContent(dc.getFileName());
+		} else if (dc.getInputStream() != null) {
+			content = FileUtil.getContent(dc.getInputStream());
 		}
-		if(content != null) {
-			JSONObject json = new JSONObject(content);
-			System.out.println(json.getJSONObject("address").get("city"));
+		if (content != null) {
+			json = new JSONObject(content);
+			List<String> headers = new ArrayList<>();
+			for (String key : json.toMap().keySet()) {
+				headers.add(key);
+			}
+			dc.setHeaders(headers);
+			for (String header : dc.getHeaders().keySet()) {
+				dc.setColumn(header, new String[] { json.get(header).toString() });
+			}		
 		}
-		
-		// JACKSON Parser
-//		JsonFactory factory = new JsonFactory();
-//		JsonParser parser = null;
-//		try {
-//			if (!dc.getFileName().isEmpty()) {
-//				parser = factory.createParser(new File(dc.fileName));
-//			} else if (dc.getInputStream() != null) {
-//				parser = factory.createParser(dc.getInputStream());
-//			}
-//			if (parser != null) {
-//				while (!parser.isClosed()) {
-//					JsonToken jsonToken;
-//					jsonToken = parser.nextToken();
-//					System.out.println("jsonToken = " + jsonToken);
-//				}
-//			}
-//		} catch (IOException e) {
-//			MLogger.getInstance().log(Level.SEVERE, e);
-//			throw new RuntimeException(e);
-//		} finally {
-//			if (parser != null) {
-//				try {
-//					parser.close();
-//				} catch (IOException e) {
-//					MLogger.getInstance().log(Level.SEVERE, e);
-//				}
-//			}
-//		}
 	}
 
 	@Override
 	public void writeData(String srcFileName) {
-
+		if(json == null || json.isEmpty()) {
+			MLogger.getInstance().log(Level.WARNING, "JSON object is not initialized or empty ==> No JSON content to write", getClass().getSimpleName(), "writeData");
+		} else {
+			try {
+				FileUtil.createFile(srcFileName, true);			
+				FileUtil.writeOutputFile(json.toString(1), srcFileName);
+			} catch (JSONException | IOException e) {
+				MLogger.getInstance().log(Level.SEVERE, e);
+				throw new RuntimeException(e);
+			}
+		}
+		
 	}
 
 }

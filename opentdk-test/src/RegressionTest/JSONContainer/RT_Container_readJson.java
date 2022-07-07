@@ -13,7 +13,7 @@ public class RT_Container_readJson extends BaseRegression {
 	@Override
 	protected void runTest() {
 		DataContainer dc = new DataContainer("testdata/RegressionTestData/JsonExample.json");
-		
+		dc.writeData("output/JsonExample.json");
 		
 	}
 
