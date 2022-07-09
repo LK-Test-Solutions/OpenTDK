@@ -337,25 +337,24 @@ public abstract class BaseContainer {
 	/**
 	 * Checks, if the filter rules match to the values of the given data set.
 	 *
-	 * @param values String Array with all values of a defined dataset (row).
+	 * @param values String Array with all values of a defined data set (row).
 	 * @param fltr   Object of type Filter, which includes one or more filter rules
 	 * @return true = values match to the filter; false = values don't match to the
-	 * @throws Exception If any error occurs it should be logged with the
-	 *                   {@link MLogger} to get details about it.
+	 * @throws NoSuchHeaderException 
 	 */
-	protected boolean checkValuesFilter(String[] values, Filter fltr) throws Exception {
+	protected boolean checkValuesFilter(String[] values, Filter fltr) throws NoSuchHeaderException {
 		boolean returnCode = false;
 		for (FilterRule rule : fltr.getFilterRules()) {
 			if ((!this.headerNames.containsKey(rule.getHeaderName())) && (!implicitHeaders.contains(rule.getHeaderName()))) {
-				throw new Exception("Header " + rule.getHeaderName() + " doesn't comply to DataContainer!");
+				throw new NoSuchHeaderException("Header " + rule.getHeaderName() + " doesn't comply to DataContainer!");
 			}
 		}
 		// return true, if no filter rule is defined
-		if (fltr.getFilterRules().size() == 0) {
+		if (fltr.getFilterRules().isEmpty()) {
 			returnCode = true;
 		} else {
 			for (FilterRule fr : fltr.getFilterRules()) {
-				// Wildcards * and % will accept any value
+				// Wild cards * and % will accept any value
 				if (fr.getValue() != null) {
 					if ((fr.getValue().equals("*")) || (fr.getValue().equals("%"))) {
 						returnCode = true;

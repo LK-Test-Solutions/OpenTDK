@@ -56,12 +56,18 @@ public class Transaction {
 	 * Stores pairs of transactions and time stamps.
 	 */
 	private static Map<String, String> storage;
-
-	/**
+	/*
 	 * Initializes the {@link #storage}.
 	 */
+	static {
+		storage = new HashMap<>();
+	}
+
+	/**
+	 * See {@link org.opentdk.api.meter.Transaction}
+	 */
 	public Transaction() {
-		storage = new HashMap<String, String>();
+		super();
 	}
 
 	/**

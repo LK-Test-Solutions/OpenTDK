@@ -54,11 +54,11 @@ public class XMLEditor {
 	 * 
 	 * @param xml_src Object of type {@link java.io.File}
 	 */
-	public XMLEditor(File xml_src) {
+	public XMLEditor(File xml_src) throws IOException {
 		this(xml_src, "");
 	}
 
-	public XMLEditor(String fullPath, String rootNode) {
+	public XMLEditor(String fullPath, String rootNode) throws IOException {
 		this(new File(fullPath), rootNode);
 	}
 
@@ -69,21 +69,21 @@ public class XMLEditor {
 	 * @param fullPath String with the relative or absolute path and filename of the xml file
 	 * 
 	 */
-	public XMLEditor(String fullPath) {
+	public XMLEditor(String fullPath) throws IOException {
 		this(new File(fullPath), "");
 	}
 
-	public XMLEditor(File xml_src, String rootNode) {
+	public XMLEditor(File xml_src, String rootNode) throws IOException {
 		xmlFile = xml_src;
 		if (!rootNode.isBlank()) {
 			rootNodeName = rootNode;
 		}
-		try {
+//		try {
 			FileUtil.checkDir(xmlFile.getParentFile(), true);
 			createXMLEditor();
-		} catch (IOException e) {
-			MLogger.getInstance().log(Level.SEVERE, e);
-		}
+//		} catch (IOException e) {
+//			MLogger.getInstance().log(Level.SEVERE, e);
+//		}
 	}
 	
 	public XMLEditor(InputStream inStream) {

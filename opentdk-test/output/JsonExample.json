@@ -1,0 +1,23 @@
+{
+ "address": {
+  "zipcode": 87463,
+  "city": "Munich",
+  "street": "Schneckenburgerstrasse"
+ },
+ "role": "Manager",
+ "cities": [
+  "Munich",
+  "Berlin"
+ ],
+ "permanent": true,
+ "name": "LK",
+ "id": 1,
+ "phoneNumbers": [
+  123456,
+  987654
+ ],
+ "properties": {
+  "salary": "1000 EUR",
+  "age": "26 years"
+ }
+}

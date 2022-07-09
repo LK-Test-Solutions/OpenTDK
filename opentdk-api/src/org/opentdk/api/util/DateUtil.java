@@ -395,7 +395,7 @@ public class DateUtil {
 		LocalDate ret = null;
 		EFormat format = EFormat.getDateEFormat(inDate);
 		if (format != EFormat.NONE) {
-			try {
+//			try {
 				int year = format.getYear(inDate);
 				int month = format.getMonth(inDate);
 				int day = format.getDay(inDate);
@@ -406,9 +406,9 @@ public class DateUtil {
 				if (month != -1 && day != -1) {
 					ret = LocalDate.of(year, month, day);
 				}
-			} catch (DateTimeException e) {
-				MLogger.getInstance().log(Level.SEVERE, DateUtil.class.getName() + ".getDateInstance ==> Error while retrieving date: " + inDate);
-			}
+//			} catch (DateTimeException e) {
+//				MLogger.getInstance().log(Level.SEVERE, DateUtil.class.getName() + ".getDateInstance ==> Error while retrieving date: " + inDate);
+//			}
 		}
 		return ret;
 	}
@@ -424,7 +424,7 @@ public class DateUtil {
 		LocalTime ret = null;
 		EFormat format = EFormat.getDateEFormat(inTime);
 		if (format != EFormat.NONE) {
-			try {
+//			try {
 				int hours = format.getHour(inTime);
 				int minutes = format.getMinute(inTime);
 				int seconds = format.getSecond(inTime);
@@ -437,9 +437,9 @@ public class DateUtil {
 					int rest = (millis * 1000 * 1000) + (micros * 1000) + nanos;
 					ret = LocalTime.of(hours, minutes, seconds, rest);
 				}
-			} catch (DateTimeException e) {
-				MLogger.getInstance().log(Level.SEVERE, DateUtil.class.getName() + ".getTimeInstance ==> Error while retrieving time: " + inTime);
-			}
+//			} catch (DateTimeException e) {
+//				MLogger.getInstance().log(Level.SEVERE, DateUtil.class.getName() + ".getTimeInstance ==> Error while retrieving time: " + inTime);
+//			}
 		}
 		return ret;
 	}
@@ -455,7 +455,7 @@ public class DateUtil {
 		LocalDateTime ret = null;
 		EFormat format = EFormat.getDateEFormat(inTimestamp);
 		if (format != EFormat.NONE) {
-			try {
+//			try {
 				int year = format.getYear(inTimestamp);
 				int month = format.getMonth(inTimestamp);
 				int day = format.getDay(inTimestamp);
@@ -473,9 +473,9 @@ public class DateUtil {
 					int rest = (millis * 1000 * 1000) + (micros * 1000) + nanos;
 					ret = LocalDateTime.of(year, month, day, hours, minutes, seconds, rest);
 				}
-			} catch (DateTimeException e) {
-				MLogger.getInstance().log(Level.SEVERE, DateUtil.class.getName() + ".getTimestampInstance ==> Error while retrieving timestamp: " + inTimestamp);
-			}
+//			} catch (DateTimeException e) {
+//				MLogger.getInstance().log(Level.SEVERE, DateUtil.class.getName() + ".getTimestampInstance ==> Error while retrieving timestamp: " + inTimestamp);
+//			}
 		}
 		return ret;
 	}

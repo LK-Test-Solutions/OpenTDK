@@ -18,6 +18,7 @@ import org.opentdk.api.dispatcher.BaseDispatcher;
  *
  */
 public class EBaseSettings extends BaseDispatcher {
+	
 	/**
 	 * The variable APP_LOGFILE defines the full path and name of the file, where {@link org.opentdk.api.logger.MLogger} will log all messages and errors.
 	 */

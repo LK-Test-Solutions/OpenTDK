@@ -1,5 +1,6 @@
 package org.opentdk.api.dispatcher;
 
+import java.io.IOException;
 import java.io.InputStream;
 import java.util.Arrays;
 
@@ -100,8 +101,9 @@ public class BaseDispatcher {
 	 * @param dispatcherFile - full path and name of the file that stores the values of {@link BaseDispatchComponent} 
 	 * 						 variables which are defined within the dispatcher class
 	 * @param rootNode - name of the root node within the tree formated file, used to check if the content of the file matches to the dispatcher class
+	 * @throws IOException
 	 */
-	public static void setDataContainer(Class<?> dispatcherClass, String dispatcherFile, String rootNode) {
+	public static void setDataContainer(Class<?> dispatcherClass, String dispatcherFile, String rootNode) throws IOException {
 		BaseDispatchComponent.checkDispatcherFile(dispatcherFile, rootNode);
 		BaseDispatchComponent.setDataContainer(dispatcherClass.getSimpleName(), dispatcherFile);
 		BaseDispatchComponent.setFields(dispatcherClass.getSimpleName(), Arrays.asList(dispatcherClass.getDeclaredFields()));

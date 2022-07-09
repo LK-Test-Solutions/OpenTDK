@@ -16,7 +16,7 @@ public class YAMLDataContainer {
 	 * @param dCont the <code>DataContainer</code> instance to use it in the read
 	 *              and write methods of this specific data container
 	 */
-	public YAMLDataContainer(DataContainer dCont) {
+	YAMLDataContainer(DataContainer dCont) {
 		dc = dCont;
 		dc.containerFormat = EContainerFormat.YAML;
 	}

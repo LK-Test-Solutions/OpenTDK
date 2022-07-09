@@ -44,14 +44,8 @@ public class RT_FileUtil extends BaseRegression {
 			System.err.println(e.getMessage());
 		}
 		
-		// CHECK EXISTING DIR
-		try {
-			boolean exists = FileUtil.checkDir(path, false);
-			BaseRegression.testResult(String.valueOf(exists), "CHECK_DIR", "true");
-		} catch (IOException e) {
-			System.err.println("CHECK_DIR failed.");
-			return;
-		}
+		boolean exists = FileUtil.checkDir(path, false);
+		BaseRegression.testResult(String.valueOf(exists), "CHECK_DIR", "true");
 		// CHECK EXISTING FILE
 		boolean fileExists = FileUtil.checkFile(path);
 		BaseRegression.testResult(String.valueOf(fileExists), "CHECK_FILE", "true");
@@ -59,7 +53,7 @@ public class RT_FileUtil extends BaseRegression {
 		// COPY
 		try {
 			FileUtil.copyFile(path, path_copy);
-			boolean exists = FileUtil.checkDir(path_copy);
+			exists = FileUtil.checkDir(path_copy);
 			BaseRegression.testResult(String.valueOf(exists), "CHECK_DIR_COPY", "true");
 		} catch (IOException e) {
 			System.err.println("CHECK_DIR_COPY failed.");
@@ -69,7 +63,7 @@ public class RT_FileUtil extends BaseRegression {
 		// RENAME 
 		try {
 			FileUtil.renameFile(path, path_rename);
-			boolean exists = FileUtil.checkDir(path_rename);
+			exists = FileUtil.checkDir(path_rename);
 			BaseRegression.testResult(String.valueOf(exists), "CHECK_DIR_RENAME", "true");
 		} catch (IOException e) {
 			if (e instanceof FileSystemException) {
@@ -80,7 +74,7 @@ public class RT_FileUtil extends BaseRegression {
 		// DELETE
 		try {
 			FileUtil.deleteFile(path_rename);
-			boolean exists = FileUtil.checkDir(path_rename);
+			exists = FileUtil.checkDir(path_rename);
 			BaseRegression.testResult(String.valueOf(exists), "CHECK_DIR_DELETE", "false");
 		} catch (IOException e) {
 			System.err.println(e.getMessage());

@@ -10,6 +10,7 @@ import org.opentdk.api.datastorage.BaseContainer.EContainerFormat;
 import org.opentdk.api.io.FileUtil;
 import org.opentdk.api.logger.MLogger;
 
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.FileWriter;
@@ -43,7 +44,12 @@ public class PropertiesDataContainer implements CustomContainer {
 		int headerIndex = dc.getHeaderIndex(headerName);
 		dc.values.get(0)[headerIndex] = null;
 		if(!dc.getFileName().isEmpty()) {
-			writeData(dc.getFileName());
+			try {
+				writeData(dc.getFileName());
+			} catch (IOException e) {
+				MLogger.getInstance().log(Level.SEVERE, e, "getRowsIndexes");
+				throw new RuntimeException(e);
+			}
 		}
 	}
 
@@ -94,45 +100,42 @@ public class PropertiesDataContainer implements CustomContainer {
 	 * added to the file. Manipulated data will also change in the file.
 	 *
 	 * @param srcFile Name and full path of the properties file
+	 * @throws FileNotFoundException
 	 */
-	public void writeData(String srcFile) {
+	public void writeData(String srcFile) throws IOException {
 		FileWriter fw = null;
-		try {
-			fw = new FileWriter(dc.getFileName());
-			SortedProperties existingProps = readProps(dc.getFileName());
-			SortedProperties outputProps = new SortedProperties();
-			if ((existingProps != null) && (!existingProps.isEmpty())) {
-				List<String> doc = FileUtil.getRowsAsList(dc.getFileName());
+		fw = new FileWriter(dc.getFileName());
+		SortedProperties existingProps = readProps(dc.getFileName());
+		SortedProperties outputProps = new SortedProperties();
+		if ((existingProps != null) && (!existingProps.isEmpty())) {
+			List<String> doc = FileUtil.getRowsAsList(dc.getFileName());
 
-				List<String> usedKeys = new ArrayList<String>();
-				for (String line : doc) {
-					if (dc.getHeaders().containsKey(line.split("=")[0].trim())) {
-						fw.write(line.split("=")[0].trim() + "=" + dc.getValue(line.split("=")[0].trim(), 0) + "\n");
-						usedKeys.add(line.split("=")[0].trim());
-					} else {
-						fw.write(line + "\n");
-					}
+			List<String> usedKeys = new ArrayList<String>();
+			for (String line : doc) {
+				if (dc.getHeaders().containsKey(line.split("=")[0].trim())) {
+					fw.write(line.split("=")[0].trim() + "=" + dc.getValue(line.split("=")[0].trim(), 0) + "\n");
+					usedKeys.add(line.split("=")[0].trim());
+				} else {
+					fw.write(line + "\n");
 				}
-				for (String k : dc.getHeaders().keySet()) {
-					if (!usedKeys.contains(k))
-						fw.write(k + "=" + dc.getValue(k, 0) + "\n");
-				}
-
-				fw.close();
-
-			} else {
-				String[] ds = dc.getRow(0);
-				for (String s : dc.getHeaders().keySet()) {
-					if(ds[dc.getHeaders().get(s)] != null) {
-						outputProps.put(s, ds[dc.getHeaders().get(s)]);
-					}
-				}
-				FileOutputStream fos = new FileOutputStream(dc.getFileName());
-				outputProps.store(fos, "Store properties");
-				
 			}
-		} catch (IOException e) {
-			MLogger.getInstance().log(Level.SEVERE, e, "writeProperties");
+			for (String k : dc.getHeaders().keySet()) {
+				if (!usedKeys.contains(k))
+					fw.write(k + "=" + dc.getValue(k, 0) + "\n");
+			}
+
+			fw.close();
+
+		} else {
+			String[] ds = dc.getRow(0);
+			for (String s : dc.getHeaders().keySet()) {
+				if(ds[dc.getHeaders().get(s)] != null) {
+					outputProps.put(s, ds[dc.getHeaders().get(s)]);
+				}
+			}
+			FileOutputStream fos = new FileOutputStream(dc.getFileName());
+			outputProps.store(fos, "Store properties");
+			
 		}
 	}
 }

@@ -68,7 +68,7 @@ public class FileUtil {
 	 *         doesn't exist.
 	 * @throws IOException If an I/O error occurred.
 	 */
-	public static boolean checkDir(String inDir) throws IOException {
+	public static boolean checkDir(String inDir) {
 		return checkDir(new File(inDir), false);
 	}
 
@@ -82,7 +82,7 @@ public class FileUtil {
 	 * @throws IOException If an I/O error occurred.
 	 * @see java.io.File
 	 */
-	public static boolean checkDir(File inDir) throws IOException {
+	public static boolean checkDir(File inDir) {
 		return checkDir(inDir, false);
 	}
 
@@ -97,7 +97,7 @@ public class FileUtil {
 	 *         doesn't exist.
 	 * @throws IOException If an I/O error occurred.
 	 */
-	public static boolean checkDir(String inDir, boolean createFolders) throws IOException {
+	public static boolean checkDir(String inDir, boolean createFolders) {
 		return checkDir(new File(inDir), createFolders);
 	}
 
@@ -114,7 +114,7 @@ public class FileUtil {
 	 * @throws IOException If an I/O error occurred.
 	 * @see java.io.File
 	 */
-	public static boolean checkDir(File inDir, boolean createFolders) throws IOException {
+	public static boolean checkDir(File inDir, boolean createFolders) {
 		boolean rval = false;
 		if (inDir.exists()) {
 			rval = true;
@@ -242,7 +242,7 @@ public class FileUtil {
 	 * @throws SecurityException     If the file/directory creation failed in the current context.
 	 * @throws IOException           If any I/O error occurs on the file system.
 	 */
-	public static void renameFile(String oldFile, String newFile) throws SecurityException, FileNotFoundException, IOException {
+	public static void renameFile(String oldFile, String newFile) throws SecurityException, IOException {
 		renameFile(new File(oldFile), new File(newFile));
 	}
 
@@ -257,7 +257,7 @@ public class FileUtil {
 	 * @throws SecurityException     If the file/directory creation failed in the current context.
 	 * @throws IOException           If any I/O error occurs on the file system.
 	 */
-	public static void renameFile(File oldFile, File newFile) throws SecurityException, FileNotFoundException, IOException {
+	public static void renameFile(File oldFile, File newFile) throws SecurityException, IOException {
 		if (checkDir(oldFile)) {
 			Path oldPath = Paths.get(oldFile.getPath());
 			Path newPath = Paths.get(newFile.getPath());
@@ -492,11 +492,10 @@ public class FileUtil {
 					break;
 				}
 				i++;
-			}
-		} catch (FileNotFoundException e) {
-			e.printStackTrace();
+			}		
 		} catch (IOException e) {
-			e.printStackTrace();
+			MLogger.getInstance().log(Level.SEVERE, e);
+			throw new RuntimeException(e);
 		} finally {
 			if (br != null) {
 				try {
@@ -536,11 +535,10 @@ public class FileUtil {
 			String line = null;
 			while ((line = br.readLine()) != null) {
 				rows.add(line);
-			}
-		} catch (FileNotFoundException e) {
-			e.printStackTrace();
+			}		
 		} catch (IOException e) {
-			e.printStackTrace();
+			MLogger.getInstance().log(Level.SEVERE, e);
+			throw new RuntimeException(e);
 		} finally {
 			if (br != null) {
 				try {
@@ -564,7 +562,8 @@ public class FileUtil {
 		try {
 			stream = new FileInputStream(path);
 		} catch (FileNotFoundException e) {
-			e.printStackTrace();
+			MLogger.getInstance().log(Level.SEVERE, e);
+			throw new RuntimeException(e);
 		}
 		return FileUtil.getContent(stream);
 	}
@@ -590,13 +589,14 @@ public class FileUtil {
 	public static String getContent(InputStream is) {
 
 		BufferedInputStream isb = new BufferedInputStream(is);
-		StringBuffer sb = new StringBuffer();
+		StringBuilder sb = new StringBuilder();
 		try {
 			int c;
 			while (0 < (c = isb.read())) {
 				sb.append((char) c);
 			}
 		} catch (IOException e) {
+			MLogger.getInstance().log(Level.SEVERE, e);
 			throw new RuntimeException(e);
 		} finally {
 			try {
@@ -627,7 +627,37 @@ public class FileUtil {
 				writer.append(System.getProperty("line.separator"));
 			}
 		} catch (IOException e) {
-			MLogger.getInstance().log(Level.SEVERE, e, "writeOutputFile");
+			MLogger.getInstance().log(Level.SEVERE, e);
+			throw new RuntimeException(e);
+		} finally {
+			try {
+				if (writer != null) {
+					writer.flush();
+					writer.close();
+				}
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+
+		}
+	}
+	
+	/**
+	 * Transfers the content of a string into a defined file. Existing files with the same name
+	 * will be overwritten.
+	 * 
+	 * @param content     Object of type String which content will be written into the output file.
+	 * @param fileName Full path and name of the file, where content of the list will be written.
+	 */
+	public static void writeOutputFile(String content, String fileName) {
+		FileWriter writer = null;
+		try {
+			FileUtil.createFile(fileName, true);
+			writer = new FileWriter(fileName);
+			writer.append(content);
+		} catch (IOException e) {
+			MLogger.getInstance().log(Level.SEVERE, e);
+			throw new RuntimeException(e);
 		} finally {
 			try {
 				if (writer != null) {

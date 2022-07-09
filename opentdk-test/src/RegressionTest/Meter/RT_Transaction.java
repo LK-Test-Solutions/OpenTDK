@@ -17,9 +17,10 @@ public class RT_Transaction extends BaseRegression {
 		try {
 			Thread.sleep(1000);
 		} catch (InterruptedException e) {	
-			e.printStackTrace();
+			throw new RuntimeException(e);
 		}
 		System.out.println(EMeter.TRANSACTION.end("trn1"));
+		System.out.println(EMeter.TRANSACTION.end("trnX"));
 	}
 
 }

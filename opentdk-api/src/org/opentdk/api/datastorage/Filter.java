@@ -131,22 +131,14 @@ public class Filter {
 
 	public void addFilterRule(String headerName, String[] values, BaseDispatchComponent mode, FilterRule.ERuleFormat ruleFormat) {
 		if (plausibleHeaders.isEmpty() || checkHeader(headerName)) {
-			try {
-				rules.add(new FilterRule(headerName, values, mode, ruleFormat));
-			} catch (Exception e) {
-				MLogger.getInstance().log(Level.SEVERE, e);
-			}
+			rules.add(new FilterRule(headerName, values, mode, ruleFormat));
 		}
 	}
 	
 	@Deprecated
 	public void addFilterRule(String headerName, String[] values, BaseDispatchComponent mode, boolean quoteRuleString) {
 		if (plausibleHeaders.isEmpty() || checkHeader(headerName)) {
-			try {
-				rules.add(new FilterRule(headerName, values, mode, quoteRuleString));
-			} catch (Exception e) {
-				MLogger.getInstance().log(Level.SEVERE, e);
-			}
+			rules.add(new FilterRule(headerName, values, mode, quoteRuleString));
 		}
 	}
 
@@ -169,22 +161,14 @@ public class Filter {
 
 	public void addFilterRule(String headerName, String[] values, BaseDispatchComponent mode, BaseDispatchComponent concat, FilterRule.ERuleFormat ruleFormat) {
 		if (plausibleHeaders.isEmpty() || checkHeader(headerName)) {
-			try {
-				rules.add(new FilterRule(headerName, values, mode, concat, ruleFormat));
-			} catch (Exception e) {
-				MLogger.getInstance().log(Level.SEVERE, e);
-			}
+			rules.add(new FilterRule(headerName, values, mode, concat, ruleFormat));
 		}
 	}
 	
 	@Deprecated
 	public void addFilterRule(String headerName, String[] values, BaseDispatchComponent mode, BaseDispatchComponent concat, boolean quoteRuleString) {
 		if (plausibleHeaders.isEmpty() || checkHeader(headerName)) {
-			try {
-				rules.add(new FilterRule(headerName, values, mode, concat, quoteRuleString));
-			} catch (Exception e) {
-				MLogger.getInstance().log(Level.SEVERE, e);
-			}
+			rules.add(new FilterRule(headerName, values, mode, concat, quoteRuleString));
 		}
 	}
 
@@ -316,11 +300,7 @@ public class Filter {
 	 */
 	public boolean deleteRule(String headerName, String value, BaseDispatchComponent mode) {
 		boolean ret = false;
-		try {
-			ret = this.deleteRule(new FilterRule(headerName, value, mode));
-		} catch (Exception e) {
-			MLogger.getInstance().log(Level.SEVERE, e);
-		}
+		ret = this.deleteRule(new FilterRule(headerName, value, mode));
 		return ret;
 	}
 
@@ -336,11 +316,7 @@ public class Filter {
 	 */
 	public boolean deleteRule(String headerName, String[] values, BaseDispatchComponent mode) {
 		boolean ret = false;
-		try {
-			ret = this.deleteRule(new FilterRule(headerName, values, mode));
-		} catch (Exception e) {
-			MLogger.getInstance().log(Level.SEVERE, e);
-		}
+		ret = this.deleteRule(new FilterRule(headerName, values, mode));
 		return ret;
 	}
 

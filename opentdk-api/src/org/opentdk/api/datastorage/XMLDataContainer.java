@@ -1,13 +1,16 @@
 package org.opentdk.api.datastorage;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.logging.Level;
 import java.util.stream.Collectors;
 
 import org.opentdk.api.datastorage.BaseContainer.EContainerFormat;
 import org.opentdk.api.io.XMLEditor;
+import org.opentdk.api.logger.MLogger;
 import org.w3c.dom.Element;
 
 /**
@@ -59,7 +62,12 @@ public class XMLDataContainer implements CustomContainer {
 	public void readData(Filter filter) {
 		if(!dc.getFileName().isEmpty()) {
 			
-			xEdit = new XMLEditor(new File(dc.getFileName()));
+			try {
+				xEdit = new XMLEditor(new File(dc.getFileName()));
+			} catch (IOException e) {
+				MLogger.getInstance().log(Level.SEVERE, e, "readData");
+				throw new RuntimeException(e);
+			}
 		} else if(dc.getInputStream() != null) {
 			xEdit = new XMLEditor(dc.getInputStream());
 		}
@@ -113,7 +121,7 @@ public class XMLDataContainer implements CustomContainer {
 		if (expr.startsWith("/")) {
 			// split all elements of full xPath
 			String[] splittedTags = expr.split("/");
-			// last element of the splited xPath is the tagname
+			// last element of the split xPath is the tagname
 			String targetTag = splittedTags[splittedTags.length - 1];
 			// delete tagname from the string to get the parent xPath
 			String parentExpr = expr.substring(0, expr.length() - targetTag.length() - 1);
@@ -137,7 +145,7 @@ public class XMLDataContainer implements CustomContainer {
 	}
 
 	@Override
-	public Object[] getColumn(String headerName, Filter fltr) throws Exception {
+	public Object[] getColumn(String headerName, Filter fltr) {
 		return getColumn(headerName, fltr, "values");
 	}
 

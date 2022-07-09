@@ -9,6 +9,7 @@ import RegressionTest.CSVContainer.RT_CSVContainer_mergeRows;
 import RegressionTest.CSVContainer.RT_CSVContainer_putMetaData;
 import RegressionTest.CSVContainer.RT_CSVContainer_setRow;
 import RegressionTest.CSVContainer.RT_CSVContainer_setValues;
+import RegressionTest.ChartCreation.RT_ChartCreation_createChart;
 import RegressionTest.CommonUtility.RT_CommonUtil_get;
 import RegressionTest.Container.RT_Container_checkHeader;
 import RegressionTest.Container.RT_Container_construct;
@@ -79,6 +80,8 @@ public class RegressionTestRunner {
 		
 		RT_Counter.main(args);
 		RT_Transaction.main(args);
+		
+		RT_ChartCreation_createChart.main(args);
 		
 	}
 }
