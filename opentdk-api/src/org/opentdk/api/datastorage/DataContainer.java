@@ -11,6 +11,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.logging.Level;
 import java.util.stream.Collectors;
@@ -879,6 +880,15 @@ public class DataContainer extends BaseContainer {
 		return new String[] {};
 	}
 
+	public Map<String, String> getRowAsMap(int rowIndex){
+		Map<String, String> outRow = new HashMap<String, String>();
+		String[] columnHeaders = getHeaderNamesIndexed();
+		for(String header:columnHeaders) {
+			outRow.put(header, this.getValue(header, rowIndex));
+		}
+		return outRow;
+	}
+	
 	/**
 	 * Returns the number of rows of the current <code>DataContainer</code> instance.
 	 *
