@@ -107,7 +107,7 @@ public class XMLDataContainer implements CustomContainer {
 	 * If expr includes the tag with full xPath, then the scope of the search will
 	 * be the parent xPath of the tag (e.g. /Rules/rule/regExpr only searches in
 	 * /Rules/rule).<br>
-	 * If expr only includes a tagname, the scope of the search will be the whole
+	 * If expr only includes a tag name, the scope of the search will be the whole
 	 * document. In this case all tags that match to <code>expr</code> will be
 	 * searched.
 	 * 
@@ -161,8 +161,8 @@ public class XMLDataContainer implements CustomContainer {
 	 */
 	private Object[] getColumn(String headerName, Filter fltr, String returnType) {
 		List<FilterRule> implFilterRules = dc.getImplFilterRules(fltr);
-		List<Element> filteredElements = new ArrayList<Element>();
-		List<String> filteredValues = new ArrayList<String>();
+		List<Element> filteredElements = new ArrayList<>();
+		List<String> filteredValues = new ArrayList<>();
 
 		/*
 		 *  Filter all tags and values that match an implicit XPath filter rule.

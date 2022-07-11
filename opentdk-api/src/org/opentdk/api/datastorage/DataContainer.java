@@ -134,8 +134,8 @@ public class DataContainer extends BaseContainer {
 	 * 
 	 * @param srcFile     Full path and name of the source file, from which the data
 	 *                    will be loaded into DataContainer
-	 * @param delimiter   The delimiter to separate the stored data.
-	 * @param headerIndex TODO description
+	 * @param delimiter   The delimiter to separate the stored data
+	 * @param headerIndex Start index of the header row
 	 * @param fltr        A {@link org.opentdk.api.datastorage.Filter} object to
 	 *                    define which data should be ignored. If it is null no
 	 *                    filter gets used.
@@ -151,7 +151,7 @@ public class DataContainer extends BaseContainer {
 	 * @param srcFile     Full path and name of the source file, from which the data
 	 *                    will be loaded into DataContainer
 	 * @param delimiter   Character(s) that are used as delimiter within the file
-	 * @param headerIndex TODO description
+	 * @param headerIndex Start index of the header row
 	 */
 	public DataContainer(String srcFile, String delimiter, int headerIndex) {
 		this(srcFile, delimiter, headerIndex, new String[0], new Filter());
@@ -164,7 +164,7 @@ public class DataContainer extends BaseContainer {
 	 * @param srcFile   Full path and name of the source file, from which the data
 	 *                  will be loaded into DataContainer
 	 * @param delimiter Character(s) that are used as delimiter within the file
-	 * @param headers   The column header as string array.
+	 * @param headers   The column header as string array
 	 */
 	public DataContainer(String srcFile, String delimiter, String[] headers) {
 		this(srcFile, delimiter, -1, headers, new Filter());
@@ -191,11 +191,11 @@ public class DataContainer extends BaseContainer {
 	 * @param srcFile     Full path and name of the source file, from which the data
 	 *                    will be loaded into DataContainer
 	 * @param delimiter   Character(s) that are used as delimiter within the file
-	 * @param headerIndex TODO description
-	 * @param headers     The column header as string array.
+	 * @param headerIndex Start index of the header row
+	 * @param headers     The column header as string array
 	 * @param fltr        A {@link org.opentdk.api.datastorage.Filter} object to
 	 *                    define which data should be ignored. If it is null no
-	 *                    filter gets used.
+	 *                    filter gets used
 	 */
 	public DataContainer(String srcFile, String delimiter, int headerIndex, String[] headers, Filter fltr) {
 		fileName = srcFile;
@@ -241,7 +241,7 @@ public class DataContainer extends BaseContainer {
 	 * the container. No filter will be used and the column delimiter for the
 	 * imported data is the semicolon.
 	 * 
-	 * @param rs The result of the database request.
+	 * @param rs The result of the database request
 	 */
 	public DataContainer(ResultSet rs) {
 		this(rs, null);
@@ -252,9 +252,9 @@ public class DataContainer extends BaseContainer {
 	 * the container with the possibility to filter the data before it gets
 	 * imported. The column delimiter of the imported data is the semicolon.
 	 * 
-	 * @param rs   The result of the database request.
+	 * @param rs   The result of the database request
 	 * @param fltr A {@link org.opentdk.api.datastorage.Filter} object to define
-	 *             which data should be ignored. If it is null no filter gets used.
+	 *             which data should be ignored. If it is null no filter gets used
 	 */
 	public DataContainer(ResultSet rs, Filter fltr) {
 		this(rs, fltr, ";");
@@ -265,12 +265,12 @@ public class DataContainer extends BaseContainer {
 	 * the container with the possibility to filter the data before it gets imported
 	 * and define a column delimiter for the imported data.
 	 * 
-	 * @param rs           The result of the database request.
+	 * @param rs           The result of the database request
 	 * @param fltr         A {@link org.opentdk.api.datastorage.Filter} object to
 	 *                     define which data should be ignored. If it is null no
-	 *                     filter gets used.
+	 *                     filter gets used
 	 * @param colDelimiter Possibility to define a column delimiter for the imported
-	 *                     table data like semicolon.
+	 *                     table data like semicolon
 	 */
 	public DataContainer(ResultSet rs, Filter fltr, String colDelimiter) {
 		resultSet = rs;
@@ -284,7 +284,7 @@ public class DataContainer extends BaseContainer {
 	 * holds only the columns with the headers specified in headerIndices.
 	 * 
 	 * @param dc            Original DataContainer from which the columns shall be
-	 *                      copied.
+	 *                      copied
 	 * @param headerIndices Headers which shall be copied to the new DataContainer
 	 * 
 	 */
@@ -362,10 +362,10 @@ public class DataContainer extends BaseContainer {
 	 * return dataContainer.addField("StartsWith", "select[\s]*", fltr);
 	 * </pre>
 	 * 
-	 * @param headerName Name of the field or node that will be added.
-	 * @param value      Value that will be assigned to the field or node.
+	 * @param headerName Name of the field or node that will be added
+	 * @param value      Value that will be assigned to the field or node
 	 * @param fltr       The filter object to insert the new node at the right
-	 *                   position as demonstrated above.
+	 *                   position as demonstrated above
 	 */
 	public void addField(String headerName, String value, Filter fltr) {
 		switch (getContainerFormat().getHeaderType()) {
@@ -392,13 +392,13 @@ public class DataContainer extends BaseContainer {
 	 * return dataContainer.addField("element", "name", "INSERT", fltr);
 	 * </pre>
 	 * 
-	 * @param headerName     Name of the field or node that will be added.
+	 * @param headerName     Name of the field or node that will be added
 	 * @param attributeName  Name of the attribute that will be assigned to the
-	 *                       field or node.
+	 *                       field or node
 	 * @param attributeValue Value that will be assigned to the attribute of the
-	 *                       field or node.
+	 *                       field or node
 	 * @param fltr           The filter object to insert the new node at the right
-	 *                       position as demonstrated above.
+	 *                       position as demonstrated above
 	 */
 	public void addField(String headerName, String attributeName, String attributeValue, Filter fltr) {
 		switch (getContainerFormat().getHeaderType()) {
@@ -429,15 +429,15 @@ public class DataContainer extends BaseContainer {
 	 * return dataContainer.addField("element", "name", "INSERT", "INSERT INTO", fltr);
 	 * </pre>
 	 * 
-	 * @param headerName     Name of the field or node that will be added.
+	 * @param headerName     Name of the field or node that will be added
 	 * @param attributeName  Name of the attribute that will be assigned to the
-	 *                       field or node.
+	 *                       field or node
 	 * @param oldAttrValue   The attribute value that will be replaced, in case it
-	 *                       exists.
+	 *                       exists
 	 * @param attributeValue Value that will be assigned to the attribute of the
-	 *                       field or node.
+	 *                       field or node
 	 * @param fltr           The filter object to insert the new node at the right
-	 *                       position as demonstrated above.
+	 *                       position as demonstrated above
 	 */
 	public void addField(String headerName, String attributeName, String oldAttrValue, String attributeValue, Filter fltr) {
 		switch (getContainerFormat().getHeaderType()) {
@@ -456,9 +456,6 @@ public class DataContainer extends BaseContainer {
 	 * objects like header or filter will be initialized with default values if they
 	 * were not explicitly set or the information could not be read from the source
 	 * file.
-	 * 
-	 * @throws FileNotFoundException If the file name is null or empty or the file
-	 *                               does not exist.
 	 */
 	private final void adaptContainer() {
 		if (filter == null) {
@@ -554,8 +551,8 @@ public class DataContainer extends BaseContainer {
 	 * 
 	 * @param fileName        Full path and name of the source file, from which the
 	 *                        data will be added to the <code>DataContainer</code>
-	 * @param columnDelimiter The column separator to structure the data.
-	 * @throws FileNotFoundException If the committed file does not exist.
+	 * @param columnDelimiter The column separator to structure the data
+	 * @throws FileNotFoundException If the committed file does not exist
 	 */
 	public void appendData(String fileName, String columnDelimiter) throws FileNotFoundException {
 		setFileName(fileName);
@@ -577,7 +574,7 @@ public class DataContainer extends BaseContainer {
 	 * 
 	 * @param fileName Full path and name of the source file, from which the data
 	 *                 will be added to the <code>DataContainer</code>
-	 * @throws FileNotFoundException If the committed file does not exist.
+	 * @throws FileNotFoundException If the committed file does not exist
 	 */
 	public void appendData(String fileName) throws FileNotFoundException {
 		if (getColumnDelimiter() == null) {
@@ -594,7 +591,7 @@ public class DataContainer extends BaseContainer {
 	 * <code>DataContainer</code> are the same.
 	 *
 	 * @param dc The DataContanier which content will be appended to the current
-	 *           DataContainer instance.
+	 *           DataContainer instance
 	 */
 	public void appendDataContainer(DataContainer dc) {
 		if (checkHeader(dc.getHeaders()) == 0) {
@@ -633,13 +630,13 @@ public class DataContainer extends BaseContainer {
 	 * dataContainer.deleteField("element", "name", "INSERT", fltr);
 	 * </pre>
 	 * 
-	 * @param headerName     Name of the field or node that will be deleted.
+	 * @param headerName     Name of the field or node that will be deleted
 	 * @param attributeName  Name of the attribute that is part of the field or node
-	 *                       description.
+	 *                       description
 	 * @param attributeValue Value of the attribute that is part of the field or
-	 *                       node description.
+	 *                       node description
 	 * @param fltr           The filter object to find the field or node at the
-	 *                       right position as demonstrated above.
+	 *                       right position as demonstrated above
 	 */
 	public void deleteField(String headerName, String attributeName, String attributeValue, Filter fltr) {
 
@@ -710,7 +707,7 @@ public class DataContainer extends BaseContainer {
 	 * 
 	 * @param fileName Full path and name of the source file, from which the data
 	 *                 will be loaded into DataContainer
-	 * @throws IOException If any error occurred when writing to the file.
+	 * @throws IOException If any error occurred when writing to the file
 	 */
 	public void exportContainer(String fileName) throws IOException {
 		exportContainer(fileName, ";");
@@ -722,48 +719,41 @@ public class DataContainer extends BaseContainer {
 	 * be set.
 	 *
 	 * @param fileName        The file path of the file to write to or to create.
-	 * @param columnDelimiter The column separator to structure the data.
-	 * @throws IOException If any error occurred when writing to the file.
+	 * @param columnDelimiter The column separator to structure the data
+	 * @throws IOException If any error occurred when writing to the file
 	 * 
 	 */
 	public void exportContainer(String fileName, String columnDelimiter) throws IOException {
 		HashMap<Integer, String> hm = getHeadersIndexed();
-		XFileWriter writer = null;
-//		try {
-			writer = new XFileWriter(new File(fileName));
-//		} catch (FileNotFoundException e) {
-//			MLogger.getInstance().log(Level.SEVERE, e);
-//		}
-		if (writer != null) {
-			switch (getContainerFormat().getHeaderType()) {
-			case COLUMN:
-				writer.writeLine(hm.values().toArray(new String[hm.values().size()]), columnDelimiter);
-				for (String[] row : getRowsList()) {
-					writer.writeLine(row, columnDelimiter);
-				}
-				break;
-			case ROW:
-				List<String[]> colList = getColumnsList();
-				for (int i = 0; i < colList.size(); i++) {
-					writer.writeLine(hm.get(i) + columnDelimiter + (String.join(columnDelimiter, colList.get(i))));
-				}
-				break;
-			default:
-				MLogger.getInstance().log(Level.WARNING, "Header Type '" + getContainerFormat().getHeaderType().toString() + "' not supported by for export!", getClass().getSimpleName(),
-						getClass().getName(), "exportContainer");
-				return;
+		XFileWriter writer = new XFileWriter(new File(fileName));
+		switch (getContainerFormat().getHeaderType()) {
+		case COLUMN:
+			writer.writeLine(hm.values().toArray(new String[hm.values().size()]), columnDelimiter);
+			for (String[] row : getRowsList()) {
+				writer.writeLine(row, columnDelimiter);
 			}
-			writer.close();
+			break;
+		case ROW:
+			List<String[]> colList = getColumnsList();
+			for (int i = 0; i < colList.size(); i++) {
+				writer.writeLine(hm.get(i) + columnDelimiter + (String.join(columnDelimiter, colList.get(i))));
+			}
+			break;
+		default:
+			MLogger.getInstance().log(Level.WARNING, "Header Type '" + getContainerFormat().getHeaderType().toString() + "' not supported by for export!", getClass().getSimpleName(),
+					getClass().getName(), "exportContainer");
+			return;
 		}
+		writer.close();
 	}
 
 	/**
 	 * A specific method for type {@link XMLDataContainer} to get the attributes of
 	 * a XML tag.
 	 * 
-	 * @param tag      The name of the XML tag to refer to.
-	 * @param attrName The name of the XML attribute to refer to.
-	 * @return An array of type string with all attributes to the committed tag.
+	 * @param tag      The name of the XML tag to refer to
+	 * @param attrName The name of the XML attribute to refer to
+	 * @return An array of type string with all attributes to the committed tag
 	 */
 	public String[] getAttributes(String tag, String attrName) {
 		switch (getContainerFormat().getHeaderType()) {
@@ -781,9 +771,9 @@ public class DataContainer extends BaseContainer {
 	 * column is specified with index and the content is returned as
 	 * <code>Array</code> of type String
 	 *
-	 * @param index The column's index, which content is searched.
+	 * @param index The column's index, which content is searched
 	 * @return The content of the specified column as <code>Array</code> of type
-	 *         String.
+	 *         String
 	 */
 	public String[] getColumn(int index) {
 		return getColumn(getHeaderName(index), new int[0], new Filter());
@@ -795,9 +785,9 @@ public class DataContainer extends BaseContainer {
 	 * column is specified with header name and the content is returned as
 	 * <code>Array</code> of type String
 	 *
-	 * @param colName The header name of the column.
+	 * @param colName The header name of the column
 	 * @return The content of the specified column as <code>Array</code> of type
-	 *         String.
+	 *         String
 	 */
 	public String[] getColumn(String colName) {
 		return getColumn(colName, new int[0], new Filter());
@@ -810,11 +800,11 @@ public class DataContainer extends BaseContainer {
 	 * column is specified with index and the content is returned as
 	 * <code>Array</code> of type <code>String</code>.
 	 *
-	 * @param index The column's index, which content is searched.
+	 * @param index The column's index, which content is searched
 	 * @param fltr  A {@link org.opentdk.api.datastorage.Filter} object to define
-	 *              which data should be ignored. If it is null no filter gets used.
+	 *              which data should be ignored. If it is null no filter gets used
 	 * @return the content of the specified column as <code>Array</code> of type
-	 *         <code>String</code>.
+	 *         <code>String</code>
 	 */
 	public String[] getColumn(int index, Filter fltr) {
 		return getColumn(getHeaderName(index), new int[0], fltr);
@@ -827,12 +817,12 @@ public class DataContainer extends BaseContainer {
 	 * column is specified with column header name and the content is returned as
 	 * <code>Array</code> of type <code>String</code>.
 	 * 
-	 * @param colName The header name of the column.
+	 * @param colName The header name of the column
 	 * @param fltr    A {@link org.opentdk.api.datastorage.Filter} object to define
 	 *                which data should be ignored. If it is null no filter gets
-	 *                used.
+	 *                used
 	 * @return the content of the specified column as <code>Array</code> of type
-	 *         <code>String</code>.
+	 *         <code>String</code>
 	 */
 	public String[] getColumn(String colName, Filter fltr) {
 		return getColumn(colName, new int[0], fltr);
@@ -846,14 +836,14 @@ public class DataContainer extends BaseContainer {
 	 * <code>Array</code> of type <code>String</code>, but only if the detected rows
 	 * in the column match the committed row indexes.
 	 * 
-	 * @param colName    The header name of the column.
+	 * @param colName    The header name of the column
 	 * @param rowIndexes An array of type integer that contains all row indexes that
-	 *                   should be taken into account when searching in the column.
+	 *                   should be taken into account when searching in the column
 	 * @param fltr       A {@link org.opentdk.api.datastorage.Filter} object to
 	 *                   define which data should be ignored. If it is null no
-	 *                   filter gets used.
+	 *                   filter gets used
 	 * @return the content of the specified column as <code>Array</code> of type
-	 *         <code>String</code>.
+	 *         <code>String</code>
 	 */
 	public String[] getColumn(String colName, int[] rowIndexes, Filter fltr) {
 		List<String[]> outLst = getColumnsList(colName.split(";"), rowIndexes, fltr);
@@ -878,7 +868,7 @@ public class DataContainer extends BaseContainer {
 	 * <code>DataContainer</code> instance.
 	 *
 	 * @return Object of type <code>List</code> with string arrays, including all
-	 *         matching values of a column.
+	 *         matching values of a column
 	 */
 	public List<String[]> getColumnsList() {
 		return getColumnsList(new String[0], new int[0], new Filter());
@@ -894,7 +884,7 @@ public class DataContainer extends BaseContainer {
 	 * @param rowFilter Object of type {@link org.opentdk.api.datastorage.Filter}
 	 *                  which defines rules for matching rows
 	 * @return Object of type <code>List</code> with string arrays, including all
-	 *         matching values of a column.
+	 *         matching values of a column
 	 */
 	public List<String[]> getColumnsList(Filter rowFilter) {
 		return getColumnsList(new String[0], new int[0], rowFilter);
@@ -908,12 +898,12 @@ public class DataContainer extends BaseContainer {
 	 * 'City' equals to 'Munich'.
 	 *
 	 * @param columnHeaders Semicolon separated string with the column names of
-	 *                      which the values will be returned.
+	 *                      which the values will be returned
 	 * @param rowFilter     Object of type
 	 *                      {@link org.opentdk.api.datastorage.Filter} which defines
-	 *                      rules for matching rows.
+	 *                      rules for matching rows
 	 * @return Object of type <code>List</code> with string arrays, including all
-	 *         matching values of a column.
+	 *         matching values of a column
 	 */
 	public List<String[]> getColumnsList(String columnHeaders, Filter rowFilter) {
 		return getColumnsList(columnHeaders.split(";"), new int[0], rowFilter);
@@ -929,16 +919,16 @@ public class DataContainer extends BaseContainer {
 	 * 'City' equals to 'Munich'.
 	 *
 	 * @param columnHeaders Semicolon separated string with the column names of
-	 *                      which the values will be returned.
+	 *                      which the values will be returned
 	 * @param rowFilter     Object of type
 	 *                      {@link org.opentdk.api.datastorage.Filter} which defines
-	 *                      rules for matching rows.
+	 *                      rules for matching rows
 	 * @param rowIndexes    The row numbers that should be used as search criteria.
 	 * @return Object of type <code>List</code> with string arrays, including all
-	 *         matching values of a column.
+	 *         matching values of a column
 	 */
 	public List<String[]> getColumnsList(String[] columnHeaders, int[] rowIndexes, Filter rowFilter) {
-		List<String[]> colList = new ArrayList<String[]>();
+		List<String[]> colList = new ArrayList<>();
 		switch (getContainerFormat().getHeaderType()) {
 		case TREE:
 			for (String headerName : columnHeaders) {
@@ -952,11 +942,11 @@ public class DataContainer extends BaseContainer {
 			break;
 		default:
 			List<String[]> rowValues = getRowsList(rowIndexes, columnHeaders, rowFilter);
-			List<List<String>> colsTmp = new ArrayList<List<String>>();
+			List<List<String>> colsTmp = new ArrayList<>();
 			for (String[] rowArray : rowValues) {
 				for (int i = 0; i < rowArray.length; i++) {
 					if (colsTmp.size() <= i) {
-						colsTmp.add(new ArrayList<String>());
+						colsTmp.add(new ArrayList<>());
 					}
 					colsTmp.get(i).add(rowArray[i]);
 				}
@@ -991,8 +981,8 @@ public class DataContainer extends BaseContainer {
 	 * index. If the given index is bigger than the list's size, it will return
 	 * <code>null</code>.
 	 *
-	 * @param rowIndex The row's index, which content is searched.
-	 * @return The content of the specified row.
+	 * @param rowIndex The row's index, which content is searched
+	 * @return The content of the specified row
 	 */
 	public String[] getRow(int rowIndex) {
 		return getRow(rowIndex, null, new Filter());
@@ -1003,11 +993,11 @@ public class DataContainer extends BaseContainer {
 	 * index. If the given index is bigger than the list's size, it will return
 	 * <code>null</code>.
 	 *
-	 * @param rowIndex      The row's index, which content is searched.
+	 * @param rowIndex      The row's index, which content is searched
 	 * @param columnHeaders The column headers that should be taken into account,
 	 *                      separated by semicolon. If only one header should be
-	 *                      specified, no separation is needed of course.
-	 * @return The content of the specified row.
+	 *                      specified, no separation is needed of course
+	 * @return The content of the specified row
 	 */
 	public String[] getRow(int rowIndex, String columnHeaders) {
 		return getRow(rowIndex, columnHeaders, new Filter());
@@ -1018,11 +1008,11 @@ public class DataContainer extends BaseContainer {
 	 * index. If the given index is bigger than the list's size, it will return
 	 * <code>null</code>.
 	 *
-	 * @param rowIndex      The row's index, which content is searched.
+	 * @param rowIndex      The row's index, which content is searched
 	 * @param columnHeaders The column headers that should be taken into account,
 	 *                      separated by semicolon. If only one header should be
-	 *                      specified, no separation is needed of course.
-	 * @return The content of the specified row.
+	 *                      specified, no separation is needed of course
+	 * @return The content of the specified row
 	 */
 	public String[] getRow(int rowIndex, String[] columnHeaders) {
 		return getRow(rowIndex, String.join(";", columnHeaders), new Filter());
@@ -1033,14 +1023,14 @@ public class DataContainer extends BaseContainer {
 	 * index. If the given index is bigger than the list's size, it will return
 	 * <code>null</code>.
 	 *
-	 * @param rowIndex      The row's index, which content is searched.
+	 * @param rowIndex      The row's index, which content is searched
 	 * @param columnHeaders The column headers that should be taken into account,
 	 *                      separated by semicolon. If only one header should be
-	 *                      specified, no separation is needed of course.
+	 *                      specified, no separation is needed of course
 	 * @param fltr          Object of type
 	 *                      {@link org.opentdk.api.datastorage.Filter} which defines
-	 *                      rules for matching rows.
-	 * @return The content of the specified row.
+	 *                      rules for matching rows
+	 * @return The content of the specified row
 	 */
 	public String[] getRow(int rowIndex, String columnHeaders, Filter fltr) {
 		String[] colHeaders = null;
@@ -1070,7 +1060,7 @@ public class DataContainer extends BaseContainer {
 	 * instance.
 	 *
 	 * @return Number of rows e.g number of lines in case of a CSV format or number
-	 *         of key value pairs in case of a properties file.
+	 *         of key value pairs in case of a properties file
 	 */
 	public int getRowCount() {
 		return values.size();
@@ -1081,8 +1071,8 @@ public class DataContainer extends BaseContainer {
 	 * rows.
 	 * 
 	 * @param filter Object of type {@link org.opentdk.api.datastorage.Filter} which
-	 *               defines rules for matching rows.
-	 * @return The numbers of the matching rows as integer array.
+	 *               defines rules for matching rows
+	 * @return The numbers of the matching rows as integer array
 	 */
 	public int[] getRowsIndexes(Filter filter) {
 		StringBuilder indexBuffer = new StringBuilder();
@@ -1110,7 +1100,7 @@ public class DataContainer extends BaseContainer {
 	 * Returns a list with all rows stored in the <code>DataContainer</code>
 	 * instance.
 	 *
-	 * @return list object with stored data rows.
+	 * @return list object with stored data rows
 	 */
 	public List<String[]> getRowsList() {
 		return getRowsList(new int[0], new String[0], new Filter());
@@ -1120,8 +1110,8 @@ public class DataContainer extends BaseContainer {
 	 * Returns a list with all rows, that match to the defined rowFilter.
 	 *
 	 * @param rowFilter Object of type {@link org.opentdk.api.datastorage.Filter}
-	 *                  which defines rules for matching rows.
-	 * @return A list with all rows. Each row is stored in one string array.
+	 *                  which defines rules for matching rows
+	 * @return A list with all rows. Each row is stored in one string array
 	 */
 	public List<String[]> getRowsList(Filter rowFilter) {
 		return getRowsList(new int[0], new String[0], rowFilter);
@@ -1131,10 +1121,10 @@ public class DataContainer extends BaseContainer {
 	 * Returns a list of row values for defined columns that match to a defined
 	 * rowFilter.
 	 *
-	 * @param columnHeader The header name of the column to search in.
+	 * @param columnHeader The header name of the column to search in
 	 * @param rowFilter    Object of type {@link org.opentdk.api.datastorage.Filter}
-	 *                     which defines rules for matching rows.
-	 * @return A list with all rows. Each row is stored in one string array.
+	 *                     which defines rules for matching rows
+	 * @return A list with all rows. Each row is stored in one string array
 	 */
 	public List<String[]> getRowsList(String columnHeader, Filter rowFilter) {
 		return getRowsList(new int[0], columnHeader.split(";"), rowFilter);
@@ -1145,16 +1135,16 @@ public class DataContainer extends BaseContainer {
 	 * rowFilter.
 	 *
 	 * @param rowIndexes    The numbers of the rows that should be taken into
-	 *                      account.
-	 * @param columnHeaders The header name of the column to search in.
+	 *                      account
+	 * @param columnHeaders The header name of the column to search in
 	 * @param rowFilter     Object of type
 	 *                      {@link org.opentdk.api.datastorage.Filter} which defines
-	 *                      rules for matching rows.
+	 *                      rules for matching rows
 	 * 
 	 * @return A list with all rows. Each row is stored in one string array.
 	 */
 	public List<String[]> getRowsList(int[] rowIndexes, String[] columnHeaders, Filter rowFilter) {
-		List<String[]> outValues = new ArrayList<String[]>();
+		List<String[]> outValues = new ArrayList<>();
 		if (rowIndexes.length == 0) {
 			rowIndexes = new int[values.size()];
 			if (values.size() > 0) {
@@ -1201,7 +1191,7 @@ public class DataContainer extends BaseContainer {
 	/**
 	 * Removes the row of the container instance at the specified index.
 	 * 
-	 * @param index integer that has to be in the range of the values size.
+	 * @param index integer that has to be in the range of the values size
 	 */
 	public void deleteRow(int index) {
 		values.remove(index);
@@ -1213,7 +1203,7 @@ public class DataContainer extends BaseContainer {
 	 * defined for the container the changes get written to it afterwards.
 	 * 
 	 * @param fltr {@link org.opentdk.api.datastorage.Filter} object with the set
-	 *             filter rules.
+	 *             filter rules
 	 */
 	public void deleteRows(Filter fltr) {
 		int[] indexes = getRowsIndexes(fltr);
@@ -1234,7 +1224,7 @@ public class DataContainer extends BaseContainer {
 	 * addressed by headerName.
 	 *
 	 * @param headerName The name of the column header
-	 * @return the first value in column addressed by headerName.
+	 * @return the first value in column addressed by headerName
 	 */
 	public String getValue(String headerName) {
 		return getValue(headerName, -1, new Filter());
@@ -1257,7 +1247,7 @@ public class DataContainer extends BaseContainer {
 	 * by headerName of the column and index of the row.
 	 *
 	 * @param headerIndex The name of the column header
-	 * @param rowIndex    row-index of the field
+	 * @param rowIndex    row index of the field
 	 * @return the value as String
 	 */
 	public String getValue(int headerIndex, int rowIndex) {
@@ -1281,9 +1271,9 @@ public class DataContainer extends BaseContainer {
 	 * index and prepared filter.
 	 * 
 	 * @param headerName The name of the column header
-	 * @param rowIndex   The row index. If it is unknown or not used, commit -1 to
+	 * @param rowIndex   The row index. If it is unknown or not used, commit {@literal -1} to
 	 *                   search for header name and filter
-	 * @param fltr       A prepared Filter instance to categorize the result.
+	 * @param fltr       A prepared Filter instance to categorize the result
 	 * @return the value as String or an empty string if no result could be found
 	 */
 	public String getValue(String headerName, int rowIndex, Filter fltr) {
@@ -1310,13 +1300,13 @@ public class DataContainer extends BaseContainer {
 	}
 
 	/**
-	 * Gets a sequence of distincted values from the DataContainer instance.
+	 * Gets a sequence of distinct values from the DataContainer instance.
 	 * Depending on the header orientation, this method will retrieve the values of
 	 * one row, or one column, which is defined by headerName.
 	 *
 	 * @param headerName The name of the header, which can be column or row,
 	 *                   depending on the orientation
-	 * @return distincted list of type String with the selected values
+	 * @return distinct list of type String with the selected values
 	 */
 	public List<String> getValuesAsDistinctedList(String headerName) {
 		List<String> values = getValuesAsList(headerName, new int[0], new Filter());
@@ -1350,7 +1340,7 @@ public class DataContainer extends BaseContainer {
 	 * @return List of type Double with all selected values
 	 */
 	public List<Double> getValuesAsDoubleList(String headerName, Filter rowFilter) {
-		List<Double> doubleList = new ArrayList<Double>();
+		List<Double> doubleList = new ArrayList<>();
 		List<String> valList = getValuesAsList(headerName, rowFilter);
 		for (String val : valList) {
 			if (!val.isEmpty()) {
@@ -1386,7 +1376,7 @@ public class DataContainer extends BaseContainer {
 	 * @return List of type integer with all selected values
 	 */
 	public List<Integer> getValuesAsIntList(String headerName, Filter rowFilter) {
-		List<Integer> intList = new ArrayList<Integer>();
+		List<Integer> intList = new ArrayList<>();
 		List<String> valList = getValuesAsList(headerName, rowFilter);
 		for (String val : valList) {
 			intList.add(Integer.valueOf(val));
@@ -1429,7 +1419,7 @@ public class DataContainer extends BaseContainer {
 	 * which is defined by headerName.
 	 *
 	 * @param headerName The name of the header
-	 * @param rowIndexes int array with index numbers of the rows that will be
+	 * @param rowIndexes integer array with index numbers of the rows that will be
 	 *                   retrieved
 	 * @param fltr       Object of type {@link org.opentdk.api.datastorage.Filter}
 	 *                   which defines rules for matching rows
@@ -1437,7 +1427,7 @@ public class DataContainer extends BaseContainer {
 	 */
 	public List<String> getValuesAsList(String headerName, int[] rowIndexes, Filter fltr) {
 		List<String[]> colLst = getColumnsList(headerName.split(";"), rowIndexes, fltr);
-		List<String> outList = new ArrayList<String>();
+		List<String> outList = new ArrayList<>();
 		if (colLst.size() > 0) {
 			outList = Arrays.asList(colLst.get(0));
 		}
@@ -1508,7 +1498,7 @@ public class DataContainer extends BaseContainer {
 	 * source file is assigned to the {@link BaseContainer#fileName} property.
 	 * 
 	 * @param fltr A {@link org.opentdk.api.datastorage.Filter} object to define
-	 *             which data should be ignored. If it is null no filter gets used.
+	 *             which data should be ignored. If it is null no filter gets used
 	 */
 	public void readData(Filter fltr) {
 		instance.readData(fltr);
@@ -1523,7 +1513,7 @@ public class DataContainer extends BaseContainer {
 	 * 
 	 * @param fltr     A {@link org.opentdk.api.datastorage.Filter} object to define
 	 *                 which data should be ignored. If it is null no filter gets
-	 *                 used.
+	 *                 used
 	 */
 	public void readData(String fileName, Filter fltr) {
 		this.setFileName(fileName);
@@ -1536,8 +1526,8 @@ public class DataContainer extends BaseContainer {
 	 * empty values will be added.
 	 *
 	 * @param headerName   The name of the column. Existing column will be
-	 *                     overwritten and non-existing column will be created.
-	 * @param columnValues The values for the column as string array.
+	 *                     overwritten and non existing column will be created
+	 * @param columnValues The values for the column as string array
 	 */
 	public void setColumn(String headerName, String[] columnValues) {
 		String[] oldCol = new String[values.size()];
@@ -1586,9 +1576,9 @@ public class DataContainer extends BaseContainer {
 	 * Sub method that finally edits the values object e.g. when a setValue call
 	 * occurs.
 	 * 
-	 * @param headerName Name of the sequence header.
-	 * @param index      Index of the field within the DataSet.
-	 * @param value      Value as String that will be set to the field.
+	 * @param headerName Name of the sequence header
+	 * @param index      Index of the field within the DataSet
+	 * @param value      Value as String that will be set to the field
 	 */
 	private void setFieldValue(String headerName, int index, String val) {
 		if (!getHeaders().containsKey(headerName)) {
@@ -1650,14 +1640,14 @@ public class DataContainer extends BaseContainer {
 
 	/**
 	 * Sets content of a defined field by header name and filter with a specified
-	 * value. The existing content of the field within the first matching dataset
+	 * value. The existing content of the field within the first matching data set
 	 * will be overwritten. If a header does not exist, it will be created by
 	 * shifting all existing values one position backward and setting the new one at
 	 * the first position.
 	 *
 	 * @param headerName Name of the sequence header
 	 * @param value      Value as String that will be set to the field
-	 * @param fltr       Filter for selection of the target dataset (row or column)
+	 * @param fltr       Filter for selection of the target data set (row or column)
 	 */
 	public void setValue(String headerName, String value, Filter fltr) {
 		setValue(headerName, 0, value, fltr);
@@ -1665,7 +1655,7 @@ public class DataContainer extends BaseContainer {
 
 	/**
 	 * Sets content of a defined field by header name, index and filter with a
-	 * specified value. The existing content of the field within the dataset will be
+	 * specified value. The existing content of the field within the data set will be
 	 * overwritten. If a header does not exist, it will be created by shifting all
 	 * existing values one position backward and setting the new one at the first
 	 * position.
@@ -1674,7 +1664,7 @@ public class DataContainer extends BaseContainer {
 	 * @param index      zero based index that defines the position of the field in
 	 *                   case that multiple fields were found
 	 * @param value      Value as String that will be set to the field
-	 * @param fltr       Filter for selection of the target dataset (row or column)
+	 * @param fltr       Filter for selection of the target data set (row or column)
 	 */
 	public void setValue(String headerName, int index, String value, Filter fltr) {
 		setValues(headerName, new int[] { index }, value, fltr);
@@ -1682,14 +1672,14 @@ public class DataContainer extends BaseContainer {
 
 	/**
 	 * Sets content of the first matching field defined by header name and filter
-	 * with a specified value. The existing content of the field within the dataset
+	 * with a specified value. The existing content of the field within the data set
 	 * will be overwritten. If a header does not exist, it will be created by
 	 * shifting all existing values one position backward and setting the new one at
 	 * the first position.
 	 *
 	 * @param headerName Name of the sequence header
 	 * @param value      Value as String that will be set to the field
-	 * @param fltr       Filter for selection of the target dataset (row or column)
+	 * @param fltr       Filter for selection of the target data set (row or column)
 	 */
 	public void setValues(String headerName, String value, Filter fltr) {
 		setValues(headerName, new int[0], value, fltr);
@@ -1697,7 +1687,7 @@ public class DataContainer extends BaseContainer {
 
 	public void setValues(String headerName, String value, Filter fltr, Boolean allOccurences) {
 		int indexes = 0;
-		if (allOccurences) {
+		if (allOccurences.booleanValue()) {
 			indexes = -1;
 		}
 		setValues(headerName, new int[] { indexes }, value, fltr);
@@ -1705,7 +1695,7 @@ public class DataContainer extends BaseContainer {
 
 	/**
 	 * Sets content of multiple fields by header name, index and filter with a
-	 * specified value. The existing content of the fields within the dataset will
+	 * specified value. The existing content of the fields within the data set will
 	 * be overwritten. If a header does not exist, it will be created by shifting
 	 * all existing values one position backward and setting the new one at the
 	 * first position.
@@ -1714,7 +1704,7 @@ public class DataContainer extends BaseContainer {
 	 * @param indexes    Array with indexes, defining the position of all fields
 	 *                   which will be overwritten
 	 * @param value      Value as String that will be set to the field
-	 * @param fltr       Filter for selection of the target dataset (row or column)
+	 * @param fltr       Filter for selection of the target data set (row or column)
 	 */
 	public void setValues(String headerName, int[] indexes, String value, Filter fltr) {
 		switch (getContainerFormat().getHeaderType()) {
