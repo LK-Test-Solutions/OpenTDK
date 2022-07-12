@@ -1,49 +1,56 @@
 package Template.Application;
 
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
+
+import org.opentdk.api.dispatcher.BaseDispatchComponent;
+import org.opentdk.api.dispatcher.BaseDispatcher;
+
+import RegressionTest.BaseRegression;
+
 import java.lang.reflect.Field;
 
-public class Application {
+public class Application extends BaseRegression {
 
 	public static void main(String[] args) {
-		new Application(args);
+		new Application();
 	}
 	
-	public Application(String[] args) {
-		
+	@Override
+	protected void runTest() {
+		String[] params = { "SettingsFile=conf/TestSettings.xml" };
+		parseArgs(params);		
 	}
 
-	// -homepath=.
-	public void parseArgs(String[] args) {
-		Map<String,String> prop = new HashMap<String,String>();
-		
-		List<Field> propertyFields = ERuntimeProperties.getFields(ERuntimeProperties.class);
-		for(String arg:args) {
+	private void parseArgs(String[] args) {		
+		// Initialize the ERuntimeProperties class
+		BaseDispatcher.setDataContainer(ERuntimeProperties.class, "./conf/AppSettings.xml");
+		// Get all fields of the ERuntimeProperties
+		List<Field> propertyFields = BaseDispatcher.getFields(ERuntimeProperties.class);
+		for (String arg : args) {
+
 			String key = arg.split("=")[0];
 			String value = arg.split("=")[1];
-			for(Field fld:propertyFields) {
-				if(fld.getName().equalsIgnoreCase(key)) {
-					prop.put(key, value);
+
+			for (Field fld : propertyFields) {
+				if (fld.getName().equalsIgnoreCase(key)) {
 					
-					
-					if(fld.getName().equalsIgnoreCase("homepath")) {
-						 ERuntimeProperties.HOMEDIR.setValue(value);
-					}else if(fld.getName().equalsIgnoreCase("SettingsFile")) {
-						
+					// Get the runtime object to execute the method with
+					Object fieldInstance = null;
+					try {
+						fieldInstance = fld.get(ERuntimeProperties.class);
+					} catch (IllegalArgumentException | IllegalAccessException e1) {
+						e1.printStackTrace();
 					}
 					
-//					(BaseDispatchComponent) fld.getName().setValue(value);
-					
+					if(fieldInstance != null) {
+						if(fieldInstance instanceof BaseDispatchComponent) {
+							((BaseDispatchComponent) fieldInstance).setValue(value);
+						}
+					}
 				}
 			}
 		}
-		
-		
-		prop.get("homepath");
-		ERuntimeProperties.HOMEDIR.getValue();
-		
+		BaseRegression.testResult(ERuntimeProperties.SETTINGSFILE.getValue(), "New settings file", "conf/TestSettings.xml");
 
 	}
 }
