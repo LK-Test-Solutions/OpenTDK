@@ -1,0 +1,253 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<AppSettings>
+    <!-- Logging -->
+    <Logfile></Logfile>
+    <!-- defines the maximum size of logfile in KB, before a new file will be greated -->
+    <LogFileLimit>4000</LogFileLimit>
+    <!-- defines the maximum age in days of logfiles - all older logfiles will automatically by deleted -->
+    <LogKeepAge>90</LogKeepAge>
+    <!-- defines the level of message logging; 0 = disable loggint; 1 = log errors; 2 = log errors and warnings; 3 = log all messages -->
+    <TraceLevel>3</TraceLevel>
+    <!-- links to a connection within the Connections section - the settings defined in this section will be used to create JDBC connections -->
+    <LatestConnection>ATA0</LatestConnection>
+    <!-- PreparedSQL true converts the static SELECT statements into prepared statements with separated parametervalues -->
+    <PreparedSQL>true</PreparedSQL>
+    <!-- Release is only used to address the location of parameterfiles in case the java class is called without runtimeHome argument (third argument) --> 
+    <Release>20.5</Release>
+    <Compatibility>
+    	<!-- Stored Procedure to use. Allowed values are DAASP01 and DAAJKSP -->
+    	<StoredProcedureName>DAAJKSP</StoredProcedureName>
+    	<!-- Parameterization of empty strings when using prepared statements. Only valued when PreparedSQL = true-->
+    	<parameterizeEmptyString>false</parameterizeEmptyString>
+    </Compatibility>
+    <Connections>
+	    <connection name="AIL_Properties">
+		    <params>DE1PRD</params>
+		    <db name="HOST">
+		        <credential>LAST001@Host</credential>
+		        <dbSchema>DE1PRD</dbSchema>
+		        <dbURL>jdbc:db2://ail0.muc.allianz:6010/VYO1</dbURL>
+		        <dbURL>jdbc:db2://ail1.muc.allianz:6010/VYO1</dbURL>
+		    </db>
+		    <db name="GGRL">
+		        <credential>LAST001@Windows</credential>
+		        <dbSchema>DE1PRD</dbSchema>
+		        <dbURL>jdbc:db2://s-absmucil.muc.allianz:50000/DAGFKGLL</dbURL>
+		    </db>
+		</connection>
+        <connection name="AIL">
+            <params>DE1PRD</params>
+            <db name="HOST">
+                <credential>LAST001@Host</credential>
+                <dbSchema>DE1PRD</dbSchema>
+                <dbURL>jdbc:db2://ail0.muc.allianz:6010/VYO1</dbURL>
+                <dbURL>jdbc:db2://ail1.muc.allianz:6010/VYO1</dbURL>
+            </db>
+            <db name="GGRL">
+                <credential>LAST001@Windows</credential>
+                <dbSchema>DE1PRD</dbSchema>
+                <dbURL>jdbc:db2://s-absmucil.muc.allianz:50000/DAGFKGLL</dbURL>
+            </db>
+        </connection>
+        <connection name="AIM">
+            <params>DE1PRD</params>
+            <db name="HOST">
+                <credential>LAST001@Host</credential>
+                <dbSchema>DE1PRD</dbSchema>
+                <dbURL>jdbc:db2://aim0.muc.allianz:6010/VPO1</dbURL>
+                <dbURL>jdbc:db2://aim1.muc.allianz:6010/VPO1</dbURL>
+            </db>
+            <db name="GGRL">
+                <credential>LAST001@Windows</credential>
+                <dbSchema>DE1PRD</dbSchema>
+                <dbURL>jdbc:db2://s-absmucaim.muc.allianz:50001/DAGFKGLM</dbURL>
+            </db>
+        </connection>
+        <connection name="ATA0">
+        	<!-- Testumgebung fuer ABS 20.6 - Stand 01/2021 -->
+            <params>GG$ATU0</params>
+            <db name="HOST">
+                <credential>LAST001@Host</credential>
+                <dbSchema>GG$ATU0</dbSchema>
+                <dbURL>jdbc:db2://aio0.muc.allianz:6010/VIO1</dbURL>
+                <dbURL>jdbc:db2://aio1.muc.allianz:6010/VIO1</dbURL>
+            </db>
+        </connection>
+        <connection name="ATA1">
+        	<!-- Testumgebung fuer ABS 20.5 - Stand 01/2021 -->
+            <params>GG$ATU1</params>
+            <db name="HOST">
+                <credential>LAST001@Host</credential>
+                <dbSchema>GG$ATU1</dbSchema>
+                <dbURL>jdbc:db2://aio0.muc.allianz:6010/VIO1</dbURL>
+                <dbURL>jdbc:db2://aio1.muc.allianz:6010/VIO1</dbURL>
+            </db>
+        </connection>
+        <connection name="ATE1">
+        	<!-- Entwickler-Testumgebung fuer ABS 20.5 - Stand 01/2021 -->
+            <params>GG$TUKA</params>
+            <db name="HOST">
+                <credential>LAST001@Host</credential>
+                <dbSchema>GG$TUKA</dbSchema>
+                <dbURL>jdbc:db2://adt0.muc.allianz:6030/DTT1</dbURL>
+            </db>
+        </connection>
+        <connection name="TUKO">
+        	<!--  Entwicklungsumgebung fuer ABS 20.5 - Stand 01/2021 -->
+            <params>GG$TUKO</params>
+            <db name="HOST">
+                <credential>LAST001@Host</credential>
+                <dbSchema>GG$TUKO</dbSchema>
+                <dbURL>jdbc:db2://adt0.muc.allianz:6030/DTT1</dbURL>
+            </db>
+        </connection>
+        <connection name="LPTA">
+            <params>DE1PRD</params>
+            <db name="LINUX">
+                <credential>LAST001@Windows</credential>
+                <dbSchema>ABS</dbSchema>
+                <dbURL>jdbc:db2://azdo0lao.abs.azd.srv.allianz:50200/AZDO0LAO</dbURL>
+		        <propertiesSet>LINUX_DB</propertiesSet>
+            </db>
+            <!--  <db name="GGRL">
+                <credential>LAST001@Windows</credential>
+                <dbSchema>DE1PRD</dbSchema>
+                <dbURL>jdbc:db2://s-absmucil.muc.allianz:50000/DAGFKGLL</dbURL>
+            </db> 
+            -->
+        </connection>
+        <connection name="LPTA1">
+            <params>DE1PRD</params>
+            <db name="LINUX">
+                <credential>LAST001@Windows</credential>
+                <dbSchema>ABS</dbSchema>
+                <dbURL>jdbc:db2://azdo1lao.abs.azd.srv.allianz:50200/AZDO1LAO</dbURL>
+		        <propertiesSet>LINUX_DB</propertiesSet>
+            </db>
+        </connection>
+        <connection name="LPTB">
+            <params>DE1PRD</params>
+            <db name="LINUX">
+                <credential>LAST001@Windows</credential>
+                <dbSchema>ABS</dbSchema>
+                <dbURL>jdbc:db2://azdo0lbo.abs.azd.srv.allianz:50200/AZDO0LBO</dbURL>
+		        <propertiesSet>LINUX_DB</propertiesSet>
+            </db>
+        </connection>
+        <connection name="LPTB1">
+            <params>DE1PRD</params>
+            <db name="LINUX">
+                <credential>LAST001@Windows</credential>
+                <dbSchema>ABS</dbSchema>
+                <dbURL>jdbc:db2://azdo1lbo.abs.azd.srv.allianz:50200/AZDO1LBO</dbURL>
+		        <propertiesSet>LINUX_DB</propertiesSet>
+            </db>
+        </connection>
+
+        <connection name="LPTD">
+            <params>DE1PRD</params>
+            <db name="LINUX">
+                <credential>LAST001@Windows</credential>
+                <dbSchema>ABS</dbSchema>
+                <dbURL>jdbc:db2://azdo0ldo.abs.azd.srv.allianz:50200/AZDO0LDO</dbURL>
+		        <propertiesSet>LINUX_DB</propertiesSet>
+            </db>
+        </connection>
+        <connection name="LATA0">
+            <params>LATA0</params>
+            <db name="LINUX">
+                <credential>LAST001@Windows</credential>
+                <dbSchema>ABS</dbSchema>
+                <dbURL>jdbc:db2://azdo0t0o.abs.azd.srv.allianz:50200/AZDO0T0O</dbURL>
+		        <propertiesSet>LINUX_DB</propertiesSet>
+            </db>
+        </connection>
+        <connection name="LATA1">
+            <params>GG$ATU1</params>
+            <db name="LINUX">
+                <credential>LAST001@Windows</credential>
+                <dbSchema>ABS</dbSchema>
+                <dbURL>jdbc:db2://AZDO0T1O.abs.azd.srv.allianz:50200/AZDO0T1O</dbURL>
+		        <propertiesSet>LINUX_DB</propertiesSet>
+            </db>
+        </connection>
+        <connection name="LAPO">
+            <params>DE1PRD</params>
+            <db name="LINUX">
+                <credential>LAST001@Windows</credential>
+                <dbSchema>ABS</dbSchema>
+                <dbURL>jdbc:db2://AZDO0PO.abs.azd.srv.allianz:50200/AZDO0PO</dbURL>
+		        <propertiesSet>LINUX_DB</propertiesSet>
+            </db>
+        </connection>
+    </Connections>
+    <Credentials>
+        <credential name="LAST001@Host">
+            <userID>LAST001</userID>
+            <encryptedPassword>DY4D4OcS2upVwBi9EHYBqHFZBT2MNZzB</encryptedPassword>
+        </credential>
+        <credential name="LAST001@Windows">
+            <userID>LAST001</userID>
+            <encryptedPassword>rWD/huTwb1DVmS01ck+2qNjDY95XoW3hPp/v/QS12fY=</encryptedPassword>
+        </credential>
+    </Credentials>
+    <Properties>
+    	<propertiesSet name="LINUX_DB">
+			<connectionProperty name="sslConnection">
+				<value>true</value>
+			</connectionProperty>
+			<connectionProperty name="sslTrustStoreLocation">
+				<value>./nlres/cacerts</value>
+			</connectionProperty>
+			<connectionProperty name="securityMechanism">
+				<value>9</value> <!-- com.ibm.db2.jcc.DB2BaseDataSource.ENCRYPTED_USER_AND_PASSWORD_SECURITY -->
+			</connectionProperty>
+    		<stpProperty name="3"> <!-- STP Parameter 3 = Dataformat -->
+    			<value>H</value>   <!-- H = uncompressed string -->
+    		</stpProperty>
+    	</propertiesSet>
+    	<!-- The propertiesSet "DEFAULT" will be used for all connections and in addition a second propertiesSet with another name can be assigned to a connection -->
+    	<propertiesSet name="DEFAULT">
+    		<!-- The clientProgramName will be used to identify the JDBC connection within the DB system. For loadtest vusers use "LAST_CLI" and for connection vusers use "LAST_CON" -->
+			<connectionProperty name="clientProgramName">
+				<value>LAST_CLI</value>
+			</connectionProperty>
+			<connectionProperty name="sslConnection">
+				<value>false</value>
+			</connectionProperty>
+			<connectionProperty name="securityMechanism">
+				<value>3</value> <!-- com.ibm.db2.jcc.DB2BaseDataSource.CLEAR_TEXT_PASSWORD_SECURITY -->
+			</connectionProperty>
+			<connectionProperty name="queryCloseImplicit">
+				<value>3</value>
+			</connectionProperty>
+			<connectionProperty name="currentFunctionPath">
+				<value>ABS,SYSFUN</value>
+			</connectionProperty>
+			<connectionProperty name="retrieveMessagesFromServerOnGetMessage">
+				<value>true</value>
+			</connectionProperty>
+    		<connectionProperty name="deferPrepares">
+				<value>true</value>
+			</connectionProperty>
+    		<systemProperty name="db2.jcc.maxTransportObjectIdleTime">
+    			<value>900</value>
+    		</systemProperty>
+    		<systemProperty name="db2.jcc.maxTransportObjectWaitTime">
+    			<value>10</value>
+    		</systemProperty>
+    		<systemProperty name="db2.jcc.maxTransportObjects">
+    			<value>10</value>
+    		</systemProperty>
+    		<systemProperty name="db2.jcc.enableInetAddressGetHostName">
+    			<value>false</value>
+    		</systemProperty>
+    		<systemProperty name="db2.jcc.maxRefreshInterval">
+    			<value>60</value>
+    		</systemProperty>
+    		<stpProperty name="3"> <!-- STP Parameter 3 = Dataformat -->
+    			<value>Z</value>   <!-- Z = compressed bytes -->
+    		</stpProperty>
+    	</propertiesSet>    	    	
+    </Properties>
+</AppSettings>

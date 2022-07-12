@@ -1,0 +1,224 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<Rules>
+    <rule name="ABS-Start">
+        <Query>
+            <filter column="DATANAME">
+                <value>ABS-Start</value>
+            </filter>
+        </Query>
+        <Output>
+			<resultLocation>${HomePath}/results/ABS-Start</resultLocation>  
+			<resultFile>$settings(${DATANAME})_${resultType}.txt</resultFile>    
+			<chartLocation>${HomePath}/charts/ABS-Start</chartLocation>
+			<chartFile>${resultType}_${DATANAME}.png</chartFile>	
+			<reportingLocation>https://wiki.allianz.de/display/PerformADAG/3.1.1.0+ABS+ABS-Start</reportingLocation>
+            <ResultTypes>
+            	<resultType name="Average">
+                	<resultTemplate>AVG_eineZeile_in_Spalten</resultTemplate>
+                	<reportFile>/download/attachments/937160772/ABS-Start_ABS-Start.jpg</reportFile>
+                </resultType>
+                <resultType name="Histogram">
+                	<column name="">
+                    	<value>DURMILLIS</value>
+                    </column>
+                    <reportFile>/download/attachments/953619354/Histogram_ABS-Start.jpg</reportFile>
+                </resultType>
+            </ResultTypes>
+        </Output>
+     </rule>
+    <rule name="Vertrag allgemein">
+        <Query>
+            <filter column="DATANAME">
+                <value>Vertrag oeffnen</value>
+                <value>Vertrag speichern I</value>
+                <value>Vertrag speichern U</value>
+            </filter>
+            <filter column="HSPEIGEN">
+                <value>KB</value>
+                <value>LE</value>
+                <value>PB</value>
+                <value>UF</value>
+                <value>KV</value>
+            </filter>
+        </Query>
+        <Output>
+        	<ResultSets>
+	        	<resultSet name="Vertrag allgemein">
+		       		<unit>DATANAME</unit>
+		           	<unit>HSPEIGEN</unit>
+	        	</resultSet>
+	        </ResultSets>
+			<reportingLocation>https://ind-wiki.allianz.de.awin/display/PerformADAG/3.1.1.1+ABS+Kraft+Vertrag</reportingLocation>
+			<reportingLocation>https://ind-wiki.allianz.de.awin/display/PerformADAG/3.1.1.2+ABS+Leben+Vertrag</reportingLocation>
+			<reportingLocation>https://ind-wiki.allianz.de.awin/display/PerformADAG/3.1.1.3+ABS+Privatschutz+Vertrag</reportingLocation>
+			<reportingLocation>https://ind-wiki.allianz.de.awin/display/PerformADAG/3.1.1.3+ABS+Privat+Unfall+Vertrag</reportingLocation>
+			<reportingLocation>https://ind-wiki.allianz.de.awin/display/PerformADAG/3.1.1.4+ABS+Kranken+Vertrag</reportingLocation>
+            <ResultTypes>
+                <resultType name="Average">
+	                <filter column="FIRSTCALL">
+	                    <value>0</value>
+	                </filter>
+                	<resultTemplate>AVG_eineZeile_in_Spalten</resultTemplate>
+	                <reportFile>/download/attachments/512333051/OpenContract_Kraft.jpg</reportFile>
+        			<reportFile>/download/attachments/512333051/UpdateContract_Kraft.jpg</reportFile>
+        			<reportFile>/download/attachments/512333051/InsertContract_Kraft.jpg</reportFile>
+                </resultType>
+                <resultType name="Histogram">
+                	<column name="">
+                    	<value>DURMILLIS</value>
+                    </column>
+	        		<reportFile>/download/attachments/512333051/Histogram_KB.jpg</reportFile>
+        			<reportFile>/download/attachments/512333051/Histogram_U_KB.jpg</reportFile>
+        			<reportFile>/download/attachments/512333051/Histogram_I_KB.jpg</reportFile>
+                </resultType>
+                <resultType name="RawData">
+                	<column name="">
+                    	<value>DURMILLIS</value>
+                    </column>
+                </resultType>
+            </ResultTypes>
+        </Output>
+    </rule>
+    <rule name="Schaden allgemein nach Standort">
+        <Query>
+            <filter column="DATANAME">
+                <value>Schaden oeffnen</value>
+                <value>Schaden speichern I</value>
+                <value>Schaden speichern U</value>
+            </filter>
+            <filter column="HSPEIGEN">
+                <value>LE</value>
+                <value>PB</value>
+                <value>KB</value>
+                <value>KV</value>
+            </filter>
+        </Query>
+        <Output>
+            <resultLocation>${HomePath}/Results/Schaden_${HSPEIGEN}</resultLocation>        
+ 			<chartLocation>${HomePath}/Charts/Schaden_${HSPEIGEN}</chartLocation>
+        	<ResultSets>
+	        	<resultSet name="Schaden je DATANAME je HSPEIGEN">
+	        		<unit>DATANAME</unit>
+	            	<unit>HSPEIGEN</unit>
+	        	</resultSet>
+	        	<resultSet name="Schaden je DATANAME HSPEIGEN gesamt">
+	        		<unit>DATANAME</unit>
+	        	</resultSet>
+	        </ResultSets>
+            <ResultTypes>
+                <resultType name="Average Standorte">
+	                <filter column="FIRSTCALL">
+	                    <value>0</value>
+	                </filter>
+                	<resultTemplate>AVG_eineZeile_in_Spalten</resultTemplate>
+                </resultType>
+                <resultType name="Histogram">
+                	<column name="">
+                    	<value>DURMILLIS</value>
+                    </column>
+                </resultType>
+                <resultType name="RawData">
+                	<column name="">
+                    	<value>DURMILLIS</value>
+                    </column>
+                </resultType>
+            </ResultTypes>
+        </Output>
+    </rule>
+    <rule name="Schaden allgemein nach HSPEIGEN">
+        <Query>
+            <filter column="DATANAME">
+                <value>Schaden oeffnen</value>
+                <value>Schaden speichern I</value>
+                <value>Schaden speichern U</value>
+            </filter>
+            <filter column="HSPEIGEN">
+                <value>KB</value>
+                <value>EH</value>
+                <value>PB</value>
+                <value>HB</value>
+                <value>LE</value>
+                <value>HP</value>
+                <value>HH</value>
+                <value>TP</value>
+                <value>RS</value>
+                <value>KV</value>
+            </filter>
+        </Query>
+        <Output>
+            <resultLocation>${HomePath}/Results/Schaden_HSP</resultLocation>        
+ 			<chartLocation>${HomePath}/Charts/Schaden_HSP</chartLocation>
+        	<ResultSets>
+	        	<resultSet name="Schaden je DATANAME HSPEIGEN gesamt">
+	        		<unit>DATANAME</unit>
+	        	</resultSet>
+	        </ResultSets>
+            <ResultTypes>
+                <resultType name="Average HSP">
+	                <filter column="FIRSTCALL">
+	                    <value>0</value>
+	                </filter>
+                	<resultTemplate>AVG_eineZeile_HSPEIGEN_in_Spalten</resultTemplate>
+                </resultType>
+                <resultType name="Histogram">
+                	<column name="">
+                    	<value>DURMILLIS</value>
+                    </column>
+                </resultType>
+                <resultType name="RawData">
+                	<column name="">
+                    	<value>DURMILLIS</value>
+                    </column>
+                </resultType>
+            </ResultTypes>
+        </Output>
+    </rule>
+    <rule name="Kalkulieren_gesamt">
+        <Query>
+            <filter column="DATANAME">
+                <value>WSchadenAkteDe.Regulierung.Erfassung.WRegulierungErgebnisAllggutachtenDePvKv.r_4.cb_kalkulieren.select</value>
+                <value>WSchadenAkteDe.Kalkulation.Belegprfung.PageCostingReceiptVerificationDePvKv.cmpAllButtons.cmpButtons.cmdComplete.select</value>
+                <value>WSchadenAkteDe.Kalkulation.VertrgPrfung.PageCostingContractualVerificationDePvKv.cmpAllButtons.btnAktualisieren.select</value>
+                <value>WSchadenAkteDe.Kalkulation.Belegprfung.PageCostingReceiptVerificationDePvKv.cmpAllButtons.cmpButtons.cmdNeuErmitteln.select</value>
+                <value>PopupCostingBenefitDeductionsDePvKv.btnApply.select</value>
+                <value>MarkierteZeilenichtregulieren.select</value>
+                <value>TariffralleBelegzeilennichtregulieren.select</value>
+                <value>PopupContractualVerificationDePvKv.buttonApply.select</value>
+                <value>WSchadenAkteDe.Regulierung.Fragen.WQuestionAnswerListAuftragDePvKv.compCompButtons.cbKalkulieren.select</value>
+                <value>WSchadenAkteDe.Regulierung.Fragen.WQuestionAnswerListAuftragDePvKv.compCompButtons.cbPruefungAbschliessen.select</value>
+                <value>WPopupDoppelzahlungDePvKv.buttonOk.select</value>
+            </filter>
+            <filter column="HSPEIGEN">
+                <value>KV</value>
+            </filter>
+        </Query>
+        <Output>
+            <resultLocation>${HomePath}/Results/Schaden_KV</resultLocation>        
+ 			<chartLocation>${HomePath}/Charts/Schaden_KV</chartLocation>
+        	<ResultSets>
+	        	<resultSet name="Kalkulieren_gesmat">
+	        		<unit>DATANAME</unit>
+	        	</resultSet>
+	        	<resultSet name="Kalkulieren_gesamt"/>
+	        </ResultSets>
+            <ResultTypes>
+                <resultType name="Average">
+                    <filter column="FIRSTCALL">
+                        <value>0</value>
+                    </filter>
+                	<resultTemplate>AVG_eineZeile_in_Spalten</resultTemplate>
+                </resultType>
+                <resultType name="Histogram">
+                	<column name="">
+                    	<value>DURMILLIS</value>
+                    </column>
+                </resultType>
+                <resultType name="RawData">
+                	<column name="">
+                    	<value>DURMILLIS</value>
+                    </column>
+                </resultType>
+            </ResultTypes>
+        </Output>
+    </rule>
+</Rules>

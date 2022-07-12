@@ -1,0 +1,112 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<CollectorSettings>
+    <StartDate/>
+    <StartTime>09.00.00.000000</StartTime>
+    <EndDate/>
+    <EndTime>17.00.00.000000</EndTime>
+    <DateOffset>-1</DateOffset>
+    <HomePath>Monitoring/</HomePath>
+    <ResultPath>Monitoring/results</ResultPath>
+    <KeyFile>./conf/howto.key</KeyFile>
+    <Driver>com.ibm.db2.jcc.DB2Driver</Driver>
+    <DataMappingFile>./conf/ProdMon_DataMap.xml</DataMappingFile>
+    <Configurations>
+        <config name="ABS_PROD_Allgemein">
+            <inputFile>./conf/ProdMon_Rules.xml</inputFile>
+            <connectionName>Statistix_Prod</connectionName>
+            <requestName>Statistix_ResponseTime</requestName>
+        </config>
+        <config name="ABS_PROD_Belgien">
+            <inputFile>./conf/B_ProdMon_Rules.xml</inputFile>
+            <connectionName>B_Statistix_Prod</connectionName>
+            <requestName>Statistix_ResponseTime</requestName>
+        </config>
+    </Configurations>
+    <Connections>
+        <connection name="Statistix_Prod">
+            <dbURL>jdbc:db2://s-dadcb01p.muc.allianz:50000/DADCB01P</dbURL>
+            <dbUser>tu02141</dbUser>
+            <dbPwd>BD62895CBF32CF3A0E7E3B4DA92DA81C43D3199B269744CF2C19E72AADFEE431</dbPwd>
+            <dbSchema>DE1PRD</dbSchema>
+            <dbTable>VADCB01_RES</dbTable>
+        </connection>
+        <connection name="B_Statistix_Prod">
+            <dbURL>jdbc:db2://s-dadcb01p.muc.allianz:50000/DADCB01P</dbURL>
+            <dbUser>tu02141</dbUser>
+            <dbPwd>BD62895CBF32CF3A0E7E3B4DA92DA81C43D3199B269744CF2C19E72AADFEE431</dbPwd>
+            <dbSchema>BE1PRD</dbSchema>
+            <dbTable>VADCB01_RES</dbTable>
+        </connection>
+        <connection name="Statistix_Test">
+            <dbURL>jdbc:db2://s-dadcb01e.muc.allianz:50000/DADCB01E</dbURL>
+            <dbUser>tu02141</dbUser>
+            <dbPwd>BD62895CBF32CF3A0E7E3B4DA92DA81C43D3199B269744CF2C19E72AADFEE431</dbPwd>
+            <dbSchema>DE1PRD</dbSchema>
+            <dbTable>VADCB01_RES</dbTable>
+        </connection>
+        <connection name="VDI_Prod">
+            <sourcePath>\\\\sm016662\\VDIMonitoringData\\imported\\</sourcePath>
+            <resourceFile>*resourceperblade.csv</resourceFile>
+            <vmFile>*VmsOnBlade.csv</vmFile>
+        </connection>
+    </Connections>
+    <Requests>
+        <request name="Statistix_ResponseTime">
+            <Columns>
+                <column>DURMILLIS</column>
+                <column>BACKENDMILLIS</column>
+                <column>FIRSTCALL</column>
+            </Columns>
+            <Conditions>
+                <condition>AND VIRTUALPC like 'VG%'</condition>
+                <condition>AND starttime BETWEEN TIMESTAMP('${INTERVAL_STARTDATE}-${INTERVAL_STARTTIME}') AND TIMESTAMP('${INTERVAL_ENDDATE}-${INTERVAL_ENDTIME}')</condition>
+            </Conditions>
+        </request>
+    </Requests>
+    <ResultTemplates>
+    	<resultTemplate name="AVG_eineZeile_in_Spalten">
+    		<resultLocation>${HomePath}/results/$mapping(${HSPEIGEN[1]})</resultLocation>
+    		<resultFile>$mapping(${DATANAME[1]})_${HSPEIGEN}_${resultType}.csv</resultFile>
+    		<chartLocation>${HomePath}/charts/$mapping(${HSPEIGEN[1]})</chartLocation>
+           	<chartFile>$mapping(${DATANAME[2]})_$mapping(HSPEIGEN[1]}).png</chartFile>	
+            <column name="Datum">
+            	<value>${StartDate}</value>
+            </column>
+            <column name="$mapping(CID_STANDORT[1])_Antwortzeit">
+                <value>$average(DURMILLIS)</value>
+            </column>
+            <column name="$mapping(CID_STANDORT[1])_Antwortzeit">
+                <value>$average(BACKENDMILLIS)</value>
+            </column>
+            <column name="$mapping(CID_STANDORT[1])_Anzahl">
+                <value>$count(DURMILLIS)</value>
+            </column>
+            <column name="$mapping(CID_STANDORT[1])_Quantile[80]">
+                <value>$quantile(DURMILLIS, 80)</value>
+            </column>
+            <aggregateBy></aggregateBy>
+    	</resultTemplate>
+    	<resultTemplate name="AVG_eineZeile_HSPEIGEN_in_Spalten">
+    		<resultLocation>${HomePath}/Results/$mapping(${HSPEIGEN[1]})</resultLocation>
+    		<resultFile>$mapping(${DATANAME[1]})_${HSPEIGEN}_${resultType}.txt</resultFile>
+    		<chartLocation>${HomePath}/Charts/$mapping(${HSPEIGEN[1]})</chartLocation>
+           	<chartFile>$mapping(${DATANAME[2]})_$mapping(${HSPEIGEN[1]}).jpg</chartFile>	
+    		<column name="Kalenderwoche">
+            	<value></value>
+            </column>
+            <column name="Datum">
+            	<value>${StartDate}</value>
+            </column>
+            <column name="$mapping(HSPEIGEN[1])_Antwortzeit">
+                <value>$average(DURMILLIS)</value>
+            </column>
+            <column name="$mapping(HSPEIGEN[1])_Anzahl">
+                <value>$count(DURMILLIS)</value>
+            </column>
+            <column name="$mapping(HSPEIGEN[1])_Quantile[80]">
+                <value>$quantile(DURMILLIS, 80)</value>
+            </column>
+            <aggregateBy>$mapping(CID_STANDORT[0])</aggregateBy>
+    	</resultTemplate>
+    </ResultTemplates>
+</CollectorSettings>
