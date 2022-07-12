@@ -235,6 +235,11 @@ public class DataContainer extends BaseContainer {
 		containerFormat = EContainerFormat.DEFAULT;
 		adaptContainer();
 	}
+	
+//	public DataContainer(EContainerFormat containerFormat) {
+//		String input = "";
+//		InputStream stream = new ByteArrayInputStream(input.getBytes(StandardCharsets.UTF_8));
+//	}
 
 	/**
 	 * Constructor that is called, when importing data from a database request to
@@ -304,6 +309,51 @@ public class DataContainer extends BaseContainer {
 		}
 	}
 
+	/**
+	 * This method adapts the one {@link CustomContainer} instance to a specific
+	 * <code>DataContainer</code> depending on the source file ending. The needed
+	 * objects like header or filter will be initialized with default values if they
+	 * were not explicitly set or the information could not be read from the source
+	 * file.
+	 * 
+	 * @throws FileNotFoundException If the file name is null or empty or the file
+	 *                               does not exist.
+	 */
+	private final void adaptContainer() {
+		if (filter == null) {
+			filter = new Filter();
+		}
+		switch (detectDataFormat()) {
+		case CSV:
+			instance = new CSVDataContainer(this);
+			break;
+		case PROPERTIES:
+			instance = new PropertiesDataContainer(this);
+			break;
+		case RESULTSET:
+			instance = new RSDataContainer(this);
+			break;
+		case XML:
+			instance = new XMLDataContainer(this);
+			values = new ArrayList<String[]>() {
+				private static final long serialVersionUID = 1L;
+
+				@Override
+				public String[] get(int index) {
+					return ((XMLDataContainer) instance).getDecoded(index);
+				}
+			};
+			break;
+		case JSON:
+			instance = new JSONDataContainer(this);
+			break;
+		default:
+			instance = new CSVDataContainer(this);
+			return;
+		}
+		instance.readData(filter);
+	}
+	
 	/**
 	 * This method is designed for tabular data formats to add column names to
 	 * existing <code>DataContainer</code>. In case the column name already exists,
@@ -448,51 +498,6 @@ public class DataContainer extends BaseContainer {
 			MLogger.getInstance().log(Level.WARNING, "The method is only supported for tree formats!", getClass().getSimpleName(), getClass().getName(), "addField");
 			break;
 		}
-	}
-
-	/**
-	 * This method adapts the one {@link CustomContainer} instance to a specific
-	 * <code>DataContainer</code> depending on the source file ending. The needed
-	 * objects like header or filter will be initialized with default values if they
-	 * were not explicitly set or the information could not be read from the source
-	 * file.
-	 * 
-	 * @throws FileNotFoundException If the file name is null or empty or the file
-	 *                               does not exist.
-	 */
-	private final void adaptContainer() {
-		if (filter == null) {
-			filter = new Filter();
-		}
-		switch (detectDataFormat()) {
-		case CSV:
-			instance = new CSVDataContainer(this);
-			break;
-		case PROPERTIES:
-			instance = new PropertiesDataContainer(this);
-			break;
-		case RESULTSET:
-			instance = new RSDataContainer(this);
-			break;
-		case XML:
-			instance = new XMLDataContainer(this);
-			values = new ArrayList<String[]>() {
-				private static final long serialVersionUID = 1L;
-
-				@Override
-				public String[] get(int index) {
-					return ((XMLDataContainer) instance).getDecoded(index);
-				}
-			};
-			break;
-		case JSON:
-			instance = new JSONDataContainer(this);
-			break;
-		default:
-			instance = new CSVDataContainer(this);
-			return;
-		}
-		instance.readData(filter);
 	}
 
 	/**

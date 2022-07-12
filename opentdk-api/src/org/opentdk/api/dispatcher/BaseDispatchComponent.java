@@ -549,6 +549,10 @@ public class BaseDispatchComponent {
 		return dcMap.get(keyName);
 	}
 	
+	public static List<Field> getFields(String keyName){
+		return fieldsMap.get(keyName);
+	}
+	
 	/**
 	 * Retrieves the fieldsMap which includes the names of all {@link org.opentdk.api.dispatcher.BaseDispatchComponent} variables, used by the application at runtime.
 	 * 

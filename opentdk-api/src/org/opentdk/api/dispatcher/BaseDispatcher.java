@@ -3,6 +3,8 @@ package org.opentdk.api.dispatcher;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Arrays;
+import java.util.List;
+import java.lang.reflect.Field;
 
 import org.opentdk.api.application.EBaseSettings;
 import org.opentdk.api.datastorage.DataContainer;
@@ -77,6 +79,10 @@ public class BaseDispatcher {
 		return BaseDispatchComponent.getDataContainer(dispatcherClass.getSimpleName());
 	}
 
+	public static List<Field> getFields(Class<?> dispatcherClass){
+		return BaseDispatchComponent.getFields(dispatcherClass.getSimpleName());
+	}
+	
 	/**
 	 * Assigns a {@link org.opentdk.api.datastorage.DataContainer} to the {@link BaseDispatchComponent} variables that are declared in an  
 	 * extended sub class of {@link BaseDispatcher}. The DataContainer acts as a runtime storage for the values of the {@link BaseDispatchComponent} 
