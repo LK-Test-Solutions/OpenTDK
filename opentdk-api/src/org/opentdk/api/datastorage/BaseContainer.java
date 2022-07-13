@@ -185,6 +185,8 @@ public abstract class BaseContainer {
 	 * {@link org.opentdk.api.datastorage.RSDataContainer}
 	 */
 	protected ResultSet resultSet;
+	
+	protected String rootNode = "";
 
 	/**
 	 * ArrayList with an Array of Strings where content of tabular sources is stored
@@ -642,6 +644,10 @@ public abstract class BaseContainer {
 	public ResultSet getResultSet() {
 		return resultSet;
 	}
+	
+	public String getRootNode() {
+		return rootNode;
+	}
 
 	/**
 	 * Inserts additional headers and values into the DataContanier that will added
@@ -791,6 +797,10 @@ public abstract class BaseContainer {
 	 */
 	public void setResultSet(ResultSet rs) {
 		resultSet = rs;
+	}
+	
+	public void setRootNode(String rn) {
+		rootNode = rn;
 	}
 
 }

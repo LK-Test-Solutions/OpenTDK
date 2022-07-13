@@ -9,6 +9,7 @@ import java.util.logging.Level;
 import java.util.stream.Collectors;
 
 import org.opentdk.api.datastorage.BaseContainer.EContainerFormat;
+import org.opentdk.api.io.FileUtil;
 import org.opentdk.api.io.XMLEditor;
 import org.opentdk.api.logger.MLogger;
 import org.w3c.dom.Element;
@@ -61,8 +62,10 @@ public class XMLDataContainer implements CustomContainer {
 	@Override
 	public void readData(Filter filter) {
 		if(!dc.getFileName().isEmpty()) {
-			
 			try {
+//				if(!FileUtil.checkFile(dc.getFileName())) {
+//					FileUtil.createFile(dc.getFileName(), true);
+//				}
 				xEdit = new XMLEditor(new File(dc.getFileName()));
 			} catch (IOException e) {
 				MLogger.getInstance().log(Level.SEVERE, e, "readData");

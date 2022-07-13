@@ -23,7 +23,8 @@ public class Application extends BaseRegression {
 
 	private void parseArgs(String[] args) {		
 		// Initialize the ERuntimeProperties class
-		BaseDispatcher.setDataContainer(ERuntimeProperties.class, "./conf/AppSettings.xml");
+//		BaseDispatcher.setRootNode(ERuntimeProperties.class, "Properties");
+//		BaseDispatcher.setDataContainer(ERuntimeProperties.class, "./conf/AppSettings_1.xml");
 		// Get all fields of the ERuntimeProperties
 		List<Field> propertyFields = BaseDispatcher.getFields(ERuntimeProperties.class);
 		for (String arg : args) {

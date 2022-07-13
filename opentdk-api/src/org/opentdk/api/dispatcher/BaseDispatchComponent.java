@@ -74,8 +74,11 @@ public class BaseDispatchComponent {
 	 * Once the setDataContainer method of a settings class is called, the list is automatically created and stored in the HashMap with 
 	 * the simple name of the settings class as key.
 	 */
-	private static Map<String, List<Field>> fieldsMap = new HashMap<String, List<Field>>();
-	
+//	private static Map<String, List<Field>> fieldsMap = new HashMap<String, List<Field>>();
+//	
+//	private static Map<String, String> rootNodeMap = new HashMap<String, String>();
+
+
 	/**
 	 * This property assigns the key name of the related DataContainer to each BaseDispatchComponent variable.
 	 */
@@ -99,7 +102,7 @@ public class BaseDispatchComponent {
 	 * in case that no settings file entry with the XPath and node name exists. 
 	 */
 	private String defaultValue;
-	
+		
 	/**
 	 * This property keeps the dispatcher class where the BaseDispatchComponent variable is declared. Since the BaseDispatchComponent classes are static,
 	 * there is no reference to the parent class, where they are declared. This is why the parent class needs to be set for the runtime instance of 
@@ -549,18 +552,18 @@ public class BaseDispatchComponent {
 		return dcMap.get(keyName);
 	}
 	
-	public static List<Field> getFields(String keyName){
-		return fieldsMap.get(keyName);
-	}
+//	public static List<Field> getFields(String keyName){
+//		return fieldsMap.get(keyName);
+//	}
 	
 	/**
 	 * Retrieves the fieldsMap which includes the names of all {@link org.opentdk.api.dispatcher.BaseDispatchComponent} variables, used by the application at runtime.
 	 * 
 	 * @return fielsMap property of type HashMap
 	 */
-	public static Map<String, List<Field>> getFieldsMap() {
-		return fieldsMap;
-	}
+//	public static Map<String, List<Field>> getFieldsMap() {
+//		return fieldsMap;
+//	}
 
 	/**
 	 * Returns the parameterName property of the {@link org.opentdk.api.dispatcher.BaseDispatchComponent}.
@@ -571,6 +574,10 @@ public class BaseDispatchComponent {
 	public String getName() {
 		return parameterName;
 	}
+	
+//	public static String getRootNode(String keyName) {
+//		return rootNodeMap.get(keyName);
+//	}
 	
 	/**
 	 * This method retrieves the value that is assigned to the {@link org.opentdk.api.dispatcher.BaseDispatchComponent} variable in the following way:<br>
@@ -784,9 +791,13 @@ public class BaseDispatchComponent {
 	 * @param setKey - The key under which the fields list will be stored within the HashMap. This should be the simple name of the dispatcher class, where the {@link BaseDispatchComponent} variables are declared.
 	 * @param fields - A List object with the names of all {@link BaseDispatchComponent} variables of a dispatcher class. 
 	 */
-	public static void setFields(String setKey, List<Field> fields) {
-		fieldsMap.put(setKey, fields);
-	}
+//	public static void setFields(String setKey, List<Field> fields) {
+//		fieldsMap.put(setKey, fields);
+//	}
+	
+//	public static void setRootNode(String keyName, String rn) {
+//		rootNodeMap.put(keyName, rn);
+//	}
 
 	/**
 	 * This method searches within the associated document for the first tree node or field, that matches the name and path (for tree formats)
