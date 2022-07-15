@@ -342,7 +342,7 @@ public abstract class BaseContainer {
 	 * @param values String Array with all values of a defined data set (row).
 	 * @param fltr   Object of type Filter, which includes one or more filter rules
 	 * @return true = values match to the filter; false = values don't match to the
-	 * @throws NoSuchHeaderException 
+	 * @throws NoSuchHeaderException If the container does not have a header that is defined in the filter 
 	 */
 	protected boolean checkValuesFilter(String[] values, Filter fltr) throws NoSuchHeaderException {
 		boolean returnCode = false;

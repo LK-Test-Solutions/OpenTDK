@@ -1759,7 +1759,6 @@ public class DataContainer extends BaseContainer {
 	 * output file.
 	 *
 	 * @param srcFile The path to the source file.
-	 * @throws FileNotFoundException
 	 */
 	public void writeData(String srcFile) {
 		try {

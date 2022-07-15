@@ -108,7 +108,7 @@ public class BaseDispatcher {
 	 * @param dispatcherFile - full path and name of the file that stores the values of {@link BaseDispatchComponent} 
 	 * 						 variables which are defined within the dispatcher class
 	 * @param rootNode - name of the root node within the tree formated file, used to check if the content of the file matches to the dispatcher class
-	 * @throws IOException
+	 * @throws IOException TODO
 	 */
 	public static void setDataContainer(Class<?> dispatcherClass, String dispatcherFile, String rootNode) throws IOException {
 		BaseDispatchComponent.checkDispatcherFile(dispatcherFile, rootNode);

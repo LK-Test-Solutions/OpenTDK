@@ -125,7 +125,7 @@ interface CustomContainer {
      * @param rowFilter		The row filter defines the conditions for values found in the column. Only values that match the conditions will be retrieved. 
      * @return				Array with all resulting values.
      */
-	default Object[] getColumn(String headerName, Filter rowFilter) throws Exception {
+	default Object[] getColumn(String headerName, Filter rowFilter) {
 		return new String[0];
 	}
  

@@ -290,7 +290,7 @@ public class BaseDispatchComponent {
 	 * @param fileName - Full name of the file to check.
 	 * @param rootNode - The value of this parameter defines the expected name of the root node within tree formated file.
 	 * @return true = rootNode matches with the first node within the file ; false = rootNode does not match to the first node within the file
-	 * @throws IOException
+	 * @throws IOException TODO
 	 */
 	public static boolean checkDispatcherFile(String fileName, String rootNode) throws IOException {
 		return checkDispatcherFile(fileName, rootNode, false);
@@ -319,7 +319,7 @@ public class BaseDispatchComponent {
 	 * @param rootNode - The value of this parameter defines the expected name of the root node within tree formated file.
 	 * @param createNew - defines the behavior if the file does not exist.<br> true = create new file with first node and return true<br> false = do nothing and return false
 	 * @return true = rootNode matches with the first node within the file ; false = rootNode does not match to the first node within the file
-	 * @throws IOException
+	 * @throws IOException TODO
 	 */
 	public static boolean checkDispatcherFile(String fileName, String rootNode, boolean createNew) throws IOException {
 		File file = new File(fileName);

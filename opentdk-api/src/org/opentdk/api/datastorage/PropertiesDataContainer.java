@@ -100,7 +100,7 @@ public class PropertiesDataContainer implements CustomContainer {
 	 * added to the file. Manipulated data will also change in the file.
 	 *
 	 * @param srcFile Name and full path of the properties file
-	 * @throws FileNotFoundException
+	 * @throws IOException If any I/O error occurred
 	 */
 	public void writeData(String srcFile) throws IOException {
 		FileWriter fw = null;

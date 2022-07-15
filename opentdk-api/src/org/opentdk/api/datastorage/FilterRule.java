@@ -128,7 +128,7 @@ public class FilterRule {
 	 * @param hName String value with the Header name of the DataSet to which the
 	 *              rule applies.
 	 * @param value String value, used by the check operation of the FilterRule.
-	 * @param format 
+	 * @param format option to define how the string get compared
 	 */
 	public FilterRule(String hName, String value, ERuleFormat format) {
 		this(hName, new String[] { value }, format);
