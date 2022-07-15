@@ -66,7 +66,6 @@ public class FileUtil {
 	 * @param inDir String with the directory name and its full or relative path.
 	 * @return <code>true</code> the defined directory exists; <code>false</code> the defined directory
 	 *         doesn't exist.
-	 * @throws IOException If an I/O error occurred.
 	 */
 	public static boolean checkDir(String inDir) {
 		return checkDir(new File(inDir), false);
@@ -79,7 +78,6 @@ public class FileUtil {
 	 * @param inDir Object of type {@link java.io.File} of the directory that needs to be checked.
 	 * @return <code>true</code> the defined directory exists; <code>false</code> the defined directory
 	 *         doesn't exist.
-	 * @throws IOException If an I/O error occurred.
 	 * @see java.io.File
 	 */
 	public static boolean checkDir(File inDir) {
@@ -95,7 +93,6 @@ public class FileUtil {
 	 *                      <code>false</code> = don't create missing folders.
 	 * @return <code>true</code> the defined directory exists; <code>false</code> the defined directory
 	 *         doesn't exist.
-	 * @throws IOException If an I/O error occurred.
 	 */
 	public static boolean checkDir(String inDir, boolean createFolders) {
 		return checkDir(new File(inDir), createFolders);
@@ -111,7 +108,6 @@ public class FileUtil {
 	 *                      missing folders.
 	 * @return <code>true</code> the defined directory exists; <code>false</code> the defined directory
 	 *         doesn't exist.
-	 * @throws IOException If an I/O error occurred.
 	 * @see java.io.File
 	 */
 	public static boolean checkDir(File inDir, boolean createFolders) {

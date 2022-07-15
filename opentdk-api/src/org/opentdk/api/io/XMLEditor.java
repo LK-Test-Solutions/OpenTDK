@@ -67,7 +67,7 @@ public class XMLEditor {
 	 * an instance with this constructor, immediate read and write access can be performed to the xml file, using the methods provided by this class.
 	 * 
 	 * @param fullPath String with the relative or absolute path and filename of the xml file
-	 * 
+	 * @throws IOException if any I/O error occurred
 	 */
 	public XMLEditor(String fullPath) throws IOException {
 		this(new File(fullPath), "");
