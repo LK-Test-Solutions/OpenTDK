@@ -4,10 +4,12 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.Arrays;
 import java.util.List;
+import java.util.logging.Level;
 import java.lang.reflect.Field;
 
 import org.opentdk.api.application.EBaseSettings;
 import org.opentdk.api.datastorage.DataContainer;
+import org.opentdk.api.logger.MLogger;
 
 /**
  * BaseDispatcher is build as a super class which can be inherited by subclasses to implement a list of variables,  
@@ -81,12 +83,7 @@ public class BaseDispatcher {
 
 	public static List<Field> getFields(Class<?> dispatcherClass){
 		return Arrays.asList(dispatcherClass.getDeclaredFields());
-//		return BaseDispatchComponent.getFields(dispatcherClass.getSimpleName());
 	}
-	
-//	public static String getRootNode(Class<?> dispatcherClass) {
-//		return BaseDispatchComponent.getRootNode(dispatcherClass.getSimpleName());
-//	}
 	
 	/**
 	 * Assigns a {@link org.opentdk.api.datastorage.DataContainer} to the {@link BaseDispatchComponent} variables that are declared in an  
@@ -99,7 +96,6 @@ public class BaseDispatcher {
 	 */
 	public static void setDataContainer(Class<?> dispatcherClass, String dispatcherFile) {
 		BaseDispatchComponent.setDataContainer(dispatcherClass.getSimpleName(), dispatcherFile);
-//		BaseDispatchComponent.setFields(dispatcherClass.getSimpleName(), Arrays.asList(dispatcherClass.getDeclaredFields()));
 	}
 
 	/**
@@ -117,7 +113,6 @@ public class BaseDispatcher {
 	public static void setDataContainer(Class<?> dispatcherClass, String dispatcherFile, String rootNode) throws IOException {
 		BaseDispatchComponent.checkDispatcherFile(dispatcherFile, rootNode);
 		BaseDispatchComponent.setDataContainer(dispatcherClass.getSimpleName(), dispatcherFile);
-//		BaseDispatchComponent.setFields(dispatcherClass.getSimpleName(), Arrays.asList(dispatcherClass.getDeclaredFields()));
 	}
 	
 	/**
@@ -130,7 +125,6 @@ public class BaseDispatcher {
 	 */
 	public static void setDataContainer(Class<?>  dispatcherClass, DataContainer dc) {
 		BaseDispatchComponent.setDataContainer(dispatcherClass.getSimpleName(), dc);
-//		BaseDispatchComponent.setFields(dispatcherClass.getSimpleName(), Arrays.asList(dispatcherClass.getDeclaredFields()));
 	}
 
 	/**
@@ -146,7 +140,6 @@ public class BaseDispatcher {
 	public static void setDataContainer(Class<?>  dispatcherClass, DataContainer dc, String rootNode) {
 		BaseDispatchComponent.checkDispatcherFile(dc, rootNode);
 		BaseDispatchComponent.setDataContainer(dispatcherClass.getSimpleName(), dc);
-//		BaseDispatchComponent.setFields(dispatcherClass.getSimpleName(), Arrays.asList(dispatcherClass.getDeclaredFields()));
 	}
 
 	/**
@@ -160,11 +153,6 @@ public class BaseDispatcher {
 	 */
 	public static void setDataContainer(Class<?>  dispatcherClass, InputStream inStream) {
 		BaseDispatchComponent.setDataContainer(dispatcherClass.getSimpleName(), inStream);
-//		BaseDispatchComponent.setFields(dispatcherClass.getSimpleName(), Arrays.asList(dispatcherClass.getDeclaredFields()));
-	}
-	
-//	public static void setRootNode(Class<?> dispatcherClass, String rn) {
-//		BaseDispatchComponent.setRootNode(dispatcherClass.getSimpleName(), rn);
-//	}
+	}	
 
 }

@@ -127,6 +127,13 @@ public class XMLEditor {
 		save();
 		return newChild;
 	}	
+	
+	public Element addRootElement(Element rootE) {
+		rootNodeName = rootE.getNodeName();
+		Element outRoot = doc.createElement(rootNodeName);
+		save();
+		return outRoot;
+	}
 
 	/**
 	 * Adds a child tag to the root tag of the XML document which is represented by the current instance of the {@link #doc} property. This method will
@@ -187,8 +194,8 @@ public class XMLEditor {
 				if (compareElements(searchE, doc.getDocumentElement())) {
 					resolvedE = doc.getDocumentElement();
 					eFound = true;
-				} else {
-					break;
+//				} else {
+//					break;
 				}
 			} else {
 				NodeList cnl = resolvedE.getChildNodes();
@@ -203,8 +210,12 @@ public class XMLEditor {
 				}
 			}
 			if ((!eFound) && (createMissingNodes)) {
-				resolvedE = addChildElement(resolvedE, searchE);
-				eFound = compareElements(searchE, resolvedE);
+				if(resolvedE != null) {
+					resolvedE = addChildElement(resolvedE, searchE);
+					eFound = compareElements(searchE, resolvedE);
+				}else {
+					addRootElement(searchE);
+				}
 			}
 			if (!eFound) {
 				return null;
@@ -214,6 +225,42 @@ public class XMLEditor {
 		return resolvedE;
 	}
 
+//	public Element checkXPath(String XPath, boolean createMissingNodes) {
+//		List<Element> eList = getElementsListFromXPath(XPath);
+//		Element resolvedE = null;
+//		for (Element searchE : eList) {
+//			boolean eFound = false;
+//			if (resolvedE == null) {
+//				if (compareElements(searchE, doc.getDocumentElement())) {
+//					resolvedE = doc.getDocumentElement();
+//					eFound = true;
+//				} else {
+//					break;
+//				}
+//			} else {
+//				NodeList cnl = resolvedE.getChildNodes();
+//				for (int i = 0; i < cnl.getLength(); i++) {
+//					if (cnl.item(i).getNodeType() == 1) {
+//						if (compareElements(searchE, (Element) cnl.item(i))) {
+//							resolvedE = (Element) cnl.item(i);
+//							eFound = true;
+//							break;
+//						}
+//					}
+//				}
+//			}
+//			if ((!eFound) && (createMissingNodes)) {
+//				resolvedE = addChildElement(resolvedE, searchE);
+//				eFound = compareElements(searchE, resolvedE);
+//			}
+//			if (!eFound) {
+//				return null;
+//			}
+//
+//		}
+//		return resolvedE;
+//	}
+	
 	public boolean compareElements(Element eSearch, Element eCompareWith) {
 		if (eSearch.getNodeName().equals(eCompareWith.getNodeName())) {
 			if (eSearch.getNodeValue() != null) {
@@ -354,8 +401,8 @@ public class XMLEditor {
 		
 		try {
 			DocumentBuilder docBuilder = dbf.newDocumentBuilder();
-			if ((xmlFile != null) && (xmlFile.exists())) {			
-				doc = docBuilder.parse(xmlFile);
+			if ((xmlFile != null) && (xmlFile.exists())) {
+				doc = docBuilder.parse(xmlFile);				
 				doc.getDocumentElement().normalize();
 				rootElement = doc.getDocumentElement();
 			} else if(xmlStream != null) {

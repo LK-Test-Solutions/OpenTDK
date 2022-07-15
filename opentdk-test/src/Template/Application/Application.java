@@ -1,12 +1,15 @@
 package Template.Application;
 
 import java.util.List;
+import java.util.logging.Level;
 
 import org.opentdk.api.dispatcher.BaseDispatchComponent;
 import org.opentdk.api.dispatcher.BaseDispatcher;
+import org.opentdk.api.logger.MLogger;
 
 import RegressionTest.BaseRegression;
 
+import java.io.IOException;
 import java.lang.reflect.Field;
 
 public class Application extends BaseRegression {
@@ -23,8 +26,11 @@ public class Application extends BaseRegression {
 
 	private void parseArgs(String[] args) {		
 		// Initialize the ERuntimeProperties class
-//		BaseDispatcher.setRootNode(ERuntimeProperties.class, "Properties");
-//		BaseDispatcher.setDataContainer(ERuntimeProperties.class, "./conf/AppSettings_1.xml");
+		try {
+			BaseDispatcher.setDataContainer(ERuntimeProperties.class, "./conf/AppSettings_1.xml", ERuntimeProperties.HOMEDIR.getRootNode());
+		} catch (IOException e) {
+			MLogger.getInstance().log(Level.WARNING, e);
+		}
 		// Get all fields of the ERuntimeProperties
 		List<Field> propertyFields = BaseDispatcher.getFields(ERuntimeProperties.class);
 		for (String arg : args) {

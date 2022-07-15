@@ -322,13 +322,13 @@ public class BaseDispatchComponent {
 	 * @throws IOException
 	 */
 	public static boolean checkDispatcherFile(String fileName, String rootNode, boolean createNew) throws IOException {
-		boolean res = false;
-		if (createNew || !new File(fileName).exists()) {
+		File file = new File(fileName);
+		if (createNew || !file.exists() || FileUtil.getContent(fileName).isBlank()) {
 			FileUtil.deleteFile(fileName);
 			XMLEditor xEdit = new XMLEditor(fileName, rootNode);
 			xEdit.save(fileName);
 		}
-		return res;
+		return file.exists();
 	}
 
 	/**
@@ -575,9 +575,20 @@ public class BaseDispatchComponent {
 		return parameterName;
 	}
 	
-//	public static String getRootNode(String keyName) {
-//		return rootNodeMap.get(keyName);
-//	}
+	public String getRootNode() {
+		String rootNode = "";
+		String[] nodeArray = parentXPath.split("/");
+		if(nodeArray.length > 0) {
+			if(nodeArray[0].isBlank()) {
+				if(nodeArray.length > 1) {
+					rootNode = nodeArray[1].replace("/", "");
+				}
+			}else {
+				rootNode = nodeArray[0].replace("/", "");
+			}
+		}
+		return rootNode;
+	}
 	
 	/**
 	 * This method retrieves the value that is assigned to the {@link org.opentdk.api.dispatcher.BaseDispatchComponent} variable in the following way:<br>

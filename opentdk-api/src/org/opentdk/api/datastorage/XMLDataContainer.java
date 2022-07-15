@@ -63,9 +63,6 @@ public class XMLDataContainer implements CustomContainer {
 	public void readData(Filter filter) {
 		if(!dc.getFileName().isEmpty()) {
 			try {
-//				if(!FileUtil.checkFile(dc.getFileName())) {
-//					FileUtil.createFile(dc.getFileName(), true);
-//				}
 				xEdit = new XMLEditor(new File(dc.getFileName()));
 			} catch (IOException e) {
 				MLogger.getInstance().log(Level.SEVERE, e, "readData");
