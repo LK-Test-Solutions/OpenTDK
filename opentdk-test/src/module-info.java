@@ -18,6 +18,8 @@ module opentdk.test {
 	exports RegressionTest.Logging;
 	exports RegressionTest.CryptoUtility;
 	exports RegressionTest.CSVContainer;
+	exports Template.Application;
+	
 
 	requires java.desktop;
 	requires java.logging;

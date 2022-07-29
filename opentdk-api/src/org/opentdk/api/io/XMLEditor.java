@@ -53,6 +53,7 @@ public class XMLEditor {
 	 * class.
 	 * 
 	 * @param xml_src Object of type {@link java.io.File}
+	 * @throws IOException if any I/O error occurred
 	 */
 	public XMLEditor(File xml_src) throws IOException {
 		this(xml_src, "");
