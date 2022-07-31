@@ -356,7 +356,7 @@ public abstract class BaseContainer {
 			returnCode = true;
 		} else {
 			for (FilterRule fr : fltr.getFilterRules()) {
-				// Wild cards * and % will accept any value
+				// Wildcards * and % will accept any value
 				if (fr.getValue() != null) {
 					if ((fr.getValue().equals("*")) || (fr.getValue().equals("%"))) {
 						returnCode = true;

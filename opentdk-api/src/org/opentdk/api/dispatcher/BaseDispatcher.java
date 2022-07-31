@@ -2,8 +2,11 @@ package org.opentdk.api.dispatcher;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.logging.Level;
 import java.lang.reflect.Field;
 
@@ -79,6 +82,25 @@ public class BaseDispatcher {
 	 */
 	public static DataContainer getDataContainer(Class<?> dispatcherClass) {
 		return BaseDispatchComponent.getDataContainer(dispatcherClass.getSimpleName());
+	}
+	
+	public static Map<String, BaseDispatchComponent> getDeclaredComponents(Class<?> dispatcherClass){
+		Map<String, BaseDispatchComponent> componentMap = new HashMap<>();
+		for(Field fld:getFields(dispatcherClass)) {
+            // Get the runtime object to execute the method with
+            Object fieldInstance = null;
+            try {
+                fieldInstance = fld.get(dispatcherClass);
+            } catch (IllegalArgumentException | IllegalAccessException e1) {
+                e1.printStackTrace();
+            }
+            if(fieldInstance != null) {
+                if(fieldInstance instanceof BaseDispatchComponent) {
+                	componentMap.put(fld.getName(), ((BaseDispatchComponent) fieldInstance));
+                }
+            }
+		}
+		return componentMap;
 	}
 
 	public static List<Field> getFields(Class<?> dispatcherClass){

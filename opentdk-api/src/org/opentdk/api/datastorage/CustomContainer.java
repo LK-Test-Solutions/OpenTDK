@@ -32,7 +32,7 @@ interface CustomContainer {
      * into a file.
      * 
      * @param srcFileName   The name of the source file to write to
-     * @throws FileNotFoundException
+     * @throws IOException  Throws an exception if file is missing
      */
     void writeData(String srcFileName) throws IOException;
     
