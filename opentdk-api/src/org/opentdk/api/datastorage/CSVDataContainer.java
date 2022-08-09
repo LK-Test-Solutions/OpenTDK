@@ -271,7 +271,9 @@ public class CSVDataContainer implements CustomContainer {
 		}
 		// Write content of List writeable to output-file
 		try {
-			XFileWriter writer = new XFileWriter(new File(fileName));
+			File f = new File(fileName);
+			FileUtil.checkDir(f.getParent(), true);
+			XFileWriter writer = new XFileWriter(f);
 			writer.writeLines(writeable);
 			writer.close();
 		} catch (IOException e) {

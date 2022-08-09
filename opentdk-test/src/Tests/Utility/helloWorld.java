@@ -10,7 +10,7 @@ public class helloWorld {
 	public static void main(String[] args) throws IOException {
 		ESettings.setDataContainer(EBaseSettings.class, "logs/helloWorld.xml", "AppSettings");
 		
-		MLogger.getInstance().setLogFile(ESettings.APP_LOGFILE.getValue());
+		MLogger.getInstance().setLogFile(ESettings.LOGFILE.getValue());
 		MLogger.getInstance().log(ESettings.HUNDNAME.getValue());
 		
 		ESettings.HUNDNAME.setValue("Emma");

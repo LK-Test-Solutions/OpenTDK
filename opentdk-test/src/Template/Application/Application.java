@@ -1,17 +1,6 @@
 package Template.Application;
 
-import java.util.List;
-import java.util.logging.Level;
-
 import org.opentdk.api.application.BaseApplication;
-import org.opentdk.api.dispatcher.BaseDispatchComponent;
-import org.opentdk.api.dispatcher.BaseDispatcher;
-import org.opentdk.api.logger.MLogger;
-
-import RegressionTest.BaseRegression;
-
-import java.io.IOException;
-import java.lang.reflect.Field;
 
 public class Application extends BaseApplication {
 
@@ -20,7 +9,15 @@ public class Application extends BaseApplication {
 	}
 	
 	public Application(String[] args) throws Exception {
-		parseArgs(ERuntimeProperties.class, args);	
+		parseArgs(ERuntimeProperties.class, args);
+		initRuntimeProperties(ERuntimeProperties.class, EAppSettings.class);
+		
+		System.out.println("HOMEDIR = " + ERuntimeProperties.HOMEDIR.getValue());
+		System.out.println("BASEURL = " + ERuntimeProperties.BASEURL.getValue()); 
+		
+		System.out.println("HOMEDIR = " + EAppSettings.HOMEDIR.getValue());
+		System.out.println("BASEURL = " + EAppSettings.BASEURL.getValue()); 
+
 	}
 }
 

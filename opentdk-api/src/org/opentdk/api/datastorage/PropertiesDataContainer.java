@@ -10,6 +10,7 @@ import org.opentdk.api.datastorage.BaseContainer.EContainerFormat;
 import org.opentdk.api.io.FileUtil;
 import org.opentdk.api.logger.MLogger;
 
+import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.FileReader;
@@ -103,6 +104,8 @@ public class PropertiesDataContainer implements CustomContainer {
 	 * @throws IOException If any I/O error occurred
 	 */
 	public void writeData(String srcFile) throws IOException {
+		File f = new File(srcFile);
+		FileUtil.checkDir(f.getParent(), true);
 		FileWriter fw = null;
 		fw = new FileWriter(dc.getFileName());
 		SortedProperties existingProps = readProps(dc.getFileName());

@@ -17,9 +17,9 @@ public class RT_noFile_XML_values extends BaseRegression {
 	public void runTest() {
 		
 		// Gets the default values of dispatcher components that are declared within EBaseSettings class
-		testResult(E_XMLFile_Dispatcher_values.APP_LOGFILE.getValue(), "APP_LOGFILE", "./logs/Application.log");
-		testResult(E_XMLFile_Dispatcher_values.APP_LOGFILE_LIMIT.getValue(), "APP_LOGFILE_LIMIT", "4000");
-		testResult(E_XMLFile_Dispatcher_values.APP_TRACE_LEVEL.getValue(), "APP_TRACE_LEVEL", "1");
+		testResult(E_XMLFile_Dispatcher_values.LOGFILE.getValue(), "APP_LOGFILE", "./logs/Application.log");
+		testResult(E_XMLFile_Dispatcher_values.LOGFILE_LIMIT.getValue(), "APP_LOGFILE_LIMIT", "4000");
+		testResult(E_XMLFile_Dispatcher_values.TRACE_LEVEL.getValue(), "APP_TRACE_LEVEL", "1");
 		
 		// Adds Items to the associated XML Container
 		E_XMLFile_Dispatcher_values.PROJECT_LOCATION.addValue("Project 1", true);

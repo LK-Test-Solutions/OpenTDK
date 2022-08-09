@@ -28,6 +28,6 @@ module opentdk.test {
 	requires javafx.controls;
 	requires javafx.graphics;
 	requires javafx.swing;
-	requires opentdk.api;
+	requires transitive opentdk.api;
 	requires opentdk.gui;
 }
