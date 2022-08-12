@@ -16,7 +16,7 @@ public class RT_Container_readJson extends BaseRegression {
 		BaseRegression.testResult(dc.getValue("cities"), "JSON node 'citites' with two values", "[\"Munich\",\"Berlin\"]");
 		BaseRegression.testResult(dc.getAttributes("properties", "salary")[0], "JSON value of attribute 'salary' under key 'properties'", "1000 EUR");
 
-		dc.writeData("output/JsonOutput.json");
+//		dc.writeData("output/JsonOutput.json");
 		
 	}
 
