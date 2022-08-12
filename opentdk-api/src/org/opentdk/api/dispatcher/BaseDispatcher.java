@@ -133,7 +133,16 @@ public class BaseDispatcher {
 	 * @throws IOException TODO
 	 */
 	public static void setDataContainer(Class<?> dispatcherClass, String dispatcherFile, String rootNode) throws IOException {
-		BaseDispatchComponent.checkDispatcherFile(dispatcherFile, rootNode);
+		Map<String, BaseDispatchComponent> dcomp = BaseDispatcher.getDeclaredComponents(dispatcherClass);
+		String rn = "";
+		for(String key:dcomp.keySet()) {
+			rn = dcomp.get(key).getRootNode();
+			if(!rn.isEmpty()) {
+				break;
+			}
+		}
+		
+		BaseDispatchComponent.checkDispatcherFile(dispatcherFile, rn);
 		BaseDispatchComponent.setDataContainer(dispatcherClass.getSimpleName(), dispatcherFile);
 	}
 	
