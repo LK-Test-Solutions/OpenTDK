@@ -133,7 +133,14 @@ public class CSVDataContainer implements CustomContainer {
 		List<String> rows = FileUtil.getRowsAsList(fileName);
 		for (String row : rows) {
 			rowIndex++;
-			String[] valArray = dc.cleanValues(row.split(columnDelimiter, -1));
+			
+			// 20220817 HWA: disabled cleanValues, because stepInterpreter for Finanz Informatik cannot handle null fields
+			// and removed quotes. 
+			// TODO The concept of cleanValues needs to be reviewed! It may be more useful to store the values unchanged in the
+			// DataContainer and let the consumer handle modifications.
+			String[] valArray = row.split(columnDelimiter, -1);
+			
+//			String[] valArray = dc.cleanValues(row.split(columnDelimiter, -1));
 			if (rowIndex < dc.getHeaderRowIndex()) {
 				MLogger.getInstance().log(Level.INFO, "Skipping row with index " + rowIndex + "! Just rows after the headerRowIndex will be loaded into DataContainer.",
 						this.getClass().getSimpleName(), "putDataSetRows");

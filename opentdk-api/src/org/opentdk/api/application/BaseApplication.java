@@ -104,6 +104,8 @@ public class BaseApplication {
 	/**
 	 * Constructor that will be called, when creating an instance of BaseApplication with a String Array of arguments.
 	 * This will be the case when starting the application from command-line. 
+	 * 
+	 * @param args			String array with arguments, passed to the application from the caller (e.g. command-line)
 	 */
 	public BaseApplication(String[] args) {
 		
@@ -130,7 +132,7 @@ public class BaseApplication {
      * ERuntimeProperties.LOGFILE.getValue();
      * </pre>
      * 
-     * @param	rtproperties The class of type {@link BaseDispatcher} which includes the declaration of all runtime properties
+     * @param	runtimePropertiesClass The class of type {@link BaseDispatcher} which includes the declaration of all runtime properties
      * @param 	args String array with keys and values passed by the commandline (e.g. -homedir=c:/applications/myApp)
      */
     public final void parseArgs(Class<?> runtimePropertiesClass, String[] args){
@@ -160,20 +162,21 @@ public class BaseApplication {
      * 
      * @param runtimePropertiesClass	the class of type {@link BaseDispatcher} that includes the declarations of all runtimeProperties
      * @param appSettingsClass			the class of type {@link BaseDispatcher} that includes the declarations of all application settings
+     * @throws IOException				IOExceptions that are not handled by the application will be thrown
      */
     public final void initRuntimeProperties(Class<?> runtimePropertiesClass, Class<?> appSettingsClass) throws IOException {
     	Map<String, BaseDispatchComponent> runtimeProperties = BaseDispatcher.getDeclaredComponents(runtimePropertiesClass);
+		Map<String, BaseDispatchComponent> appSettings = BaseDispatcher.getDeclaredComponents(appSettingsClass);
     	// in case a settings-file is defined, the file will be assigned to the appSettingsClass
     	if(runtimeProperties.keySet().contains("SETTINGSFILE")) {
-    		if(!runtimeProperties.get("SETTINGSFILE").getValue().isBlank()) {
-    			BaseDispatcher.setDataContainer(appSettingsClass, runtimeProperties.get("SETTINGSFILE").getValue(), "AppSettings");
+    		if(!runtimeProperties.get("SETTINGSFILE").getValue().isEmpty()) {
+    			BaseDispatcher.setDataContainer(EBaseSettings.class, runtimeProperties.get("SETTINGSFILE").getValue(), "AppSettings");
     		}
     	}
     	// assign the value from the appSettings duplicate instances to all empty runtimeProperties instances
     	for(String propertiesKey:runtimeProperties.keySet()) {
     		if(runtimeProperties.get(propertiesKey).getValue().isEmpty()) {
     			if(!propertiesKey.equalsIgnoreCase("SETTINGSFILE")) {
-    				Map<String, BaseDispatchComponent> appSettings = BaseDispatcher.getDeclaredComponents(appSettingsClass);
     				for(String appSettingsKey:appSettings.keySet()) {
     					if(appSettingsKey.equalsIgnoreCase(propertiesKey)) {
     						runtimeProperties.get(propertiesKey).setValue(appSettings.get(appSettingsKey).getValue());

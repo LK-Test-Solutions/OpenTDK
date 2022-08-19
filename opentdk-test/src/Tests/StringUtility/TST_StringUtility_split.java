@@ -13,6 +13,12 @@ public class TST_StringUtility_split {
 		if(test2.contains(".")) {
 			System.out.println(test2);
 		}
+		
+		String rowStr = "a;b;;d";
+		String[] rowArray_1 = rowStr.split(";");
+		String[] rowArray_2 = new String[]{"a","b","","d"};
+		System.out.println("rowArray_1 = "+ String.join(";", rowArray_1));
+		System.out.println("rowArray_2 = "+ String.join(";", rowArray_2));
 	}
 
 }
