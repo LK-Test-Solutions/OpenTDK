@@ -16,7 +16,7 @@ public class RT_DateUtil_get extends BaseRegression {
 
 	@Override
 	public void runTest() {
-		System.out.println("######## get formated date from current date ########");
+		System.out.println("######## Get formated date from current date ########");
 		System.out.println("current date in FORMAT DATE_1 = " + DateUtil.get("yyyyMMdd") + " ## expected format = yyyyMMdd");
 		System.out.println("current date in FORMAT DATE_2 = " + DateUtil.get("yyyy-MM-dd") + " ## expected format = yyyy-MM-dd");
 		System.out.println("current date in FORMAT DATE_3 = " + DateUtil.get("dd-MM-yyyy") + " ## expected format = dd-MM-yyyy");
@@ -25,41 +25,40 @@ public class RT_DateUtil_get extends BaseRegression {
 		System.out.println("current date in FORMAT DATE_6 = " + DateUtil.get("MM/dd/yyyy") + " ## expected format = MM/dd/yyyy");
 		
 		System.out.println();
-		System.out.println("######## get formated date from current date with static day ########");
+		System.out.println("######## Get formated date from current date with static day ########");
 		System.out.println("current date in FORMAT DATE_4 = " + DateUtil.get("01.MM.yyyy") + " ## expected format = dd.MM.yyyy");
 
 		System.out.println();
-		System.out.println("######## get formated date from defined date of type String ########");
-		System.out.println("given date in FORMAT DATE_1 = " + DateUtil.get("31.12.2018", EFormat.DATE_1.getDateFormat()) + " ## expected = 20181231");
-		System.out.println("given date in FORMAT DATE_2 = " + DateUtil.get("20000113", EFormat.DATE_2.getDateFormat()) + " ## expected = 2000-01-13");
-		System.out.println("given date in FORMAT DATE_3 = " + DateUtil.get("1999-02-28", EFormat.DATE_3.getDateFormat()) + " ## expected = 28-02-1999");
-		System.out.println("given date in FORMAT DATE_4 = " + DateUtil.get("2020.11.02", EFormat.DATE_4.getDateFormat()) + " ## expected = 02.11.2020");
-		System.out.println("given date in FORMAT DATE_5 = " + DateUtil.get("12/24/1985", EFormat.DATE_5.getDateFormat()) + " ## expected = 1985.12.24");
-		System.out.println("given date in FORMAT DATE_6 = " + DateUtil.get("24-12-1985", EFormat.DATE_6.getDateFormat()) + " ## expected = 12/24/1985");
+		System.out.println("######## Get formated date from defined date of type String ########");
+		BaseRegression.testResult(DateUtil.get("31.12.2018", EFormat.DATE_1.getDateFormat()), "Given date in FORMAT DATE_1", "20181231");
+		BaseRegression.testResult(DateUtil.get("20000113", EFormat.DATE_2.getDateFormat()), "Given date in FORMAT DATE_2", "2000-01-13");
+		BaseRegression.testResult(DateUtil.get("1999-02-28", EFormat.DATE_3.getDateFormat()), "Given date in FORMAT DATE_3", "28-02-1999");
+		BaseRegression.testResult(DateUtil.get("2020.11.02", EFormat.DATE_4.getDateFormat()), "Given date in FORMAT DATE_4", "02.11.2020");
+		BaseRegression.testResult(DateUtil.get("12/24/1985", EFormat.DATE_5.getDateFormat()), "Given date in FORMAT DATE_5", "1985.12.24");
+		BaseRegression.testResult(DateUtil.get("24-12-1985", EFormat.DATE_6.getDateFormat()), "Given date in FORMAT DATE_6", "12/24/1985");
 
 		System.out.println("");
 		System.out.println("######## get formated date from defined object of type Date ########");
 		String date = "12/31/2018";
-		System.out.println("given date in FORMAT DATE_1 = " + DateUtil.get(date, EFormat.DATE_1.getDateFormat()) + " ## expected = 20181231");
-		System.out.println("given date in FORMAT DATE_2 = " + DateUtil.get(date, EFormat.DATE_2.getDateFormat()) + " ## expected = 2018-12-31");
-		System.out.println("given date in FORMAT DATE_3 = " + DateUtil.get(date, EFormat.DATE_3.getDateFormat()) + " ## expected = 31-12-2018");
-		System.out.println("given date in FORMAT DATE_4 = " + DateUtil.get(date, EFormat.DATE_4.getDateFormat()) + " ## expected = 31.12.2018");
-		System.out.println("given date in FORMAT DATE_5 = " + DateUtil.get(date, EFormat.DATE_5.getDateFormat()) + " ## expected = 2018.12.31");
-		System.out.println("given date in FORMAT DATE_6 = " + DateUtil.get(date, EFormat.DATE_6.getDateFormat()) + " ## expected = 12/31/2018");
+		BaseRegression.testResult(DateUtil.get(date, EFormat.DATE_1.getDateFormat()), "Given date in FORMAT DATE_1", "20181231");
+		BaseRegression.testResult(DateUtil.get(date, EFormat.DATE_2.getDateFormat()), "Given date in FORMAT DATE_2", "2018-12-31");
+		BaseRegression.testResult(DateUtil.get(date, EFormat.DATE_3.getDateFormat()), "Given date in FORMAT DATE_3", "31-12-2018");
+		BaseRegression.testResult(DateUtil.get(date, EFormat.DATE_4.getDateFormat()), "Given date in FORMAT DATE_4", "31.12.2018");
+		BaseRegression.testResult(DateUtil.get(date, EFormat.DATE_5.getDateFormat()), "Given date in FORMAT DATE_5", "2018.12.31");
+		BaseRegression.testResult(DateUtil.get(date, EFormat.DATE_6.getDateFormat()), "Given date in FORMAT DATE_6", "12/31/2018");
 		
 		System.out.println("");
-		System.out.println("######## get calculated and formated date from current date ########");
+		System.out.println("######## Get calculated and formated date from current date ########");
 		System.out.println("current date plus 12 days in FORMAT DATE_1 = " + DateUtil.get(12, EFormat.DATE_1.getDateFormat(), ChronoUnit.DAYS) + " ## expected = today + 12 in format yyyyMMdd");
 
 		System.out.println("");
-		System.out.println("######## get calculated and formated date from date of type string ########");
-		System.out.println("given date minus 42 days in FORMAT DATE_2 = " + DateUtil.get("31.12.2018", -42, EFormat.DATE_2.getDateFormat(), ChronoUnit.DAYS) + " ## expected = 2018-11-19");
+		System.out.println("######## Get calculated and formated date from date of type string ########");
+		BaseRegression.testResult(DateUtil.get("31.12.2018", -42, EFormat.DATE_2.getDateFormat(), ChronoUnit.DAYS), "Given date minus 42 days in FORMAT DATE_2", "2018-11-19");
 		
 		System.out.println("");
-		System.out.println("######## get calculated and formated date from defined object of type date ########");
-		System.out.println("given date minus 42 days in FORMAT DATE_2 = " + DateUtil.get(date, -42, EFormat.DATE_2.getDateFormat(), ChronoUnit.DAYS) + " ## expected = 2018-11-19");
+		System.out.println("######## Get calculated and formated date from defined object of type date ########");
+		BaseRegression.testResult(DateUtil.get(date, -42, EFormat.DATE_2.getDateFormat(), ChronoUnit.DAYS), "Given date minus 42 days in FORMAT DATE_2", "2018-11-19");
 	
-		// TODO check result automatically with BaseRegressionSet
 //		BaseRegressionSet.testResult(String.valueOf(DateUtil.compare("20210329", "2021-03-29")), "Compare date with date", "1");
 		System.out.println("Compare date with date ==> " + DateUtil.compare("20210329", "2021-03-29"));
 		System.out.println("Compare time with time ==> " + DateUtil.compare("23:45:31", "23:45:30"));

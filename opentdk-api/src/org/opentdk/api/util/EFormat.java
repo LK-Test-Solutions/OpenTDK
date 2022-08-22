@@ -300,8 +300,9 @@ public enum EFormat {
 		if (start == -1 || end == -1) {
 			return 0;
 		}
-		String part = inDate.substring(start, end);
+		String part = "";
 		try {
+			part = inDate.substring(start, end);
 			part = part.substring(from, to);
 		} catch (IndexOutOfBoundsException e) {
 			return 0;
