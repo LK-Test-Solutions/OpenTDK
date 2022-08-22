@@ -30,4 +30,5 @@ module opentdk.test {
 	requires javafx.swing;
 	requires transitive opentdk.api;
 	requires opentdk.gui;
+	requires org.json;
 }
