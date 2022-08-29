@@ -677,8 +677,10 @@ public class DataContainer extends BaseContainer {
 				if (inputStream.available() > 0) {
 					if (XMLEditor.validateXMLString(inputStream)) {
 						return EContainerFormat.XML;
-					} else if(!new JSONObject(FileUtil.getContent(inputStream)).isEmpty()) {
+					} else if(FileUtil.getContent(inputStream).startsWith("{")) {
 						return EContainerFormat.JSON;
+					} else {
+						return EContainerFormat.DEFAULT;
 					}
 				}
 			} catch (IOException e) {
