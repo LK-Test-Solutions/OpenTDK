@@ -17,8 +17,12 @@ import RegressionTest.Container.RT_Container_exportContainer;
 import RegressionTest.Container.RT_Container_getHeader;
 import RegressionTest.CryptoUtility.RT_CryptoUtil_encrypt;
 import RegressionTest.DateUtility.RT_DateUtil_compare;
+import RegressionTest.DateUtility.RT_DateUtil_diff;
 import RegressionTest.DateUtility.RT_DateUtil_get;
+import RegressionTest.DateUtility.RT_DateUtil_getFirstOf;
+import RegressionTest.DateUtility.RT_DateUtil_getLastOf;
 import RegressionTest.DateUtility.RT_DateUtil_getMillisecondsLength;
+import RegressionTest.DateUtility.RT_DateUtil_getNumber;
 import RegressionTest.Dispatcher.RT_File_Properties_values;
 import RegressionTest.Dispatcher.RT_File_XML_values;
 import RegressionTest.Dispatcher.RT_Settings_attributes;
@@ -61,8 +65,12 @@ public class RegressionTestRunner {
 		RT_CSVContainer_setValues.main(args);
 		
 		RT_DateUtil_compare.main(args);
+		RT_DateUtil_diff.main(args);
 		RT_DateUtil_get.main(args);
+		RT_DateUtil_getFirstOf.main(args);
+		RT_DateUtil_getLastOf.main(args);
 		RT_DateUtil_getMillisecondsLength.main(args);
+		RT_DateUtil_getNumber.main(args);
 		
 		RT_File_Properties_values.main(args);
 		RT_File_XML_values.main(args);
