@@ -14,12 +14,12 @@ public class RT_DateUtil_getLastOf extends BaseRegression {
 	}
 	
 	@Override
-	public void runTest() {		
-		System.out.println("Last of week ==> " + DateUtil.getLastOf("04.04.2021", ChronoField.DAY_OF_WEEK, EFormat.DATE_2.getDateFormat())); // 2021-04-04
-		System.out.println("Last of month ==> " + DateUtil.getLastOf("2021.04.04 12:00:30", ChronoField.DAY_OF_MONTH, EFormat.DATE_5.getDateFormat())); // 2021.04.30
-		System.out.println("Last of year ==> " + DateUtil.getLastOf("2021.04.04 12:00:30", ChronoField.DAY_OF_YEAR, EFormat.DATE_4.getDateFormat())); // 31.12.2021
-		System.out.println("Last time of day ==> " + DateUtil.getLastOf(ChronoField.NANO_OF_DAY, EFormat.TIME_1.getDateFormat())); // 23.59.59
-		System.out.println("Last time of day ==> " + DateUtil.getLastOf("2021-04-04", ChronoField.NANO_OF_DAY, EFormat.TIMESTAMP_1.getDateFormat())); // 2021-04-04-23.59.59.999999
+	public void runTest() {	
+		BaseRegression.testResult(DateUtil.getLastOf("04.04.2021", ChronoField.DAY_OF_WEEK, EFormat.DATE_2.getDateFormat()), "Last of week", "2021-04-04");
+		BaseRegression.testResult(DateUtil.getLastOf("2021.04.04 12:00:30", ChronoField.DAY_OF_MONTH, EFormat.DATE_5.getDateFormat()), "Last of month", "2021.04.30");
+		BaseRegression.testResult(DateUtil.getLastOf("2021.04.04 12:00:30", ChronoField.DAY_OF_YEAR, EFormat.DATE_4.getDateFormat()), "Last of year", "31.12.2021");
+		BaseRegression.testResult(DateUtil.getLastOf(ChronoField.NANO_OF_DAY, EFormat.TIME_1.getDateFormat()), "Last time of day", "23.59.59");
+		BaseRegression.testResult(DateUtil.getLastOf("2021-04-04", ChronoField.NANO_OF_DAY, EFormat.TIMESTAMP_1.getDateFormat()), "Last time of day", "2021-04-04-23.59.59.999999");
 		
 	}
 
