@@ -13,10 +13,18 @@ public class RT_Container_readJson extends BaseRegression {
 	@Override
 	protected void runTest() {
 		DataContainer dc = new DataContainer("testdata/RegressionTestData/JsonExample.json");
-		BaseRegression.testResult(dc.getValue("cities"), "JSON node 'citites' with two values", "[\"Munich\",\"Berlin\"]");
-		BaseRegression.testResult(dc.getAttributes("properties", "salary")[0], "JSON value of attribute 'salary' under key 'properties'", "1000 EUR");
-
-//		dc.writeData("output/JsonOutput.json");
+		// Only possible at top level
+		BaseRegression.testResult(dc.getValue("id"), "ID", "1");
+		BaseRegression.testResult(dc.getValue("name"), "NAME", "LK");
+		BaseRegression.testResult(dc.getValue("permanent"), "PERM", "true");
+		BaseRegression.testResult(dc.getValue("address"), "ADDRESS", "{\"zipcode\":87463,\"city\":\"Munich\",\"street\":\"Schneckenburgerstrasse\"}");
+		BaseRegression.testResult(dc.getValue("phoneNumbers"), "PHONE_NUMBERS", "[123456,987654]");
+		BaseRegression.testResult(dc.getValue("cities"), "CITIES", "[\"Munich\",\"Berlin\"]");
+//		BaseRegression.testResult(dc.getValue("properties;age"), "AGE", "1");
+			
+		BaseRegression.testResult(dc.getAttributes("properties", "salary")[0], "SALARY", "1000 EUR");
+		BaseRegression.testResult(dc.getAttributes("properties/titles", "Sir")[0], "Sir", "true");
+		BaseRegression.testResult(dc.getAttributes("properties;titles", "Sir")[0], "Sir", "true");
 		
 	}
 

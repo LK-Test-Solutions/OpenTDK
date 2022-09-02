@@ -114,6 +114,16 @@ public class ListUtil {
 		}
 		return retVal;
 	}
+	
+	/**
+	 * Transform a list of primitive data types to a string array.
+	 * 
+	 * @param list List of primitive data types (wild card)
+	 * @return An array of type sting with all the elements of the committed list
+	 */
+	public static String[] asStringArr(List<?> list) {
+		return list.toArray(new String[list.size()]);
+	}
 
 	/**
 	 * Transform a list of unknown to to list of type string by using the valueOf method of the String

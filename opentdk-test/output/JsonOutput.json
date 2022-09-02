@@ -17,6 +17,10 @@
   987654
  ],
  "properties": {
+  "titles": {
+   "Madam": false,
+   "Sir": true
+  },
   "salary": "1000 EUR",
   "age": "26 years"
  }

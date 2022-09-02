@@ -18,6 +18,10 @@
   ],
   "properties": {
     "age": "26 years",
-    "salary": "1000 EUR"
+    "salary": "1000 EUR",
+    "titles": {
+	    "Sir": true,
+	    "Madam": false,
+  	}
   }
 }

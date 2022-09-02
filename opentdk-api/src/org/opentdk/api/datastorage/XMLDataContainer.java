@@ -9,20 +9,20 @@ import java.util.logging.Level;
 import java.util.stream.Collectors;
 
 import org.opentdk.api.datastorage.BaseContainer.EContainerFormat;
-import org.opentdk.api.io.FileUtil;
 import org.opentdk.api.io.XMLEditor;
 import org.opentdk.api.logger.MLogger;
 import org.w3c.dom.Element;
 
 /**
  * SubClass of {@link DataContainer} which provides all methods for reading and writing
- * from or to Ascii files in XML format, and store the data at runtime within the DataContainer.
+ * from or to ASCII files in XML format, and store the data at runtime within the DataContainer.
  * 
  * @author LK Test Solutions
  * @see org.opentdk.api.datastorage.DataContainer
  */
 public class XMLDataContainer implements CustomContainer {
 
+	// Unused?
 	public enum EImplicitHeaders {
 		XPath;
 	}
@@ -51,8 +51,8 @@ public class XMLDataContainer implements CustomContainer {
 	}
 
 	/**
-	 * This method is used to load data from an XML-File to the datacontainer. As
-	 * the structure of a XML is fundamentally different from the datacontainer
+	 * This method is used to load data from an XML-File to the data container. As
+	 * the structure of a XML is fundamentally different from the data container
 	 * instance, only references of the values are stored in the container as
 	 * "X-Paths". Every XML-Tag has its own column in the container. The references
 	 * alone are useless, they need to be read out by <code>getValue</code>.
@@ -117,20 +117,20 @@ public class XMLDataContainer implements CustomContainer {
 	@Override
 	public String[] getAttributes(String expr, String attrName) {
 		List<String> lst = new ArrayList<String>();
-		// leading "/" indicates a tagname with full xPath
+		// leading "/" indicates a tag name with full xPath
 		if (expr.startsWith("/")) {
 			// split all elements of full xPath
 			String[] splittedTags = expr.split("/");
-			// last element of the split xPath is the tagname
+			// last element of the split xPath is the tag name
 			String targetTag = splittedTags[splittedTags.length - 1];
-			// delete tagname from the string to get the parent xPath
+			// delete tag name from the string to get the parent xPath
 			String parentExpr = expr.substring(0, expr.length() - targetTag.length() - 1);
 			// get DOM element of the tags parent
 			Element e = xEdit.getElement(parentExpr);
-			// search all child elements that match to the target tagname
+			// search all child elements that match to the target tag name
 			for (Element eCh : xEdit.getChildren(e)) {
 				// get all attributes that matching to attrName and add the attributes value to
-				// the resultlist
+				// the result list
 				if (eCh.getTagName().equals(targetTag)) {
 					lst.add(eCh.getAttribute(attrName));
 				}
@@ -217,61 +217,6 @@ public class XMLDataContainer implements CustomContainer {
 			return retValues.toArray(new String[retValues.size()]);
 		}
 	}
-	
-//	private Object[] getColumn(String headerName, Filter fltr, String returnType) {
-//		List<FilterRule> implFilterRules = dc.getImplFilterRules(fltr);
-//		List<Element> filteredElements = new ArrayList<Element>();
-//		List<String> filteredValues = new ArrayList<String>();
-//
-//		// filter all values that match an implicit filter rule
-//		if (implFilterRules.size() > 0) {
-//			for (FilterRule frImpl : implFilterRules) {
-//				if (frImpl.getHeaderName().equalsIgnoreCase("XPath")) {
-//					Element tagElement = xEdit.getElement(frImpl.getValue());
-//					if (tagElement != null) {
-//						for (Element childE : xEdit.getChildren(tagElement)) {
-//							if (childE.getTagName().equals(headerName)) {
-//								filteredElements.add(childE);
-//								filteredValues.add(childE.getTextContent());
-//							}
-//						}
-//					}
-//				}
-//			}
-//		} else {
-//			// if no implicit filter rule exists, add all values to the filteredValues list
-//			for (Element e : xEdit.getElementList(headerName)) {
-//				filteredElements.add(e);
-//				filteredValues.add(e.getTextContent());
-//			}
-//		}
-//		
-//		List<Element> retElements = new ArrayList<>(filteredElements);
-//		List<String> retValues = new ArrayList<>(filteredValues);
-//		// apply standard filter
-//		for (FilterRule fr : fltr.getFilterRules()) {
-//			if (dc.getImplFilterRules(fltr).contains(fr) == false) {
-//				for (Element fltrE : filteredElements) {
-//					if (fr.isValidValue(fltrE.getTextContent(), fr.getValue()) == true) {
-//						retValues.remove(fltrE.getTextContent());
-//						retElements.remove(fltrE);
-//					}
-//					
-//				}
-//			} 
-//		}
-//		
-//		filteredElements = null;
-//		filteredValues = null;
-//		
-//		if (returnType.equals("elements")) {	
-//			filteredValues = null;
-//			return retElements.toArray(new Element[retElements.size()]);
-//		} else {
-//			filteredElements = null;
-//			return retValues.toArray(new String[retValues.size()]);
-//		}
-//	}
 
 	@Override
 	public void addField(String headerName, String value, Filter fltr) {
@@ -318,7 +263,7 @@ public class XMLDataContainer implements CustomContainer {
 	}
 
 	public void setFieldValues(String headerName, int[] occurences, String value, Filter fltr, boolean newField) {
-		// Initialize occurences array with 0 item, in case it is empty
+		// Initialize occurrences array with 0 item, in case it is empty
 		if(occurences.length < 1) {
 			occurences = new int[] {0};
 		}
@@ -340,26 +285,5 @@ public class XMLDataContainer implements CustomContainer {
 			}
 		}
 	}
-	
-//	public String[] setFieldValues(String headerName, int[] occurences, String value, Filter fltr, boolean newField) {
-//		List<String> outLst = new ArrayList<String>();
-//		for (FilterRule fltrRule : fltr.getFilterRules()) {
-//			if (fltrRule.getHeaderName().equalsIgnoreCase("XPath")) {
-//				if (newField) {
-////    				Element pathE = xEdit.checkXPath(fltrRule.getValue(), true);
-//					Element addedE = xEdit.addElement(fltrRule.getValue(), headerName, value);
-//					outLst.add(addedE.getTextContent());
-//				} else {
-//					xEdit.checkXPath(fltrRule.getValue() + "/" + headerName, true);
-//					Element[] elements = (Element[]) getColumn(headerName, fltr, "elements");
-//					for (Element e : elements) {
-//						Element changedE = xEdit.setElementValue(e, value);
-//						outLst.add(changedE.getTextContent());
-//					}
-//				}
-//				break;
-//			}
-//		}
-//		return outLst.toArray(new String[outLst.size()]);
-//	}
+
 }

@@ -4,10 +4,8 @@ import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
-import java.lang.reflect.Field;
 import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.logging.Level;
 
@@ -108,6 +106,7 @@ public class BaseDispatchComponent {
 	 * there is no reference to the parent class, where they are declared. This is why the parent class needs to be set for the runtime instance of 
 	 * the BaseDispatchComponent class.
 	 */
+	@SuppressWarnings("unused")
 	private Class<?> cls;
 	
 	/**
@@ -324,7 +323,7 @@ public class BaseDispatchComponent {
 	public static boolean checkDispatcherFile(String fileName, String rootNode, boolean createNew) throws IOException {
 		File file = new File(fileName);
 		if (createNew || !file.exists() || FileUtil.getContent(fileName).isBlank()) {
-			FileUtil.deleteFile(fileName);
+			FileUtil.deleteFile(fileName);			
 			XMLEditor xEdit = new XMLEditor(fileName, rootNode);
 			xEdit.save(fileName);
 		}
