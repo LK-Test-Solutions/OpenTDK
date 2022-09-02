@@ -2,10 +2,8 @@ package org.opentdk.api.datastorage;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.logging.Level;
-import java.util.stream.Collectors;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -14,7 +12,6 @@ import org.opentdk.api.datastorage.BaseContainer.EContainerFormat;
 import org.opentdk.api.io.FileUtil;
 import org.opentdk.api.logger.MLogger;
 import org.opentdk.api.util.ListUtil;
-import org.w3c.dom.Element;
 
 public class JSONDataContainer implements CustomContainer {
 
@@ -52,6 +49,7 @@ public class JSONDataContainer implements CustomContainer {
 		}
 		if (content != null) {
 			json = new JSONObject(content);
+
 			String[] names = JSONObject.getNames(json);
 			dc.setHeaders(names);
 			for (String header : names) {
@@ -63,9 +61,7 @@ public class JSONDataContainer implements CustomContainer {
 	@Override
 	public void writeData(String srcFileName) {
 		if (json == null || json.isEmpty()) {
-			MLogger.getInstance().log(Level.WARNING,
-					"JSON object is not initialized or empty ==> No JSON content to write", getClass().getSimpleName(),
-					"writeData");
+			MLogger.getInstance().log(Level.WARNING, "JSON object is not initialized or empty ==> No JSON content to write", getClass().getSimpleName(), "writeData");
 		} else {
 			try {
 				FileUtil.createFile(srcFileName, true);
@@ -100,10 +96,27 @@ public class JSONDataContainer implements CustomContainer {
 		if (implFilterRules.size() > 0) {
 			for (FilterRule frImpl : fltr.getFilterRules()) {
 				if (frImpl.getHeaderName().equalsIgnoreCase("XPath")) {
+
 					String searchExp = "/" + frImpl.getValue().replace(";", "/") + "/" + headerName;
 					Object result = json.query(searchExp);
-					//
-					filteredValues.add(result.toString());
+					String sResult = result.toString();
+
+					String[] saResults = null;
+					if (result instanceof JSONArray) {
+						if (sResult.startsWith("[") && sResult.endsWith("]")) {
+							sResult = sResult.substring(sResult.indexOf("[") + 1, sResult.indexOf("]"));
+						}
+						if (sResult.contains(",")) {
+							saResults = sResult.split(",");
+						}
+					}
+					if (saResults == null) {
+						filteredValues.add(sResult);
+					} else {
+						for (String res : saResults) {
+							filteredValues.add(res);
+						}
+					}
 				}
 			}
 			ret = ListUtil.asStringArr(filteredValues);
@@ -111,14 +124,24 @@ public class JSONDataContainer implements CustomContainer {
 			/*
 			 * Simply returns the whole content of the column header at top level.
 			 */
-			ret = new String[] { json.get(headerName).toString() };
+			Object result = json.get(headerName);
+			String sResult = result.toString();
+			ret = new String[] { sResult };
+			if (result instanceof JSONArray) {
+				if (sResult.startsWith("[") && sResult.endsWith("]")) {
+					sResult = sResult.substring(sResult.indexOf("[") + 1, sResult.indexOf("]"));
+				}
+				if (sResult.contains(",")) {
+					ret = sResult.split(",");
+				}
+			}
+
 		}
 		return ret;
 	}
 
 	@Override
-	public void addField(String headerName, String attributeName, String oldAttributeValue, String attributeValue,
-			Filter fltr) {
+	public void addField(String headerName, String attributeName, String oldAttributeValue, String attributeValue, Filter fltr) {
 
 	}
 
@@ -133,42 +156,86 @@ public class JSONDataContainer implements CustomContainer {
 	}
 
 	public void setFieldValues(String headerName, int[] occurences, String value, Filter fltr, boolean newField) {
-		// Initialize occurrences array with 0 item, in case it is empty
-		if (occurences.length < 1) {
-			occurences = new int[] { 0 };
+		occurences = null;
+
+		if (fltr.getFilterRules().isEmpty()) {
+			Object oldValue = json.get(headerName);
+			Object newValue = this.getDataType(oldValue, value);
+			if (newField) {
+				json.append(headerName, newValue);
+			} else {
+				json.put(headerName, newValue);
+			}
 		}
 		for (FilterRule fltrRule : fltr.getFilterRules()) {
-			if (fltrRule.getHeaderName().equalsIgnoreCase("XPath")) {			
+			if (fltrRule.getHeaderName().equalsIgnoreCase("XPath")) {
 				if (!fltrRule.getValue().strip().isEmpty()) {
-					
-//					String searchExp = "/" + fltrRule.getValue().replace(";", "/") + "/" + headerName;
-//					Object result = json.query(searchExp);
-//					
-//					Object field = null;
-//					if(result.equals(JSONObject.NULL)) {
-//						break;
-//					} else if(result instanceof JSONArray) {
-//						field = new JSONArray(result.toString());
-//					} else if(result instanceof JSONObject) {
-//						field = new JSONObject(result.toString());
-//					} else if(result instanceof String) {
-//						
-//					}
-//					if (newField) {
-//						((JSONObject) result).append(headerName, value);
-//					} else {
-//						((JSONObject) result).put(headerName, value);
-//					}
-				} else {
-					if(newField) {
-						json.append(headerName, value);
+
+					String searchExp = fltrRule.getValue().replace(";", "/") + "/" + headerName;
+					Object oldValue = json.query("/" + searchExp);
+					Object newValue = this.getDataType(oldValue, value);
+					Object result = null;
+
+					List<String> keyList = ListUtil.asList(searchExp.split("/"));
+					int i = 0;
+					for (String key : keyList) {
+						if (i == 0) {
+							result = json.get(key);
+						} else {
+							if (result instanceof JSONObject && i < keyList.size() - 1) {
+								result = ((JSONObject) result).get(key);
+							}
+//							else if(result instanceof JSONArray) {
+//								result = ((JSONArray) result).get(key);
+//							}
+						}
+						i++;
+					}
+					if (newField) {
+						((JSONObject) result).append(headerName, newValue);
 					} else {
-						json.put(headerName, value);
+						((JSONObject) result).put(headerName, newValue);
 					}
 				}
 				break;
 			}
 		}
+	}
+
+	private Object getDataType(Object oldValue, String newValue) {
+		Object ret = null;
+		if (oldValue instanceof String) {
+			ret = newValue;
+		} else if (oldValue instanceof Integer) {
+			ret = Integer.parseInt(newValue);
+		} else if (oldValue instanceof Float) {
+			ret = Float.parseFloat(newValue);
+		} else if (oldValue instanceof Double) {
+			ret = Double.parseDouble(newValue);
+		} else if (oldValue instanceof Boolean) {
+			ret = Boolean.parseBoolean(newValue);
+		} else if (oldValue instanceof JSONArray) {
+			String[] values = null;
+			String tempNewValue = newValue;
+			if (tempNewValue.startsWith("[") && tempNewValue.endsWith("]")) {
+				tempNewValue = tempNewValue.substring(tempNewValue.indexOf("[") + 1, tempNewValue.indexOf("]"));
+			}
+			if (tempNewValue.contains(",")) {
+				values = tempNewValue.split(",");
+			}
+			// TODO data type not knwon
+//			JSONArray jsonArray = (JSONArray) oldValue;
+//			for (int i = 0; i < jsonArray.length(); i++) {
+//				Object child = jsonArray.get(i);
+//
+//			}
+
+			ret = ListUtil.asList(values);
+
+		} else {
+			MLogger.getInstance().log(Level.SEVERE, "No data type detected", getClass().getSimpleName(), "getDataType");
+		}
+		return ret;
 	}
 
 }
