@@ -8,6 +8,7 @@ import java.util.logging.Level;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.json.JSONStringer;
 import org.opentdk.api.datastorage.BaseContainer.EContainerFormat;
 import org.opentdk.api.io.FileUtil;
 import org.opentdk.api.logger.MLogger;
@@ -103,9 +104,7 @@ public class JSONDataContainer implements CustomContainer {
 
 					String[] saResults = null;
 					if (result instanceof JSONArray) {
-						if (sResult.startsWith("[") && sResult.endsWith("]")) {
-							sResult = sResult.substring(sResult.indexOf("[") + 1, sResult.indexOf("]"));
-						}
+						sResult = this.splitJSONArray(sResult);
 						if (sResult.contains(",")) {
 							saResults = sResult.split(",");
 						}
@@ -128,9 +127,7 @@ public class JSONDataContainer implements CustomContainer {
 			String sResult = result.toString();
 			ret = new String[] { sResult };
 			if (result instanceof JSONArray) {
-				if (sResult.startsWith("[") && sResult.endsWith("]")) {
-					sResult = sResult.substring(sResult.indexOf("[") + 1, sResult.indexOf("]"));
-				}
+				sResult = this.splitJSONArray(sResult);
 				if (sResult.contains(",")) {
 					ret = sResult.split(",");
 				}
@@ -155,13 +152,21 @@ public class JSONDataContainer implements CustomContainer {
 		setFieldValues(headerName, occurences, value, fltr, false);
 	}
 
+	/**
+	 * Called when a value, array or object should be changed or added.
+	 * 
+	 * @param headerName JSON key
+	 * @param occurences unused
+	 * @param value      date to add or set
+	 * @param fltr       filter object to find the correct field
+	 * @param newField   flag to indicate if the value should be added or set
+	 */
 	public void setFieldValues(String headerName, int[] occurences, String value, Filter fltr, boolean newField) {
 		occurences = null;
-
+		// No filter ==> top level adjustments
 		if (fltr.getFilterRules().isEmpty()) {
-			Object oldValue = json.get(headerName);
-			Object newValue = this.getDataType(oldValue, value);
-			if (newField) {
+			Object newValue = this.getDataType(value);
+			if (newField && newValue instanceof JSONArray) {
 				json.append(headerName, newValue);
 			} else {
 				json.put(headerName, newValue);
@@ -172,8 +177,7 @@ public class JSONDataContainer implements CustomContainer {
 				if (!fltrRule.getValue().strip().isEmpty()) {
 
 					String searchExp = fltrRule.getValue().replace(";", "/") + "/" + headerName;
-					Object oldValue = json.query("/" + searchExp);
-					Object newValue = this.getDataType(oldValue, value);
+					Object newValue = this.getDataType(value);
 					Object result = null;
 
 					List<String> keyList = ListUtil.asList(searchExp.split("/"));
@@ -185,13 +189,10 @@ public class JSONDataContainer implements CustomContainer {
 							if (result instanceof JSONObject && i < keyList.size() - 1) {
 								result = ((JSONObject) result).get(key);
 							}
-//							else if(result instanceof JSONArray) {
-//								result = ((JSONArray) result).get(key);
-//							}
 						}
 						i++;
 					}
-					if (newField) {
+					if (newField && newValue instanceof JSONArray) {
 						((JSONObject) result).append(headerName, newValue);
 					} else {
 						((JSONObject) result).put(headerName, newValue);
@@ -202,38 +203,37 @@ public class JSONDataContainer implements CustomContainer {
 		}
 	}
 
-	private Object getDataType(Object oldValue, String newValue) {
+	private Object getDataType(String newValue) {
+		JSONObject.testValidity(newValue);
+
 		Object ret = null;
-		if (oldValue instanceof String) {
-			ret = newValue;
-		} else if (oldValue instanceof Integer) {
-			ret = Integer.parseInt(newValue);
-		} else if (oldValue instanceof Float) {
-			ret = Float.parseFloat(newValue);
-		} else if (oldValue instanceof Double) {
-			ret = Double.parseDouble(newValue);
-		} else if (oldValue instanceof Boolean) {
-			ret = Boolean.parseBoolean(newValue);
-		} else if (oldValue instanceof JSONArray) {
-			String[] values = null;
-			String tempNewValue = newValue;
-			if (tempNewValue.startsWith("[") && tempNewValue.endsWith("]")) {
-				tempNewValue = tempNewValue.substring(tempNewValue.indexOf("[") + 1, tempNewValue.indexOf("]"));
-			}
-			if (tempNewValue.contains(",")) {
-				values = tempNewValue.split(",");
-			}
-			// TODO data type not knwon
-//			JSONArray jsonArray = (JSONArray) oldValue;
-//			for (int i = 0; i < jsonArray.length(); i++) {
-//				Object child = jsonArray.get(i);
-//
-//			}
-
-			ret = ListUtil.asList(values);
-
+		if (newValue.startsWith("\"") && newValue.endsWith("\"")) {
+			ret = newValue.substring(newValue.indexOf("\"") + 1, newValue.indexOf("\""));
 		} else {
-			MLogger.getInstance().log(Level.SEVERE, "No data type detected", getClass().getSimpleName(), "getDataType");
+			try {
+				ret = new JSONArray(newValue);
+			} catch (JSONException e) {
+				ret = null;
+			}
+			if (ret == null) {
+				try {
+					ret = new JSONObject(newValue);
+				} catch (JSONException e) {
+					ret = null;
+				}
+				// All other data types like boolean or number
+				if (ret == null) {
+					ret = JSONObject.stringToValue(newValue);
+				}
+			}
+		}
+		return ret;
+	}
+
+	private String splitJSONArray(String input) {
+		String ret = input;
+		if (ret.startsWith("[") && ret.endsWith("]")) {
+			ret = ret.substring(ret.indexOf("[") + 1, ret.indexOf("]"));
 		}
 		return ret;
 	}

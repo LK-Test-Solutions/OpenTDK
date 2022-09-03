@@ -14,14 +14,15 @@
   "role": "Manager",
   "cities": [
     "Munich",
-    "Berlin"
+     86637,
+    "Berlin",
   ],
   "properties": {
     "age": "26 years",
     "salary": "1000 EUR",
     "titles": {
 	    "Sir": true,
-	    "Madam": false,
+	    "Madam": false
   	}
   }
 }
