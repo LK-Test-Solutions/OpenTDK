@@ -7,19 +7,31 @@
  "role": "Manager",
  "cities": [
   "Munich",
-  "Berlin"
+  86637,
+  "Augsburg"
  ],
  "permanent": true,
  "name": "LK",
- "id": 1,
+ "id": 2,
+ "people": [
+  {
+   "special": {"salary": 30000},
+   "name": "Boss",
+   "age": 52
+  },
+  {
+   "name": "Employee",
+   "age": 28
+  }
+ ],
  "phoneNumbers": [
   123456,
-  987654
+  654321
  ],
  "properties": {
   "titles": {
    "Madam": false,
-   "Sir": true
+   "Sir": false
   },
   "salary": "1000 EUR",
   "age": "26 years"

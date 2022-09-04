@@ -8,7 +8,6 @@ import java.util.logging.Level;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.json.JSONStringer;
 import org.opentdk.api.datastorage.BaseContainer.EContainerFormat;
 import org.opentdk.api.io.FileUtil;
 import org.opentdk.api.logger.MLogger;
@@ -75,19 +74,6 @@ public class JSONDataContainer implements CustomContainer {
 
 	}
 
-	/**
-	 * Retrieves the value of the attribute 'attrName' with the specified search
-	 * criteria 'expr' that is a semicolon separated string with the keys that point
-	 * to the result. Does not work for objects enumerations that are listed in a
-	 * JSON array.
-	 */
-//	@Override
-//	public String[] getAttributes(String expr, String attrName) {
-//		String searchExp = "/" + expr.replace(";", "/") + "/" + attrName;
-//		Object result = json.query(searchExp);
-//		return new String[] { result.toString() };
-//	}
-
 	@Override
 	public Object[] getColumn(String headerName, Filter fltr) {
 		String[] ret = null;
@@ -100,6 +86,7 @@ public class JSONDataContainer implements CustomContainer {
 
 					String searchExp = "/" + frImpl.getValue().replace(";", "/") + "/" + headerName;
 					Object result = json.query(searchExp);
+					JSONObject.testValidity(result);
 					String sResult = result.toString();
 
 					String[] saResults = null;
@@ -157,7 +144,7 @@ public class JSONDataContainer implements CustomContainer {
 	 * 
 	 * @param headerName JSON key
 	 * @param occurences unused
-	 * @param value      date to add or set
+	 * @param value      data to add or set
 	 * @param fltr       filter object to find the correct field
 	 * @param newField   flag to indicate if the value should be added or set
 	 */
@@ -188,6 +175,10 @@ public class JSONDataContainer implements CustomContainer {
 						} else {
 							if (result instanceof JSONObject && i < keyList.size() - 1) {
 								result = ((JSONObject) result).get(key);
+							} else if(result instanceof JSONArray && i < keyList.size() - 1) {
+								result = ((JSONArray) result).get(Integer.parseInt(key));
+							} else {
+								break;
 							}
 						}
 						i++;
@@ -195,7 +186,11 @@ public class JSONDataContainer implements CustomContainer {
 					if (newField && newValue instanceof JSONArray) {
 						((JSONObject) result).append(headerName, newValue);
 					} else {
-						((JSONObject) result).put(headerName, newValue);
+						if(result instanceof JSONArray) {
+							((JSONArray) result).put(newValue);
+						} else {
+							((JSONObject) result).put(headerName, newValue);
+						}						
 					}
 				}
 				break;
@@ -203,6 +198,19 @@ public class JSONDataContainer implements CustomContainer {
 		}
 	}
 
+	/**
+	 * Retrieves the data type out of the committed value. This can be a JSONObject,
+	 * JSONArray or any other primitive data type like string, integer or boolean.
+	 * E.g. if the input string has leading and trailing '"' it gets interpreted as
+	 * JSONString. If not it gets wrapped into a number or boolean. If it has the
+	 * syntax '[value1,value2]' it gets wrapped as JSONarray. And if it has the
+	 * syntax '{...}' it gets wrapped as JSONObject. A 'null' value is allowed, too,
+	 * and gets a JSON.NULL object.
+	 * 
+	 * @param newValue the value to add or put that should be checked
+	 * @return the detected object type depending on the syntax of the committed
+	 *         string
+	 */
 	private Object getDataType(String newValue) {
 		JSONObject.testValidity(newValue);
 

@@ -11,6 +11,19 @@
     123456,
     987654
   ],
+  "people": [
+  	{
+  		"name": "Boss",
+  		"age": 52,
+  		"special": {
+  			"salary": 25000
+  		}
+  	},
+  	{
+  		"name": "Employee",
+  		"age": 28
+  	}
+  ],
   "role": "Manager",
   "cities": [
     "Munich",
