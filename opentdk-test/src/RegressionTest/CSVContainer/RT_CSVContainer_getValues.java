@@ -6,7 +6,6 @@ import java.util.List;
 import org.opentdk.api.datastorage.DataContainer;
 import org.opentdk.api.datastorage.EOperator;
 import org.opentdk.api.datastorage.Filter;
-import org.opentdk.api.datastorage.FilterRule;
 
 import RegressionTest.BaseRegression;
 
@@ -20,31 +19,22 @@ public class RT_CSVContainer_getValues extends BaseRegression {
 	@Override
 	public void runTest() {
 		DataContainer dc = new DataContainer("./testdata/RegressionTestData/CSVContainer_Contacts.csv");
-		System.out.println("        ******** test1 ********");
 		test1(dc);
 		
-		System.out.println("        ******** test2 ********");
 		test2(dc);
 		
-		System.out.println("        ******** test3 ********");
 		test3(dc);
 
-		System.out.println("        ******** test4 ********");
 		test4(dc);
 		
-		System.out.println("        ******** test5 ********");
 		test5(dc);
 		
-		System.out.println("        ******** test6 ********");
 		test6(dc);
 		
-		System.out.println("        ******** test7 ********");
 		test7(dc);
 		
-		System.out.println("        ******** test8 ********");
 		test8(dc);
 		
-		System.out.println("        ******** test9 ********");
 		test9(dc);
 		
 //		System.out.println("        ******** test10 ********");

@@ -12,7 +12,6 @@ import org.opentdk.api.datastorage.BaseContainer.EContainerFormat;
 import org.opentdk.api.io.FileUtil;
 import org.opentdk.api.logger.MLogger;
 import org.opentdk.api.util.ListUtil;
-import org.w3c.dom.Element;
 
 public class JSONDataContainer implements CustomContainer {
 
@@ -88,20 +87,22 @@ public class JSONDataContainer implements CustomContainer {
 					String searchExp = "/" + frImpl.getValue().replace(";", "/") + "/" + headerName;
 					Object result = json.query(searchExp);
 					JSONObject.testValidity(result);
-					String sResult = result.toString();
+					if (result != null) {
+						String sResult = result.toString();
 
-					String[] saResults = null;
-					if (result instanceof JSONArray) {
-						sResult = this.splitJSONArray(sResult);
-						if (sResult.contains(",")) {
-							saResults = sResult.split(",");
+						String[] saResults = null;
+						if (result instanceof JSONArray) {
+							sResult = this.splitJSONArray(sResult);
+							if (sResult.contains(",")) {
+								saResults = sResult.split(",");
+							}
 						}
-					}
-					if (saResults == null) {
-						filteredValues.add(sResult);
-					} else {
-						for (String res : saResults) {
-							filteredValues.add(res);
+						if (saResults == null) {
+							filteredValues.add(sResult);
+						} else {
+							for (String res : saResults) {
+								filteredValues.add(res);
+							}
 						}
 					}
 				}
@@ -126,34 +127,88 @@ public class JSONDataContainer implements CustomContainer {
 	}
 
 	@Override
-	public void addField(String headerName, String attributeName, String oldAttributeValue, String attributeValue, Filter fltr) {
-		// No filter ==> top level adjustments
-		if (fltr.getFilterRules().isEmpty()) {
-			Object[] exisitingNode = this.getColumn(headerName, new Filter());
-			if (exisitingNode.length == 0) {
+	public void addField(String headerName, String value, Filter fltr) {
+		this.addField(headerName, "", value, fltr);
+	}
 
+	@Override
+	public void addField(String headerName, String fieldName, String newFieldValue, Filter fltr) {
+		this.addField(headerName, fieldName, "", newFieldValue, fltr);
+	}
+
+	@Override
+	public void addField(String headerName, String fieldName, String oldFieldValue, String newFieldValue, Filter fltr) {
+		Object[] exisitingNode = this.getColumn(headerName, fltr);
+		if (exisitingNode.length == 0) {
+			// Field does not exist ==> create it
+			this.setFieldValues(headerName, new int[0], newFieldValue, fltr);
+		} else {
+			if (fltr.getFilterRules().isEmpty()) {
+				Object newValue = this.getDataType(newFieldValue);
+				json.append(headerName, newValue);
+			}
+			for (FilterRule fltrRule : fltr.getFilterRules()) {
+				// Filter used ==> XPath usage
+				if (fltrRule.getHeaderName().equalsIgnoreCase("XPath") && !fltrRule.getValue().strip().isEmpty()) {
+					String searchExp = fltrRule.getValue().replace(";", "/") + "/" + headerName;
+					Object newValue = this.getDataType(newFieldValue);
+					Object result = null;
+
+					List<String> keyList = ListUtil.asList(searchExp.split("/"));
+					int i = 0;
+					for (String key : keyList) {
+						if (i == 0) {
+							result = json.get(key);
+						} else {
+							if (result instanceof JSONObject && i < keyList.size() - 1) {
+								result = ((JSONObject) result).get(key);
+							} else if (result instanceof JSONArray && i < keyList.size() - 1) {
+								result = ((JSONArray) result).get(Integer.parseInt(key));
+							} else {
+								break;
+							}
+						}
+						i++;
+					}
+					((JSONObject) result).append(headerName, newValue);
+					break;
+				}
 			}
 		}
-		for (FilterRule fltrRule : fltr.getFilterRules()) {
-			// Filter ==> XPath usage
-			if (fltrRule.getHeaderName().equalsIgnoreCase("XPath")) {
-				Object[] exisitingNode = this.getColumn(headerName, fltr);
-				if (exisitingNode.length == 0) {
+	}
 
+	@Override
+	public void deleteField(String headerName, String fieldName, String fieldValue, Filter fltr) {
+		// No filter ==> top level adjustments
+		if (fltr.getFilterRules().isEmpty()) {
+			json.remove(headerName);
+		}
+		for (FilterRule fltrRule : fltr.getFilterRules()) {
+			// Filter used ==> XPath usage
+			if (fltrRule.getHeaderName().equalsIgnoreCase("XPath") && !fltrRule.getValue().strip().isEmpty()) {
+				String searchExp = fltrRule.getValue().replace(";", "/") + "/" + headerName;
+				Object result = null;
+
+				List<String> keyList = ListUtil.asList(searchExp.split("/"));
+				int i = 0;
+				for (String key : keyList) {
+					if (i == 0) {
+						result = json.get(key);
+					} else {
+						if (result instanceof JSONObject && i < keyList.size() - 1) {
+							result = ((JSONObject) result).get(key);
+						} else if (result instanceof JSONArray && i < keyList.size() - 1) {
+							result = ((JSONArray) result).get(Integer.parseInt(key));
+						} else {
+							break;
+						}
+					}
+					i++;
 				}
+				((JSONObject) result).remove(headerName);
 				break;
 			}
 		}
-	}
-
-	@Override
-	public void deleteField(String headerName, String attributeName, String attributeValue, Filter fltr) {
-
-	}
-
-	@Override
-	public void setFieldValues(String headerName, int[] occurences, String value, Filter fltr) {
-		setFieldValues(headerName, occurences, value, fltr, false);
 	}
 
 	/**
@@ -165,19 +220,13 @@ public class JSONDataContainer implements CustomContainer {
 	 *                   becomes a boolean or '"Test"' becomes a string or
 	 *                   '[value1,value2]' an array
 	 * @param fltr       filter object to find the correct field
-	 * @param newField   flag to indicate if the value should be added or set ==>
-	 *                   for JSONArray only
 	 */
-	public void setFieldValues(String headerName, int[] occurences, String value, Filter fltr, boolean newField) {
+	public void setFieldValues(String headerName, int[] occurences, String value, Filter fltr) {
 		occurences = null;
 		// No filter ==> top level adjustments
 		if (fltr.getFilterRules().isEmpty()) {
 			Object newValue = this.getDataType(value);
-			if (newField && newValue instanceof JSONArray) {
-				json.append(headerName, newValue);
-			} else {
-				json.put(headerName, newValue);
-			}
+			json.put(headerName, newValue);
 		}
 		for (FilterRule fltrRule : fltr.getFilterRules()) {
 			// Filter used ==> XPath usage
@@ -202,14 +251,10 @@ public class JSONDataContainer implements CustomContainer {
 					}
 					i++;
 				}
-				if (newField && newValue instanceof JSONArray) {
-					((JSONObject) result).append(headerName, newValue);
+				if (result instanceof JSONArray) {
+					((JSONArray) result).put(newValue);
 				} else {
-					if (result instanceof JSONArray) {
-						((JSONArray) result).put(newValue);
-					} else {
-						((JSONObject) result).put(headerName, newValue);
-					}
+					((JSONObject) result).put(headerName, newValue);
 				}
 				break;
 			}

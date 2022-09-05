@@ -13,6 +13,7 @@ import RegressionTest.ChartCreation.RT_ChartCreation_createChart;
 import RegressionTest.CommonUtility.RT_CommonUtil_get;
 import RegressionTest.Container.RT_Container_checkHeader;
 import RegressionTest.Container.RT_Container_construct;
+import RegressionTest.Container.RT_Container_delete;
 import RegressionTest.Container.RT_Container_exportContainer;
 import RegressionTest.Container.RT_Container_getHeader;
 import RegressionTest.CryptoUtility.RT_CryptoUtil_encrypt;
@@ -31,10 +32,13 @@ import RegressionTest.Dispatcher.RT_noFile_Default_values;
 import RegressionTest.Dispatcher.RT_noFile_XML_values;
 import RegressionTest.IO.RT_FileUtil;
 import RegressionTest.IO.RT_XFileWiter;
+import RegressionTest.JSONContainer.RT_Container_dispatchJson;
+import RegressionTest.JSONContainer.RT_Container_readJson;
 import RegressionTest.ListUtility.RT_ListUtility_asString;
 import RegressionTest.Logging.RT_Logging_log;
 import RegressionTest.Meter.RT_Counter;
 import RegressionTest.Meter.RT_Transaction;
+import RegressionTest.XMLContainer.RT_XMLContainer_getValues;
 
 /**
  * Executes all regression test classes by calling their main method.
@@ -45,15 +49,23 @@ import RegressionTest.Meter.RT_Transaction;
 public class RegressionTestRunner {
 
 	public static void main(String[] args) {
-
+		// RegressionTest.ChartCreation
+		RT_ChartCreation_createChart.main(args);
+		
+		// RegressionTest.CommonUtility
 		RT_CommonUtil_get.main(args);
+		
+		// RegressionTest.Container
 		RT_Container_checkHeader.main(args);
 		RT_Container_construct.main(args);
+		RT_Container_delete.main(args);
 		RT_Container_exportContainer.main(args);
 		RT_Container_getHeader.main(args);
 		
+		// RegressionTest.CryptoUtility
 		RT_CryptoUtil_encrypt.main(args);
 		
+		// RegressionTest.CSVContainer
 		RT_CSVContainer_addColumn.main(args);
 		RT_CSVContainer_addRow.main(args);
 		RT_CSVContainer_getColumns.main(args);
@@ -64,6 +76,7 @@ public class RegressionTestRunner {
 		RT_CSVContainer_setRow.main(args);
 		RT_CSVContainer_setValues.main(args);
 		
+		// RegressionTest.DateUtility
 		RT_DateUtil_compare.main(args);
 		RT_DateUtil_diff.main(args);
 		RT_DateUtil_get.main(args);
@@ -72,6 +85,7 @@ public class RegressionTestRunner {
 		RT_DateUtil_getMillisecondsLength.main(args);
 		RT_DateUtil_getNumber.main(args);
 		
+		// RegressionTest.Dispatcher
 		RT_File_Properties_values.main(args);
 		RT_File_XML_values.main(args);
 		RT_noFile_Default_values.main(args);
@@ -79,17 +93,26 @@ public class RegressionTestRunner {
 		RT_Settings_attributes.main(args);
 		RT_Settings_exportContainer.main(args);
 		
+		// RegressionTest.IO
 		RT_FileUtil.main(args);
 		RT_XFileWiter.main(args);
 		
+		// RegressionTest.JSONContainer
+		RT_Container_dispatchJson.main(args);
+		RT_Container_readJson.main(args);
+		
+		// RegressionTest.ListUtility
 		RT_ListUtility_asString.main(args);
 		
+		// RegressionTest.Logging
 		RT_Logging_log.main(args);
 		
+		// RegressionTest.Meter
 		RT_Counter.main(args);
 		RT_Transaction.main(args);
 		
-		RT_ChartCreation_createChart.main(args);
+		// RegressionTest.XMLContainer
+		RT_XMLContainer_getValues.main(args);	
 		
 	}
 }

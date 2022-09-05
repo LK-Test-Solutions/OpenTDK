@@ -234,7 +234,7 @@ public class DataContainer extends BaseContainer {
 		containerFormat = EContainerFormat.DEFAULT;
 		adaptContainer();
 	}
-	
+
 //	public DataContainer(EContainerFormat containerFormat) {
 //		String input = "";
 //		InputStream stream = new ByteArrayInputStream(input.getBytes(StandardCharsets.UTF_8));
@@ -352,7 +352,7 @@ public class DataContainer extends BaseContainer {
 		}
 		instance.readData(filter);
 	}
-	
+
 	/**
 	 * This method is designed for tabular data formats to add column names to
 	 * existing <code>DataContainer</code>. In case the column name already exists,
@@ -618,8 +618,7 @@ public class DataContainer extends BaseContainer {
 				values.add(row);
 			}
 		} else {
-			MLogger.getInstance().log(Level.WARNING, "Headers of appending DataContainer don't match to the headers of the current instance. DataContainer will not be appended!",
-					getClass().getSimpleName(), getClass().getName(), "appendDataContainer");
+			MLogger.getInstance().log(Level.WARNING, "Headers of appending DataContainer don't match to the headers of the current instance. DataContainer will not be appended!", getClass().getSimpleName(), getClass().getName(), "appendDataContainer");
 		}
 	}
 
@@ -649,14 +648,16 @@ public class DataContainer extends BaseContainer {
 
 		switch (containerFormat) {
 		case XML:
+		case JSON:
+			instance.deleteField(headerName, "", "", fltr);
+			break;
 		case PROPERTIES:
 		case CSV:
 		case DEFAULT:
 			instance.deleteField(headerName, attributeName, attributeValue, fltr);
 			break;
 		default:
-			MLogger.getInstance().log(Level.WARNING, "The method is only supported for DataContainer format " + containerFormat.toString() + "!", getClass().getSimpleName(), getClass().getName(),
-					"deleteField");
+			MLogger.getInstance().log(Level.WARNING, "The method is not supported for DataContainer format " + containerFormat.toString() + "!", getClass().getSimpleName(), getClass().getName(), "deleteField");
 			break;
 		}
 	}
@@ -676,7 +677,7 @@ public class DataContainer extends BaseContainer {
 				if (inputStream.available() > 0) {
 					if (XMLEditor.validateXMLString(inputStream)) {
 						return EContainerFormat.XML;
-					} else if(FileUtil.getContent(inputStream).startsWith("{")) {
+					} else if (FileUtil.getContent(inputStream).startsWith("{")) {
 						return EContainerFormat.JSON;
 					} else {
 						return EContainerFormat.DEFAULT;
@@ -736,7 +737,7 @@ public class DataContainer extends BaseContainer {
 		HashMap<Integer, String> hm = getHeadersIndexed();
 		XFileWriter writer = null;
 //		try {
-			writer = new XFileWriter(new File(fileName));
+		writer = new XFileWriter(new File(fileName));
 //		} catch (FileNotFoundException e) {
 //			MLogger.getInstance().log(Level.SEVERE, e);
 //		}
@@ -755,8 +756,7 @@ public class DataContainer extends BaseContainer {
 				}
 				break;
 			default:
-				MLogger.getInstance().log(Level.WARNING, "Header Type '" + getContainerFormat().getHeaderType().toString() + "' not supported by for export!", getClass().getSimpleName(),
-						getClass().getName(), "exportContainer");
+				MLogger.getInstance().log(Level.WARNING, "Header Type '" + getContainerFormat().getHeaderType().toString() + "' not supported by for export!", getClass().getSimpleName(), getClass().getName(), "exportContainer");
 				return;
 			}
 			writer.close();
@@ -948,12 +948,12 @@ public class DataContainer extends BaseContainer {
 		switch (getContainerFormat().getHeaderType()) {
 		case TREE:
 			for (String headerName : columnHeaders) {
-				try {
-					colList.add((String[]) instance.getColumn(headerName, rowFilter));
-				} catch (Exception e) {
-					MLogger.getInstance().log(Level.SEVERE, e, "getColumnsList");
-					throw new RuntimeException(e);
-				}
+//				try {
+				colList.add((String[]) instance.getColumn(headerName, rowFilter));
+//				} catch (Exception e) {
+//					MLogger.getInstance().log(Level.SEVERE, e, "getColumnsList");
+//					throw new RuntimeException(e);
+//				}
 			}
 			break;
 		default:
@@ -1062,15 +1062,15 @@ public class DataContainer extends BaseContainer {
 		return new String[] {};
 	}
 
-	public Map<String, String> getRowAsMap(int rowIndex){
+	public Map<String, String> getRowAsMap(int rowIndex) {
 		Map<String, String> outRow = new HashMap<String, String>();
 		String[] columnHeaders = getHeaderNamesIndexed();
-		for(String header:columnHeaders) {
+		for (String header : columnHeaders) {
 			outRow.put(header, this.getValue(header, rowIndex));
 		}
 		return outRow;
 	}
-	
+
 	/**
 	 * Returns the number of rows of the current <code>DataContainer</code>
 	 * instance.
@@ -1172,8 +1172,7 @@ public class DataContainer extends BaseContainer {
 		}
 		for (int i = 0; i < rowIndexes.length; i++) {
 			if (rowIndexes[i] >= values.size()) {
-				MLogger.getInstance().log(Level.INFO, "Row-index " + rowIndexes[i] + " is out of range. Maximum number of rows in container is " + values.size(), this.getClass().getSimpleName(),
-						this.getClass().getName(), "getRowsList");
+				MLogger.getInstance().log(Level.INFO, "Row-index " + rowIndexes[i] + " is out of range. Maximum number of rows in container is " + values.size(), this.getClass().getSimpleName(), this.getClass().getName(), "getRowsList");
 				break;
 			}
 			String[] row = values.get(rowIndexes[i]);
@@ -1740,8 +1739,7 @@ public class DataContainer extends BaseContainer {
 				}
 				for (int i = 0; i < rowIDs.length; i++) {
 					if ((occ.size() > 0) && (!occ.contains(i))) {
-						MLogger.getInstance().log(Level.INFO, "Occurence index not in occurences array.", this.getClass().getSimpleName(),
-								"setValues(String headerName, int[] occurences, String value, Filter fltr)");
+						MLogger.getInstance().log(Level.INFO, "Occurence index not in occurences array.", this.getClass().getSimpleName(), "setValues(String headerName, int[] occurences, String value, Filter fltr)");
 					} else {
 						setFieldValue(headerName, rowIDs[i], value);
 					}

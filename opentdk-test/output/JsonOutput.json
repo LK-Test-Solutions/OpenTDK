@@ -1,10 +1,5 @@
 {
  "new": {"person": 1},
- "address": {
-  "zipcode": 87463,
-  "city": "Munich",
-  "street": "Schneckenburgerstrasse"
- },
  "role": "Manager",
  "cities": [
   "Munich",
@@ -16,18 +11,23 @@
  "id": 2,
  "people": [
   {
-   "special": {"salary": 30000},
+   "special": {},
    "name": "Boss",
    "age": 52
   },
   {
    "name": "Employee",
    "age": 28
+  },
+  {
+   "name": "Volunteer",
+   "age": 16
   }
  ],
  "phoneNumbers": [
   123456,
-  654321
+  654321,
+  485625
  ],
  "properties": {
   "titles": {
