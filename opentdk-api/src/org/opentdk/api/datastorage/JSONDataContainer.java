@@ -12,6 +12,7 @@ import org.opentdk.api.datastorage.BaseContainer.EContainerFormat;
 import org.opentdk.api.io.FileUtil;
 import org.opentdk.api.logger.MLogger;
 import org.opentdk.api.util.ListUtil;
+import org.w3c.dom.Element;
 
 public class JSONDataContainer implements CustomContainer {
 
@@ -126,7 +127,23 @@ public class JSONDataContainer implements CustomContainer {
 
 	@Override
 	public void addField(String headerName, String attributeName, String oldAttributeValue, String attributeValue, Filter fltr) {
+		// No filter ==> top level adjustments
+		if (fltr.getFilterRules().isEmpty()) {
+			Object[] exisitingNode = this.getColumn(headerName, new Filter());
+			if (exisitingNode.length == 0) {
 
+			}
+		}
+		for (FilterRule fltrRule : fltr.getFilterRules()) {
+			// Filter ==> XPath usage
+			if (fltrRule.getHeaderName().equalsIgnoreCase("XPath")) {
+				Object[] exisitingNode = this.getColumn(headerName, fltr);
+				if (exisitingNode.length == 0) {
+
+				}
+				break;
+			}
+		}
 	}
 
 	@Override
@@ -140,13 +157,16 @@ public class JSONDataContainer implements CustomContainer {
 	}
 
 	/**
-	 * Called when a value, array or object should be changed or added.
+	 * Called when a value, array or object should be changed or created.
 	 * 
 	 * @param headerName JSON key
 	 * @param occurences unused
-	 * @param value      data to add or set
+	 * @param value      data to set ==> the JSON data type gets parsed e.g. 'true'
+	 *                   becomes a boolean or '"Test"' becomes a string or
+	 *                   '[value1,value2]' an array
 	 * @param fltr       filter object to find the correct field
-	 * @param newField   flag to indicate if the value should be added or set
+	 * @param newField   flag to indicate if the value should be added or set ==>
+	 *                   for JSONArray only
 	 */
 	public void setFieldValues(String headerName, int[] occurences, String value, Filter fltr, boolean newField) {
 		occurences = null;
@@ -160,37 +180,35 @@ public class JSONDataContainer implements CustomContainer {
 			}
 		}
 		for (FilterRule fltrRule : fltr.getFilterRules()) {
-			if (fltrRule.getHeaderName().equalsIgnoreCase("XPath")) {
-				if (!fltrRule.getValue().strip().isEmpty()) {
+			// Filter used ==> XPath usage
+			if (fltrRule.getHeaderName().equalsIgnoreCase("XPath") && !fltrRule.getValue().strip().isEmpty()) {
+				String searchExp = fltrRule.getValue().replace(";", "/") + "/" + headerName;
+				Object newValue = this.getDataType(value);
+				Object result = null;
 
-					String searchExp = fltrRule.getValue().replace(";", "/") + "/" + headerName;
-					Object newValue = this.getDataType(value);
-					Object result = null;
-
-					List<String> keyList = ListUtil.asList(searchExp.split("/"));
-					int i = 0;
-					for (String key : keyList) {
-						if (i == 0) {
-							result = json.get(key);
-						} else {
-							if (result instanceof JSONObject && i < keyList.size() - 1) {
-								result = ((JSONObject) result).get(key);
-							} else if(result instanceof JSONArray && i < keyList.size() - 1) {
-								result = ((JSONArray) result).get(Integer.parseInt(key));
-							} else {
-								break;
-							}
-						}
-						i++;
-					}
-					if (newField && newValue instanceof JSONArray) {
-						((JSONObject) result).append(headerName, newValue);
+				List<String> keyList = ListUtil.asList(searchExp.split("/"));
+				int i = 0;
+				for (String key : keyList) {
+					if (i == 0) {
+						result = json.get(key);
 					} else {
-						if(result instanceof JSONArray) {
-							((JSONArray) result).put(newValue);
+						if (result instanceof JSONObject && i < keyList.size() - 1) {
+							result = ((JSONObject) result).get(key);
+						} else if (result instanceof JSONArray && i < keyList.size() - 1) {
+							result = ((JSONArray) result).get(Integer.parseInt(key));
 						} else {
-							((JSONObject) result).put(headerName, newValue);
-						}						
+							break;
+						}
+					}
+					i++;
+				}
+				if (newField && newValue instanceof JSONArray) {
+					((JSONObject) result).append(headerName, newValue);
+				} else {
+					if (result instanceof JSONArray) {
+						((JSONArray) result).put(newValue);
+					} else {
+						((JSONObject) result).put(headerName, newValue);
 					}
 				}
 				break;

@@ -2,17 +2,14 @@ package org.opentdk.api.dispatcher;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.logging.Level;
 import java.lang.reflect.Field;
 
 import org.opentdk.api.application.EBaseSettings;
 import org.opentdk.api.datastorage.DataContainer;
-import org.opentdk.api.logger.MLogger;
 
 /**
  * BaseDispatcher is build as a super class which can be inherited by subclasses to implement a list of variables,  

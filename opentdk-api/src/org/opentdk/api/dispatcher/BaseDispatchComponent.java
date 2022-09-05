@@ -117,18 +117,29 @@ public class BaseDispatchComponent {
 	}
 	
 	/**
-	 * Constructor used to declare variables for tabular formats like .properties or .csv Files
+	 * Constructor with the settings class and the field name. The XPath and the default value are unused (set to blank).
+	 * Can be used for tabular formats or tree formats (if no XPath gets used).
 	 * 
-	 * @param Key - Name of the dispatcher class where the BaseDispatchComponent variable is declared. If the class is an extended subclass, then the name of the superclass needs to be used. 
+	 * @param parentClass The dispatcher class where the BaseDispatchComponent variable is declared. If the class is an extended subclass, then the superclass needs to be used.
+	 * @param paramName Name of a node, associated with the variable
+	 */
+	public BaseDispatchComponent(Class<?> parentClass, String paramName) {
+		this(parentClass.getSimpleName(), paramName, "", "");
+	}
+	
+	/**
+	 * Constructor used to declare variables for tabular formats like .properties or .csv files or tree formats (if no XPath gets used).
+	 * 
+	 * @param key - Name of the dispatcher class where the BaseDispatchComponent variable is declared. If the class is an extended subclass, then the name of the superclass needs to be used. 
 	 * @param paramName - Header name of the field. Tabular formats can either have column header or row headers.
 	 * @param dVal - Default value returned by the variable in case the field doesn't exist in the associated DataContainer or file.
 	 */
-	public BaseDispatchComponent(String Key, String paramName, String dVal) {
-		this(Key, paramName, "", dVal);
+	public BaseDispatchComponent(String key, String paramName, String dVal) {
+		this(key, paramName, "", dVal);
 	}
 
 	/**
-	 * Constructor used for tabular formats like .properties or .csv Files
+	 * Constructor used for tabular formats like .properties or .csv Files or tree formats (if no XPath gets used).
 	 * 
 	 * @param parentClass - The dispatcher class where the BaseDispatchComponent variable is declared. If the class is an extended subclass, then the superclass needs to be used. 
 	 * @param paramName - Header name of the field. Tabular formats can either have column header or row headers.

@@ -12,7 +12,9 @@ public class EJsonValues extends BaseDispatcher {
 	public static final BaseDispatchComponent CITIES = new BaseDispatchComponent(EJsonValues.class, "cities", "", "");
 	public static final BaseDispatchComponent EMPLOYEE_AGE = new BaseDispatchComponent(EJsonValues.class, "age", "people/1", "");
 	public static final BaseDispatchComponent BOSS_SALARY = new BaseDispatchComponent(EJsonValues.class, "salary", "people/0/special", "");
+	public static final BaseDispatchComponent ROLE = new BaseDispatchComponent(EJsonValues.class, "role");
 
+	public static final BaseDispatchComponent NEW = new BaseDispatchComponent(EJsonValues.class, "new", "");
 	public static final BaseDispatchComponent INVALID = new BaseDispatchComponent(EJsonValues.class, "invalid", "", "");
 
 

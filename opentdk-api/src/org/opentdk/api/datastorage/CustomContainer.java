@@ -1,6 +1,5 @@
 package org.opentdk.api.datastorage;
 
-import java.io.FileNotFoundException;
 import java.io.IOException;
 
 /**
@@ -51,7 +50,7 @@ interface CustomContainer {
      * @param fltr			Filter condition for more precise localization of the element within the data structure.
      */
 	default void addField(String headerName, String value, Filter fltr) {
-    	
+		return;
     }
 
     /**
@@ -67,7 +66,7 @@ interface CustomContainer {
      * @param fltr				Filter condition for more precise localization of the element within the data structure.
      */
     default void addField(String headerName, String attributeName, String attributeValue, Filter fltr) {
-    	
+    	return;
     }
 
     /**
@@ -84,7 +83,7 @@ interface CustomContainer {
      * @param fltr				Filter condition for more precise localization of the element within the data structure.
      */
     default void addField(String headerName, String attributeName, String oldAttrValue, String attributeValue, Filter fltr) {
-    	
+    	return;
     }
 
     /**
@@ -139,7 +138,7 @@ interface CustomContainer {
      * @param fltr			Filter condition of the elements to search for.
      */
 	default void setFieldValues(String headerName, int[] occurences, String value, Filter fltr) {
-
+		return;
 	}
 	
 }

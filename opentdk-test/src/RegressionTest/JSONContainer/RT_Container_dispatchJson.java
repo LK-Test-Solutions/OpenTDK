@@ -36,6 +36,7 @@ public class RT_Container_dispatchJson extends BaseRegression {
 		EJsonValues.PHONE_NUMBERS.setValue("[123456,654321]");
 		EJsonValues.CITIES.setValue("[\"Munich\",86637,\"Augsburg\"]");
 		EJsonValues.BOSS_SALARY.setValue("30000");
+		EJsonValues.NEW.setValue("{\"person\": 1}");
 		
 		BaseRegression.testResult(EJsonValues.ID.getValue(), "ID after set", "2");
 		BaseRegression.testResult(EJsonValues.SIR.getValue(), "SIR after set", "false");
@@ -44,6 +45,7 @@ public class RT_Container_dispatchJson extends BaseRegression {
 		BaseRegression.testResult(EJsonValues.BOSS_SALARY.getValue(), "BOSS SALARY after set", "30000");
 
 		// ADD
+		EJsonValues.ROLE.addValue("Employee");
 		EJsonValues.PHONE_NUMBERS.addValue("485625");
 		
 		// DELETE
