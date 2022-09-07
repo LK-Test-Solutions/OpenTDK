@@ -9,28 +9,45 @@ import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.ButtonBar.ButtonData;
 
 /**
- * Standard messages boxes for information or warning issues. Prerequisites: An application specific bundle.properties file with the used strings e.g. "messagebox.type.Information = Information"
- *
- * Usage example: MessageDialog message = new MessageDialog(mainApp.getBundle()); message.showMessageBox(MessageType.WARNING, mainApp.getBundle().getString("messagebox.RequiredField.title"),
- * mainApp.getBundle().getString("messagebox.your.message"));
- *
- * @author LK Test Solutions GmbH
+ * Standard message box for information or warning issues. Prerequisites: An
+ * application specific bundle.properties file with the used strings e.g.
+ * "messagebox.type.Information = Information".
+ * 
+ * @author LK Test Solutions
  *
  */
 public class MessageDialog {
+	/**
+	 * Object that stores all internationalized strings that are used in the
+	 * application.
+	 */
 	private ResourceBundle rscBundle;
 
-//	TODO Do not use TGR specific code and the preferences are not necessary to use this class
-//	static Preferences prefs = Preferences.userRoot().node("/com/lk/tgr/settings/dialog");
-
+	/**
+	 * Create a new <code>MessageDialog</code>.
+	 * 
+	 * @param bundle {@link #rscBundle}
+	 */
 	public MessageDialog(ResourceBundle bundle) {
 		rscBundle = bundle;
 	}
 
+	/**
+	 * All available designs of the <code>MessageDialog</code>.
+	 */
 	public enum MessageType {
 		INFORMATION, CONFIRMATION, CONFIRMATION_YES_NO, CONFIRMATION_SAVE_SAVEAS, CONFIRMATION_SAVE_NEW, CONFIRMATION_CHECK, WARNING, ERROR, NONE
 	}
 
+	/**
+	 * Let the message box appear.
+	 * 
+	 * @param mt          one of the message types defined in
+	 *                    <code>MessageType</code>
+	 * @param headerText  text in the header area of the dialog
+	 * @param contentText text in the body area of the dialog
+	 * @return selected button if the user selection has to be analyzed
+	 */
 	public ButtonType showMessageBox(MessageType mt, String headerText, String contentText) {
 		Alert alert;
 		ButtonType bt = new ButtonType("");
@@ -54,7 +71,6 @@ public class MessageDialog {
 			alert.setTitle(rscBundle.getString("dict.Confirmation"));
 			buttonTypeOne = new ButtonType(rscBundle.getString("dict.Yes"));
 			buttonTypeTwo = new ButtonType(rscBundle.getString("dict.No"));
-//				buttonTypeFour = new ButtonType(rscBundle.getString("dict.Cancel"), ButtonData.CANCEL_CLOSE);
 			alert.getButtonTypes().setAll(buttonTypeOne, buttonTypeTwo);
 			break;
 		case CONFIRMATION_SAVE_SAVEAS:
@@ -81,7 +97,6 @@ public class MessageDialog {
 			alert.getDialogPane().setContent(selection);
 			buttonTypeFour = new ButtonType(rscBundle.getString("dict.Apply"), ButtonData.OK_DONE);
 			alert.getButtonTypes().setAll(buttonTypeFour);
-//				alert.getDialogPane().set(selection);
 			break;
 		case ERROR:
 			alert = new Alert(AlertType.ERROR);
@@ -113,13 +128,6 @@ public class MessageDialog {
 		} else if (alert.getResult() == buttonTypeThree) {
 			bt = ButtonType.FINISH;
 		} else if (alert.getResult() == buttonTypeFour) {
-			if (mt == MessageType.CONFIRMATION_CHECK) {
-				@SuppressWarnings("unused")
-				boolean sel = false;
-				if (selection.isSelected())
-					sel = true;
-//				prefs.putBoolean("CheckBoxSelection", sel);
-			}
 			bt = ButtonType.CANCEL;
 		}
 		return bt;

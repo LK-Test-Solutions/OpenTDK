@@ -6,9 +6,7 @@ import java.net.URL;
 import java.util.ResourceBundle;
 import java.util.logging.Level;
 
-import org.opentdk.gui.controls.ApplyDialog;
 import org.opentdk.gui.controls.ChoiceBox;
-import org.opentdk.gui.controls.ChooserDialog;
 import org.opentdk.gui.controls.InputDialog;
 import org.opentdk.gui.controls.MessageDialog;
 
@@ -17,6 +15,7 @@ import org.opentdk.api.logger.MLogger;
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.fxml.FXMLLoader;
+import javafx.geometry.Insets;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.paint.Color;
@@ -25,8 +24,9 @@ import javafx.stage.Stage;
 import javafx.stage.StageStyle;
 
 /**
- * This class gets used as extend for the main classes of JavaFX GUI applications. It provides basic
- * methods and properties that are required to create and show GUI dialogues and components.
+ * This class gets used as extend for the main classes of JavaFX GUI
+ * applications. It provides basic methods and properties that are required to
+ * create and show GUI dialogues and components.
  * <p>
  * 
  * Sample usage:<br>
@@ -52,10 +52,11 @@ import javafx.stage.StageStyle;
  * 	}
  * </pre>
  * 
- * This would launch a simple window on the screen. The look is defined in the Sample.fxml file that
- * can be designed with the SceneBuilder application. The controller class is in the same package
- * than the FXML file and the sample controller skeleton can be generated with SceneBuilder as well.
- * The title of the window is 'Test'.<br>
+ * This would launch a simple window on the screen. The look is defined in the
+ * Sample.fxml file that can be designed with the SceneBuilder application. The
+ * controller class is in the same package than the FXML file and the sample
+ * controller skeleton can be generated with SceneBuilder as well. The title of
+ * the window is 'Test'.<br>
  * <br>
  * Advanced usage:<br>
  * <br>
@@ -81,18 +82,6 @@ public abstract class BaseApplication extends Application {
 	 * Vertical position of the application in pixel.
 	 */
 	private double posY = 0;
-
-	/**
-	 * Default configuration file of the application with several GUI properties like layout, log file
-	 * etc.
-	 */
-//	private static final String defaultAppSettingsFile = "conf" + File.separator + "AppSettings.xml";
-
-	/**
-	 * Full name (path + name) to the settings XML file that the {@link #BaseApplication()} used to read
-	 * application properties like log file and window bounds.
-	 */
-//	private String appSettingsFile;
 	/**
 	 * CSS file to style the look of the application.
 	 */
@@ -102,20 +91,20 @@ public abstract class BaseApplication extends Application {
 	 */
 	private ResourceBundle resourceBundle;
 	/**
-	 * Stage instance of the main layout of the application that gets initialized when the start method
-	 * gets called. It is available as getter for the sub class and gets used to initialize the main
-	 * controller class.
+	 * Stage instance of the main layout of the application that gets initialized
+	 * when the start method gets called. It is available as getter for the sub
+	 * class and gets used to initialize the main controller class.
 	 */
 	private Stage primaryStage;
-
-	// Set the default settings file before any other operation to always have one available.
-//	static {
-//		EBaseAppSettings.setDataContainer(EBaseAppSettings.class, defaultAppSettingsFile);
-//	}
+	/**
+	 * Default choice box size that can be overwritten via
+	 */
+	private Insets choiceBoxSize = new Insets(20, 150, 10, 10);
 
 	/**
-	 * Force the sub class to load a root layout with the {@link #primaryStage} to have a main window
-	 * appearing with the look of the FXML file that is assigned to the main controller class. <br>
+	 * Force the sub class to load a root layout with the {@link #primaryStage} to
+	 * have a main window appearing with the look of the FXML file that is assigned
+	 * to the main controller class. <br>
 	 * <br>
 	 * Example content of the method:
 	 * 
@@ -135,14 +124,15 @@ public abstract class BaseApplication extends Application {
 	 * }
 	 * </pre>
 	 * 
-	 * In this case the FXML file is in the same package (recommended) than the controller class and the
-	 * title of the stage (window) is 'Test'.
+	 * In this case the FXML file is in the same package (recommended) than the
+	 * controller class and the title of the stage (window) is 'Test'.
 	 */
 	protected abstract void showRootLayout();
 
 	/**
-	 * Gets called after {@link #launch(String...)} was called by the sub class in the main method. The
-	 * method is empty by default and is used here to initialize the <code>MLogger</code> class.
+	 * Gets called after {@link #launch(String...)} was called by the sub class in
+	 * the main method. The method is empty by default and is used here to
+	 * initialize the <code>MLogger</code> class.
 	 */
 	public void init() throws Exception {
 //		MLogger.getInstance().setLogFile(EBaseAppSettings.APP_LOGFILE.getValue());
@@ -150,8 +140,8 @@ public abstract class BaseApplication extends Application {
 	}
 
 	/**
-	 * Gets called after {@link #init()} and is used to set the primary stage (with size properties) and
-	 * implicitly call {@link #showRootLayout()}.
+	 * Gets called after {@link #init()} and is used to set the primary stage (with
+	 * size properties) and implicitly call {@link #showRootLayout()}.
 	 */
 	public void start(Stage primaryStage) throws Exception {
 		this.primaryStage = primaryStage;
@@ -163,8 +153,8 @@ public abstract class BaseApplication extends Application {
 	}
 
 	/**
-	 * Call this method to close the primary stage, which closes the application and stops the JavaFX
-	 * application thread.
+	 * Call this method to close the primary stage, which closes the application and
+	 * stops the JavaFX application thread.
 	 */
 	public void close() {
 		this.primaryStage.close();
@@ -172,80 +162,52 @@ public abstract class BaseApplication extends Application {
 	}
 
 	/**
-	 * Returns the current instance of the applyDialog object. Apply Dialog is used to apply or skip an
-	 * action, described by the content of the dialog.
+	 * Creates a new <code>ChoiceBox</code> instance with the apply button text
+	 * 'dict.Apply' and the cancel button text 'dict.Cancel' that are defined in the
+	 * properties file connected to the <code>ResourceBundle</code>. The size of the
+	 * dialog has the default values of {@link #choiceBoxSize}.
 	 * 
-	 * @return current instance of the applyDialog object
+	 * @return new <code>ChoiceBox</code> instance
 	 */
-	public ApplyDialog getApplyDialog() {
-		return new ApplyDialog(this.resourceBundle);
+	public ChoiceBox getChoiceBox() {
+		final String apply = this.resourceBundle.getString("dict.Apply");
+		final String cancel = this.resourceBundle.getString("dict.Cancel");
+		return new ChoiceBox(this.choiceBoxSize, apply, cancel);
 	}
 
 	/**
-	 * Returns the current instance of the chooserDialog object. ChooserDialog is an OS depending
-	 * explorer for opening or saving files.
+	 * Define the size of the four sides of the choice box.
 	 * 
-	 * @return current instance of the chooserDialog object
+	 * @param size {@link #choiceBoxSize}
 	 */
-	public ChooserDialog getChooserDialog() {
-		return new ChooserDialog();
+	public final void setChoiceBoxSize(Insets size) {
+		if (size == null || size == Insets.EMPTY) {
+			MLogger.getInstance().log(Level.SEVERE, "Insets are null or empty", this.getClass().getSimpleName(), "setChoiceBoxSize");
+			return;
+		}
+		this.choiceBoxSize = size;
 	}
 
 	/**
-	 * Returns the current instance of the inputDialog object. InputDialog can be used to pass user
-	 * input into the application
-	 * 
-	 * @return current instance of the imputDialog object
+	 * Returns an instance of the InputDialog object. InputDialog can be
+	 * used to pass user input into the application.
 	 */
 	public InputDialog getInputDialog() {
-		return new InputDialog(this.resourceBundle);
+		return new InputDialog();
 	}
 
 	/**
-	 * Returns the current instance of the messageDialog object. MessageDialog is used to display any
-	 * application message like error, warning, information etc. in a pop-up dialog.
-	 * 
-	 * @return current instance of the messageDialog object
+	 * Returns the instance of the MessageDialog object. MessageDialog is
+	 * used to display any application message like error, warning, information etc.
+	 * in a pop up dialog.
 	 */
 	public MessageDialog getMessageDialog() {
 		return new MessageDialog(this.resourceBundle);
 	}
 
 	/**
-	 * Returns the current instance of the choiceBox object.
-	 * 
-	 * @return current instance of the choiceBox object
-	 */
-	public ChoiceBox getChoiceBox() {
-		return new ChoiceBox();
-	}
-
-	/**
-	 * Retrieve the path and filename of the application settings file.
-	 * 
-	 * @return path and filename as string
-	 */
-//	public String getAppSettingsFile() {
-//		return appSettingsFile;
-//	}
-
-//	public void setAppSettingsFile(String fileName) {
-//		if (fileName == null || fileName.isBlank() || fileName.length() > Short.MAX_VALUE) {
-//			MLogger.getInstance().log(Level.SEVERE, "Invalid parameter 'fileName'. Use default ==> " + defaultAppSettingsFile, getClass().getSimpleName(), "setAppSettingsFile");
-//			return;
-//		}
-//		try {
-//			this.appSettingsFile = new File(fileName).getCanonicalPath();
-//			EBaseAppSettings.setDataContainer(EBaseAppSettings.class, this.appSettingsFile);
-//		} catch (IOException e) {
-//			this.appSettingsFile = null;
-//			MLogger.getInstance().log(Level.SEVERE, e, "setAppSettingsFile");
-//		}
-//	}
-
-	/**
-	 * Returns the name and path of the style sheet (CSS file) which is used for the GUI design like
-	 * colors, fonts
+	 * Returns the name and path of the style sheet (CSS file) which is used for the
+	 * GUI design like colors, fonts
 	 * 
 	 * @return Instance of the rootLayoutController object
 	 */
@@ -254,9 +216,9 @@ public abstract class BaseApplication extends Application {
 	}
 
 	/**
-	 * Assigns the full path and filename of the Cascaded Style Sheet with the GUI theme (colors, fonts
-	 * etc.) to the styleSheet property. This CSS file controls representation of the GUI elements of
-	 * this application.
+	 * Assigns the full path and filename of the Cascaded Style Sheet with the GUI
+	 * theme (colors, fonts etc.) to the styleSheet property. This CSS file controls
+	 * representation of the GUI elements of this application.
 	 * 
 	 * @param css Full path and name of the CSS file
 	 */
@@ -276,8 +238,8 @@ public abstract class BaseApplication extends Application {
 	}
 
 	/**
-	 * Use this method to define which resource bundle should be used to store internationalized
-	 * strings.<br>
+	 * Use this method to define which resource bundle should be used to store
+	 * internationalized strings.<br>
 	 * <br>
 	 * Example:
 	 * 
@@ -285,7 +247,8 @@ public abstract class BaseApplication extends Application {
 	 * setResourceBundle(ResourceBundle.getBundle("application.test.Bundle", new Locale("en")));
 	 * </pre>
 	 * 
-	 * Points to a file named Bundle_en.properties that is located in the package application.test.<br>
+	 * Points to a file named Bundle_en.properties that is located in the package
+	 * application.test.<br>
 	 * <br>
 	 * 
 	 * @param bundle {@link #resourceBundle}
@@ -396,8 +359,8 @@ public abstract class BaseApplication extends Application {
 	}
 
 	/**
-	 * {@link #showStage(String, String, Stage)} Use the model option to define if the window can be
-	 * used parallel to the origin window (true).
+	 * {@link #showStage(String, String, Stage)} Use the model option to define if
+	 * the window can be used parallel to the origin window (true).
 	 */
 	public BaseController showStage(String fxmlFile, String title, boolean modal) throws IOException {
 		Stage stage = new Stage();
@@ -408,12 +371,14 @@ public abstract class BaseApplication extends Application {
 	}
 
 	/**
-	 * Show a new stage on the screen. For an example usage see {@link #BaseApplication()}.
+	 * Show a new stage on the screen. For an example usage see
+	 * {@link #BaseApplication()}.
 	 * 
 	 * @param fxmlFile The FXML file that defines the looks of the stage.
 	 * @param title    Text on the top of the window.
-	 * @param stage    The javafx.application.Stage object that should be used. If unknown use
-	 *                 {@link #showStage(String, String)} to simply pass <code>new Stage()</code>.
+	 * @param stage    The javafx.application.Stage object that should be used. If
+	 *                 unknown use {@link #showStage(String, String)} to simply pass
+	 *                 <code>new Stage()</code>.
 	 * @return <code>BaseController</code> instance that controls the FXMl file.
 	 * @throws IOException
 	 */
@@ -457,8 +422,8 @@ public abstract class BaseApplication extends Application {
 	}
 
 	/**
-	 * Similar to {@link #showStage(String, String, Stage)} but used to embed container into an existing
-	 * parent stage.
+	 * Similar to {@link #showStage(String, String, Stage)} but used to embed
+	 * container into an existing parent stage.
 	 * 
 	 * @param fxmlFile The FXML file that defines the looks of the container.
 	 * @return <code>BaseController</code> instance that controls the FXMl file.
@@ -495,7 +460,8 @@ public abstract class BaseApplication extends Application {
 	 * {@link #posY}
 	 * </pre>
 	 * 
-	 * There are default values for every property if it was not set in the {@link #init()} method.
+	 * There are default values for every property if it was not set in the
+	 * {@link #init()} method.
 	 */
 	private void setStageProperties() {
 

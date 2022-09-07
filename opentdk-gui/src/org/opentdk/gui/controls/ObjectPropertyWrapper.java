@@ -5,7 +5,6 @@ import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleObjectProperty;
 
-@SuppressWarnings("javadoc")
 public class ObjectPropertyWrapper<T> {
 
 	private final ObjectProperty<T> object = new SimpleObjectProperty<>();

@@ -11,7 +11,6 @@ import org.opentdk.api.io.FileUtil;
 import org.opentdk.api.logger.MLogger;
 
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.FileWriter;

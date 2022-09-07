@@ -9,9 +9,8 @@ public class SampleCall_SettingsFile {
 	public SampleCall_SettingsFile() {
 		String[] args = new String[] {"-settingsfile=./conf/TemplateApplicationSettings.xml"};
 		try {
-			Application app = new Application(args);
+			new Application(args);
 		} catch (Exception e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 	}

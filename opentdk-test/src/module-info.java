@@ -19,16 +19,17 @@ module opentdk.test {
 	exports RegressionTest.CryptoUtility;
 	exports RegressionTest.CSVContainer;
 	exports Template.Application;
+	exports Tests.BaseApplication;
 	
 
 	requires java.desktop;
 	requires java.logging;
 	requires java.sql;
 	requires javafx.base;
-	requires javafx.controls;
-	requires javafx.graphics;
+	requires transitive javafx.controls;
+	requires transitive javafx.graphics;
 	requires javafx.swing;
 	requires transitive opentdk.api;
-	requires opentdk.gui;
+	requires transitive opentdk.gui;
 	requires org.json;
 }
