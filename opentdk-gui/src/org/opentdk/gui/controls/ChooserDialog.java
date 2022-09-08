@@ -1,7 +1,11 @@
 package org.opentdk.gui.controls;
 
 import java.io.File;
+import java.util.Arrays;
 import java.util.List;
+import java.util.logging.Level;
+
+import org.opentdk.api.logger.MLogger;
 
 import javafx.stage.DirectoryChooser;
 import javafx.stage.FileChooser;
@@ -13,11 +17,12 @@ import javafx.stage.FileChooser;
  * Call like this:
  * 
  * <pre>
- * List{@literal <File>} files = openFileChooserDialog(TITLE, ExtensionType.FILE, LATESTAPTH); 
+ * List{@literal <File>} files = ChooserDialog.openFileChooser(TITLE, ExtensionType.FILE, DialogType.CHOOSE, LATESTPATH); 
  * </pre>
  * 
  * The latest path can stored in a properties file or set to null to open the
- * default path (user home)
+ * default path (user home).<br>
+ * <br>
  * 
  * @author LK Test Solutions
  *
@@ -28,97 +33,131 @@ public final class ChooserDialog {
 	}
 
 	/**
-	 * A file can be opened in the application or in another program
-	 */
-	public enum FileOpeningType {
-		INTERN, EXTERN;
-	}
-
-	/**
-	 * Set extension filter in the chooser dialog: FILE: TXT, JAVA, CSV, XML etc.
-	 * APP: DMG, APP, EXE, RPG etc.
+	 * Available extension filters in the chooser dialog.
 	 */
 	public enum ExtensionType {
-		FILE, APP;
+		FILE(Arrays.asList(new FileChooser.ExtensionFilter("All Files", "*.*"), new FileChooser.ExtensionFilter("java", "*.java"), new FileChooser.ExtensionFilter("txt", "*.txt"), new FileChooser.ExtensionFilter("csv", "*.csv"), new FileChooser.ExtensionFilter("xml", "*.xml"))), APP(Arrays.asList(new FileChooser.ExtensionFilter("exe", "*.exe"), new FileChooser.ExtensionFilter("dmg", "*.dmg"), new FileChooser.ExtensionFilter("app", "*.app"), new FileChooser.ExtensionFilter("rpm", "*.rpm")));
+
+		/**
+		 * File ending filter list that get added to the FileChooser instance. Not used
+		 * for DiectoryChooser, of course.
+		 */
+		private List<FileChooser.ExtensionFilter> filters;
+
+		/**
+		 * @param extFilters {@link #filters}
+		 */
+		ExtensionType(List<FileChooser.ExtensionFilter> extFilters) {
+			this.filters = extFilters;
+		}
+
+		/**
+		 * @return {@link #filters}
+		 */
+		public List<FileChooser.ExtensionFilter> getFilters() {
+			return filters;
+		}
+	}
+
+	public enum DialogType {
+		CHOOSE, SAVE;
 	}
 
 	/**
-	 * Open the OS depending explorer to open or save files.
+	 * Show the OS depending explorer to open or save files. The latest path is
+	 * default user.home.
+	 * 
+	 * @param title the title of the chooser dialog
+	 * @param ext   the extension of the files that should be displayed by default
+	 * @param type  One of the DialogType e.g. CHOOSE or SAVE
+	 * @return the chosen file as <code>File</code> list instance
+	 */
+	public static List<File> openFileChooser(String title, ExtensionType ext, DialogType type) {
+		return openFileChooser(title, ext, type, null);
+	}
+
+	/**
+	 * Show the OS depending explorer to open or save files.
 	 * 
 	 * @param title      the title of the chooser dialog
 	 * @param ext        the extension of the files that should be displayed by
-	 *                   default.
-	 * @param latestPath if the latest path string was saved somewhere, it can be
-	 *                   used to open the chooser at this location again.
-	 * @return the chosen file as <code>File</code> instance.
+	 *                   default
+	 * @param latestPath if the latest path was stored, it can be used to open the
+	 *                   chooser at this location again
+	 * @return the chosen file as <code>File</code> list instance
 	 */
-	public static List<File> openFileChooserDialog(final String title, final ExtensionType ext, final String latestPath) {
-		final FileChooser fileChooser = new FileChooser(); /* Initialize the file chooser object */
-
-		String load = null;
-		if (latestPath == null || latestPath.isEmpty()) {
-			load = System.getProperty("user.home");
+	public static List<File> openFileChooser(String title, ExtensionType ext, DialogType type, String latestPath) {
+		String chooserTitle = null;
+		if (title == null || title.isBlank()) {
+			MLogger.getInstance().log(Level.WARNING, "Title is null or blank", ChooserDialog.class.getSimpleName(), "openFileChooserDialog");
+			chooserTitle = "";
 		} else {
-			load = latestPath;
+			chooserTitle = title;
 		}
-		File file = new File(load);
 
-		if (ext == ExtensionType.FILE) {
-			configureFileChooser(fileChooser, file, file.getName(), ExtensionType.FILE, title);
-		} else if (ext == ExtensionType.APP) {
-			configureFileChooser(fileChooser, file, file.getName(), ExtensionType.APP, title);
+		String pathToLoad = null;
+		if (latestPath == null || latestPath.isBlank()) {
+			pathToLoad = System.getProperty("user.home");
+		} else {
+			pathToLoad = latestPath;
 		}
-		return fileChooser.showOpenMultipleDialog(null);
-	}
 
-	public static File openSaveDialog(final String title, final ExtensionType ext, final String latestPath) {
 		final FileChooser fileChooser = new FileChooser();
 
-		fileChooser.setTitle(title);
+		File file = new File(pathToLoad);
+		fileChooser.setTitle(chooserTitle);
+		fileChooser.setInitialFileName(file.getName());
+		fileChooser.getExtensionFilters().addAll(ext.getFilters());
 
-		String load = null;
-		if (latestPath == null || latestPath.isEmpty()) {
-			load = System.getProperty("user.home");
-		} else {
-			load = latestPath;
+		switch (type) {
+		case CHOOSE:
+			return fileChooser.showOpenMultipleDialog(null);
+		case SAVE:
+			return Arrays.asList(fileChooser.showSaveDialog(null));
+		default:
+			throw new RuntimeException("No DialogType detected in openFileDialog");
 		}
-		File file = new File(load);
-
-		if (ext == ExtensionType.FILE) {
-			configureFileChooser(fileChooser, file, file.getName(), ExtensionType.FILE, title);
-		} else if (ext == ExtensionType.APP) {
-			configureFileChooser(fileChooser, file, file.getName(), ExtensionType.APP, title);
-		}
-		return fileChooser.showSaveDialog(null);
 	}
 
-	private static void configureFileChooser(FileChooser fileChooser, File latest, String name, ExtensionType ext, String title) {
-		fileChooser.setTitle(title);
-		fileChooser.setInitialFileName(name);
-
-		if (ext == ExtensionType.FILE) {
-			fileChooser.getExtensionFilters().addAll(new FileChooser.ExtensionFilter("All Files", "*.*"), new FileChooser.ExtensionFilter("java", "*.java"), new FileChooser.ExtensionFilter("txt", "*.txt"), new FileChooser.ExtensionFilter("csv", "*.csv"), new FileChooser.ExtensionFilter("xml", "*.xml"));
-		} else if (ext == ExtensionType.APP) {
-			fileChooser.getExtensionFilters().addAll(new FileChooser.ExtensionFilter("exe", "*.exe"), new FileChooser.ExtensionFilter("dmg", "*.dmg"), new FileChooser.ExtensionFilter("app", "*.app"), new FileChooser.ExtensionFilter("rpm", "*.rpm"));
-		}
-
+	/**
+	 * Show the OS depending explorer to open directories. The latest path is
+	 * default user.home.
+	 * 
+	 * @param title title of the window
+	 * @return chosen directory as <code>File</code> object
+	 */
+	public static File openDirectoryChooser(String title) {
+		return openDirectoryChooser(title, null);
 	}
 
+	/**
+	 * Show the OS depending explorer to open directories.
+	 * 
+	 * @param title  title of the window
+	 * @param latest if the latest path was stored, it can be used to open the
+	 *               chooser at this location again
+	 * @return chosen directory as <code>File</code> object
+	 */
 	public static File openDirectoryChooser(String title, String latest) {
-		final DirectoryChooser dirChooser = new DirectoryChooser(); 
-		String load;
-		if (latest == null || latest.isEmpty() || !new File(latest).exists())
-			load = System.getProperty("user.home");
-		else
-			load = latest;
+		String chooserTitle = null;
+		if (title == null || title.isBlank()) {
+			MLogger.getInstance().log(Level.WARNING, "Title is null or blank", ChooserDialog.class.getSimpleName(), "openDirectoryChooser");
+			chooserTitle = "";
+		} else {
+			chooserTitle = title;
+		}
 
-		configureDirectoryChooser(dirChooser, load, title);
+		String pathToLoad = null;
+		if (latest == null || latest.isBlank() || !new File(latest).exists()) {
+			pathToLoad = System.getProperty("user.home");
+		} else {
+			pathToLoad = latest;
+		}
+
+		final DirectoryChooser dirChooser = new DirectoryChooser();
+		dirChooser.setTitle(chooserTitle);
+		dirChooser.setInitialDirectory(new File(pathToLoad));
 
 		return dirChooser.showDialog(null);
-	}
-
-	private static void configureDirectoryChooser(DirectoryChooser directoryChooser, String latest, String title) {
-		directoryChooser.setTitle(title); 
-		directoryChooser.setInitialDirectory(new File(latest));
 	}
 }
