@@ -57,3 +57,4 @@ With its implemented default behaviour the `MLogger` will write all messages of 
 ### Recent version with sources and dependencies
 [opentdk-api-1.5.8.zip](https://github.com/LK-Test-Solutions/OpenTDK/files/9452868/opentdk-api-1.5.8.zip)
 
+[opentdk-1.5.9.zip](https://github.com/LK-Test-Solutions/OpenTDK/files/9530541/opentdk-1.5.9.zip)
