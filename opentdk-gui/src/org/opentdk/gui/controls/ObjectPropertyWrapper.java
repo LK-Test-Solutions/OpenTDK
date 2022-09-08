@@ -5,6 +5,19 @@ import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleObjectProperty;
 
+/**
+ * Whenever the items of a control of javafx.scene.controls is in editing mode this class helps to 
+ * display the items correctly. This is a typical JavaFX bean object.<br>
+ * <br>
+ * E.g. if a list view should be editable it gets initialized like this:
+ * <pre>
+ * {@literal ListView<ObjectPropertyWrapper<String>>} view = ...
+ * </pre>
+ * 
+ * @author FME (LK Test Solutions)
+ *
+ * @param <T>
+ */
 public class ObjectPropertyWrapper<T> {
 
 	private final ObjectProperty<T> object = new SimpleObjectProperty<>();

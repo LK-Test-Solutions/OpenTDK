@@ -6,12 +6,13 @@ import java.util.Stack;
 import javafx.scene.control.TreeItem;
 
 /**
- * Iterates over a TreeTable and adds values to stack.
- * @author FME
+ * Iterates over a TreeTable and adds values to a stack.
+ * 
+ * @author FME (LK Test Solutions)
  */
 public class TreeTableIterator<T> implements Iterator<TreeItem<T>> {
 
-	private Stack<TreeItem<T>> stack = new Stack<>();
+	private final Stack<TreeItem<T>> stack = new Stack<>();
 	
 	public TreeTableIterator(TreeItem<T> root) {
 		stack.push(root);

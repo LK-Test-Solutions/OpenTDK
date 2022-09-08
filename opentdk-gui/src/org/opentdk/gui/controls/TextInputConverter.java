@@ -1,3 +1,4 @@
+
 package org.opentdk.gui.controls;
 
 import javafx.scene.control.cell.TextFieldListCell;
@@ -5,23 +6,22 @@ import javafx.util.StringConverter;
 import javafx.scene.control.Cell;
 
 /**
- * Use this class to convert between the text input of a
- * {@link javafx.scene.control.Cell} and any other type supported by
- * {@link org.opentdk.gui.controls.ObjectPropertyWrapper}. This has to be done
- * once at initialization of the cell factory of the object that contains
- * cells.<br>
+ * Whenever the items of a control of javafx.scene.controls have editable
+ * {@link javafx.scene.control.Cell} this class helps to display the text input
+ * of the cells correctly.<br>
  * <br>
  * 
- * Example for a list cell with text fields:<br>
- * <br>
- * lstv.setCellFactory(factory {@literal ->} {<br>
- * TextFieldListCell{@literal <ObjectPropertyWrapper<String>>} cell = new<br>
- * TextFieldListCell{@literal <>}(); cell.setConverter(new TextInputConverter(cell));<br>
- * return cell; <br>
+ * Example for a list cell of type text field:
+ * 
+ * <pre>
+ * listview.setCellFactory(factory {@literal ->} {
+ * 	TextFieldListCell{@literal <ObjectPropertyWrapper<String>>} cell = new TextFieldListCell{@literal <>}(); 
+ * 	cell.setConverter(new TextInputConverter(cell));
+ * 	return cell; 
  * });
+ * </pre>
  * 
- * 
- * @author FME (LK Test Solutions GmbH)
+ * @author FME (LK Test Solutions)
  *
  */
 public class TextInputConverter extends StringConverter<ObjectPropertyWrapper<String>> {
@@ -29,7 +29,7 @@ public class TextInputConverter extends StringConverter<ObjectPropertyWrapper<St
 	/**
 	 * The cell object where the text input should be converted.
 	 */
-	private Cell<ObjectPropertyWrapper<String>> cell;
+	private final Cell<ObjectPropertyWrapper<String>> cell;
 
 	/**
 	 * Entry point to use this class.

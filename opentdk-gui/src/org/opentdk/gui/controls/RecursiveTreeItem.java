@@ -12,6 +12,7 @@ import javafx.util.Callback;
 /**
  * A helper class to get the number of tree items of a tree table.
  */
+@Deprecated
 public class RecursiveTreeItem<T> extends TreeItem<T> {
 
     private Callback<T, ObservableList<T>> childrenFactory;
