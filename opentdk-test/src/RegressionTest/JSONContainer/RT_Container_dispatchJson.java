@@ -18,12 +18,15 @@ public class RT_Container_dispatchJson extends BaseRegression {
 		// GET
 		BaseRegression.testResult(EJsonValues.SIR.getValue(), "SIR", "true");
 		BaseRegression.testResult(EJsonValues.SIR.getValues()[0], "SIR", "true");
+		BaseRegression.testResult(EJsonValues.NAME.getValue(), "NAME", "LK");
 		BaseRegression.testResult(EJsonValues.PHONE_NUMBERS.getValue(), "PHONE_NUMBER FIRST VALUE", "123456");
 		BaseRegression.testResult(EJsonValues.PHONE_NUMBERS.getValues()[1], "PHONE_NUMBER SECOND VALUE", "987654");
 		BaseRegression.testResult(EJsonValues.CITIES.getValue(), "CITIES FIRST VALUE", "\"Munich\"");
 		BaseRegression.testResult(EJsonValues.CITIES.getValues()[1], "CITIES SECOND VALUE", "86637");
 		BaseRegression.testResult(EJsonValues.EMPLOYEE_AGE.getValue(), "EMPLOYEE AGE", "28");
 		BaseRegression.testResult(EJsonValues.BOSS_SALARY.getValue(), "BOSS SALARY", "25000");
+		BaseRegression.testResult(EJsonValues.BOSS_NAME.getValue(), "BOSS_NAME", "Boss");
+
 
 		try {
 			EJsonValues.INVALID.getValue();

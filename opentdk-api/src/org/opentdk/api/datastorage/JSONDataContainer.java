@@ -45,7 +45,12 @@ public class JSONDataContainer implements CustomContainer {
 		if (!dc.getFileName().isEmpty()) {
 			content = FileUtil.getContent(dc.getFileName());
 		} else if (dc.getInputStream() != null) {
-			content = FileUtil.getContent(dc.getInputStream());
+			try {
+				content = new String(dc.getInputStream().readAllBytes());
+			} catch (IOException e) {
+				MLogger.getInstance().log(Level.SEVERE, e);
+				content = null;
+			}
 		}
 		if (content != null) {
 			json = new JSONObject(content);

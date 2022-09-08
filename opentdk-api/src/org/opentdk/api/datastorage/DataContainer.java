@@ -16,7 +16,7 @@ import java.util.Set;
 import java.util.logging.Level;
 import java.util.stream.Collectors;
 
-import org.opentdk.api.io.FileUtil;
+import org.json.JSONObject;
 import org.opentdk.api.io.XFileWriter;
 import org.opentdk.api.io.XMLEditor;
 import org.opentdk.api.logger.*;
@@ -235,11 +235,6 @@ public class DataContainer extends BaseContainer {
 		adaptContainer();
 	}
 
-//	public DataContainer(EContainerFormat containerFormat) {
-//		String input = "";
-//		InputStream stream = new ByteArrayInputStream(input.getBytes(StandardCharsets.UTF_8));
-//	}
-
 	/**
 	 * Constructor that is called, when importing data from a database request to
 	 * the container. No filter will be used and the column delimiter for the
@@ -352,6 +347,67 @@ public class DataContainer extends BaseContainer {
 		}
 		instance.readData(filter);
 	}
+	
+	/**
+	 * Analyzes the file extension and/or structure of the data content and an enumeration
+	 * of type {@link EContainerFormat} which defines the type of DataContaner that
+	 * needs to be adapted.
+	 * 
+	 * @return enumeration of type {@link EContainerFormat}
+	 */
+	private final EContainerFormat detectDataFormat() {
+		if (resultSet != null) {
+			return EContainerFormat.RESULTSET;
+		} else if (inputStream != null) {
+			try {
+				if (inputStream.available() > 0) {
+				
+					String inputContent = new String(inputStream.readAllBytes());
+					// Every access consumes the stream so a reset is necessary
+					inputStream.reset();
+					
+					if (inputContent.startsWith("<")) {
+						// Own if clause due to performance reasons
+						if(XMLEditor.validateXMLString(inputStream)) {
+							inputStream.reset();
+							return EContainerFormat.XML;
+						}
+						inputStream.reset();
+					} else if (inputContent.startsWith("{")) {
+						if(!JSONObject.valueToString(inputContent).isBlank()) {
+							return EContainerFormat.JSON;
+						}
+					} else {
+						return EContainerFormat.DEFAULT;
+					}
+				}
+			} catch (IOException e) {
+				MLogger.getInstance().log(Level.SEVERE, e);
+				return EContainerFormat.CSV;
+			}
+		} else if ((fileName != null) && (!fileName.isBlank())) {
+			if (fileName.endsWith(".properties")) {
+				return EContainerFormat.PROPERTIES;
+			} else if (fileName.endsWith(".xml")) {
+				return EContainerFormat.XML;
+				// ToDo: Validation of XML file need to be re-defined. The current
+				// implementation fails when the file is empty.
+//				if(FileUtil.checkFile(fileName)) {
+//					if(XMLEditor.validateXMLFile(new File(fileName))) {
+//						return EContainerFormat.XML;
+//					}
+//				} else {
+//					return EContainerFormat.XML;
+//				}
+			} else if (fileName.endsWith(".json")) {
+				return EContainerFormat.JSON;
+			} else {
+				return EContainerFormat.CSV;
+			}
+		}
+		return EContainerFormat.DEFAULT;
+	}
+
 
 	/**
 	 * This method is designed for tabular data formats to add column names to
@@ -661,55 +717,6 @@ public class DataContainer extends BaseContainer {
 			break;
 		}
 	}
-
-	/**
-	 * Analyzes the file extension and/or structure of the data content and an enum
-	 * of type {@link EContainerFormat} which defines the type of DataContaner that
-	 * needs to be adapted.
-	 * 
-	 * @return enum of type {@link EContainerFormat}
-	 */
-	private final EContainerFormat detectDataFormat() {
-		if (resultSet != null) {
-			return EContainerFormat.RESULTSET;
-		} else if (inputStream != null) {
-			try {
-				if (inputStream.available() > 0) {
-					if (XMLEditor.validateXMLString(inputStream)) {
-						return EContainerFormat.XML;
-					} else if (FileUtil.getContent(inputStream).startsWith("{")) {
-						return EContainerFormat.JSON;
-					} else {
-						return EContainerFormat.DEFAULT;
-					}
-				}
-			} catch (IOException e) {
-				MLogger.getInstance().log(Level.SEVERE, e);
-				return EContainerFormat.CSV;
-			}
-		} else if ((fileName != null) && (!fileName.isBlank())) {
-			if (fileName.endsWith(".properties")) {
-				return EContainerFormat.PROPERTIES;
-			} else if (fileName.endsWith(".xml")) {
-				return EContainerFormat.XML;
-				// ToDo: Validation of XML file need to be re-defined. The current
-				// implementation fails when the file is empty.
-//				if(FileUtil.checkFile(fileName)) {
-//					if(XMLEditor.validateXMLFile(new File(fileName))) {
-//						return EContainerFormat.XML;
-//					}
-//				} else {
-//					return EContainerFormat.XML;
-//				}
-			} else if (fileName.endsWith(".json")) {
-				return EContainerFormat.JSON;
-			} else {
-				return EContainerFormat.CSV;
-			}
-		}
-		return EContainerFormat.DEFAULT;
-	}
-
 	/**
 	 * This method writes data to a existing or newly created CSV file. Useful if
 	 * the current state of the container should be saved. The semicolon gets used
