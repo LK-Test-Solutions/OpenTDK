@@ -19,7 +19,7 @@ public class RT_Container_readJson extends BaseRegression {
 		BaseRegression.testResult(dc.getValue("permanent"), "PERM", "true");
 		BaseRegression.testResult(dc.getValue("address"), "ADDRESS", "{\"zipcode\":87463,\"city\":\"Munich\",\"street\":\"Schneckenburgerstrasse\"}");
 		BaseRegression.testResult(dc.getValue("phoneNumbers"), "PHONE_NUMBERS", "123456");
-		BaseRegression.testResult(dc.getValue("cities"), "CITIES", "\"Munich\"");
+		BaseRegression.testResult(dc.getValue("cities"), "CITIES", "Munich");
 			
 //		BaseRegression.testResult(dc.getAttributes("properties", "salary")[0], "SALARY", "1000 EUR");
 //		BaseRegression.testResult(dc.getAttributes("properties/titles", "Sir")[0], "Sir", "true");

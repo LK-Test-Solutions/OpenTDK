@@ -92,22 +92,18 @@ public class JSONDataContainer implements CustomContainer {
 					String searchExp = "/" + frImpl.getValue().replace(";", "/") + "/" + headerName;
 					Object result = json.query(searchExp);
 					JSONObject.testValidity(result);
-					if (result != null) {
-						String sResult = result.toString();
 
-						String[] saResults = null;
+					if (result == null) {
+						throw new JSONException("JSON key not present");
+					} else {
+						String sResult = result.toString();
 						if (result instanceof JSONArray) {
-							sResult = this.splitJSONArray(sResult);
-							if (sResult.contains(",")) {
-								saResults = sResult.split(",");
+							JSONArray values = (JSONArray) result;
+							for (int i = 0; i < values.length(); i++) {
+								filteredValues.add(values.get(i).toString());
 							}
-						}
-						if (saResults == null) {
-							filteredValues.add(sResult);
 						} else {
-							for (String res : saResults) {
-								filteredValues.add(res);
-							}
+							filteredValues.add(sResult);
 						}
 					}
 				}
@@ -119,14 +115,16 @@ public class JSONDataContainer implements CustomContainer {
 			 */
 			Object result = json.get(headerName);
 			String sResult = result.toString();
-			ret = new String[] { sResult };
-			if (result instanceof JSONArray) {
-				sResult = this.splitJSONArray(sResult);
-				if (sResult.contains(",")) {
-					ret = sResult.split(",");
-				}
-			}
 
+			if (result instanceof JSONArray) {
+				JSONArray values = (JSONArray) result;
+				ret = new String[values.length()];
+				for (int i = 0; i < values.length(); i++) {
+					ret[i] = values.get(i).toString();
+				}
+			} else {
+				ret = new String[] { sResult };
+			}
 		}
 		return ret;
 	}
@@ -306,12 +304,12 @@ public class JSONDataContainer implements CustomContainer {
 		return ret;
 	}
 
-	private String splitJSONArray(String input) {
-		String ret = input;
-		if (ret.startsWith("[") && ret.endsWith("]")) {
-			ret = ret.substring(ret.indexOf("[") + 1, ret.indexOf("]"));
-		}
-		return ret;
-	}
+//	private String splitJSONArray(String input) {
+//		String ret = input;
+//		if (ret.startsWith("[") && ret.endsWith("]")) {
+//			ret = ret.substring(ret.indexOf("[") + 1, ret.indexOf("]"));
+//		}
+//		return ret;
+//	}
 
 }

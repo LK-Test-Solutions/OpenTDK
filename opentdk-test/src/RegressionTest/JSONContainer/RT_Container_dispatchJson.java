@@ -1,5 +1,7 @@
 package RegressionTest.JSONContainer;
 
+import java.io.ByteArrayInputStream;
+
 import org.json.JSONException;
 import org.opentdk.api.dispatcher.BaseDispatcher;
 
@@ -21,13 +23,18 @@ public class RT_Container_dispatchJson extends BaseRegression {
 		BaseRegression.testResult(EJsonValues.NAME.getValue(), "NAME", "LK");
 		BaseRegression.testResult(EJsonValues.PHONE_NUMBERS.getValue(), "PHONE_NUMBER FIRST VALUE", "123456");
 		BaseRegression.testResult(EJsonValues.PHONE_NUMBERS.getValues()[1], "PHONE_NUMBER SECOND VALUE", "987654");
-		BaseRegression.testResult(EJsonValues.CITIES.getValue(), "CITIES FIRST VALUE", "\"Munich\"");
+		BaseRegression.testResult(EJsonValues.CITIES.getValue(), "CITIES FIRST VALUE", "Munich");
 		BaseRegression.testResult(EJsonValues.CITIES.getValues()[1], "CITIES SECOND VALUE", "86637");
 		BaseRegression.testResult(EJsonValues.EMPLOYEE_AGE.getValue(), "EMPLOYEE AGE", "28");
 		BaseRegression.testResult(EJsonValues.BOSS_SALARY.getValue(), "BOSS SALARY", "25000");
 		BaseRegression.testResult(EJsonValues.BOSS_NAME.getValue(), "BOSS_NAME", "Boss");
-
-
+		
+		String[] peoples = EJsonValues.PEOPLE.getValues();
+		for(String people : peoples) {
+			BaseDispatcher.setDataContainer(EPeopleValues.class, new ByteArrayInputStream(people.getBytes()));
+			System.out.println(EPeopleValues.PEOPLE_AGE.getValue());
+		}
+		
 		try {
 			EJsonValues.INVALID.getValue();
 		} catch (JSONException e) {
@@ -45,7 +52,7 @@ public class RT_Container_dispatchJson extends BaseRegression {
 		BaseRegression.testResult(EJsonValues.ID.getValue(), "ID after set", "2");
 		BaseRegression.testResult(EJsonValues.SIR.getValue(), "SIR after set", "false");
 		BaseRegression.testResult(EJsonValues.PHONE_NUMBERS.getValues()[1], "PHONE_NUMBER after set", "654321");
-		BaseRegression.testResult(EJsonValues.CITIES.getValues()[2], "CITIES after set", "\"Augsburg\"");
+		BaseRegression.testResult(EJsonValues.CITIES.getValues()[2], "CITIES after set", "Augsburg");
 		BaseRegression.testResult(EJsonValues.BOSS_SALARY.getValue(), "BOSS SALARY after set", "30000");
 
 		// ADD
@@ -72,11 +79,13 @@ public class RT_Container_dispatchJson extends BaseRegression {
 		EJsonValues.BOSS_SALARY.delete();
 		try {
 			EJsonValues.ADDRESS.getValue();
+			System.err.println("Exception not correctly catched ==> Field 'address' should be deleted");
 		} catch (JSONException e) {
 			System.out.println("Exception correctly catched ==> Field 'address' was deleted");
 		}
 		try {
 			EJsonValues.BOSS_SALARY.getValue();
+			System.err.println("Exception not correctly catched ==> Field 'salary' should be deleted");
 		} catch (JSONException e) {
 			System.out.println("Exception correctly catched ==> Field 'salary' was deleted");
 		}
