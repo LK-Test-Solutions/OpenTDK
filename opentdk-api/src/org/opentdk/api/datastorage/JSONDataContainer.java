@@ -219,7 +219,7 @@ public class JSONDataContainer implements CustomContainer {
 	 * 
 	 * @param headerName JSON key
 	 * @param occurences unused
-	 * @param value      data to set ==> the JSON data type gets parsed e.g. 'true'
+	 * @param value      data to set {@literal -} the JSON data type gets parsed e.g. 'true'
 	 *                   becomes a boolean or '"Test"' becomes a string or
 	 *                   '[value1,value2]' an array
 	 * @param fltr       filter object to find the correct field

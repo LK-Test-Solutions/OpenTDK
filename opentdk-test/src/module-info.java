@@ -14,7 +14,6 @@ module opentdk.test {
 	exports RegressionTest.IO;
 	exports Tests.Logging;
 	exports Tests.OverrideBehavior;
-	exports RegressionTest.ChartCreation;
 	exports RegressionTest.Logging;
 	exports RegressionTest.CryptoUtility;
 	exports RegressionTest.CSVContainer;

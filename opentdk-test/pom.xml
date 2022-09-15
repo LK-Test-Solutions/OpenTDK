@@ -73,6 +73,11 @@
 			<version>11.0.2</version>
 		</dependency>
 		<dependency>
+			<groupId>org.json</groupId>
+			<artifactId>json</artifactId>
+			<version>20220320</version>
+		</dependency>
+		<dependency>
 			<groupId>org.opentdk</groupId>
 			<artifactId>opentdk-api</artifactId>
 			<version>1.5.9</version>

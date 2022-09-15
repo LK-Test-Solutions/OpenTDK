@@ -226,9 +226,14 @@ public class MultiAxisBarChart<X, Y> extends MultiAxisChart<X, Y> {
 
 	@Override
 	protected void layoutPlotChildren() {
-		double catSpace = this.categoryAxis.getCategorySpacing();
-		double avilableBarSpace = catSpace - getCategoryGap() + getBarGap();
-		double barWidth = avilableBarSpace / getSeriesSize() - getBarGap();
+//		double catSpace = this.categoryAxis.getCategorySpacing();
+		int catCount =  this.categoryAxis.getCategories().size();
+		if(catCount == 0) {
+			catCount = 1;
+		}
+		double catSpace = this.categoryAxis.getWidth() / catCount; // Each catSpace has the same proportion on the abscissa depending on the number of categories
+		double avilableBarSpace = catSpace - getCategoryGap() + getBarGap(); 
+		double barWidth = avilableBarSpace / getSeriesSize() - getBarGap(); // Divide with seriesSize to split the avilableBarSpace by the number of bars per category
 		double barOffset = -((catSpace - getCategoryGap()) / 2.0D);
 		double zeroPos = (this.valueAxis.getLowerBound() > 0.0D) ? this.valueAxis.getDisplayPosition(Double.valueOf(this.valueAxis.getLowerBound())) : this.valueAxis.getZeroPosition();
 		if (barWidth <= 0.0D)
