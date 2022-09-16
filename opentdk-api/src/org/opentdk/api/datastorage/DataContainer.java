@@ -701,21 +701,7 @@ public class DataContainer extends BaseContainer {
 	 *                       right position as demonstrated above.
 	 */
 	public void deleteField(String headerName, String attributeName, String attributeValue, Filter fltr) {
-
-		switch (containerFormat) {
-		case XML:
-		case JSON:
-			instance.deleteField(headerName, "", "", fltr);
-			break;
-		case PROPERTIES:
-		case CSV:
-		case DEFAULT:
-			instance.deleteField(headerName, attributeName, attributeValue, fltr);
-			break;
-		default:
-			MLogger.getInstance().log(Level.WARNING, "The method is not supported for DataContainer format " + containerFormat.toString() + "!", getClass().getSimpleName(), getClass().getName(), "deleteField");
-			break;
-		}
+		instance.deleteField(headerName, attributeName, attributeValue, fltr);
 	}
 	/**
 	 * This method writes data to a existing or newly created CSV file. Useful if
@@ -742,12 +728,7 @@ public class DataContainer extends BaseContainer {
 	 */
 	public void exportContainer(String fileName, String columnDelimiter) throws IOException {
 		HashMap<Integer, String> hm = getHeadersIndexed();
-		XFileWriter writer = null;
-//		try {
-		writer = new XFileWriter(new File(fileName));
-//		} catch (FileNotFoundException e) {
-//			MLogger.getInstance().log(Level.SEVERE, e);
-//		}
+		XFileWriter writer = new XFileWriter(new File(fileName));
 		if (writer != null) {
 			switch (getContainerFormat().getHeaderType()) {
 			case COLUMN:
@@ -955,12 +936,7 @@ public class DataContainer extends BaseContainer {
 		switch (getContainerFormat().getHeaderType()) {
 		case TREE:
 			for (String headerName : columnHeaders) {
-//				try {
 				colList.add((String[]) instance.getColumn(headerName, rowFilter));
-//				} catch (Exception e) {
-//					MLogger.getInstance().log(Level.SEVERE, e, "getColumnsList");
-//					throw new RuntimeException(e);
-//				}
 			}
 			break;
 		default:
