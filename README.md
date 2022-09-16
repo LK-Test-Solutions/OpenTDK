@@ -56,12 +56,12 @@ With its implemented default behaviour the `MLogger` will write all messages of 
 ## Download 
 ### Recent version with sources and dependencies
 
-[opentdk-api-1.5.9.jar](https://github.com/LK-Test-Solutions/OpenTDK/releases/download/opentdk-1.5.9.1/opentdk-api-1.5.9.jar)
+[opentdk-api-1.5.9.jar](https://github.com/LK-Test-Solutions/OpenTDK/releases/download/opentdk-1.5.9.2/opentdk-api-1.5.9.jar)
 
-[opentdk-api-1.5.9-sources.jar](https://github.com/LK-Test-Solutions/OpenTDK/releases/download/opentdk-1.5.9.1/opentdk-api-1.5.9-sources.jar)
+[opentdk-api-1.5.9-sources.jar](https://github.com/LK-Test-Solutions/OpenTDK/releases/download/opentdk-1.5.9.2/opentdk-api-1.5.9-sources.jar)
 
-[opentdk-gui-1.5.9.jar](https://github.com/LK-Test-Solutions/OpenTDK/releases/download/opentdk-1.5.9.1/opentdk-gui-1.5.9.jar)
+[opentdk-gui-1.5.9.jar](https://github.com/LK-Test-Solutions/OpenTDK/releases/download/opentdk-1.5.9.2/opentdk-gui-1.5.9.jar)
 
-[opentdk-gui-1.5.9-sources.jar](https://github.com/LK-Test-Solutions/OpenTDK/releases/download/opentdk-1.5.9.1/opentdk-gui-1.5.9-sources.jar)
+[opentdk-gui-1.5.9-sources.jar](https://github.com/LK-Test-Solutions/OpenTDK/releases/download/opentdk-1.5.9.2/opentdk-gui-1.5.9-sources.jar)
 
 [opentdk-1.5.9-dependencies.zip](https://github.com/LK-Test-Solutions/OpenTDK/files/9534257/opentdk-1.5.9-dependencies.zip)
