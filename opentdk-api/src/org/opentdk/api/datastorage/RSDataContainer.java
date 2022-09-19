@@ -69,4 +69,9 @@ public class RSDataContainer implements CustomContainer {
 	public void writeData(String srcFile) {
 
 	}
+
+	@Override
+	public String asString() {
+		return dc.getValuesAsString();
+	}
 }

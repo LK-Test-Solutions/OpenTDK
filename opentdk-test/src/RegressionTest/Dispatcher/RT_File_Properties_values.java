@@ -26,6 +26,8 @@ public class RT_File_Properties_values extends BaseRegression {
 		testResult(E_PropertiesFile_Dispatcher_values.COUNTRY.getValue(), "Country", "France");
 		testResult(E_PropertiesFile_Dispatcher_values.LANGUAGE.getValue(), "Language", "german");
 		testResult(E_PropertiesFile_Dispatcher_values.CAPITAL_CITY.getValue(), "City", "Berlin");
+		
+		testResult(E_PropertiesFile_Dispatcher_values.getDataContainer(E_PropertiesFile_Dispatcher_values.class).asString(), "Current content as string", "Country = France\n");
 
 		// Change the other values and check the values of E_PropertiesFile_Dispatcher_values
 		E_PropertiesFile_Dispatcher_values.LANGUAGE.setValue("french");

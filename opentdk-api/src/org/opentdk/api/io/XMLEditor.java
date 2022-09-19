@@ -3,6 +3,7 @@ package org.opentdk.api.io;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -48,9 +49,10 @@ public class XMLEditor {
 	private Element rootElement;
 
 	/**
-	 * Constructor that is used to create a new instance of this object with a given file-object, defined by the argument <code>xml_src</code>. After
-	 * creating an instance with this constructor, immediate read and write access can be performed to the xml file, using the methods provided by this
-	 * class.
+	 * Constructor that is used to create a new instance of this object with a given file-object,
+	 * defined by the argument <code>xml_src</code>. After creating an instance with this constructor,
+	 * immediate read and write access can be performed to the xml file, using the methods provided by
+	 * this class.
 	 * 
 	 * @param xml_src Object of type {@link java.io.File}
 	 * @throws IOException if any I/O error occurred
@@ -64,8 +66,9 @@ public class XMLEditor {
 	}
 
 	/**
-	 * Constructor that is used to create a new instance of this object with a given file, defined by the argument <code>fullPath</code>. After creating
-	 * an instance with this constructor, immediate read and write access can be performed to the xml file, using the methods provided by this class.
+	 * Constructor that is used to create a new instance of this object with a given file, defined by
+	 * the argument <code>fullPath</code>. After creating an instance with this constructor, immediate
+	 * read and write access can be performed to the xml file, using the methods provided by this class.
 	 * 
 	 * @param fullPath String with the relative or absolute path and filename of the xml file
 	 * @throws IOException if any I/O error occurred
@@ -80,17 +83,17 @@ public class XMLEditor {
 			rootNodeName = rootNode;
 		}
 //		try {
-			FileUtil.checkDir(xmlFile.getParentFile(), true);
-			createXMLEditor();
+		FileUtil.checkDir(xmlFile.getParentFile(), true);
+		createXMLEditor();
 //		} catch (IOException e) {
 //			MLogger.getInstance().log(Level.SEVERE, e);
 //		}
 	}
-	
+
 	public XMLEditor(InputStream inStream) {
 		this(inStream, "");
 	}
-	
+
 	public XMLEditor(InputStream inStream, String rootNode) {
 		xmlStream = inStream;
 		if (!rootNode.isBlank()) {
@@ -127,8 +130,8 @@ public class XMLEditor {
 		pathE.appendChild(newChild);
 		save();
 		return newChild;
-	}	
-	
+	}
+
 	public Element addRootElement(Element rootE) {
 		rootNodeName = rootE.getNodeName();
 		Element outRoot = doc.createElement(rootNodeName);
@@ -137,10 +140,12 @@ public class XMLEditor {
 	}
 
 	/**
-	 * Adds a child tag to the root tag of the XML document which is represented by the current instance of the {@link #doc} property. This method will
-	 * immediately write the tag into the physical XML file which is represented by the {@link #doc} property, using the {@link #save()} Method.
+	 * Adds a child tag to the root tag of the XML document which is represented by the current instance
+	 * of the {@link #doc} property. This method will immediately write the tag into the physical XML
+	 * file which is represented by the {@link #doc} property, using the {@link #save()} Method.
 	 * 
-	 * @param entry The XML tag as type {@link org.w3c.dom.Element} that will be added to the root element of the current XML Document
+	 * @param entry The XML tag as type {@link org.w3c.dom.Element} that will be added to the root
+	 *              element of the current XML Document
 	 */
 	public void addTag(Element entry) {
 		Element parent = null;
@@ -162,9 +167,10 @@ public class XMLEditor {
 	}
 
 	/**
-	 * Adds a child tag with one or more attributes to the root tag of the XML document which is represented by the current instance of the {@link #doc}
-	 * property. This method will immediately write the tag into the physical XML file which is represented by the {@link #doc} property, using the
-	 * {@link #save()} Method.
+	 * Adds a child tag with one or more attributes to the root tag of the XML document which is
+	 * represented by the current instance of the {@link #doc} property. This method will immediately
+	 * write the tag into the physical XML file which is represented by the {@link #doc} property, using
+	 * the {@link #save()} Method.
 	 * 
 	 * @param tagName    Name of the XML tag
 	 * @param attributes HashMap containing attributes with their names as keys
@@ -185,7 +191,7 @@ public class XMLEditor {
 		hm.put(attributeName, attributeValue);
 		addTag(tagName, hm);
 	}
-	
+
 	public Element checkXPath(String XPath, boolean createMissingNodes) {
 		List<Element> eList = getElementsListFromXPath(XPath);
 		Element resolvedE = null;
@@ -211,10 +217,10 @@ public class XMLEditor {
 				}
 			}
 			if ((!eFound) && (createMissingNodes)) {
-				if(resolvedE != null) {
+				if (resolvedE != null) {
 					resolvedE = addChildElement(resolvedE, searchE);
 					eFound = compareElements(searchE, resolvedE);
-				}else {
+				} else {
 					addRootElement(searchE);
 				}
 			}
@@ -261,7 +267,7 @@ public class XMLEditor {
 //		}
 //		return resolvedE;
 //	}
-	
+
 	public boolean compareElements(Element eSearch, Element eCompareWith) {
 		if (eSearch.getNodeName().equals(eCompareWith.getNodeName())) {
 			if (eSearch.getNodeValue() != null) {
@@ -294,11 +300,12 @@ public class XMLEditor {
 		}
 		return true;
 	}
-	
+
 	/**
-	 * Creates and returns a new object instance of type Element without attributes for further operations like adding the element to the root tag of an
-	 * XML document, shown in the following sample where a new tag with the name <code>newTag</code> will be added to the root tag of XML file
-	 * <code>c:\\temp\\sample.xml</code>:
+	 * Creates and returns a new object instance of type Element without attributes for further
+	 * operations like adding the element to the root tag of an XML document, shown in the following
+	 * sample where a new tag with the name <code>newTag</code> will be added to the root tag of XML
+	 * file <code>c:\\temp\\sample.xml</code>:
 	 * 
 	 * <pre>
 	 * XMLEditor xmlEdit = new XMLEditor(new File("c:\\temp\\sample.xml"));
@@ -322,9 +329,10 @@ public class XMLEditor {
 	}
 
 	/**
-	 * Creates and returns a new object instance of type Element one or multiple attributes for further operations, like adding the element to the root
-	 * tag of an XML document, shown in the following sample where a new tag with the name <code>newTag</code> will be added to the root tag of XML file
-	 * <code>c:\\temp\\sample.xml</code>:
+	 * Creates and returns a new object instance of type Element one or multiple attributes for further
+	 * operations, like adding the element to the root tag of an XML document, shown in the following
+	 * sample where a new tag with the name <code>newTag</code> will be added to the root tag of XML
+	 * file <code>c:\\temp\\sample.xml</code>:
 	 * 
 	 * <pre>
 	 * XMLEditor xmlEdit = new XMLEditor(new File("c:\\temp\\sample.xml"));
@@ -355,8 +363,9 @@ public class XMLEditor {
 	}
 
 	/**
-	 * Creates and returns a new object instance of type Element one attribute for further operations, like adding the element to the root tag of an XML
-	 * document, shown in the following sample where a new tag with the name <code>newTag</code> will be added to the root tag of XML file
+	 * Creates and returns a new object instance of type Element one attribute for further operations,
+	 * like adding the element to the root tag of an XML document, shown in the following sample where a
+	 * new tag with the name <code>newTag</code> will be added to the root tag of XML file
 	 * <code>c:\\temp\\sample.xml</code>:
 	 * 
 	 * <pre>
@@ -383,48 +392,49 @@ public class XMLEditor {
 		hm.put(attributeName, attributeValue);
 		return createElement(tagName, hm);
 	}
-	
+
 	private void createXMLEditor() {
 		DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
 		String feature = null;
 		try {
-		    // Security settings: If document type definitions (DTD) are disallowed, almost all XML entity attacks are prevented
+			// Security settings: If document type definitions (DTD) are disallowed, almost all XML entity
+			// attacks are prevented
 			feature = "http://apache.org/xml/features/disallow-doctype-decl";
-		    dbf.setFeature(feature, true);
+			dbf.setFeature(feature, true);
 		} catch (ParserConfigurationException e) {
-		    MLogger.getInstance().log(Level.WARNING, "The feature '" + feature + "' is probably not supported the XML processor. XML will not be read.", getClass().getSimpleName(), "createXMLEditor");	   
-		} 
-		// Security settings: This prevents the parser to expand the entity reference node  
-	    dbf.setExpandEntityReferences(false);
+			MLogger.getInstance().log(Level.WARNING, "The feature '" + feature + "' is probably not supported the XML processor. XML will not be read.", getClass().getSimpleName(), "createXMLEditor");
+		}
+		// Security settings: This prevents the parser to expand the entity reference node
+		dbf.setExpandEntityReferences(false);
 		// Security settings: Set an empty string to deny all access to external references
 		dbf.setAttribute(XMLConstants.ACCESS_EXTERNAL_DTD, "");
 		dbf.setAttribute(XMLConstants.ACCESS_EXTERNAL_SCHEMA, "");
-		
+
 		try {
 			DocumentBuilder docBuilder = dbf.newDocumentBuilder();
 			if ((xmlFile != null) && (xmlFile.exists())) {
-				doc = docBuilder.parse(xmlFile);				
+				doc = docBuilder.parse(xmlFile);
 				doc.getDocumentElement().normalize();
 				rootElement = doc.getDocumentElement();
-			} else if(xmlStream != null) {
+			} else if (xmlStream != null) {
 				xmlStream.reset();
 				doc = docBuilder.parse(xmlStream);
 				doc.getDocumentElement().normalize();
-				rootElement = doc.getDocumentElement();				
+				rootElement = doc.getDocumentElement();
 			} else {
 				doc = docBuilder.newDocument();
 				rootElement = doc.createElement(rootNodeName);
 				doc.appendChild(rootElement);
 			}
 		} catch (ParserConfigurationException e) {
-		    MLogger.getInstance().log(Level.SEVERE, "The feature '" + feature + "' is probably not supported the XML processor.", getClass().getSimpleName(), "createXMLEditor");	   
+			MLogger.getInstance().log(Level.SEVERE, "The feature '" + feature + "' is probably not supported the XML processor.", getClass().getSimpleName(), "createXMLEditor");
 		} catch (SAXException e) {
-		    MLogger.getInstance().log(Level.SEVERE, "A DOCTYPE was passed into the XML document.", getClass().getSimpleName(), "createXMLEditor");	      
+			MLogger.getInstance().log(Level.SEVERE, "A DOCTYPE was passed into the XML document.", getClass().getSimpleName(), "createXMLEditor");
 		} catch (IOException e) {
-		    MLogger.getInstance().log(Level.SEVERE, "Exception occured: XXE may still possible ==> XML will not be read.", getClass().getSimpleName(), "createXMLEditor");	      
+			MLogger.getInstance().log(Level.SEVERE, "Exception occured: XXE may still possible ==> XML will not be read.", getClass().getSimpleName(), "createXMLEditor");
 		}
 	}
-	
+
 	/**
 	 * Removes the specified element from the XML file.
 	 * 
@@ -496,7 +506,8 @@ public class XMLEditor {
 	}
 
 	/**
-	 * Retrieve a child element by it's parent, applicable to the specified tag name. If there can be more than one child use getChildren instead.
+	 * Retrieve a child element by it's parent, applicable to the specified tag name. If there can be
+	 * more than one child use getChildren instead.
 	 * 
 	 * @param parent  the parent element
 	 * @param tagName the child's tag name
@@ -513,7 +524,8 @@ public class XMLEditor {
 	}
 
 	/**
-	 * Retrieve a child element by it's parent, applicable to the specified tag name and attribute value.
+	 * Retrieve a child element by it's parent, applicable to the specified tag name and attribute
+	 * value.
 	 * 
 	 * @param parent    the parent element
 	 * @param tagName   the child's tag name
@@ -547,14 +559,14 @@ public class XMLEditor {
 		}
 		return children;
 	}
-	
+
 	public Document getDocument() {
 		return doc;
 	}
 
 	/**
-	 * Get Element by XPath expression. In case of multiple occurrences of the XPath within the XML file, the method will retrieve the element of the
-	 * first occurrence.
+	 * Get Element by XPath expression. In case of multiple occurrences of the XPath within the XML
+	 * file, the method will retrieve the element of the first occurrence.
 	 * 
 	 * @param exp XPath referencing to the searched element
 	 * @return the found element
@@ -564,7 +576,8 @@ public class XMLEditor {
 		if (isXPath(exp)) {
 			XPath xPath = XPathFactory.newInstance().newXPath();
 			try {
-				// Security: This evaluation is fine because the document object is already checked when the XML is read.
+				// Security: This evaluation is fine because the document object is already checked when the XML is
+				// read.
 				ret = (Element) xPath.compile(exp).evaluate(doc, XPathConstants.NODE);
 			} catch (XPathExpressionException e) {
 				MLogger.getInstance().log(Level.SEVERE, e);
@@ -574,7 +587,8 @@ public class XMLEditor {
 	}
 
 	/**
-	 * Get Element by using a newly created target element. Use getElementByParent instead if the element is not unique.
+	 * Get Element by using a newly created target element. Use getElementByParent instead if the
+	 * element is not unique.
 	 * 
 	 * @param target the element to search for
 	 * @return the referring element in the xml-file
@@ -610,7 +624,7 @@ public class XMLEditor {
 		}
 		return null;
 	}
-	
+
 	/**
 	 * Get Element by using tagName and attribute (only if it is unique).
 	 * 
@@ -654,7 +668,7 @@ public class XMLEditor {
 		}
 		return ret;
 	}
-	
+
 	/**
 	 * Retrieve a list of all applicable elements.
 	 * 
@@ -664,9 +678,10 @@ public class XMLEditor {
 	public ArrayList<Element> getElementsList(String tagName) {
 		return getElementsList(tagName, false);
 	}
-	
+
 	/**
-	 * Retrieve a list of all applicable elements. If ignoreChildless is true, child-less elements will be ignored.
+	 * Retrieve a list of all applicable elements. If ignoreChildless is true, child-less elements will
+	 * be ignored.
 	 * 
 	 * @param tagName         the element's tag name
 	 * @param ignoreChildless child-less elements will be ignored, if true
@@ -694,9 +709,10 @@ public class XMLEditor {
 		if (isXPath(exp)) {
 			XPath xPath = XPathFactory.newInstance().newXPath();
 			try {
-				// Security: This evaluation is fine because the document object is already checked when the XML is read.
+				// Security: This evaluation is fine because the document object is already checked when the XML is
+				// read.
 				nl = (NodeList) xPath.compile(exp).evaluate(doc, XPathConstants.NODESET);
-				for(int i=0; i<nl.getLength(); i++) {
+				for (int i = 0; i < nl.getLength(); i++) {
 					ret.add((Element) nl.item(i));
 				}
 			} catch (XPathExpressionException e) {
@@ -752,7 +768,7 @@ public class XMLEditor {
 		}
 		return index;
 	}
-	
+
 	public Node getLastNode_fail(String xPath) {
 		Node targetNode = (Node) getDocument().getDocumentElement();
 		NodeList nl = null;
@@ -779,7 +795,7 @@ public class XMLEditor {
 		}
 		return targetNode;
 	}
-	
+
 	/**
 	 * Get the parent of the referenced element.
 	 * 
@@ -791,9 +807,10 @@ public class XMLEditor {
 	}
 
 	/**
-	 * Retrieves the root element of the xml file for this instance of XMLEditor. The rootElement property will be assigned by the method
-	 * {@link #createXMLEditor} with the root element of the assigned XML-file. If the assigned XML-file does not exist, a new root element will be
-	 * created with a default name.
+	 * Retrieves the root element of the xml file for this instance of XMLEditor. The rootElement
+	 * property will be assigned by the method {@link #createXMLEditor} with the root element of the
+	 * assigned XML-file. If the assigned XML-file does not exist, a new root element will be created
+	 * with a default name.
 	 * 
 	 * @return an object of type Element, representing the root element of the assigned XML-file
 	 * 
@@ -819,7 +836,8 @@ public class XMLEditor {
 		if (isXPath(exp)) {
 			XPath xPath = XPathFactory.newInstance().newXPath();
 			try {
-				// Security: This evaluation is fine because the document object is already checked when the XML is read.
+				// Security: This evaluation is fine because the document object is already checked when the XML is
+				// read.
 				ret = (String) xPath.compile(exp).evaluate(doc, XPathConstants.STRING);
 			} catch (XPathExpressionException e) {
 				MLogger.getInstance().log(Level.SEVERE, e);
@@ -827,7 +845,7 @@ public class XMLEditor {
 		}
 		return ret;
 	}
-	
+
 	public String getValue(Element parent) {
 		String ret = null;
 		if (parent.getChildNodes().getLength() == 1) {
@@ -836,7 +854,7 @@ public class XMLEditor {
 		}
 		return ret;
 	}
-	
+
 	/**
 	 * Returns the current value of property xmlFile as object of type {@link java.io.File}.
 	 * 
@@ -845,10 +863,10 @@ public class XMLEditor {
 	public File getXMLFile() {
 		return xmlFile;
 	}
-	
+
 	/**
-	 * This method returns all XML tags used in the XML file by calling another instance of this method with a list of all elements on the top level and
-	 * an empty one, used for recursive calls.
+	 * This method returns all XML tags used in the XML file by calling another instance of this method
+	 * with a list of all elements on the top level and an empty one, used for recursive calls.
 	 * 
 	 * @return List containing all XML tags used in the XML file
 	 */
@@ -860,8 +878,9 @@ public class XMLEditor {
 	}
 
 	/**
-	 * This method returns all XML tags used in the XML file by checking the passed list for new tags and calling a new instance of itself on child
-	 * element lists. The results are stored in the tags list.
+	 * This method returns all XML tags used in the XML file by checking the passed list for new tags
+	 * and calling a new instance of itself on child element lists. The results are stored in the tags
+	 * list.
 	 * 
 	 * @param eList List with all top level elements
 	 * @param tags  List with all new XML tags
@@ -877,7 +896,7 @@ public class XMLEditor {
 		}
 		return tags;
 	}
-	
+
 	/**
 	 * Returns a list of all XPaths, referencing to a element with the passed tag.
 	 * 
@@ -894,7 +913,8 @@ public class XMLEditor {
 	}
 
 	/**
-	 * Check if the String expression is a XPath (currently only checks for a slash character at the beginning)
+	 * Check if the String expression is a XPath (currently only checks for a slash character at the
+	 * beginning)
 	 * 
 	 * @param exp XPath expression
 	 * @return true if the expression is a XPath (starts with a slash character)
@@ -908,10 +928,11 @@ public class XMLEditor {
 		}
 		return ret;
 	}
-	
+
 	/**
-	 * If the passed element, referenced by an XPath, has attributes, this method returns those by combining attribute name and value. Otherwise if the
-	 * element has a text value, this method returns the value.
+	 * If the passed element, referenced by an XPath, has attributes, this method returns those by
+	 * combining attribute name and value. Otherwise if the element has a text value, this method
+	 * returns the value.
 	 * 
 	 * @param exp String with the XPath reference
 	 * 
@@ -948,7 +969,7 @@ public class XMLEditor {
 			}
 		}
 	}
-	
+
 	/**
 	 * Replaces the old Element with a new Element at the same hierarchical position.
 	 * 
@@ -965,8 +986,8 @@ public class XMLEditor {
 	 * Write out results of the XMLEditor to the related file.
 	 */
 	public void save() {
-		if(doc.getDocumentURI() != null) {
-			if(!doc.getDocumentURI().isBlank()) {
+		if (doc.getDocumentURI() != null) {
+			if (!doc.getDocumentURI().isBlank()) {
 				save(xmlFile);
 			}
 		}
@@ -983,7 +1004,7 @@ public class XMLEditor {
 			// Security settings: Set an empty string to deny all access to external references
 			tf.setAttribute(XMLConstants.ACCESS_EXTERNAL_DTD, "");
 			tf.setAttribute(XMLConstants.ACCESS_EXTERNAL_STYLESHEET, "");
-			
+
 			Transformer transformer = tf.newTransformer();
 
 			removeEmptySpace(rootElement);
@@ -1001,8 +1022,30 @@ public class XMLEditor {
 		}
 	}
 
+	public String asString() {
+		String ret = "";
+		TransformerFactory tf = TransformerFactory.newInstance();
+		// Security settings: Set an empty string to deny all access to external references
+		tf.setAttribute(XMLConstants.ACCESS_EXTERNAL_DTD, "");
+		tf.setAttribute(XMLConstants.ACCESS_EXTERNAL_STYLESHEET, "");
+		try {
+			Transformer transformer = tf.newTransformer();
+			transformer.setOutputProperty(OutputKeys.INDENT, "yes");
+			
+			this.removeEmptySpace(rootElement);
+			
+			StringWriter writer = new StringWriter();
+			transformer.transform(new DOMSource(doc), new StreamResult(writer));
+			ret = writer.getBuffer().toString();
+		} catch (TransformerException e) {
+			e.printStackTrace();
+		} 
+		return ret;
+	}
+
 	/**
-	 * Set the TextValue of the element. Use only for elements without children, if it has any they will be deleted.
+	 * Set the TextValue of the element. Use only for elements without children, if it has any they will
+	 * be deleted.
 	 * 
 	 * @param el  the element reference to the element that should be changed
 	 * @param val new TextValue
@@ -1017,35 +1060,34 @@ public class XMLEditor {
 		return el;
 	}
 
-
 	public static Boolean validateXMLFile(File inFile) {
 		try {
 			SAXParserFactory.newInstance().newSAXParser().parse(inFile, new DefaultHandler());
 		} catch (SAXException e) {
-		    MLogger.getInstance().log(Level.WARNING, "A DOCTYPE was passed into the XML document.", "XMLEditor", "validateXMLString");	      
-		    return false;
+			MLogger.getInstance().log(Level.WARNING, "A DOCTYPE was passed into the XML document.", "XMLEditor", "validateXMLString");
+			return false;
 		} catch (IOException e) {
-		    MLogger.getInstance().log(Level.WARNING, "Invalid input used for XML parser", "XMLEditor", "validateXMLString");	   
-		    return false;
+			MLogger.getInstance().log(Level.WARNING, "Invalid input used for XML parser", "XMLEditor", "validateXMLString");
+			return false;
 		} catch (ParserConfigurationException e) {
-		    MLogger.getInstance().log(Level.WARNING, "Probably non supported feature used for the XML processor.", "XMLEditor", "validateXMLString");	   
-		    return false;
+			MLogger.getInstance().log(Level.WARNING, "Probably non supported feature used for the XML processor.", "XMLEditor", "validateXMLString");
+			return false;
 		}
 		return true;
 	}
-	
+
 	public static Boolean validateXMLString(InputStream inStream) {
 		try {
 			SAXParserFactory.newInstance().newSAXParser().getXMLReader().parse(new InputSource(inStream));
 		} catch (IOException e) {
-		    MLogger.getInstance().log(Level.WARNING, "Invalid input used for XML parser", "XMLEditor", "validateXMLString");	   
-		    return false;
+			MLogger.getInstance().log(Level.WARNING, "Invalid input used for XML parser", "XMLEditor", "validateXMLString");
+			return false;
 		} catch (ParserConfigurationException e) {
-		    MLogger.getInstance().log(Level.WARNING, "Probably non supported feature used for the XML processor.", "XMLEditor", "validateXMLString");	   
-		    return false;
+			MLogger.getInstance().log(Level.WARNING, "Probably non supported feature used for the XML processor.", "XMLEditor", "validateXMLString");
+			return false;
 		} catch (SAXException e) {
-		    MLogger.getInstance().log(Level.WARNING, "A DOCTYPE was passed into the XML document.", "XMLEditor", "validateXMLString");	      
-		    return false;
+			MLogger.getInstance().log(Level.WARNING, "A DOCTYPE was passed into the XML document.", "XMLEditor", "validateXMLString");
+			return false;
 		}
 		return true;
 	}

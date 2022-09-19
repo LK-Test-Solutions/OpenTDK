@@ -1750,5 +1750,12 @@ public class DataContainer extends BaseContainer {
 			throw new RuntimeException(e);
 		}
 	}
+	
+	/**
+	 * @return the container content as string for further operations.
+	 */
+	public String asString() {
+		return instance.asString();
+	}
 
 }

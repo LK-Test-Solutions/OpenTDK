@@ -25,7 +25,7 @@ public class RT_noFile_XML_values extends BaseRegression {
 		E_XMLFile_Dispatcher_values.PROJECT_LOCATION.addValue("Project 1", true);
 		E_XMLFile_Dispatcher_values.PROJECT_LOCATION.addValue("Project 2", true);
 		E_XMLFile_Dispatcher_values.PROJECT_LOCATION.addValue("Project 3", true);
-		
+				
 		// Gets the first value
 		testResult(E_XMLFile_Dispatcher_values.PROJECT_LOCATION.getValue(), "PROJECT_LOCATION", "Project 1");
 		

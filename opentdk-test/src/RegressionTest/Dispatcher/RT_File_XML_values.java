@@ -4,11 +4,22 @@ import java.util.Arrays;
 import java.util.List;
 
 import org.opentdk.api.application.EBaseSettings;
+import org.opentdk.api.dispatcher.BaseDispatcher;
 import org.opentdk.api.util.ListUtil;
 
 import RegressionTest.BaseRegression;
 
 public class RT_File_XML_values extends BaseRegression {
+	
+	private String xmlContent = "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?>\r\n"
+			+ "<AppSettings>\r\n"
+			+ "    <ProjectLocations>\r\n"
+			+ "        <ProjectLocation>Project 1</ProjectLocation>\r\n"
+			+ "        <ProjectLocation>Project 2</ProjectLocation>\r\n"
+			+ "        <ProjectLocation>Project 3</ProjectLocation>\r\n"
+			+ "    </ProjectLocations>\r\n"
+			+ "</AppSettings>\r\n"
+			+ "";
 
 	public static void main(String[] args) {
 		new RT_File_XML_values();
@@ -28,6 +39,8 @@ public class RT_File_XML_values extends BaseRegression {
 		E_XMLFile_Dispatcher_values.PROJECT_LOCATION.addValue("Project 1", true);
 		E_XMLFile_Dispatcher_values.PROJECT_LOCATION.addValue("Project 2", true);
 		E_XMLFile_Dispatcher_values.PROJECT_LOCATION.addValue("Project 3", true);
+		
+		testResult(BaseDispatcher.getDataContainer(EBaseSettings.class).asString(), "XML content" , xmlContent);
 		
 		// Gets the first value
 		testResult(E_XMLFile_Dispatcher_values.PROJECT_LOCATION.getValue(), "PROJECT_LOCATION", "Project 1");

@@ -22,8 +22,8 @@ public class RT_CSVContainer_getColumns extends BaseRegression {
 		expResults1.add("LK Test Solutions GmbH;Muster AG;LK Test Solutions GmbH;LK Test Solutions GmbH");
 		expResults1.add("Walter;Mustermann;Meisinger;Winkler");
 		expResults1.add("81675;12345;86450;81675");
-		expResults1.add("München;Musterhausen;München;München");
-		expResults1.add("Schneckenburgerstraße;Musterstraße;Schneckenburgerstraße;Schneckenburgerstraße");
+		expResults1.add("Muenchen;Musterhausen;Muenchen;Muenchen");
+		expResults1.add("Schneckenburgerstrasse;Musterstrasse;Schneckenburgerstrasse;Schneckenburgerstrasse");
 		expResults1.add("32;1;32;32");
 		expResults1.add("089/45709053;0123/4567890;null;null");
 		expResults1.add("hwa@lk-test.com;max@muster.mu;fme@lk-test.de;lwi@lk-test.de");
@@ -35,8 +35,8 @@ public class RT_CSVContainer_getColumns extends BaseRegression {
 		expResults1.add("LK Test Solutions GmbH;Muster AG;LK Test Solutions GmbH;LK Test Solutions GmbH");
 		expResults1.add("Walter;Mustermann;Meisinger;Winkler");
 		expResults1.add("81675;12345;86450;81675");
-		expResults1.add("München;Musterhausen;München;München");
-		expResults1.add("Schneckenburgerstraße;Musterstraße;Schneckenburgerstraße;Schneckenburgerstraße");
+		expResults1.add("Muenchen;Musterhausen;Muenchen;Muenchen");
+		expResults1.add("Schneckenburgerstrasse;Musterstrasse;Schneckenburgerstrasse;Schneckenburgerstrasse");
 		expResults1.add("32;1;32;32");
 		expResults1.add("089/45709053;0123/4567890;null;null");
 		expResults1.add("hwa@lk-test.com;max@muster.mu;fme@lk-test.de;lwi@lk-test.de");
@@ -66,8 +66,8 @@ public class RT_CSVContainer_getColumns extends BaseRegression {
 		expResults1.add("LK Test Solutions GmbH;Muster AG;LK Test Solutions GmbH;LK Test Solutions GmbH");
 		expResults1.add("Walter;Mustermann;Meisinger;Winkler");
 		expResults1.add("81675;12345;86450;81675");
-		expResults1.add("München;Musterhausen;München;München");
-		expResults1.add("Schneckenburgerstraße;Musterstraße;Schneckenburgerstraße;Schneckenburgerstraße");
+		expResults1.add("Muenchen;Musterhausen;Muenchen;Muenchen");
+		expResults1.add("Schneckenburgerstrasse;Musterstrasse;Schneckenburgerstrasse;Schneckenburgerstrasse");
 		expResults1.add("32;1;32;32");
 		expResults1.add("089/45709053;0123/4567890;null;null");
 		expResults1.add("hwa@lk-test.com;max@muster.mu;fme@lk-test.de;lwi@lk-test.de");
@@ -80,8 +80,8 @@ public class RT_CSVContainer_getColumns extends BaseRegression {
 		expResults1.add("LK Test Solutions GmbH;LK Test Solutions GmbH;LK Test Solutions GmbH");
 		expResults1.add("Walter;Meisinger;Winkler");
 		expResults1.add("81675;86450;81675");
-		expResults1.add("München;München;München");
-		expResults1.add("Schneckenburgerstraße;Schneckenburgerstraße;Schneckenburgerstraße");
+		expResults1.add("Muenchen;Muenchen;Muenchen");
+		expResults1.add("Schneckenburgerstrasse;Schneckenburgerstrasse;Schneckenburgerstrasse");
 		expResults1.add("32;32;32");
 		expResults1.add("089/45709053;null;null");
 		expResults1.add("hwa@lk-test.com;fme@lk-test.de;lwi@lk-test.de");

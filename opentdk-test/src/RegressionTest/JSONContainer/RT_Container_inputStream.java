@@ -27,6 +27,11 @@ public class RT_Container_inputStream extends BaseRegression {
 		
 		BaseDispatcher.setDataContainer(EWebControlResponse.class, new ByteArrayInputStream(jsonString.getBytes()));
 		BaseRegression.testResult(EWebControlResponse.STATUS.getValue(), "STATUS", "SUCCESS");
+		
+		BaseDispatcher.setDataContainer(EWebControlResponse.class, new ByteArrayInputStream("{}".getBytes()));
+		EWebControlResponse.STATUS.setValue("test");		
+		BaseRegression.testResult(BaseDispatcher.getDataContainer(EWebControlResponse.class).asString(), "DC AS STRING", "{\"status\": \"test\"}");
+
 	}
 	
 }

@@ -1,5 +1,5 @@
-Firma;Nachname;PLZ;Ort;Stra�e;Hausnummer;Telefon;Email
-LK Test Solutions GmbH;Walter;81675;M�nchen;Schneckenburgerstra�e;32;089/45709053;hwa@lk-test.com
-Muster AG;Mustermann;12345;Musterhausen;Musterstra�e;1;0123/4567890;max@muster.mu
-LK Test Solutions GmbH;Meisinger;86450;M�nchen;Schneckenburgerstra�e;32;null;fme@lk-test.de
-LK Test Solutions GmbH;Winkler;81675;M�nchen;Schneckenburgerstra�e;32;null;lwi@lk-test.de
+Firma;Nachname;PLZ;Ort;Strasse;Hausnummer;Telefon;Email
+LK Test Solutions GmbH;Walter;81675;Muenchen;Schneckenburgerstrasse;32;089/45709053;hwa@lk-test.com
+Muster AG;Mustermann;12345;Musterhausen;Musterstrasse;1;0123/4567890;max@muster.mu
+LK Test Solutions GmbH;Meisinger;86450;Muenchen;Schneckenburgerstrasse;32;null;fme@lk-test.de
+LK Test Solutions GmbH;Winkler;81675;Muenchen;Schneckenburgerstrasse;32;null;lwi@lk-test.de

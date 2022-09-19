@@ -140,4 +140,17 @@ public class PropertiesDataContainer implements CustomContainer {
 			
 		}
 	}
+
+	@Override
+	public String asString() {
+		StringBuilder ret = new StringBuilder();
+		String[] values = dc.getRow(0);
+		for (String key : dc.getHeaders().keySet()) {
+			String value = values[dc.getHeaders().get(key)];
+			if(value != null) {
+				ret.append(key.strip()).append(" = ").append(value.strip()).append("\n");
+			}
+		}
+		return ret.toString();
+	}
 }

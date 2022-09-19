@@ -286,4 +286,13 @@ public class XMLDataContainer implements CustomContainer {
 		}
 	}
 
+	@Override
+	public String asString() {
+		String ret = "";
+		if(xEdit != null) {
+			ret = xEdit.asString();
+		}
+		return ret;
+	}
+
 }

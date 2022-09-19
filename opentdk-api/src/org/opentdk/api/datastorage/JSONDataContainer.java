@@ -16,22 +16,21 @@ import org.opentdk.api.util.ListUtil;
 public class JSONDataContainer implements CustomContainer {
 
 	/**
-	 * An instance of the DataContainer that should be filled with the data from the
-	 * connected source file. Task of the specific data containers.
+	 * An instance of the DataContainer that should be filled with the data from the connected source
+	 * file. Task of the specific data containers.
 	 */
 	private final DataContainer dc;
 
 	/**
-	 * Container object for the JSON data. Supports several methods for read and
-	 * write operations.
+	 * Container object for the JSON data. Supports several methods for read and write operations.
 	 */
 	private JSONObject json;
 
 	/**
 	 * Construct a new specific <code>DataContainer</code> for JSON files.
 	 *
-	 * @param dCont the <code>DataContainer</code> instance to use it in the read
-	 *              and write methods of this specific data container
+	 * @param dCont the <code>DataContainer</code> instance to use it in the read and write methods of
+	 *              this specific data container
 	 */
 	JSONDataContainer(DataContainer dCont) {
 		dc = dCont;
@@ -55,10 +54,14 @@ public class JSONDataContainer implements CustomContainer {
 		if (content != null) {
 			json = new JSONObject(content);
 
-			String[] names = JSONObject.getNames(json);
-			dc.setHeaders(names);
-			for (String header : names) {
-				dc.setColumn(header, new String[] { json.get(header).toString() });
+			if (!json.isEmpty()) {
+				String[] names = JSONObject.getNames(json);
+				if (names.length > 0) {
+					dc.setHeaders(names);
+					for (String header : names) {
+						dc.setColumn(header, new String[] { json.get(header).toString() });
+					}
+				}
 			}
 		}
 	}
@@ -219,9 +222,8 @@ public class JSONDataContainer implements CustomContainer {
 	 * 
 	 * @param headerName JSON key
 	 * @param occurences unused
-	 * @param value      data to set {@literal -} the JSON data type gets parsed e.g. 'true'
-	 *                   becomes a boolean or '"Test"' becomes a string or
-	 *                   '[value1,value2]' an array
+	 * @param value      data to set {@literal -} the JSON data type gets parsed e.g. 'true' becomes a
+	 *                   boolean or '"Test"' becomes a string or '[value1,value2]' an array
 	 * @param fltr       filter object to find the correct field
 	 */
 	public void setFieldValues(String headerName, int[] occurences, String value, Filter fltr) {
@@ -265,17 +267,15 @@ public class JSONDataContainer implements CustomContainer {
 	}
 
 	/**
-	 * Retrieves the data type out of the committed value. This can be a JSONObject,
-	 * JSONArray or any other primitive data type like string, integer or boolean.
-	 * E.g. if the input string has leading and trailing '"' it gets interpreted as
-	 * JSONString. If not it gets wrapped into a number or boolean. If it has the
-	 * syntax '[value1,value2]' it gets wrapped as JSONarray. And if it has the
-	 * syntax '{...}' it gets wrapped as JSONObject. A 'null' value is allowed, too,
-	 * and gets a JSON.NULL object.
+	 * Retrieves the data type out of the committed value. This can be a JSONObject, JSONArray or any
+	 * other primitive data type like string, integer or boolean. E.g. if the input string has leading
+	 * and trailing '"' it gets interpreted as JSONString. If not it gets wrapped into a number or
+	 * boolean. If it has the syntax '[value1,value2]' it gets wrapped as JSONarray. And if it has the
+	 * syntax '{...}' it gets wrapped as JSONObject. A 'null' value is allowed, too, and gets a
+	 * JSON.NULL object.
 	 * 
 	 * @param newValue the value to add or put that should be checked
-	 * @return the detected object type depending on the syntax of the committed
-	 *         string
+	 * @return the detected object type depending on the syntax of the committed string
 	 */
 	private Object getDataType(String newValue) {
 		JSONObject.testValidity(newValue);
@@ -304,12 +304,15 @@ public class JSONDataContainer implements CustomContainer {
 		return ret;
 	}
 
-//	private String splitJSONArray(String input) {
-//		String ret = input;
-//		if (ret.startsWith("[") && ret.endsWith("]")) {
-//			ret = ret.substring(ret.indexOf("[") + 1, ret.indexOf("]"));
-//		}
-//		return ret;
-//	}
+	@Override
+	public String asString() {
+		String ret = "";
+		if (json == null || json.isEmpty()) {
+			MLogger.getInstance().log(Level.WARNING, "JSON object is not initialized or empty ==> No JSON content to return", getClass().getSimpleName(), "asString");
+		} else {
+			ret = json.toString(1);
+		}
+		return ret;
+	}
 
 }

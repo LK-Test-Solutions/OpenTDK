@@ -6,6 +6,7 @@ import java.util.List;
 import org.opentdk.api.datastorage.DataContainer;
 import org.opentdk.api.datastorage.EOperator;
 import org.opentdk.api.datastorage.Filter;
+import org.opentdk.api.datastorage.FilterRule;
 
 import RegressionTest.BaseRegression;
 
@@ -20,31 +21,17 @@ public class RT_CSVContainer_getValues extends BaseRegression {
 	public void runTest() {
 		DataContainer dc = new DataContainer("./testdata/RegressionTestData/CSVContainer_Contacts.csv");
 		test1(dc);
-		
 		test2(dc);
-		
 		test3(dc);
-
 		test4(dc);
-		
 		test5(dc);
-		
 		test6(dc);
-		
 		test7(dc);
-		
 		test8(dc);
-		
 		test9(dc);
-		
-//		System.out.println("        ******** test10 ********");
-//		test10(dc);
-//		
-//		System.out.println("        ******** test11 ********");
-//		test11(dc);
-//		
-//		System.out.println("        ******** test12 ********");
-//		test12(dc);
+		test10(dc);
+		test11(dc);		
+		test12(dc);
 
 	}
 	
@@ -62,7 +49,7 @@ public class RT_CSVContainer_getValues extends BaseRegression {
 
 	public void test3(DataContainer dc) {
 		List<String> expResults1 = new ArrayList<>();
-		expResults1.add("M�nchen");
+		expResults1.add("Muenchen");
 		testResult(dc.getValue(3, 2), "getValue(headerindex,rowindex) - Column 4, Row 3", expResults1.get(0));
 	}
 
@@ -114,15 +101,15 @@ public class RT_CSVContainer_getValues extends BaseRegression {
 	public void test8(DataContainer dc) {	
 		String allValues = dc.getValuesAsString();
 		StringBuilder sb = new StringBuilder();
-		sb.append("LK Test Solutions GmbH;Walter;81675;M�nchen;Schneckenburgerstra�e;32;089/45709053;hwa@lk-test.com").append("\n");
-		sb.append("Muster AG;Mustermann;12345;Musterhausen;Musterstra�e;1;0123/4567890;max@muster.mu").append("\n");
-		sb.append("LK Test Solutions GmbH;Meisinger;86450;M�nchen;Schneckenburgerstra�e;32;null;fme@lk-test.de").append("\n");
-		sb.append("LK Test Solutions GmbH;Winkler;81675;M�nchen;Schneckenburgerstra�e;32;null;lwi@lk-test.de").append("\n");
+		sb.append("LK Test Solutions GmbH;Walter;81675;Muenchen;Schneckenburgerstrasse;32;089/45709053;hwa@lk-test.com").append("\n");
+		sb.append("Muster AG;Mustermann;12345;Musterhausen;Musterstrasse;1;0123/4567890;max@muster.mu").append("\n");
+		sb.append("LK Test Solutions GmbH;Meisinger;86450;Muenchen;Schneckenburgerstrasse;32;null;fme@lk-test.de").append("\n");
+		sb.append("LK Test Solutions GmbH;Winkler;81675;Muenchen;Schneckenburgerstrasse;32;null;lwi@lk-test.de").append("\n");
 		
 		boolean valuesEqual = allValues.equals(sb.toString());
 		testResult(String.valueOf(valuesEqual), "getValuesAsString() - values equal", "true");
 		
-		List<String> uniqueValues = dc.getValuesAsDistinctedList("Stra�e");
+		List<String> uniqueValues = dc.getValuesAsDistinctedList("Strasse");
 		testResult(String.valueOf(uniqueValues.size()), "getValuesAsDistinctedList(header) - size", "2");
 	}
 	
@@ -137,44 +124,44 @@ public class RT_CSVContainer_getValues extends BaseRegression {
 		testResult(String.valueOf(biggestValue), "getMaxLen(header) - values", "22");
 	}
 	
-//	public void test10(DataContainer dc) {
-//		StringBuilder sb = new StringBuilder();
-//		sb.append("Walter").append(";");
-//		sb.append("Meisinger").append(";");
-//		sb.append("Winkler");
-//		
-//		Filter fltr = new Filter();
-//		fltr.addFilterRule("Firma", "\s+Test\s+", EOperator.CONTAINS, FilterRule.ERuleFormat.REGEX);
-//		List<String> outList = dc.getValuesAsList("Nachname", fltr);
-//		boolean valuesEqual = String.join(";", outList.toArray(new String[outList.size()])).equals(sb.toString());
-//		testResult(String.valueOf(valuesEqual), "getValuesAsList() RegEx Filter - values equal", "true");
-//		testResult(String.valueOf(outList.size()), "getValuesAsList(\"Nachname\", fltr) - size", "3");
-//	}
-//	
-//	public void test11(DataContainer dc) {
-//		StringBuilder sb = new StringBuilder();
-//		sb.append("Walter").append(";");
-//		sb.append("Meisinger").append(";");
-//		sb.append("Winkler");
-//
-//		Filter fltr = new Filter();
-//		fltr.addFilterRule("Firma", ".*\s+TEST\s+.*", EOperator.EQUALS_IGNORE_CASE, FilterRule.ERuleFormat.REGEX);
-//		List<String> outList = dc.getValuesAsList("Nachname", fltr);
-//		boolean valuesEqual = String.join(";", outList.toArray(new String[outList.size()])).equals(sb.toString());
-//		testResult(String.valueOf(valuesEqual), "getValuesAsList() RegEx Filter - values equal", "true");
-//		testResult(String.valueOf(outList.size()), "getValuesAsList(\"Nachname\", fltr) - size", "3");
-//	}
-//	
-//	public void test12(DataContainer dc) {
-//		StringBuilder sb = new StringBuilder();
-//		sb.append("Mustermann");
-//
-//		Filter fltr = new Filter();
-//		fltr.addFilterRule("Firma", ".*\s+Test\s+.*", EOperator.NOT_EQUALS, FilterRule.ERuleFormat.REGEX);
-//		List<String> outList = dc.getValuesAsList("Nachname", fltr);
-//		boolean valuesEqual = String.join(";", outList.toArray(new String[outList.size()])).equals(sb.toString());
-//		testResult(String.valueOf(valuesEqual), "getValuesAsList() RegEx Filter - values equal", "true");
-//		testResult(String.valueOf(outList.size()), "getValuesAsList(\"Nachname\", fltr) - size", "1");
-//	}
+	public void test10(DataContainer dc) {
+		StringBuilder sb = new StringBuilder();
+		sb.append("Walter").append(";");
+		sb.append("Meisinger").append(";");
+		sb.append("Winkler");
+		
+		Filter fltr = new Filter();
+		fltr.addFilterRule("Firma", "\\s+Test\\s+", EOperator.CONTAINS, FilterRule.ERuleFormat.REGEX);
+		List<String> outList = dc.getValuesAsList("Nachname", fltr);
+		boolean valuesEqual = String.join(";", outList.toArray(new String[outList.size()])).equals(sb.toString());
+		testResult(String.valueOf(valuesEqual), "getValuesAsList() RegEx Filter - values equal", "true");
+		testResult(String.valueOf(outList.size()), "getValuesAsList(\"Nachname\", fltr) - size", "3");
+	}
+	
+	public void test11(DataContainer dc) {
+		StringBuilder sb = new StringBuilder();
+		sb.append("Walter").append(";");
+		sb.append("Meisinger").append(";");
+		sb.append("Winkler");
+
+		Filter fltr = new Filter();
+		fltr.addFilterRule("Firma", ".*\\s+TEST\\s+.*", EOperator.EQUALS_IGNORE_CASE, FilterRule.ERuleFormat.REGEX);
+		List<String> outList = dc.getValuesAsList("Nachname", fltr);
+		boolean valuesEqual = String.join(";", outList.toArray(new String[outList.size()])).equals(sb.toString());
+		testResult(String.valueOf(valuesEqual), "getValuesAsList() RegEx Filter - values equal", "true");
+		testResult(String.valueOf(outList.size()), "getValuesAsList(\"Nachname\", fltr) - size", "3");
+	}
+	
+	public void test12(DataContainer dc) {
+		StringBuilder sb = new StringBuilder();
+		sb.append("Mustermann");
+
+		Filter fltr = new Filter();
+		fltr.addFilterRule("Firma", ".*\\s+Test\\s+.*", EOperator.NOT_EQUALS, FilterRule.ERuleFormat.REGEX);
+		List<String> outList = dc.getValuesAsList("Nachname", fltr);
+		boolean valuesEqual = String.join(";", outList.toArray(new String[outList.size()])).equals(sb.toString());
+		testResult(String.valueOf(valuesEqual), "getValuesAsList() RegEx Filter - values equal", "true");
+		testResult(String.valueOf(outList.size()), "getValuesAsList(\"Nachname\", fltr) - size", "1");
+	}
 
 }

@@ -288,4 +288,9 @@ public class CSVDataContainer implements CustomContainer {
 			throw new RuntimeException(e);
 		}
 	}
+
+	@Override
+	public String asString() {
+		return dc.getValuesAsString();
+	}
 }

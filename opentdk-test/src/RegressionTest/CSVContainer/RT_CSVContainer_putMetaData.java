@@ -32,10 +32,10 @@ public class RT_CSVContainer_putMetaData extends BaseRegression {
 		testResult(String.join(";", dc.getRow(1)), "Second row with modified metadata", "value2;configB");
 
 		List<String> expResults1 = new ArrayList<>();
-		expResults1.add("LK Test Solutions GmbH;Walter;81675;München;Schneckenburgerstraße;32;089/45709053;hwa@lk-test.com;2022-01-01-00.00.00.000000");
-		expResults1.add("Muster AG;Mustermann;12345;Musterhausen;Musterstraße;1;0123/4567890;max@muster.mu;2022-01-01-00.00.00.000000");
-		expResults1.add("LK Test Solutions GmbH;Meisinger;86450;München;Schneckenburgerstraße;32;null;fme@lk-test.de;2022-01-01-00.00.00.000000");
-		expResults1.add("LK Test Solutions GmbH;Winkler;81675;München;Schneckenburgerstraße;32;null;lwi@lk-test.de;2022-01-01-00.00.00.000000");
+		expResults1.add("LK Test Solutions GmbH;Walter;81675;Muenchen;Schneckenburgerstrasse;32;089/45709053;hwa@lk-test.com;2022-01-01-00.00.00.000000");
+		expResults1.add("Muster AG;Mustermann;12345;Musterhausen;Musterstrasse;1;0123/4567890;max@muster.mu;2022-01-01-00.00.00.000000");
+		expResults1.add("LK Test Solutions GmbH;Meisinger;86450;Muenchen;Schneckenburgerstrasse;32;null;fme@lk-test.de;2022-01-01-00.00.00.000000");
+		expResults1.add("LK Test Solutions GmbH;Winkler;81675;Muenchen;Schneckenburgerstrasse;32;null;lwi@lk-test.de;2022-01-01-00.00.00.000000");
 		
 		DataContainer dc1 = new DataContainer("", ";");
 		dc1.putMetaData("Timestamp", DateUtil.get("2022-01-01", EFormat.TIMESTAMP_1.getDateFormat()));
