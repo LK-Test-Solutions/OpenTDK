@@ -36,7 +36,7 @@ import org.opentdk.api.util.EFormat;
 public class FilterRule {
 	
 	/**
-	 * This enum object is used to specify the format of the rule value. 
+	 * This object is used to specify the format of the rule value. 
 	 */
 	public enum ERuleFormat{
 		STRING,
@@ -133,11 +133,6 @@ public class FilterRule {
 	public FilterRule(String hName, String value, ERuleFormat format) {
 		this(hName, new String[] { value }, format);
 	}
-	
-	@Deprecated
-	public FilterRule(String hName, String value, boolean quoteRuleString) {
-		this(hName, new String[] { value }, quoteRuleString);
-	}
 
 	/**
 	 * Constructor that is called when creating an instance of FilterRule with the
@@ -151,7 +146,7 @@ public class FilterRule {
 	 *               FilterRule.
 	 */
 	public FilterRule(String hName, String[] values) {
-		this(hName, values, false);
+		this(hName, values, ERuleFormat.STRING);
 	}
 
 	public FilterRule(String hName, String[] values, ERuleFormat format) {
@@ -163,19 +158,6 @@ public class FilterRule {
 		this.filterOperator = EOperator.EQUALS;
 		this.ruleConcatenationOperator = EOperator.AND;
 		this.ruleFormat = format;
-		assignRuleString();
-	}
-	
-	@Deprecated
-	public FilterRule(String hName, String[] values, boolean quoteRuleString) {
-		this.headerName = hName;
-		if (values.length == 1) {
-			this.value = values[0];
-		}
-		this.values = values;
-		this.filterOperator = EOperator.EQUALS;
-		this.ruleConcatenationOperator = EOperator.AND;
-		this.quoteRule = quoteRuleString;
 		assignRuleString();
 	}
 
@@ -191,16 +173,11 @@ public class FilterRule {
 	 * @param m     Value of type EOperator, used for the check operation.
 	 */
 	public FilterRule(String hName, String value, BaseDispatchComponent m) {
-		this(hName, value, m, false);
+		this(hName, value, m, ERuleFormat.STRING);
 	}
 
 	public FilterRule(String hName, String value, BaseDispatchComponent m, ERuleFormat ruleFormat) {
 		this(hName, new String[] { value }, m, ruleFormat);
-	}
-	
-	@Deprecated
-	public FilterRule(String hName, String value, BaseDispatchComponent m, boolean quoteRuleString) {
-		this(hName, new String[] { value }, m, quoteRuleString);
 	}
 
 	/**
@@ -216,7 +193,7 @@ public class FilterRule {
 	 * @param m      Value of type EOperator, used for the check operation.
 	 */
 	public FilterRule(String hName, String[] values, BaseDispatchComponent m) {
-		this(hName, values, m, false);
+		this(hName, values, m, ERuleFormat.STRING);
 	}
 
 	public FilterRule(String hName, String[] values, BaseDispatchComponent m, ERuleFormat ruleFormat) {
@@ -229,22 +206,6 @@ public class FilterRule {
 			this.filterOperator = m;
 			this.ruleConcatenationOperator = EOperator.AND;
 			assignRuleString(ruleFormat);
-		} else {
-			throw new RuntimeException("Operator doesn't comply to values!");
-		}
-	}
-	
-	@Deprecated
-	public FilterRule(String hName, String[] values, BaseDispatchComponent m, boolean quoteRuleString) {
-		if (isValidOperator(values, m)) {
-			this.headerName = hName;
-			if (values.length == 1) {
-				this.value = values[0];
-			}
-			this.values = values;
-			this.filterOperator = m;
-			this.ruleConcatenationOperator = EOperator.AND;
-			assignRuleString(quoteRuleString);
 		} else {
 			throw new RuntimeException("Operator doesn't comply to values!");
 		}
@@ -265,16 +226,11 @@ public class FilterRule {
 	 *               EOperator.CONCATENATE_OR)
 	 */
 	public FilterRule(String hName, String value, BaseDispatchComponent m, BaseDispatchComponent concat) {
-		this(hName, value, m, concat, false);
+		this(hName, value, m, concat, ERuleFormat.STRING);
 	}
 
 	public FilterRule(String hName, String value, BaseDispatchComponent m, BaseDispatchComponent concat, ERuleFormat ruleFormat) {
 		this(hName, new String[] { value }, m, concat, ruleFormat);
-	}
-
-	@Deprecated
-	public FilterRule(String hName, String value, BaseDispatchComponent m, BaseDispatchComponent concat, boolean quoteRuleString) {
-		this(hName, new String[] { value }, m, concat, quoteRuleString);
 	}
 
 	/**
@@ -292,7 +248,7 @@ public class FilterRule {
 	 *               before.
 	 */
 	public FilterRule(String hName, String[] values, BaseDispatchComponent m, BaseDispatchComponent concat) {
-		this(hName, values, m, concat, false);
+		this(hName, values, m, concat, ERuleFormat.STRING);
 	}
 
 	public FilterRule(String hName, String[] values, BaseDispatchComponent m, BaseDispatchComponent concat, ERuleFormat ruleFormat) {
@@ -310,30 +266,8 @@ public class FilterRule {
 		}
 	}
 	
-	@Deprecated
-	public FilterRule(String hName, String[] values, BaseDispatchComponent m, BaseDispatchComponent concat, boolean quoteRuleString) {
-		if (isValidOperator(values, m)) {
-			this.headerName = hName;
-			if (values.length == 1) {
-				this.value = values[0];
-			}
-			this.values = values;
-			this.filterOperator = m;
-			this.ruleConcatenationOperator = concat;
-			assignRuleString(quoteRuleString);
-		} else {
-			throw new RuntimeException("Operator doesn't comply to values!");
-		}
-	}
-	
 	public void assignRuleString(ERuleFormat format) {
 		this.ruleFormat = format;
-		assignRuleString();
-	}
-
-	@Deprecated
-	public void assignRuleString(boolean quoteRuleString) {
-		this.quoteRule = quoteRuleString;
 		assignRuleString();
 	}
 	
@@ -692,50 +626,5 @@ public class FilterRule {
 	public void setRuleString(String ruleStr) {
 		ruleString = ruleStr;
 	}
-
-
-//	public void assignRuleString(boolean quoteRuleString) {
-//		StringBuffer sb = new StringBuffer();
-//		sb.append(ruleConcatenationOperator.getValue());
-//		sb.append(" ");
-//		sb.append(headerName);
-//		sb.append(" ");
-//		sb.append(filterOperator.getValue());
-//		sb.append(" ");
-//
-//		String quote = "";
-//		if (quoteRuleString) {
-//			quote = "'";
-//		}
-//
-//		if (filterOperator.equals(EOperator.IN)) {
-//			sb.append("(");
-//		}
-//
-//		sb.append(quote);
-//		
-//		if (values.length > 1) {
-//			for (int i = 0; i < values.length; i++) {
-//				Object val = values[i];
-//				if (i > 0 && i < values.length) {
-//					sb.append(",");
-//				}
-//				if (val instanceof String || val instanceof Timestamp || val instanceof Time) {
-//					sb.append("'" + val + "'");
-//				} else {
-//					sb.append(val);
-//				}
-//			}
-//		} else {
-//			sb.append(values[0]);
-//		}
-//		
-//		sb.append(quote);
-//
-//		if (filterOperator.equals(EOperator.IN)) {
-//			sb.append(")");
-//		}
-//		ruleString = sb.toString();
-//	}
 
 }
