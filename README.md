@@ -64,4 +64,4 @@ With its implemented default behaviour the `MLogger` will write all messages of 
 
 [opentdk-gui-1.5.9-sources.jar](https://github.com/LK-Test-Solutions/OpenTDK/releases/download/opentdk-1.5.9.5/opentdk-gui-1.5.9-sources.jar)
 
-[opentdk-1.5.9-dependencies.zip](https://github.com/LK-Test-Solutions/OpenTDK/files/9534257/opentdk-1.5.9-dependencies.zip)
+[opentdk-1.5.9-dependencies.zip](https://github.com/LK-Test-Solutions/OpenTDK/files/9620254/opentdk-1.5.9-dependencies.zip)
