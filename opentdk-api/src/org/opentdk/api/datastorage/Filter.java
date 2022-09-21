@@ -76,25 +76,25 @@ public class Filter {
 		rules.addAll(filterRules);
 	}
 
-	/**
-	 * See {@link #addFilterRule(String, String[], BaseDispatchComponent)} for single value comparison.
-	 */
+//	/**
+//	 * See {@link #addFilterRule(String, String[], BaseDispatchComponent)} for single value comparison.
+//	 */
 	public void addFilterRule(String headerName, String value, BaseDispatchComponent mode) {
 		addFilterRule(headerName, new String[] { value }, mode);
 	}
 
-	/**
-	 * See {@link #addFilterRule(String, String[], BaseDispatchComponent, FilterRule.ERuleFormat)} with
-	 * {@link ERuleFormat.STRING}.
-	 */
+//	/**
+//	 * See {@link #addFilterRule(String, String[], BaseDispatchComponent, FilterRule.ERuleFormat)} with
+//	 * {@link ERuleFormat.STRING}.
+//	 */
 	public void addFilterRule(String headerName, String[] values, BaseDispatchComponent mode) {
 		addFilterRule(headerName, values, mode, ERuleFormat.STRING);
 	}
 
-	/**
-	 * See {@link #addFilterRule(String, String[], BaseDispatchComponent, FilterRule.ERuleFormat)} for
-	 * single value comparison.
-	 */
+//	/**
+//	 * See {@link #addFilterRule(String, String[], BaseDispatchComponent, FilterRule.ERuleFormat)} for
+//	 * single value comparison.
+//	 */
 	public void addFilterRule(String headerName, String value, BaseDispatchComponent mode, FilterRule.ERuleFormat ruleFormat) {
 		addFilterRule(headerName, new String[] { value }, mode, ruleFormat);
 	}

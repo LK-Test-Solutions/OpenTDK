@@ -1,8 +1,10 @@
 package org.opentdk.api.datastorage;
 
+import java.io.IOException;
+
 import org.opentdk.api.datastorage.BaseContainer.EContainerFormat;
 
-public class YAMLDataContainer {
+public class YAMLDataContainer implements CustomContainer {
 
 	/**
 	 * An instance of the DataContainer that should be filled with the data from the
@@ -19,6 +21,24 @@ public class YAMLDataContainer {
 	YAMLDataContainer(DataContainer dCont) {
 		dc = dCont;
 		dc.containerFormat = EContainerFormat.YAML;
+	}
+
+	@Override
+	public void readData(Filter filter) {
+		
+		
+	}
+
+	@Override
+	public void writeData(String srcFileName) throws IOException {
+		
+		
+	}
+
+	@Override
+	public String asString() {
+		
+		return null;
 	}
 
 
