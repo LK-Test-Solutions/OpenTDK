@@ -29,6 +29,8 @@ package org.opentdk.api.util;
 
 import java.nio.charset.Charset;
 
+import org.apache.commons.lang3.StringUtils;
+
 /**
  * Helper class with string methods for direct use in a static way.
  * 
@@ -41,7 +43,7 @@ public class StringUtil {
 	 * @return The UNICODE transformation or null, if the input string is null, empty or too large.
 	 */
 	public static String toUnicode(String toConvert) {
-		if(toConvert == null || toConvert.isBlank() || toConvert.length() > Short.MAX_VALUE) {
+		if(StringUtils.isBlank(toConvert) || toConvert.length() > Short.MAX_VALUE) {
 			return null;
 		}
 		return new String(toConvert.getBytes(), Charset.defaultCharset());
@@ -52,7 +54,7 @@ public class StringUtil {
 	 * @return The regular expression transformation or null, if the input string is null, empty or too large.
 	 */
 	public static String stringToRegEx(String inStr) {
-		if(inStr == null || inStr.isBlank() || inStr.length() > Short.MAX_VALUE) {
+		if(StringUtils.isBlank(inStr) || inStr.length() > Short.MAX_VALUE) {
 			return null;
 		}		
 		String regexStr = inStr.replace("\"", "\\\"");
@@ -70,7 +72,7 @@ public class StringUtil {
 	 * @return The literal expression transformation or null, if the input string is null, empty or too large.
 	 */
 	public static String regExToString(String inStr) {
-		if(inStr == null || inStr.isBlank() || inStr.length() > Short.MAX_VALUE) {
+		if(StringUtils.isBlank(inStr) || inStr.length() > Short.MAX_VALUE) {
 			return null;
 		}	
 		String normalStr = inStr.replace("\\\"", "\"");
@@ -88,7 +90,7 @@ public class StringUtil {
 	 * @return A string with all double back slashes replaced by single ones or null, if the input string is null, empty or too large.
 	 */
 	public static String replaceDoubleBackslashes(String regex) {
-		if(regex == null || regex.isBlank() || regex.length() > Short.MAX_VALUE) {
+		if(StringUtils.isBlank(regex) || regex.length() > Short.MAX_VALUE) {
 			return null;
 		}	
 		return regex.replaceAll("\\\\\\\\", "\\\\");
@@ -99,7 +101,7 @@ public class StringUtil {
 	 * @return A string with all enclosing quotes removed or null, if the input string is null, empty or too large.
 	 */
 	public static String removeEnclosingQuotes(String inStr) {
-		if(inStr == null || inStr.isBlank() || inStr.length() > Short.MAX_VALUE) {
+		if(StringUtils.isBlank(inStr) || inStr.length() > Short.MAX_VALUE) {
 			return null;
 		}
 		String clearedString = inStr.replaceAll("\\A[ ]*\"", ""); // remove opening quotes

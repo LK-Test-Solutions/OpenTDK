@@ -26,6 +26,7 @@ import javax.xml.xpath.XPathConstants;
 import javax.xml.xpath.XPathExpressionException;
 import javax.xml.xpath.XPathFactory;
 
+import org.apache.commons.lang3.StringUtils;
 import org.opentdk.api.logger.MLogger;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -79,7 +80,7 @@ public class XMLEditor {
 
 	public XMLEditor(File xml_src, String rootNode) throws IOException {
 		xmlFile = xml_src;
-		if (!rootNode.isBlank()) {
+		if (StringUtils.isNotBlank(rootNode)) {
 			rootNodeName = rootNode;
 		}
 //		try {
@@ -96,7 +97,7 @@ public class XMLEditor {
 
 	public XMLEditor(InputStream inStream, String rootNode) {
 		xmlStream = inStream;
-		if (!rootNode.isBlank()) {
+			if (StringUtils.isNotBlank(rootNode)) {
 			rootNodeName = rootNode;
 		}
 		createXMLEditor();
@@ -121,7 +122,7 @@ public class XMLEditor {
 		Element pathE = checkXPath(xPath, true);
 		// create the element to add
 		Element newChild = null;
-		if (attributeName.isBlank()) {
+		if (StringUtils.isBlank(attributeName)) {
 			newChild = createElement(elementName);
 		} else {
 			newChild = this.createElement(elementName, attributeName, attributeValue);
@@ -476,7 +477,7 @@ public class XMLEditor {
 		Element oldChild = null;
 		Element pathE = checkXPath(xPath, false);
 		if (pathE != null) {
-			if (attributeName.isBlank()) {
+			if (StringUtils.isBlank(attributeName)) {
 				oldChild = getElement(xPath + "/" + elementName);
 			} else {
 				oldChild = getElement(elementName, attributeName, attributeValue);
@@ -987,7 +988,7 @@ public class XMLEditor {
 	 */
 	public void save() {
 		if (doc.getDocumentURI() != null) {
-			if (!doc.getDocumentURI().isBlank()) {
+			if (StringUtils.isNotBlank(doc.getDocumentURI())) {
 				save(xmlFile);
 			}
 		}

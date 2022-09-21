@@ -9,6 +9,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.logging.Level;
 
+import org.apache.commons.lang3.StringUtils;
 import org.opentdk.api.application.EBaseSettings;
 import org.opentdk.api.datastorage.DataContainer;
 import org.opentdk.api.datastorage.EOperator;
@@ -333,7 +334,7 @@ public class BaseDispatchComponent {
 	 */
 	public static boolean checkDispatcherFile(String fileName, String rootNode, boolean createNew) throws IOException {
 		File file = new File(fileName);
-		if (createNew || !file.exists() || FileUtil.getContent(fileName).isBlank()) {
+		if (createNew || !file.exists() || StringUtils.isBlank(FileUtil.getContent(fileName))) {
 			FileUtil.deleteFile(fileName);			
 			XMLEditor xEdit = new XMLEditor(fileName, rootNode);
 			xEdit.save(fileName);
@@ -589,7 +590,7 @@ public class BaseDispatchComponent {
 		String rootNode = "";
 		String[] nodeArray = parentXPath.split("/");
 		if(nodeArray.length > 0) {
-			if(nodeArray[0].isBlank()) {
+			if(StringUtils.isBlank(nodeArray[0])) {
 				if(nodeArray.length > 1) {
 					rootNode = nodeArray[1].replace("/", "");
 				}
@@ -694,7 +695,7 @@ public class BaseDispatchComponent {
 	 */
 	private String resolveXPath(String params) {
 		String pxp = parentXPath;
-		if (params.isBlank()) {
+		if (StringUtils.isBlank(params)) {
 			// remove all attributes placeholder like "[@name='{param_1}']"
 			pxp = pxp.replaceAll("param_[0-9]*", "");
 			pxp = pxp.replaceAll("\\[@.*\\='\\{\\}'\\]", "");

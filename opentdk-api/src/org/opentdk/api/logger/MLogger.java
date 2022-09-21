@@ -34,6 +34,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.logging.SimpleFormatter;
 
+import org.apache.commons.lang3.StringUtils;
 import org.opentdk.api.io.FileUtil;
 import org.opentdk.api.util.*;
 
@@ -240,7 +241,7 @@ public final class MLogger {
 		if (level == null || message == null || mainName == null || className == null || methodName == null) {
 			logger.log(Level.SEVERE, "Null arguments committed");
 			ret = false;
-		} else if (message.isBlank() && mainName.isBlank() && className.isBlank() && methodName.isBlank()) {
+		} else if (StringUtils.isBlank(message) && StringUtils.isBlank(mainName) && StringUtils.isBlank(className) && StringUtils.isBlank(methodName)) {
 			logger.log(Level.SEVERE, "Only blank arguments committed");
 			ret = false;
 		}
@@ -273,7 +274,7 @@ public final class MLogger {
 	 * @return False if the string is not valid, true otherwise
 	 */
 	private boolean isValidLogString(String toCheck) {
-		if (toCheck == null || toCheck.isBlank() || toCheck.length() > Short.MAX_VALUE) {
+		if (StringUtils.isBlank(toCheck) || toCheck.length() > Short.MAX_VALUE) {
 			return false;
 		}
 		return true;

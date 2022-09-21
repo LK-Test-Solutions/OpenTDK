@@ -1,10 +1,15 @@
 package org.opentdk.api.datastorage;
 
+import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
+import org.apache.commons.lang3.StringUtils;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -44,12 +49,9 @@ public class JSONDataContainer implements CustomContainer {
 		if (!dc.getFileName().isEmpty()) {
 			content = FileUtil.getContent(dc.getFileName());
 		} else if (dc.getInputStream() != null) {
-			try {
-				content = new String(dc.getInputStream().readAllBytes());
-			} catch (IOException e) {
-				MLogger.getInstance().log(Level.SEVERE, e);
-				content = null;
-			}
+			InputStreamReader inputStreamReader = new InputStreamReader(dc.getInputStream());
+			Stream<String> streamOfString = new BufferedReader(inputStreamReader).lines();
+			content = streamOfString.collect(Collectors.joining());		
 		}
 		if (content != null) {
 			json = new JSONObject(content);
@@ -155,7 +157,7 @@ public class JSONDataContainer implements CustomContainer {
 			}
 			for (FilterRule fltrRule : fltr.getFilterRules()) {
 				// Filter used ==> XPath usage
-				if (fltrRule.getHeaderName().equalsIgnoreCase("XPath") && !fltrRule.getValue().strip().isEmpty()) {
+				if (fltrRule.getHeaderName().equalsIgnoreCase("XPath") && StringUtils.isNotBlank(fltrRule.getValue())) {
 					String searchExp = fltrRule.getValue().replace(";", "/") + "/" + headerName;
 					Object newValue = this.getDataType(newFieldValue);
 					Object result = null;
@@ -191,7 +193,7 @@ public class JSONDataContainer implements CustomContainer {
 		}
 		for (FilterRule fltrRule : fltr.getFilterRules()) {
 			// Filter used ==> XPath usage
-			if (fltrRule.getHeaderName().equalsIgnoreCase("XPath") && !fltrRule.getValue().strip().isEmpty()) {
+			if (fltrRule.getHeaderName().equalsIgnoreCase("XPath") && StringUtils.isNotBlank(fltrRule.getValue())) {
 				String searchExp = fltrRule.getValue().replace(";", "/") + "/" + headerName;
 				Object result = null;
 
@@ -235,7 +237,7 @@ public class JSONDataContainer implements CustomContainer {
 		}
 		for (FilterRule fltrRule : fltr.getFilterRules()) {
 			// Filter used ==> XPath usage
-			if (fltrRule.getHeaderName().equalsIgnoreCase("XPath") && !fltrRule.getValue().strip().isEmpty()) {
+			if (fltrRule.getHeaderName().equalsIgnoreCase("XPath") && StringUtils.isNotBlank(fltrRule.getValue())) {
 				String searchExp = fltrRule.getValue().replace(";", "/") + "/" + headerName;
 				Object newValue = this.getDataType(value);
 				Object result = null;

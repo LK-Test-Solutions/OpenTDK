@@ -30,12 +30,13 @@ package org.opentdk.api.util;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.Collections;
-import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
 import java.util.ListIterator;
 import java.util.Set;
+import java.util.stream.Collectors;
+
+import org.apache.commons.lang3.StringUtils;
 
 /**
  * Helper utility class for lists that contains only static methods to call them directly like:<br>
@@ -90,8 +91,8 @@ public class ListUtil {
 	public static String asString(String[] values, String separator, boolean strip) {
 		StringBuilder retVal = new StringBuilder();
 
-		for (int i = 0; i < values.length; i++) {
-			retVal.append(values[i].strip());
+		for (int i = 0; i < values.length; i++) {			
+			retVal.append(StringUtils.strip(values[i]));
 			if (i < values.length - 1) {
 				retVal.append(separator);
 			}
@@ -271,16 +272,12 @@ public class ListUtil {
 	 * @param list A list of any type.
 	 * @return The list of type integer sorted by integer from lowest to highest value.
 	 */
-	public static List<Integer> sortByInteger(List<?> list) {
-		List<Integer> retVal = ListUtil.asIntList(list);
-		Comparator<Integer> intComp = new Comparator<>() {
-			@Override
-			public int compare(Integer i1, Integer i2) {
-				return i1.compareTo(i2);
-			}
-		};
-		Collections.sort(retVal, intComp);
-		return retVal;
+	public static List<Integer> sortByInteger(List<?> list){
+		List<Integer> intList = ListUtil.asIntList(list);
+		List<Integer> result = intList.stream().sorted((o1, o2)->o1.
+                compareTo(o2)).
+                collect(Collectors.toList());
+		return result;
 	}
 
 	/**

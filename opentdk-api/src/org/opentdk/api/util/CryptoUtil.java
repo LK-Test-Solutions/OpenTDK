@@ -46,6 +46,7 @@ import javax.crypto.NoSuchPaddingException;
 import javax.crypto.SecretKey;
 import javax.crypto.spec.SecretKeySpec;
 
+import org.apache.commons.lang3.StringUtils;
 import org.opentdk.api.io.FileUtil;
 import org.opentdk.api.logger.MLogger;
 
@@ -258,7 +259,7 @@ public class CryptoUtil {
 	 */
 	private static byte[] hexStringToByteArray(String input) {
 		byte[] ret = null;
-		if (input != null && !input.isBlank() && input.length() < Integer.MAX_VALUE) {
+		if (input != null && StringUtils.isNotBlank(input) && input.length() < Integer.MAX_VALUE) {
 			ret = new byte[input.length() / 2];
 			for (int i = 0; i < ret.length; ++i) {
 				int index = i * 2;

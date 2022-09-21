@@ -1,9 +1,11 @@
 package org.opentdk.api.datastorage;
 
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.sql.ResultSet;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -15,7 +17,9 @@ import java.util.Map;
 import java.util.Set;
 import java.util.logging.Level;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
+import org.apache.commons.lang3.StringUtils;
 import org.json.JSONObject;
 import org.opentdk.api.io.XFileWriter;
 import org.opentdk.api.io.XMLEditor;
@@ -361,8 +365,10 @@ public class DataContainer extends BaseContainer {
 		} else if (inputStream != null) {
 			try {
 				if (inputStream.available() > 0) {
-				
-					String inputContent = new String(inputStream.readAllBytes());
+					InputStreamReader inputStreamReader = new InputStreamReader(inputStream);
+					Stream<String> streamOfString = new BufferedReader(inputStreamReader).lines();
+					String inputContent = streamOfString.collect(Collectors.joining());
+
 					// Every access consumes the stream so a reset is necessary
 					inputStream.reset();
 					
@@ -374,7 +380,7 @@ public class DataContainer extends BaseContainer {
 						}
 						inputStream.reset();
 					} else if (inputContent.startsWith("{")) {
-						if(!JSONObject.valueToString(inputContent).isBlank()) {
+						if(StringUtils.isNotBlank(JSONObject.valueToString(inputContent))) {
 							return EContainerFormat.JSON;
 						}
 					} else {
@@ -385,7 +391,7 @@ public class DataContainer extends BaseContainer {
 				MLogger.getInstance().log(Level.SEVERE, e);
 				return EContainerFormat.CSV;
 			}
-		} else if ((fileName != null) && (!fileName.isBlank())) {
+		} else if (StringUtils.isNotBlank(fileName)) {
 			if (fileName.endsWith(".properties")) {
 				return EContainerFormat.PROPERTIES;
 			} else if (fileName.endsWith(".xml")) {
