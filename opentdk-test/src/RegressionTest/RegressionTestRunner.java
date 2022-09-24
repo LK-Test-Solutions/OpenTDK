@@ -32,9 +32,10 @@ import RegressionTest.Dispatcher.RT_noFile_Default_values;
 import RegressionTest.Dispatcher.RT_noFile_XML_values;
 import RegressionTest.IO.RT_FileUtil;
 import RegressionTest.IO.RT_XFileWiter;
-import RegressionTest.JSONContainer.RT_Container_dispatchJson;
-import RegressionTest.JSONContainer.RT_Container_inputStream;
-import RegressionTest.JSONContainer.RT_Container_readJson;
+import RegressionTest.JSONContainer.RT_JSONContainer_buildJson;
+import RegressionTest.JSONContainer.RT_JSONContainer_dispatchJson;
+import RegressionTest.JSONContainer.RT_JSONContainer_inputStream;
+import RegressionTest.JSONContainer.RT_JSONContainer_readViaDc;
 import RegressionTest.ListUtility.RT_ListUtility_asString;
 import RegressionTest.Logging.RT_Logging_log;
 import RegressionTest.Meter.RT_Counter;
@@ -97,9 +98,10 @@ public class RegressionTestRunner {
 		RT_XFileWiter.main(args);
 		
 		// RegressionTest.JSONContainer
-		RT_Container_dispatchJson.main(args);
-		RT_Container_readJson.main(args);
-		RT_Container_inputStream.main(args);
+		RT_JSONContainer_buildJson.main(args);
+		RT_JSONContainer_dispatchJson.main(args);
+		RT_JSONContainer_inputStream.main(args);
+		RT_JSONContainer_readViaDc.main(args);
 		
 		// RegressionTest.ListUtility
 		RT_ListUtility_asString.main(args);

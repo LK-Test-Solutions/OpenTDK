@@ -4,10 +4,10 @@ import org.opentdk.api.datastorage.DataContainer;
 
 import RegressionTest.BaseRegression;
 
-public class RT_Container_readJson extends BaseRegression {
+public class RT_JSONContainer_readViaDc extends BaseRegression {
 
 	public static void main(String[] args) {
-		new RT_Container_readJson();
+		new RT_JSONContainer_readViaDc();
 	}
 
 	@Override

@@ -25,21 +25,16 @@ public class YAMLDataContainer implements CustomContainer {
 
 	@Override
 	public void readData(Filter filter) {
-		
-		
+				
 	}
 
 	@Override
 	public void writeData(String srcFileName) throws IOException {
-		
-		
+			
 	}
 
 	@Override
-	public String asString() {
-		
+	public String asString() {		
 		return null;
 	}
-
-
 }

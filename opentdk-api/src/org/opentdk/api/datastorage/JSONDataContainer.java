@@ -18,24 +18,32 @@ import org.opentdk.api.io.FileUtil;
 import org.opentdk.api.logger.MLogger;
 import org.opentdk.api.util.ListUtil;
 
+/**
+ * Specific data container class for the JSON format. In its read and write methods the
+ * {@link org.json.JSONObject} class gets used to handle sources from an {@link java.io.InputStream}
+ * or a JSON file.
+ * 
+ * @author LK Test Solutions
+ * @see org.opentdk.api.datastorage.DataContainer
+ */
 public class JSONDataContainer implements CustomContainer {
 
 	/**
-	 * An instance of the DataContainer that should be filled with the data from the connected source
-	 * file. Task of the specific data containers.
+	 * The instance of the {@link DataContainer} that the JSONDataContainer works with.
 	 */
 	private final DataContainer dc;
 
 	/**
-	 * Container object for the JSON data. Supports several methods for read and write operations.
+	 * Container object for the JSON data. Supports several read and write methods. Gets initialized in
+	 * {@link #readData(Filter)}.
 	 */
 	private JSONObject json;
 
 	/**
-	 * Construct a new specific <code>DataContainer</code> for JSON files.
+	 * Construct a new specific container for JSON files. This gets done by the {@link DataContainer}
+	 * class in its adaptContainer method. After initialization, it gets passed to this class.
 	 *
-	 * @param dCont the <code>DataContainer</code> instance to use it in the read and write methods of
-	 *              this specific data container
+	 * @param dCont {@link #dc}
 	 */
 	JSONDataContainer(DataContainer dCont) {
 		dc = dCont;
@@ -51,7 +59,7 @@ public class JSONDataContainer implements CustomContainer {
 		} else if (dc.getInputStream() != null) {
 			InputStreamReader inputStreamReader = new InputStreamReader(dc.getInputStream());
 			Stream<String> streamOfString = new BufferedReader(inputStreamReader).lines();
-			content = streamOfString.collect(Collectors.joining());		
+			content = streamOfString.collect(Collectors.joining());
 		}
 		if (content != null) {
 			json = new JSONObject(content);
@@ -115,9 +123,6 @@ public class JSONDataContainer implements CustomContainer {
 			}
 			ret = ListUtil.asStringArr(filteredValues);
 		} else {
-			/*
-			 * Simply returns the whole content of the column header at top level.
-			 */
 			Object result = json.get(headerName);
 			String sResult = result.toString();
 
@@ -146,53 +151,44 @@ public class JSONDataContainer implements CustomContainer {
 
 	@Override
 	public void addField(String headerName, String fieldName, String oldFieldValue, String newFieldValue, Filter fltr) {
-		Object[] exisitingNode = this.getColumn(headerName, fltr);
-		if (exisitingNode.length == 0) {
-			// Field does not exist ==> create it
-			this.setFieldValues(headerName, new int[0], newFieldValue, fltr);
-		} else {
-			if (fltr.getFilterRules().isEmpty()) {
+		if (fltr.getFilterRules().isEmpty()) {
+			Object newValue = this.getDataType(newFieldValue);
+			json.append(headerName, newValue);
+		}
+		for (FilterRule fltrRule : fltr.getFilterRules()) {
+			if (fltrRule.getHeaderName().equalsIgnoreCase("XPath") && StringUtils.isNotBlank(fltrRule.getValue())) {
+				String searchExp = fltrRule.getValue().replace(";", "/") + "/" + headerName;
 				Object newValue = this.getDataType(newFieldValue);
-				json.append(headerName, newValue);
-			}
-			for (FilterRule fltrRule : fltr.getFilterRules()) {
-				// Filter used ==> XPath usage
-				if (fltrRule.getHeaderName().equalsIgnoreCase("XPath") && StringUtils.isNotBlank(fltrRule.getValue())) {
-					String searchExp = fltrRule.getValue().replace(";", "/") + "/" + headerName;
-					Object newValue = this.getDataType(newFieldValue);
-					Object result = null;
+				Object result = null;
 
-					List<String> keyList = ListUtil.asList(searchExp.split("/"));
-					int i = 0;
-					for (String key : keyList) {
-						if (i == 0) {
-							result = json.get(key);
+				List<String> keyList = ListUtil.asList(searchExp.split("/"));
+				int i = 0;
+				for (String key : keyList) {
+					if (i == 0) {
+						result = json.get(key);
+					} else {
+						if (result instanceof JSONObject && i < keyList.size() - 1) {
+							result = ((JSONObject) result).get(key);
+						} else if (result instanceof JSONArray && i < keyList.size() - 1) {
+							result = ((JSONArray) result).get(Integer.parseInt(key));
 						} else {
-							if (result instanceof JSONObject && i < keyList.size() - 1) {
-								result = ((JSONObject) result).get(key);
-							} else if (result instanceof JSONArray && i < keyList.size() - 1) {
-								result = ((JSONArray) result).get(Integer.parseInt(key));
-							} else {
-								break;
-							}
+							break;
 						}
-						i++;
 					}
-					((JSONObject) result).append(headerName, newValue);
-					break;
+					i++;
 				}
+				((JSONObject) result).append(headerName, newValue);
+				break;
 			}
 		}
 	}
 
 	@Override
 	public void deleteField(String headerName, String fieldName, String fieldValue, Filter fltr) {
-		// No filter ==> top level adjustments
 		if (fltr.getFilterRules().isEmpty()) {
 			json.remove(headerName);
 		}
 		for (FilterRule fltrRule : fltr.getFilterRules()) {
-			// Filter used ==> XPath usage
 			if (fltrRule.getHeaderName().equalsIgnoreCase("XPath") && StringUtils.isNotBlank(fltrRule.getValue())) {
 				String searchExp = fltrRule.getValue().replace(";", "/") + "/" + headerName;
 				Object result = null;
@@ -230,13 +226,11 @@ public class JSONDataContainer implements CustomContainer {
 	 */
 	public void setFieldValues(String headerName, int[] occurences, String value, Filter fltr) {
 		occurences = null;
-		// No filter ==> top level adjustments
 		if (fltr.getFilterRules().isEmpty()) {
 			Object newValue = this.getDataType(value);
 			json.put(headerName, newValue);
 		}
 		for (FilterRule fltrRule : fltr.getFilterRules()) {
-			// Filter used ==> XPath usage
 			if (fltrRule.getHeaderName().equalsIgnoreCase("XPath") && StringUtils.isNotBlank(fltrRule.getValue())) {
 				String searchExp = fltrRule.getValue().replace(";", "/") + "/" + headerName;
 				Object newValue = this.getDataType(value);
@@ -297,7 +291,6 @@ public class JSONDataContainer implements CustomContainer {
 				} catch (JSONException e) {
 					ret = null;
 				}
-				// All other data types like boolean or number
 				if (ret == null) {
 					ret = JSONObject.stringToValue(newValue);
 				}

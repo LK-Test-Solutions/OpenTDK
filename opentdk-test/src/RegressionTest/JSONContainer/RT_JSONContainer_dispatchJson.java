@@ -7,10 +7,10 @@ import org.opentdk.api.dispatcher.BaseDispatcher;
 
 import RegressionTest.BaseRegression;
 
-public class RT_Container_dispatchJson extends BaseRegression {
+public class RT_JSONContainer_dispatchJson extends BaseRegression {
 
 	public static void main(String[] args) {
-		new RT_Container_dispatchJson();
+		new RT_JSONContainer_dispatchJson();
 	}
 
 	@Override
@@ -89,7 +89,7 @@ public class RT_Container_dispatchJson extends BaseRegression {
 		} catch (JSONException e) {
 			System.out.println("Exception correctly catched ==> Field 'salary' was deleted");
 		}
-
+		
 		BaseDispatcher.getDataContainer(EJsonValues.class).writeData("output/JsonOutput.json");
 	}
 

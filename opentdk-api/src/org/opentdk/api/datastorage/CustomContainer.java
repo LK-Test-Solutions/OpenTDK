@@ -140,7 +140,8 @@ interface CustomContainer {
 	/**
 	 * The {@link #getColumn(String, Filter)} method can be implemented within the specific
 	 * <code>DataContainer</code> to retrieve all or a filtered amount of field values from a column, if
-	 * the data is in tabular format.
+	 * the data is in tabular format. In case of tree formats the header name is the key or field name that should be addressed
+	 * and the filter gets used to store the XPath.
 	 * 
 	 * @param headerName Name of the column header, where the method will get the values from.
 	 * @param rowFilter  The row filter defines the conditions for values found in the column. Only

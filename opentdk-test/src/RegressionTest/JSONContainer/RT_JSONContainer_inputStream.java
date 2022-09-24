@@ -6,7 +6,7 @@ import org.opentdk.api.dispatcher.BaseDispatcher;
 
 import RegressionTest.BaseRegression;
 
-public class RT_Container_inputStream extends BaseRegression {
+public class RT_JSONContainer_inputStream extends BaseRegression {
 	
 	private final String jsonString = "{\r\n"
 			+ "  \"status\" : \"SUCCESS\",\r\n"
@@ -19,7 +19,7 @@ public class RT_Container_inputStream extends BaseRegression {
 			+ "";
 
 	public static void main(String[] args) {
-		new RT_Container_inputStream();
+		new RT_JSONContainer_inputStream();
 	}
 
 	@Override

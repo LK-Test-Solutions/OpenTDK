@@ -396,15 +396,6 @@ public class DataContainer extends BaseContainer {
 				return EContainerFormat.PROPERTIES;
 			} else if (fileName.endsWith(".xml")) {
 				return EContainerFormat.XML;
-				// ToDo: Validation of XML file need to be re-defined. The current
-				// implementation fails when the file is empty.
-//				if(FileUtil.checkFile(fileName)) {
-//					if(XMLEditor.validateXMLFile(new File(fileName))) {
-//						return EContainerFormat.XML;
-//					}
-//				} else {
-//					return EContainerFormat.XML;
-//				}
 			} else if (fileName.endsWith(".json")) {
 				return EContainerFormat.JSON;
 			} else {
