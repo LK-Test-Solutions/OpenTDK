@@ -27,11 +27,11 @@ public class RT_JSONContainer_buildJson extends BaseRegression {
         EWebControlRequest.BROWSERNAME.setValue("chrome");
         EWebControlRequest.OSNAME.setValue("Windows 10");
         EWebControlRequest.TESTNAME.setValue("First Test");
-        EWebControlRequest.TESTSTEPS.setValue("[]");
+//        EWebControlRequest.TESTSTEPS.setValue("[]");
         EWebControlRequest.TESTSTEPS.addValue(BaseDispatcher.getDataContainer(EWebControlStep.class).asString());
         EWebControlRequest.TESTSTEPS.addValue("{\"expectedResult\":\"App ist geschlossen\",\"name\":\"Step2\",\"description\":\"Schliesse App\"}");
         
-//        System.out.println(BaseDispatcher.getDataContainer(EWebControlRequest.class).asString());
+        System.out.println(BaseDispatcher.getDataContainer(EWebControlRequest.class).asString());
        
         BaseRegression.testResult(EWebControlRequest.TESTSTEPS_NAME.getValue(), "Test step at index 1", "Step1");       
         BaseRegression.testResult(EWebControlRequest.TESTSTEPS.getValues()[0], "Test steps", expectedResult);	
