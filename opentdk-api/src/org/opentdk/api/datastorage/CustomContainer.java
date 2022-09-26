@@ -2,6 +2,8 @@ package org.opentdk.api.datastorage;
 
 import java.io.IOException;
 
+import org.opentdk.api.datastorage.BaseContainer.EContainerFormat;
+
 /**
  * The <code>CustomContainer</code> interface groups related methods with empty bodies for every
  * specific <code>DataContainer</code>, like {@link PropertiesDataContainer},
@@ -42,6 +44,17 @@ interface CustomContainer {
 	 * @return the container content as string for further operations.
 	 */
 	String asString();
+
+	/**
+	 * Used to provide the content of the container in another container format as string. Default
+	 * method, because to every format is transformable.
+	 * 
+	 * @param exportAs see {@link org.opentdk.api.datastorage.BaseContainer.EContainerFormat}
+	 * @return the container content as string for further operations in the chosen format
+	 */
+	default String asString(EContainerFormat exportAs) {
+		return asString();
+	}
 
 	/*
 	 * The default methods within this interface can be implemented in the specific classes, but they do
@@ -140,8 +153,8 @@ interface CustomContainer {
 	/**
 	 * The {@link #getColumn(String, Filter)} method can be implemented within the specific
 	 * <code>DataContainer</code> to retrieve all or a filtered amount of field values from a column, if
-	 * the data is in tabular format. In case of tree formats the header name is the key or field name that should be addressed
-	 * and the filter gets used to store the XPath.
+	 * the data is in tabular format. In case of tree formats the header name is the key or field name
+	 * that should be addressed and the filter gets used to store the XPath.
 	 * 
 	 * @param headerName Name of the column header, where the method will get the values from.
 	 * @param rowFilter  The row filter defines the conditions for values found in the column. Only

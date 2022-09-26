@@ -24,6 +24,7 @@ import org.json.JSONObject;
 import org.opentdk.api.io.XFileWriter;
 import org.opentdk.api.io.XMLEditor;
 import org.opentdk.api.logger.*;
+import org.yaml.snakeyaml.Yaml;
 
 /**
  * Class used to store data from different sources at runtime of an application
@@ -345,6 +346,9 @@ public class DataContainer extends BaseContainer {
 		case JSON:
 			instance = new JSONDataContainer(this);
 			break;
+		case YAML:
+			instance = new YAMLDataContainer(this);
+			break;
 		default:
 			instance = new CSVDataContainer(this);
 			return;
@@ -368,7 +372,11 @@ public class DataContainer extends BaseContainer {
 					InputStreamReader inputStreamReader = new InputStreamReader(inputStream);
 					Stream<String> streamOfString = new BufferedReader(inputStreamReader).lines();
 					String inputContent = streamOfString.collect(Collectors.joining());
-
+					
+					// Reader not needed anymore after stored to string
+					inputStreamReader.close();
+					streamOfString.close();
+					
 					// Every access consumes the stream so a reset is necessary
 					inputStream.reset();
 					
@@ -384,6 +392,10 @@ public class DataContainer extends BaseContainer {
 							return EContainerFormat.JSON;
 						}
 					} else {
+						Map<String, Object> yamlContent = new Yaml().load(inputContent);
+						if(!yamlContent.isEmpty()) {
+							return EContainerFormat.YAML;
+						}						
 						return EContainerFormat.DEFAULT;
 					}
 				}
@@ -398,6 +410,8 @@ public class DataContainer extends BaseContainer {
 				return EContainerFormat.XML;
 			} else if (fileName.endsWith(".json")) {
 				return EContainerFormat.JSON;
+			} else if (fileName.endsWith(".yaml")) {
+				return EContainerFormat.YAML;
 			} else {
 				return EContainerFormat.CSV;
 			}
@@ -1753,6 +1767,13 @@ public class DataContainer extends BaseContainer {
 	 */
 	public String asString() {
 		return instance.asString();
+	}
+	
+	/**
+	 * @return the container content as string for further operations in another format.
+	 */
+	public String asString(EContainerFormat toExport) {
+		return instance.asString(toExport);
 	}
 
 }

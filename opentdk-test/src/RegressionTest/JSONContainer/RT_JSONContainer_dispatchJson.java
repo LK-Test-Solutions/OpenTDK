@@ -91,6 +91,8 @@ public class RT_JSONContainer_dispatchJson extends BaseRegression {
 		}
 		
 		BaseDispatcher.getDataContainer(EJsonValues.class).writeData("output/JsonOutput.json");
+		
+		BaseDispatcher.clearDataContainer();
 	}
 
 }

@@ -103,6 +103,15 @@ public class RT_Logging_log extends BaseRegression {
 		MLogger.getInstance().setTraceLevel(1);
 		MLogger.getInstance().setTraceLevel(2);
 		MLogger.getInstance().setTraceLevel(3);
+		
+		// Reset
+		MLogger.getInstance().setLogSizeLimit(10000);
+		MLogger.getInstance().setLogKeepAge(30);
+		try {
+			FileUtil.deleteFileOrFolder(defaultLogFile);
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
 	}
 
 }

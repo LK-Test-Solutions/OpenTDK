@@ -17,6 +17,7 @@ module opentdk.test {
 	exports RegressionTest.Logging;
 	exports RegressionTest.CryptoUtility;
 	exports RegressionTest.CSVContainer;
+	exports RegressionTest.YAMLContainer;
 	exports Template.Application;
 	exports Tests.BaseApplication;
 	
@@ -31,4 +32,5 @@ module opentdk.test {
 	requires transitive opentdk.api;
 	requires transitive opentdk.gui;
 	requires org.json;
+	requires snakeyaml;
 }

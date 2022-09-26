@@ -112,7 +112,7 @@ public class RT_FileUtil extends BaseRegression {
 			System.err.println(e.getMessage());
 		}
 
-		String content = FileUtil.getRowsAsString(path_txt, 3).strip();
+		String content = FileUtil.getRowsAsString(path_txt, 3).trim();
 		BaseRegression.testResult(content.length(), "READ_STRING_SIZE", 14);
 
 		List<String> rows = FileUtil.getRowsAsList(path_txt);

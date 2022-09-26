@@ -18,4 +18,5 @@ module opentdk.api {
 	requires commons.math3;
 	requires org.json;
 	requires org.apache.commons.lang3;
+	requires snakeyaml;
 }

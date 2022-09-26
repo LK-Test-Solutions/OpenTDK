@@ -53,19 +53,26 @@ public class Counter {
 	/**
 	 * Stores pairs of transactions and counters.
 	 */
-	private static Map<String, Integer> storage;	
+	private static Map<String, Integer> storage;
 	/*
 	 * Initializes the {@link #storage}.
 	 */
 	static {
 		storage = new HashMap<>();
 	}
-	
+
 	/**
 	 * See {@link org.opentdk.api.meter.Counter}
 	 */
 	public Counter() {
 		super();
+	}
+
+	/**
+	 * @return {@link #storage}
+	 */
+	public Map<String, Integer> getStorage() {
+		return storage;
 	}
 
 	/**
@@ -142,5 +149,31 @@ public class Counter {
 			storage.put(counterName, initialValue + stepSize);
 		}
 		return storage.get(counterName);
+	}
+
+	/**
+	 * Set the value for the counter key to 0 if it exists. Calling {@link #increase(String, int, int)}
+	 * or {@link #decrease(String, int, int)} with an initial capacity has to effect, because 0 is
+	 * already present. Use {@link #remove(String)} to set a new initial capacity-
+	 * 
+	 * @param counterName The reference name to count for.
+	 */
+	public void reset(String counterName) {
+		if (storage.containsKey(counterName)) {
+			storage.put(counterName, 0);
+		}
+	}
+
+	/**
+	 * Deletes the key from the {@link #toString()} map if it exists. This allows to call the
+	 * {@link #increase(String, int, int)} or {@link #decrease(String, int, int)} with an initial
+	 * capacity again.
+	 * 
+	 * @param counterName The reference name to count for.
+	 */
+	public void remove(String counterName) {
+		if (storage.containsKey(counterName)) {
+			storage.remove(counterName);
+		}
 	}
 }

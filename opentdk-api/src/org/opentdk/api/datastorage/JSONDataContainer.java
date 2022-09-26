@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.logging.Level;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -17,6 +18,7 @@ import org.opentdk.api.datastorage.BaseContainer.EContainerFormat;
 import org.opentdk.api.io.FileUtil;
 import org.opentdk.api.logger.MLogger;
 import org.opentdk.api.util.ListUtil;
+import org.yaml.snakeyaml.Yaml;
 
 /**
  * Specific data container class for the JSON format. In its read and write methods the
@@ -60,19 +62,50 @@ public class JSONDataContainer implements CustomContainer {
 			InputStreamReader inputStreamReader = new InputStreamReader(dc.getInputStream());
 			Stream<String> streamOfString = new BufferedReader(inputStreamReader).lines();
 			content = streamOfString.collect(Collectors.joining());
+
+			streamOfString.close();
+			try {
+				inputStreamReader.close();
+			} catch (IOException e) {
+				MLogger.getInstance().log(Level.SEVERE, e);
+			}
 		}
 		if (content != null) {
 			json = new JSONObject(content);
+			fillDc();
+		}
+	}
 
-			if (!json.isEmpty()) {
-				String[] names = JSONObject.getNames(json);
-				if (names.length > 0) {
-					dc.setHeaders(names);
-					for (String header : names) {
-						dc.setColumn(header, new String[] { json.get(header).toString() });
-					}
+	private void fillDc() {
+		if (!json.isEmpty()) {
+			String[] names = JSONObject.getNames(json);
+			if (names.length > 0) {
+				dc.setHeaders(names);
+				for (String header : names) {
+					dc.setColumn(header, new String[] { json.get(header).toString() });
 				}
 			}
+		}
+	}
+	
+	/**
+	 * @return {@link #json} object as map to access from other containers.
+	 */
+	Map<String, Object> getJsonAsMap() {
+		return json.toMap();
+	}
+
+	/**
+	 * Possibility to set the content of the {@link #json} object from other containers.
+	 * 
+	 * @param content map that has the whole content of the JSON source
+	 */
+	void setJsonWithMap(Map<String, Object> content) {
+		if(content == null) {
+			MLogger.getInstance().log(Level.WARNING, "Map object is not initialized ==> No JSON content to read", getClass().getSimpleName(), "setJsonWithMap");
+		} else {
+			json = new JSONObject(content);
+			fillDc();
 		}
 	}
 
@@ -224,6 +257,7 @@ public class JSONDataContainer implements CustomContainer {
 	 *                   boolean or '"Test"' becomes a string or '[value1,value2]' an array
 	 * @param fltr       filter object to find the correct field
 	 */
+	@Override
 	public void setFieldValues(String headerName, int[] occurences, String value, Filter fltr) {
 		occurences = null;
 		if (fltr.getFilterRules().isEmpty()) {
@@ -308,6 +342,21 @@ public class JSONDataContainer implements CustomContainer {
 			ret = json.toString(1);
 		}
 		return ret;
+	}
+	
+	@Override
+	public String asString(EContainerFormat format) {
+		switch(format) {
+		case JSON:
+			MLogger.getInstance().log(Level.INFO, "Format already is JSON. Call asString", getClass().getSimpleName(), "asString(format)");
+			return asString();
+		case YAML:
+			Yaml yaml = new Yaml();
+			return yaml.dump(yaml.dumpAsMap(getJsonAsMap()));
+		default:
+			MLogger.getInstance().log(Level.WARNING, "Format not supported to export from YAML", getClass().getSimpleName(), "asString(format)");
+			return "";
+		}
 	}
 
 }

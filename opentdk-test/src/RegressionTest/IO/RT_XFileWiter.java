@@ -36,7 +36,7 @@ public class RT_XFileWiter extends BaseRegression {
 		try {
 			writer = new XFileWriter(path);
 			writer.writeLine(new String[] { content });
-			testResult(FileUtil.getRowsAsString(path).strip(), "File content", content);
+			testResult(FileUtil.getRowsAsString(path).trim(), "File content", content);
 		} catch (IOException e) {
 			e.printStackTrace();
 		} finally {

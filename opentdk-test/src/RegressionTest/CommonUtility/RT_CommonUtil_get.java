@@ -29,7 +29,7 @@ public class RT_CommonUtil_get extends BaseRegression {
 		String ip = CommonUtil.getIPAdress();
 		String mac = CommonUtil.getMacAddress();
 
-		if (computerName != null && !computerName.isBlank() && ip != null && !ip.isBlank() && mac != null && !mac.isBlank()) {
+		if (computerName != null && !computerName.trim().isEmpty() && ip != null && !ip.trim().isEmpty() && mac != null && !mac.trim().isEmpty()) {
 			System.out.println("Computer Name: " + computerName);
 			System.out.println("Computer IP: " + ip);
 			System.out.println("Computer MAC adress: " + mac);
