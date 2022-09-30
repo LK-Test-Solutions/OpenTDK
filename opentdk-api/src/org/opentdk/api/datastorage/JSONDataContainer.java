@@ -15,6 +15,8 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.opentdk.api.datastorage.BaseContainer.EContainerFormat;
+import org.opentdk.api.filter.Filter;
+import org.opentdk.api.filter.FilterRule;
 import org.opentdk.api.io.FileUtil;
 import org.opentdk.api.logger.MLogger;
 import org.opentdk.api.util.ListUtil;

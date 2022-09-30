@@ -3,6 +3,8 @@ package RegressionTest.CSVContainer;
 import java.util.List;
 
 import org.opentdk.api.datastorage.*;
+import org.opentdk.api.filter.Filter;
+import org.opentdk.api.mapping.EOperator;
 
 import RegressionTest.BaseRegression;
 

@@ -12,6 +12,8 @@ import java.util.Set;
 import java.util.Map.Entry;
 import java.util.logging.Level;
 
+import org.opentdk.api.filter.Filter;
+import org.opentdk.api.filter.FilterRule;
 import org.opentdk.api.logger.MLogger;
 import org.opentdk.api.util.*;
 
@@ -185,48 +187,6 @@ public abstract class BaseContainer {
 	protected ArrayList<String[]> values = new ArrayList<String[]>();
 
 	/**
-	 * Adds the header names from HashMap {@link #metaData} to an array of strings. Header names are
-	 * read from the key names of the entrySets of HashMap {@link #metaData}.
-	 *
-	 * @param inArray Array of strings with header names from HashMap {@link #headerNames}
-	 * @return concatenated array of strings with all key names of HashMap {@link #metaData} and values
-	 *         of the array <b>inArray</b>
-	 */
-	protected String[] addMetaHeaders(String[] inArray) {
-		return extendDataSet(inArray, "HEADER");
-	}
-
-	/**
-	 * Adds the values from HashMap {@link #metaData} to an array of strings. Values are read from the
-	 * values of the entrySets of HashMap {@link #metaData}.
-	 *
-	 * @param inArray Array of strings with values from ArrayList {@link #values}
-	 * @return concatenated array of strings with all values of HashMap {@link #metaData} and the array
-	 *         <b>inArray</b>
-	 */
-	protected String[] addMetaValues(String[] inArray) {
-		return extendDataSet(inArray, "VALUE");
-	}
-
-	/**
-	 * Compares an array of type <code>String</code> with defined header names with the header names and
-	 * indexes of the current <code>DataContainer</code>.
-	 *
-	 * @param compareHeaders Array of type <code>String</code> with header names and indexes which will
-	 *                       be compared against the headers of the current object instance.
-	 * @return
-	 * 
-	 *         <pre>
-	 * {@literal -}1 = mismatching headers
-	 * 0 = header names and indexes are identical
-	 * 1 = header names match, but with different index order
-	 *         </pre>
-	 */
-	public int checkHeader(String[] compareHeaders) {
-		return checkHeader(getHeaders(), addMetaHeaders(compareHeaders));
-	}
-
-	/**
 	 * Compares the assigned <code>HashMap</code> with header names and indexes with the headers of the
 	 * current <code>DataContainer</code> instance.
 	 *
@@ -252,29 +212,6 @@ public abstract class BaseContainer {
 		}
 		// check if headers match with existing instance headers and return the check result
 		return checkHeader(getHeaders(), hd);
-	}
-
-	/**
-	 * Compares the names and order of two Arrays of type <code>String</code>.
-	 *
-	 * @param referenceHeaders Array of type <code>String</code> with header names and indexes which
-	 *                         include reference values for comparison.
-	 * @param compareHeaders   Array of type <code>String</code> with header names and indexes which
-	 *                         include comparison values.
-	 * @return
-	 * 
-	 *         <pre>
-	 * -1 = mismatching headers
-	 * 0 = header names and indexes are identical
-	 * 1 = header names match, but with different index order
-	 *         </pre>
-	 */
-	public int checkHeader(String[] referenceHeaders, String[] compareHeaders) {
-		HashMap<String, Integer> refH = new HashMap<String, Integer>();
-		for (int i = 0; i < referenceHeaders.length; i++) {
-			refH.put(referenceHeaders[i], i);
-		}
-		return checkHeader(refH, compareHeaders);
 	}
 
 	/**
@@ -308,92 +245,44 @@ public abstract class BaseContainer {
 	}
 
 	/**
-	 * Checks, if the filter rules match to the values of the given data set.
+	 * Compares an array of type <code>String</code> with defined header names with the header names and
+	 * indexes of the current <code>DataContainer</code>.
 	 *
-	 * @param values String Array with all values of a defined data set (row).
-	 * @param fltr   Object of type Filter, which includes one or more filter rules
-	 * @return true = values match to the filter; false = values don't match to the
-	 * @throws NoSuchHeaderException If the container does not have a header that is defined in the
-	 *                               filter
+	 * @param compareHeaders Array of type <code>String</code> with header names and indexes which will
+	 *                       be compared against the headers of the current object instance.
+	 * @return
+	 * 
+	 *         <pre>
+	 * {@literal -}1 = mismatching headers
+	 * 0 = header names and indexes are identical
+	 * 1 = header names match, but with different index order
+	 *         </pre>
 	 */
-	protected boolean checkValuesFilter(String[] values, Filter fltr) throws NoSuchHeaderException {
-		boolean returnCode = false;
-		for (FilterRule rule : fltr.getFilterRules()) {
-			if ((!this.headerNames.containsKey(rule.getHeaderName())) && (!implicitHeaders.contains(rule.getHeaderName()))) {
-				throw new NoSuchHeaderException("Header " + rule.getHeaderName() + " doesn't comply to DataContainer!");
-			}
-		}
-		// return true, if no filter rule is defined
-		if (fltr.getFilterRules().isEmpty()) {
-			returnCode = true;
-		} else {
-			for (FilterRule fr : fltr.getFilterRules()) {
-				// Wild cards * and % will accept any value
-				if (fr.getValue() != null) {
-					if ((fr.getValue().equals("*")) || (fr.getValue().equals("%"))) {
-						returnCode = true;
-						break;
-					}
-				}
-				// check values against the filter rules
-				returnCode = fr.checkValue(values[headerNames.get(fr.getHeaderName())]);
-				if (!returnCode) {
-					// skip check and return false, in case that one of the rules fails
-					break;
-				}
-			}
-		}
-		return returnCode;
+	public int checkHeader(String[] compareHeaders) {
+		return checkHeader(getHeaders(), addMetaHeaders(compareHeaders));
 	}
 
 	/**
-	 * This method is used to prepare an Array of strings before inserting the values into the ArrayList
-	 * {@link #values}. <br>
-	 * <br>
-	 * e.g. remove enclosing quotes for each value in the array<br>
-	 * inArray = "val1", "val2", "val3", "val4"<br>
-	 * return = val1, val2, val3, val4
+	 * Compares the names and order of two Arrays of type <code>String</code>.
 	 *
-	 * @param inArray an Array of strings whose values are cleaned up
-	 * @return an Array of strings with cleaned values
+	 * @param referenceHeaders Array of type <code>String</code> with header names and indexes which
+	 *                         include reference values for comparison.
+	 * @param compareHeaders   Array of type <code>String</code> with header names and indexes which
+	 *                         include comparison values.
+	 * @return
+	 * 
+	 *         <pre>
+	 * -1 = mismatching headers
+	 * 0 = header names and indexes are identical
+	 * 1 = header names match, but with different index order
+	 *         </pre>
 	 */
-	protected String[] cleanValues(String[] inArray) {
-		ArrayList<String> valList = new ArrayList<String>(Arrays.asList(inArray));
-		String[] outArray = new String[inArray.length];
-		for (int i = 0; i < inArray.length; i++) {
-			outArray[i] = StringUtil.removeEnclosingQuotes(valList.get(i));
+	public int checkHeader(String[] referenceHeaders, String[] compareHeaders) {
+		HashMap<String, Integer> refH = new HashMap<String, Integer>();
+		for (int i = 0; i < referenceHeaders.length; i++) {
+			refH.put(referenceHeaders[i], i);
 		}
-		return outArray;
-	}
-
-	/**
-	 * This method is used to add the values stored in HashMap {@link #metaData} to an array of strings
-	 * and returns the extended array.
-	 *
-	 * @param inArray array of strings with all values from ArrayList {@link #values} or header names
-	 *                from HashMap {@link #headerNames}
-	 * @param target  valid values are "HEADER" and "VALUE" - this defines where to get the value value
-	 *                from HashMap {@link #metaData} (HEADER=getKey(); VALUE=getValue();)
-	 * @return the extended array.
-	 */
-	protected String[] extendDataSet(String[] inArray, String target) {
-		// copy array of strings into ArrayList
-		ArrayList<String> valList = new ArrayList<String>(Arrays.asList(inArray));
-		// check if metaData is defined for this instance of DataContainer
-		if (!getMetaData().isEmpty()) {
-			// if metaData is defined, loop through each entrySet of the HashMap "metaData"
-			for (Map.Entry<String, String> entry : getMetaData().entrySet()) {
-				if (target.equals("HEADER")) {
-					// if inArray includes headerNames from the HashMap "columnHeaders", then extend
-					// the ArrayList with the key name of the entrySet
-					valList.add(entry.getKey());
-				} else {
-					// else extend the ArrayList with the value of the entrySet
-					valList.add(entry.getValue());
-				}
-			}
-		}
-		return valList.toArray(new String[valList.size()]);
+		return checkHeader(refH, compareHeaders);
 	}
 
 	/**
@@ -551,26 +440,6 @@ public abstract class BaseContainer {
 			hi[i] = getHeaderIndex(hArray[i]);
 		}
 		return hi;
-	}
-
-	/**
-	 * Returns the filter rules which belong to an implicit header column. This allows to use same
-	 * column and row based getter and setter methods for tree formatted sources like XML, as they are
-	 * used for tabular formatted sources. e.g. the {@link #getImplFilterRules(Filter)} method is used
-	 * within {@link XMLDataContainer#getColumn} to limit the data records for the search to specified
-	 * xPath(s).
-	 * 
-	 * @param fltr Filter object with the complete filter rules for a data search
-	 * @return List object with all FilterRules that belong to implicit columns
-	 */
-	protected List<FilterRule> getImplFilterRules(Filter fltr) {
-		List<FilterRule> frList = new ArrayList<FilterRule>();
-		for (FilterRule fr : fltr.getFilterRules()) {
-			if (implicitHeaders.contains(fr.getHeaderName())) {
-				frList.add(fr);
-			}
-		}
-		return frList;
 	}
 
 	/**
@@ -754,6 +623,139 @@ public abstract class BaseContainer {
 
 	public void setRootNode(String rn) {
 		rootNode = rn;
+	}
+
+	/**
+	 * Adds the header names from HashMap {@link #metaData} to an array of strings. Header names are
+	 * read from the key names of the entrySets of HashMap {@link #metaData}.
+	 *
+	 * @param inArray Array of strings with header names from HashMap {@link #headerNames}
+	 * @return concatenated array of strings with all key names of HashMap {@link #metaData} and values
+	 *         of the array <b>inArray</b>
+	 */
+	protected String[] addMetaHeaders(String[] inArray) {
+		return extendDataSet(inArray, "HEADER");
+	}
+
+	/**
+	 * Adds the values from HashMap {@link #metaData} to an array of strings. Values are read from the
+	 * values of the entrySets of HashMap {@link #metaData}.
+	 *
+	 * @param inArray Array of strings with values from ArrayList {@link #values}
+	 * @return concatenated array of strings with all values of HashMap {@link #metaData} and the array
+	 *         <b>inArray</b>
+	 */
+	protected String[] addMetaValues(String[] inArray) {
+		return extendDataSet(inArray, "VALUE");
+	}
+
+	/**
+	 * Checks, if the filter rules match to the values of the given data set.
+	 *
+	 * @param values String Array with all values of a defined data set (row).
+	 * @param fltr   Object of type Filter, which includes one or more filter rules
+	 * @return true = values match to the filter; false = values don't match to the
+	 * @throws NoSuchHeaderException If the container does not have a header that is defined in the
+	 *                               filter
+	 */
+	protected boolean checkValuesFilter(String[] values, Filter fltr) throws NoSuchHeaderException {
+		boolean returnCode = false;
+		for (FilterRule rule : fltr.getFilterRules()) {
+			if ((!this.headerNames.containsKey(rule.getHeaderName())) && (!implicitHeaders.contains(rule.getHeaderName()))) {
+				throw new NoSuchHeaderException("Header " + rule.getHeaderName() + " doesn't comply to DataContainer!");
+			}
+		}
+		// return true, if no filter rule is defined
+		if (fltr.getFilterRules().isEmpty()) {
+			returnCode = true;
+		} else {
+			for (FilterRule fr : fltr.getFilterRules()) {
+				// Wild cards * and % will accept any value
+				if (fr.getValue() != null) {
+					if ((fr.getValue().equals("*")) || (fr.getValue().equals("%"))) {
+						returnCode = true;
+						break;
+					}
+				}
+				// check values against the filter rules
+				returnCode = fr.checkValue(values[headerNames.get(fr.getHeaderName())]);
+				if (!returnCode) {
+					// skip check and return false, in case that one of the rules fails
+					break;
+				}
+			}
+		}
+		return returnCode;
+	}
+
+	/**
+	 * This method is used to prepare an Array of strings before inserting the values into the ArrayList
+	 * {@link #values}. <br>
+	 * <br>
+	 * e.g. remove enclosing quotes for each value in the array<br>
+	 * inArray = "val1", "val2", "val3", "val4"<br>
+	 * return = val1, val2, val3, val4
+	 *
+	 * @param inArray an Array of strings whose values are cleaned up
+	 * @return an Array of strings with cleaned values
+	 */
+	protected String[] cleanValues(String[] inArray) {
+		ArrayList<String> valList = new ArrayList<String>(Arrays.asList(inArray));
+		String[] outArray = new String[inArray.length];
+		for (int i = 0; i < inArray.length; i++) {
+			outArray[i] = StringUtil.removeEnclosingQuotes(valList.get(i));
+		}
+		return outArray;
+	}
+
+	/**
+	 * This method is used to add the values stored in HashMap {@link #metaData} to an array of strings
+	 * and returns the extended array.
+	 *
+	 * @param inArray array of strings with all values from ArrayList {@link #values} or header names
+	 *                from HashMap {@link #headerNames}
+	 * @param target  valid values are "HEADER" and "VALUE" - this defines where to get the value value
+	 *                from HashMap {@link #metaData} (HEADER=getKey(); VALUE=getValue();)
+	 * @return the extended array.
+	 */
+	protected String[] extendDataSet(String[] inArray, String target) {
+		// copy array of strings into ArrayList
+		ArrayList<String> valList = new ArrayList<String>(Arrays.asList(inArray));
+		// check if metaData is defined for this instance of DataContainer
+		if (!getMetaData().isEmpty()) {
+			// if metaData is defined, loop through each entrySet of the HashMap "metaData"
+			for (Map.Entry<String, String> entry : getMetaData().entrySet()) {
+				if (target.equals("HEADER")) {
+					// if inArray includes headerNames from the HashMap "columnHeaders", then extend
+					// the ArrayList with the key name of the entrySet
+					valList.add(entry.getKey());
+				} else {
+					// else extend the ArrayList with the value of the entrySet
+					valList.add(entry.getValue());
+				}
+			}
+		}
+		return valList.toArray(new String[valList.size()]);
+	}
+
+	/**
+	 * Returns the filter rules which belong to an implicit header column. This allows to use same
+	 * column and row based getter and setter methods for tree formatted sources like XML, as they are
+	 * used for tabular formatted sources. e.g. the {@link #getImplFilterRules(Filter)} method is used
+	 * within {@link XMLDataContainer#getColumn} to limit the data records for the search to specified
+	 * xPath(s).
+	 * 
+	 * @param fltr Filter object with the complete filter rules for a data search
+	 * @return List object with all FilterRules that belong to implicit columns
+	 */
+	protected List<FilterRule> getImplFilterRules(Filter fltr) {
+		List<FilterRule> frList = new ArrayList<FilterRule>();
+		for (FilterRule fr : fltr.getFilterRules()) {
+			if (implicitHeaders.contains(fr.getHeaderName())) {
+				frList.add(fr);
+			}
+		}
+		return frList;
 	}
 
 }

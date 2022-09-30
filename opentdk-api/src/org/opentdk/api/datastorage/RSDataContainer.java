@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.logging.Level;
 
 import org.opentdk.api.datastorage.BaseContainer.EContainerFormat;
+import org.opentdk.api.filter.Filter;
 import org.opentdk.api.logger.MLogger;
 
 public class RSDataContainer implements CustomContainer {

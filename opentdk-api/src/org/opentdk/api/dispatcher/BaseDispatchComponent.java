@@ -12,11 +12,11 @@ import java.util.logging.Level;
 import org.apache.commons.lang3.StringUtils;
 import org.opentdk.api.application.EBaseSettings;
 import org.opentdk.api.datastorage.DataContainer;
-import org.opentdk.api.datastorage.EOperator;
-import org.opentdk.api.datastorage.Filter;
+import org.opentdk.api.filter.Filter;
 import org.opentdk.api.io.FileUtil;
 import org.opentdk.api.io.XMLEditor;
 import org.opentdk.api.logger.MLogger;
+import org.opentdk.api.mapping.EOperator;
 import org.opentdk.api.util.ListUtil;
 
 /**

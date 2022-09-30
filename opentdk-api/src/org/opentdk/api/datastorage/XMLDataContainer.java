@@ -9,6 +9,8 @@ import java.util.logging.Level;
 import java.util.stream.Collectors;
 
 import org.opentdk.api.datastorage.BaseContainer.EContainerFormat;
+import org.opentdk.api.filter.Filter;
+import org.opentdk.api.filter.FilterRule;
 import org.opentdk.api.io.XMLEditor;
 import org.opentdk.api.logger.MLogger;
 import org.w3c.dom.Element;

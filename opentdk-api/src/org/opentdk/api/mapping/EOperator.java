@@ -1,4 +1,4 @@
-package org.opentdk.api.datastorage;
+package org.opentdk.api.mapping;
 
 import org.opentdk.api.dispatcher.BaseDispatchComponent;
 import org.opentdk.api.dispatcher.BaseDispatcher;

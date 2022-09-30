@@ -11,10 +11,9 @@ import org.opentdk.gui.chart.ChartMarker;
 import org.opentdk.gui.chart.ChartProperties;
 import org.opentdk.gui.chart.ChartSeries;
 import org.opentdk.gui.chart.ChartMarker.DataPoint;
-
-import org.opentdk.api.datastorage.EOperator;
-import org.opentdk.api.datastorage.Filter;
+import org.opentdk.api.filter.Filter;
 import org.opentdk.api.logger.MLogger;
+import org.opentdk.api.mapping.EOperator;
 import org.opentdk.api.util.DateUtil;
 import org.opentdk.api.util.EFormat;
 import org.opentdk.api.util.ListUtil;

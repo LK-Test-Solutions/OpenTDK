@@ -6,6 +6,7 @@ import java.util.Map;
 import java.util.logging.Level;
 
 import org.opentdk.api.datastorage.BaseContainer.EContainerFormat;
+import org.opentdk.api.filter.Filter;
 import org.opentdk.api.io.FileUtil;
 import org.opentdk.api.logger.MLogger;
 import org.yaml.snakeyaml.Yaml;

@@ -1,8 +1,8 @@
 package RegressionTest.Container;
 
 import org.opentdk.api.datastorage.DataContainer;
-import org.opentdk.api.datastorage.EOperator;
-import org.opentdk.api.datastorage.Filter;
+import org.opentdk.api.filter.Filter;
+import org.opentdk.api.mapping.EOperator;
 
 import RegressionTest.BaseRegression;
 

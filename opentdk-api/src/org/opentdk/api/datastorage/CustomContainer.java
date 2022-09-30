@@ -3,6 +3,7 @@ package org.opentdk.api.datastorage;
 import java.io.IOException;
 
 import org.opentdk.api.datastorage.BaseContainer.EContainerFormat;
+import org.opentdk.api.filter.Filter;
 
 /**
  * The <code>CustomContainer</code> interface groups related methods with empty bodies for every

@@ -3,8 +3,10 @@ module opentdk.api {
 	exports org.opentdk.api.application;		
 	exports org.opentdk.api.datastorage;
 	exports org.opentdk.api.dispatcher;	
+	exports org.opentdk.api.filter;	
 	exports org.opentdk.api.io;
 	exports org.opentdk.api.logger;
+	exports org.opentdk.api.mapping;
 	exports org.opentdk.api.meter;
 	exports org.opentdk.api.util;							
 
