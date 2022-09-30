@@ -104,6 +104,9 @@ public class RT_File_XML_values extends BaseRegression {
 		testResult(E_XMLFile_Dispatcher_values.BACKGROUND_IMAGE.getValue("Cars Theme"), "BACKGROUND_IMAGE", "replaceAll.jpg");
 		
 		E_XMLFile_Dispatcher_values.THEMES.delete();
+		
+		// Reset
+//		BaseDispatcher.clearDataContainer();
 	}
 
 }

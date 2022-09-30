@@ -27,5 +27,7 @@ public class RT_Settings_attributes extends BaseRegression {
 //		
 //		E_XMLFile_Dispatcher_values.RULE.delete("name", "Orbit");
 //		testResult(E_XMLFile_Dispatcher_values.RULE.getAttribute("name"), "E_XMLFile_Dispatcher_values.RULE", null);
+		
+//		BaseDispatcher.clearDataContainer();
 	}
 }

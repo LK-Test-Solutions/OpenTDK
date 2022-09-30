@@ -1,7 +1,5 @@
 package RegressionTest.Dispatcher;
 
-import org.opentdk.api.dispatcher.BaseDispatcher;
-
 import RegressionTest.BaseRegression;
 
 public class RT_noFile_Default_values extends BaseRegression {
@@ -55,7 +53,7 @@ public class RT_noFile_Default_values extends BaseRegression {
 		testResult(E_PropertiesFile_Dispatcher_values.LANGUAGE.getValue(), "Language", "german");
 		testResult(E_PropertiesFile_Dispatcher_values.CAPITAL_CITY.getValue(), "CapitalCity", "Berlin");
 		
-		BaseDispatcher.clearDataContainer();
+//		BaseDispatcher.clearDataContainer();
 	}
 
 }
