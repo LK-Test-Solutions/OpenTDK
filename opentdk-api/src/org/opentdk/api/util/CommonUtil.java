@@ -132,12 +132,13 @@ public class CommonUtil {
 	/**
 	 * Executes any command via Runtime.getRuntime.exec.
 	 */
-	public static void exeucteCommand(String command) {
+	public static int exeucteCommand(String command) {
+		int ret = -1;
 		Process process = null;
 		try {
 			process = Runtime.getRuntime().exec(command);
-			int state = process.onExit().get().exitValue();
-			if(state == 1) {
+			ret = process.onExit().get().exitValue();
+			if(ret == 1) {
 				MLogger.getInstance().log(Level.SEVERE, "Execute command failed for ==> " + command);
 			}						
 		} catch(IOException | InterruptedException | ExecutionException e) {
@@ -147,6 +148,7 @@ public class CommonUtil {
 				process.destroy();
 			}
 		}
+		return ret;
 	}
 
 }

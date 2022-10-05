@@ -11,38 +11,58 @@ import org.apache.commons.lang3.StringUtils;
 import org.opentdk.api.logger.MLogger;
 
 public class CompressUtil {
-	/**
-	 * TODO variable command arguments and compress extension to not have a 7 ZIP dependent code
-	 */
-	private static String commandArguments = "";
+	
+	private static String fileNames = "*.*";
+	private static String switches = " -t7z -m0=BCJ2 -m1=LZMA:d25:fb255 -m2=LZMA:d19 -m3=LZMA:d19 -mb0:1 -mb0s1:2 -mb0s2:3 -mx";
+	
+	public enum CompressCommand {
+		Add("a"),
+		Delete("d"),
+		List("l"),
+		Update("u");
+		
+		private String shortcut;
+		
+		CompressCommand(String abrev) {
+			shortcut = abrev;
+		}
 
-	/**
-	 * Compress a directory with the 7 ZIP application via command line.
-	 * 
-	 * @param currentDirectory The path to the folder with the files to compress (folder name included)
-	 * @param zipExecutable    The full name (path + name) of the 7 ZIP executable
-	 * @param outputFileName   The name of the compressed folder (without extension)
-	 * @return {@literal -1}: Invalid method call, 0: Command execution succeeded, 1: Command execution
-	 *         failed
-	 */
-	public static int compressSevenZip(String currentDirectory, String zipExecutable, String outputFileName) {
-		return CompressUtil.compressSevenZip(currentDirectory, zipExecutable, outputFileName, false);
+		public String getShortcut() {
+			return shortcut;
+		}		
 	}
 
 	/**
-	 * Compress a directory with the 7 ZIP application via command line.
+	 * Compress a directory with the 7 ZIP application via command line. Only usable on windows.
 	 * 
 	 * @param currentDirectory The path to the folder with the files to compress (folder name included)
 	 * @param zipExecutable    The full name (path + name) of the 7 ZIP executable
-	 * @param outputFileName   The name of the compressed folder (without extension)
+	 * @param archiveName   The name of the compressed folder (without extension)
+	 * @return {@literal -1}: Invalid method call, 0: Command execution succeeded, 1: Command execution
+	 *         failed
+	 */
+	public static int compress(String currentDirectory, String zipExecutable, String archiveName) {
+		return CompressUtil.compress(currentDirectory, zipExecutable, archiveName, CompressCommand.Add);
+	}
+	
+	public static int compress(String currentDirectory, String zipExecutable, String archiveName, CompressCommand command) {
+		return CompressUtil.compress(currentDirectory, zipExecutable, archiveName, command, false);
+	}
+
+	/**
+	 * Compress a directory with the 7 ZIP application via command line. Only usable on windows.
+	 * 
+	 * @param currentDirectory The path to the folder with the files to compress (folder name included)
+	 * @param zipExecutable    The full name (path + name) of the 7 ZIP executable
+	 * @param archiveName   The name of the compressed folder (without extension)
 	 * @param printDetails If true the stream of the command line gets written to the console
 	 * @return {@literal -1}: Invalid method call, 0: Command execution succeeded, 1: Command execution
 	 *         failed
 	 */
-	public static int compressSevenZip(String currentDirectory, String zipExecutable, String outputFileName, boolean printDetails) {
+	public static int compress(String currentDirectory, String zipExecutable, String archiveName, CompressCommand command, boolean printDetails) {
 		int ret = -1;
 
-		if (StringUtils.isBlank(currentDirectory) || StringUtils.isBlank(zipExecutable) || StringUtils.isBlank(outputFileName)) {
+		if (StringUtils.isBlank(currentDirectory) || StringUtils.isBlank(zipExecutable) || StringUtils.isBlank(archiveName)) {
 			throw new IllegalArgumentException("CompressUtil.compress: Null or blank parameter committed");
 		}
 		File checkDir = new File(currentDirectory);
@@ -50,23 +70,21 @@ public class CompressUtil {
 			throw new IllegalArgumentException("CompressUtil.compress: Committed directory does not exist or is a file");
 		}
 
-		String command = "cmd /c cd " + currentDirectory + " && " + "\"" + zipExecutable + "\"" + " a -t7z " + "\"..\\" + outputFileName + ".7z\" *.* -m0=BCJ2 -m1=LZMA:d25:fb255 -m2=LZMA:d19 -m3=LZMA:d19 -mb0:1 -mb0s1:2 -mb0s2:3 -mx";
+		// a = Add to archive, -t7z = type of archive
+		String cmd = "cmd /c cd " + currentDirectory + " && " + "\"" + zipExecutable + "\" " + command.getShortcut() + " \"..\\" + archiveName + ".7z\" " + fileNames + switches;
 		Process process = null;
 		BufferedReader reader = null;
 		try {
-			process = Runtime.getRuntime().exec(command);
+			process = Runtime.getRuntime().exec(cmd);
 			ret = process.onExit().get().exitValue();
 
 			if (printDetails) {
-				if (ret == 0) {
-					reader = new BufferedReader(new InputStreamReader(process.getInputStream()));
-					String line = "";
-					while ((line = reader.readLine()) != null) {
-						System.out.println(line);
-					}
-				} else if (ret == 1) {
-					MLogger.getInstance().log(Level.SEVERE, "compressSevenZip failed for ==> " + currentDirectory);
+				reader = new BufferedReader(new InputStreamReader(process.getInputStream()));
+				String line = "";
+				while ((line = reader.readLine()) != null) {
+					System.out.println(line);
 				}
+				
 			}
 		} catch (IOException | InterruptedException | ExecutionException e) {
 			MLogger.getInstance().log(Level.SEVERE, e);
@@ -85,17 +103,20 @@ public class CompressUtil {
 		return ret;
 	}
 
-	/**
-	 * @return {@link #commandArguments}
-	 */
-	public static String getCommandArguments() {
-		return commandArguments;
+	public static String getSwitches() {
+		return switches;
 	}
 
-	/**
-	 * @param commandArguments {@link #commandArguments}
-	 */
-	public static void setCommandArguments(String commandArguments) {
-		CompressUtil.commandArguments = commandArguments;
+	public static void setSwitches(String switches) {
+		CompressUtil.switches = switches;
 	}
+
+	public static String getFileNames() {
+		return fileNames;
+	}
+
+	public static void setFileNames(String fileNames) {
+		CompressUtil.fileNames = fileNames;
+	}
+
 }
