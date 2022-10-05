@@ -27,11 +27,16 @@
  */
 package org.opentdk.api.util;
 
+import java.io.IOException;
 import java.net.InetAddress;
 import java.net.NetworkInterface;
 import java.net.SocketException;
 import java.net.UnknownHostException;
 import java.util.Collections;
+import java.util.concurrent.ExecutionException;
+import java.util.logging.Level;
+
+import org.opentdk.api.logger.MLogger;
 
 /**
  * Class with common methods that get directly used in a static way. For example the determination
@@ -122,6 +127,26 @@ public class CommonUtil {
 			throw new RuntimeException(e);
 		}
 		return result;
+	}
+	
+	/**
+	 * Executes any command via Runtime.getRuntime.exec.
+	 */
+	public static void exeucteCommand(String command) {
+		Process process = null;
+		try {
+			process = Runtime.getRuntime().exec(command);
+			int state = process.onExit().get().exitValue();
+			if(state == 1) {
+				MLogger.getInstance().log(Level.SEVERE, "Execute command failed for ==> " + command);
+			}						
+		} catch(IOException | InterruptedException | ExecutionException e) {
+			MLogger.getInstance().log(Level.SEVERE, e);
+		} finally {
+			if(process != null) {
+				process.destroy();
+			}
+		}
 	}
 
 }
