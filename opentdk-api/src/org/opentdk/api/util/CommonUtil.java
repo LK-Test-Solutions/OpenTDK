@@ -138,7 +138,7 @@ public class CommonUtil {
 		try {
 			process = Runtime.getRuntime().exec(command);
 			ret = process.onExit().get().exitValue();
-			if(ret == 1) {
+			if(ret > 0) {
 				MLogger.getInstance().log(Level.SEVERE, "Execute command failed for ==> " + command);
 			}						
 		} catch(IOException | InterruptedException | ExecutionException e) {

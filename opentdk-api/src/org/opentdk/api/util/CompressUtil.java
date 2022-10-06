@@ -10,26 +10,80 @@ import java.util.logging.Level;
 import org.apache.commons.lang3.StringUtils;
 import org.opentdk.api.logger.MLogger;
 
+/**
+ * This class gets used to compress and extract directories by calling the 7 ZIP executable.<br><br>
+ * Example:
+ * <pre>
+ * CompressUtil.getInstance().setFileNames("*.json *.yaml *.properties *.xml *.csv");
+ * CompressUtil.getInstance().compress("testdata\\RegressionTestData", "C:\\Program Files\\7 Zip\\7z.exe", "RegressionTestData");
+ * </pre>
+ * 
+ * This would compress all files with the defined extension in the folder 'RegressionTestData' as .7z archive with name 'RegressionTestData'.<br><br>
+ * 
+ * To get all available 7 ZIP settings go to the installation folder via command prompt and type 7z.
+ * 
+ * @author FME (LK Test Solutions)
+ */
 public class CompressUtil {
-	
-	private static String fileNames = "*.*";
-	private static String switches = " -t7z -m0=BCJ2 -m1=LZMA:d25:fb255 -m2=LZMA:d19 -m3=LZMA:d19 -mb0:1 -mb0s1:2 -mb0s2:3 -mx";
-	
+	/**
+	 * The one and only instance of the {@code CompressUtil} class.
+	 */
+	private static CompressUtil instance;
+	/**
+	 * Possibility to include/exclude file types from the compression/extraction. Default is *.* which allows all
+	 * file names and all file extensions. E.g. *.json *.yaml would only allow JSON and YAML files with
+	 * any file name.
+	 */
+	private String fileNames = "*.*";
+	/**
+	 * Possibility to define all other options of the compression like archive type or compression rate. Default is {@literal -t7z} to set the 7z archive type.
+	 */
+	private String switches = "-t7z";
+
+	/**
+	 * Possibility to differentiate between the 7 ZIP compression commands like add, delete, list or
+	 * update.
+	 */
 	public enum CompressCommand {
-		Add("a"),
-		Delete("d"),
-		List("l"),
-		Update("u");
-		
+		Add("a"), Delete("d"), List("l"), Update("u"), Extract("e");
+
 		private String shortcut;
-		
+
 		CompressCommand(String abrev) {
 			shortcut = abrev;
 		}
 
 		public String getShortcut() {
 			return shortcut;
-		}		
+		}
+	}
+
+	/**
+	 * Invisible constructor that gets called when using {@link #getInstance()} for the first time in an
+	 * application.
+	 */
+	private CompressUtil() {
+
+	}
+
+	/**
+	 * When calling this method the fist time, a new instance of the CompressUtil class will be created
+	 * and returned to the caller. For every further call, the already created instance will be
+	 * returned. This construct allows access to all methods and properties of an instance of the
+	 * CompressUtil class from any other class during runtime of an application. The usage of the
+	 * methods is like it is in a static way, but with an instantiated class.<br>
+	 * <br>
+	 * 
+	 * e.g.:<br>
+	 * <code>CompressUtil.getInstance().compress(currentDirectory, zipExecutable, archiveName);</code>
+	 * 
+	 * @return The instance of the CompressUtil class
+	 */
+	public static CompressUtil getInstance() {
+		if (instance == null) {
+			instance = new CompressUtil();
+		}
+		return instance;
 	}
 
 	/**
@@ -37,16 +91,12 @@ public class CompressUtil {
 	 * 
 	 * @param currentDirectory The path to the folder with the files to compress (folder name included)
 	 * @param zipExecutable    The full name (path + name) of the 7 ZIP executable
-	 * @param archiveName   The name of the compressed folder (without extension)
+	 * @param archiveName      The name of the compressed folder (without extension)
 	 * @return {@literal -1}: Invalid method call, 0: Command execution succeeded, 1: Command execution
 	 *         failed
 	 */
-	public static int compress(String currentDirectory, String zipExecutable, String archiveName) {
-		return CompressUtil.compress(currentDirectory, zipExecutable, archiveName, CompressCommand.Add);
-	}
-	
-	public static int compress(String currentDirectory, String zipExecutable, String archiveName, CompressCommand command) {
-		return CompressUtil.compress(currentDirectory, zipExecutable, archiveName, command, false);
+	public int compress(String currentDirectory, String zipExecutable, String archiveName) {
+		return compress(currentDirectory, zipExecutable, archiveName, CompressCommand.Add);
 	}
 
 	/**
@@ -54,12 +104,29 @@ public class CompressUtil {
 	 * 
 	 * @param currentDirectory The path to the folder with the files to compress (folder name included)
 	 * @param zipExecutable    The full name (path + name) of the 7 ZIP executable
-	 * @param archiveName   The name of the compressed folder (without extension)
-	 * @param printDetails If true the stream of the command line gets written to the console
+	 * @param archiveName      The name of the compressed folder (without extension)
+	 * @param command          One of the compress commands in {@link CompressCommand} with default ADD
+	 *                         (create archive or add if already exists)
 	 * @return {@literal -1}: Invalid method call, 0: Command execution succeeded, 1: Command execution
 	 *         failed
 	 */
-	public static int compress(String currentDirectory, String zipExecutable, String archiveName, CompressCommand command, boolean printDetails) {
+	public int compress(String currentDirectory, String zipExecutable, String archiveName, CompressCommand command) {
+		return compress(currentDirectory, zipExecutable, archiveName, command, false);
+	}
+
+	/**
+	 * Compress a directory with the 7 ZIP application via command line. Only usable on windows.
+	 * 
+	 * @param currentDirectory The path to the folder with the files to compress (folder name included)
+	 * @param zipExecutable    The full name (path + name) of the 7 ZIP executable
+	 * @param archiveName      The name of the compressed folder (without extension)
+	 * @param command          One of the compress commands in {@link CompressCommand} with default ADD
+	 *                         (create archive or add if already exists)
+	 * @param printDetails     If true the stream of the command line gets written to the console
+	 * @return {@literal -1}: Invalid method call, 0: Command execution succeeded, 1: Command execution
+	 *         failed
+	 */
+	public int compress(String currentDirectory, String zipExecutable, String archiveName, CompressCommand command, boolean printDetails) {
 		int ret = -1;
 
 		if (StringUtils.isBlank(currentDirectory) || StringUtils.isBlank(zipExecutable) || StringUtils.isBlank(archiveName)) {
@@ -70,8 +137,8 @@ public class CompressUtil {
 			throw new IllegalArgumentException("CompressUtil.compress: Committed directory does not exist or is a file");
 		}
 
-		// a = Add to archive, -t7z = type of archive
-		String cmd = "cmd /c cd " + currentDirectory + " && " + "\"" + zipExecutable + "\" " + command.getShortcut() + " \"..\\" + archiveName + ".7z\" " + fileNames + switches;
+		String cmd = "cmd /c cd " + currentDirectory + " && " + "\"" + zipExecutable + "\" " + command.getShortcut() + " \"" + archiveName + "\" " + fileNames + " " + switches;	
+		System.out.println(cmd);
 		Process process = null;
 		BufferedReader reader = null;
 		try {
@@ -84,10 +151,11 @@ public class CompressUtil {
 				while ((line = reader.readLine()) != null) {
 					System.out.println(line);
 				}
-				
+
 			}
 		} catch (IOException | InterruptedException | ExecutionException e) {
 			MLogger.getInstance().log(Level.SEVERE, e);
+			throw new RuntimeException(e);
 		} finally {
 			if (process != null) {
 				process.destroy();
@@ -103,20 +171,32 @@ public class CompressUtil {
 		return ret;
 	}
 
-	public static String getSwitches() {
+	/**
+	 * @return {@link #switches}
+	 */
+	public String getSwitches() {
 		return switches;
 	}
 
-	public static void setSwitches(String switches) {
-		CompressUtil.switches = switches;
+	/**
+	 * @param switches {@link #switches}
+	 */
+	public void setSwitches(String switches) {
+		this.switches = switches;
 	}
 
-	public static String getFileNames() {
+	/**
+	 * @return {@link #fileNames}
+	 */
+	public String getFileNames() {
 		return fileNames;
 	}
 
-	public static void setFileNames(String fileNames) {
-		CompressUtil.fileNames = fileNames;
+	/**
+	 * @param fileNames {@link #fileNames}
+	 */
+	public void setFileNames(String fileNames) {
+		this.fileNames = fileNames;
 	}
 
 }

@@ -15,9 +15,18 @@ public class TST_CompressUtil extends BaseRegression {
 	
 	@Override
 	protected void runTest() {
-		int success = CompressUtil.compress("testdata\\RegressionTestData", "C:\\Program Files\\7-Zip\\7z.exe", "RegressionTestData", CompressCommand.Add, true);
+		CompressUtil.getInstance().setFileNames("*.json *.yaml *.properties *.xml *.csv");
+		CompressUtil.getInstance().setSwitches("-t7z -m0=BCJ2 -m1=LZMA:d25:fb255 -m2=LZMA:d19 -m3=LZMA:d19 -mb0:1 -mb0s1:2 -mb0s2:3 -mx");
+		
+		int success = CompressUtil.getInstance().compress("testdata\\RegressionTestData", "C:\\Program Files\\7-Zip\\7z.exe", "..\\RegressionTestData.7z", CompressCommand.Add, true);
 		BaseRegression.testResult(success, "State", 0);
-		BaseRegression.testResult(String.valueOf(new File("testdata/RegressionTestData.7z").exists()), "Exists", "true");
+		BaseRegression.testResult(String.valueOf(new File("testdata/RegressionTestData.7z").exists()), "Compressed folder exists", "true");
+		
+
+		CompressUtil.getInstance().setSwitches("-o\"RegressionTestData_Extracted\" -t7z -y -x!*.cmd -x!config.txt -x!*.html");
+		success = CompressUtil.getInstance().compress("testdata", "C:\\Program Files\\7-Zip\\7z.exe", "RegressionTestData.7z", CompressCommand.Extract, true);
+		BaseRegression.testResult(success, "State", 0);
+		BaseRegression.testResult(String.valueOf(new File("testdata/RegressionTestData_Extracted").exists()), "Extracted folder exists", "true");
 	}
 
 }
