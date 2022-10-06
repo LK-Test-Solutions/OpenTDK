@@ -14,8 +14,8 @@ import org.opentdk.api.logger.MLogger;
  * This class gets used to compress and extract directories by calling the 7 ZIP executable.<br><br>
  * Example:
  * <pre>
- * CompressUtil.getInstance().setFileNames("*.json *.yaml *.properties *.xml *.csv");
- * CompressUtil.getInstance().compress("testdata\\RegressionTestData", "C:\\Program Files\\7 Zip\\7z.exe", "RegressionTestData");
+ * ArchiveUtil.getInstance().setFileNames("*.json *.yaml *.properties *.xml *.csv");
+ * ArchiveUtil.getInstance().doOperation("testdata\\RegressionTestData", "C:\\Program Files\\7 Zip\\7z.exe", "RegressionTestData");
  * </pre>
  * 
  * This would compress all files with the defined extension in the folder 'RegressionTestData' as .7z archive with name 'RegressionTestData'.<br><br>
@@ -24,11 +24,11 @@ import org.opentdk.api.logger.MLogger;
  * 
  * @author FME (LK Test Solutions)
  */
-public class CompressUtil {
+public class ArchiveUtil {
 	/**
-	 * The one and only instance of the {@code CompressUtil} class.
+	 * The one and only instance of the {@code ArchiveUtil} class.
 	 */
-	private static CompressUtil instance;
+	private static ArchiveUtil instance;
 	/**
 	 * Possibility to include/exclude file types from the compression/extraction. Default is *.* which allows all
 	 * file names and all file extensions. E.g. *.json *.yaml would only allow JSON and YAML files with
@@ -62,26 +62,26 @@ public class CompressUtil {
 	 * Invisible constructor that gets called when using {@link #getInstance()} for the first time in an
 	 * application.
 	 */
-	private CompressUtil() {
+	private ArchiveUtil() {
 
 	}
 
 	/**
-	 * When calling this method the fist time, a new instance of the CompressUtil class will be created
+	 * When calling this method the fist time, a new instance of the ArchiveUtil class will be created
 	 * and returned to the caller. For every further call, the already created instance will be
 	 * returned. This construct allows access to all methods and properties of an instance of the
-	 * CompressUtil class from any other class during runtime of an application. The usage of the
+	 * ArchiveUtil class from any other class during runtime of an application. The usage of the
 	 * methods is like it is in a static way, but with an instantiated class.<br>
 	 * <br>
 	 * 
 	 * e.g.:<br>
-	 * <code>CompressUtil.getInstance().compress(currentDirectory, zipExecutable, archiveName);</code>
+	 * <code>ArchiveUtil.getInstance().compress(currentDirectory, zipExecutable, archiveName);</code>
 	 * 
-	 * @return The instance of the CompressUtil class
+	 * @return The instance of the ArchiveUtil class
 	 */
-	public static CompressUtil getInstance() {
+	public static ArchiveUtil getInstance() {
 		if (instance == null) {
-			instance = new CompressUtil();
+			instance = new ArchiveUtil();
 		}
 		return instance;
 	}
@@ -95,8 +95,8 @@ public class CompressUtil {
 	 * @return {@literal -1}: Invalid method call, 0: Command execution succeeded, 1: Command execution
 	 *         failed
 	 */
-	public int compress(String currentDirectory, String zipExecutable, String archiveName) {
-		return compress(currentDirectory, zipExecutable, archiveName, CompressCommand.Add);
+	public int doOperation(String currentDirectory, String zipExecutable, String archiveName) {
+		return doOperation(currentDirectory, zipExecutable, archiveName, CompressCommand.Add);
 	}
 
 	/**
@@ -110,8 +110,8 @@ public class CompressUtil {
 	 * @return {@literal -1}: Invalid method call, 0: Command execution succeeded, 1: Command execution
 	 *         failed
 	 */
-	public int compress(String currentDirectory, String zipExecutable, String archiveName, CompressCommand command) {
-		return compress(currentDirectory, zipExecutable, archiveName, command, false);
+	public int doOperation(String currentDirectory, String zipExecutable, String archiveName, CompressCommand command) {
+		return doOperation(currentDirectory, zipExecutable, archiveName, command, false);
 	}
 
 	/**
@@ -126,15 +126,15 @@ public class CompressUtil {
 	 * @return {@literal -1}: Invalid method call, 0: Command execution succeeded, 1: Command execution
 	 *         failed
 	 */
-	public int compress(String currentDirectory, String zipExecutable, String archiveName, CompressCommand command, boolean printDetails) {
+	public int doOperation(String currentDirectory, String zipExecutable, String archiveName, CompressCommand command, boolean printDetails) {
 		int ret = -1;
 
 		if (StringUtils.isBlank(currentDirectory) || StringUtils.isBlank(zipExecutable) || StringUtils.isBlank(archiveName)) {
-			throw new IllegalArgumentException("CompressUtil.compress: Null or blank parameter committed");
+			throw new IllegalArgumentException("ArchiveUtil.doOperation: Null or blank parameter committed");
 		}
 		File checkDir = new File(currentDirectory);
 		if (!checkDir.exists() || checkDir.isFile()) {
-			throw new IllegalArgumentException("CompressUtil.compress: Committed directory does not exist or is a file");
+			throw new IllegalArgumentException("ArchiveUtil.doOperation: Committed directory does not exist or is a file");
 		}
 
 		String cmd = "cmd /c cd " + currentDirectory + " && " + "\"" + zipExecutable + "\" " + command.getShortcut() + " \"" + archiveName + "\" " + fileNames + " " + switches;	
