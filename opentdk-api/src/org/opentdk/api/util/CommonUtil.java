@@ -33,7 +33,6 @@ import java.net.NetworkInterface;
 import java.net.SocketException;
 import java.net.UnknownHostException;
 import java.util.Collections;
-import java.util.concurrent.ExecutionException;
 import java.util.logging.Level;
 
 import org.opentdk.api.logger.MLogger;
@@ -136,16 +135,16 @@ public class CommonUtil {
 		int ret = -1;
 		Process process = null;
 		try {
-			process = Runtime.getRuntime().exec(command);
-			ret = process.onExit().get().exitValue();
-			if(ret > 0) {
-				MLogger.getInstance().log(Level.SEVERE, "Execute command failed for ==> " + command);
-			}						
-		} catch(IOException | InterruptedException | ExecutionException e) {
+			process = Runtime.getRuntime().exec(command);								
+		} catch(IOException e) {
 			MLogger.getInstance().log(Level.SEVERE, e);
 		} finally {
 			if(process != null) {
 				process.destroy();
+				ret = process.exitValue();
+				if(ret > 1) {
+					MLogger.getInstance().log(Level.SEVERE, "Execute command failed for ==> " + command);
+				}
 			}
 		}
 		return ret;

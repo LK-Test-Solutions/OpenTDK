@@ -6,6 +6,7 @@ import java.util.Enumeration;
 import java.util.List;
 import java.util.logging.Level;
 
+import org.apache.commons.lang3.StringUtils;
 import org.opentdk.api.datastorage.BaseContainer.EContainerFormat;
 import org.opentdk.api.filter.Filter;
 import org.opentdk.api.io.FileUtil;
@@ -149,7 +150,7 @@ public class PropertiesDataContainer implements CustomContainer {
 		for (String key : dc.getHeaders().keySet()) {
 			String value = values[dc.getHeaders().get(key)];
 			if(value != null) {
-				ret.append(key.strip()).append(" = ").append(value.strip()).append("\n");
+				ret.append(StringUtils.strip(key)).append(" = ").append(StringUtils.strip(value)).append("\n");
 			}
 		}
 		return ret.toString();

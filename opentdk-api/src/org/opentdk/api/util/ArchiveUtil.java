@@ -4,7 +4,6 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.util.concurrent.ExecutionException;
 import java.util.logging.Level;
 
 import org.apache.commons.lang3.StringUtils;
@@ -112,8 +111,8 @@ public class ArchiveUtil {
 	 * @param currentDirectory The path to the folder with the files to compress (folder name included)
 	 * @param zipExecutable    The full name (path + name) of the 7 ZIP executable
 	 * @param archiveName      The name of the compressed folder (without extension)
-	 * @return {@literal -1}: Invalid method call, 0: Command execution succeeded, 1: Command execution
-	 *         failed
+	 * @return {@literal -1}: Invalid method call, 0 or 1: Command execution succeeded, {@literal >}1:
+	 *         Command execution failed
 	 */
 	public int runProcess(String currentDirectory, String zipExecutable, String archiveName) {
 		return runProcess(currentDirectory, zipExecutable, archiveName, ArchiveCommand.Add);
@@ -127,8 +126,8 @@ public class ArchiveUtil {
 	 * @param archiveName      The name of the compressed folder (without extension)
 	 * @param command          One of the compress commands in {@link ArchiveCommand} with default ADD
 	 *                         (create archive or add if already exists)
-	 * @return {@literal -1}: Invalid method call, 0: Command execution succeeded, 1: Command execution
-	 *         failed
+	 * @return {@literal -1}: Invalid method call, 0 or 1: Command execution succeeded, {@literal >}1:
+	 *         Command execution failed
 	 */
 	public int runProcess(String currentDirectory, String zipExecutable, String archiveName, ArchiveCommand command) {
 		return runProcess(currentDirectory, zipExecutable, archiveName, command, false);
@@ -143,8 +142,8 @@ public class ArchiveUtil {
 	 * @param command          One of the compress commands in {@link ArchiveCommand} with default ADD
 	 *                         (create archive or add if already exists)
 	 * @param printDetails     If true the stream of the command line gets written to the console
-	 * @return {@literal -1}: Invalid method call, 0: Command execution succeeded, 1: Command execution
-	 *         failed
+	 * @return {@literal -1}: Invalid method call, 0 of 1: Command execution succeeded, {@literal >}1:
+	 *         Command execution failed
 	 */
 	public int runProcess(String currentDirectory, String zipExecutable, String archiveName, ArchiveCommand command, boolean printDetails) {
 		int ret = -1;
@@ -162,7 +161,6 @@ public class ArchiveUtil {
 		BufferedReader reader = null;
 		try {
 			process = Runtime.getRuntime().exec(cmd);
-			ret = process.onExit().get().exitValue();
 
 			if (printDetails) {
 				reader = new BufferedReader(new InputStreamReader(process.getInputStream()));
@@ -170,14 +168,15 @@ public class ArchiveUtil {
 				while ((line = reader.readLine()) != null) {
 					System.out.println(line);
 				}
-
 			}
-		} catch (IOException | InterruptedException | ExecutionException e) {
+
+		} catch (IOException e) {
 			MLogger.getInstance().log(Level.SEVERE, e);
 			throw new RuntimeException(e);
 		} finally {
 			if (process != null) {
 				process.destroy();
+				ret = process.exitValue();
 			}
 			if (reader != null) {
 				try {

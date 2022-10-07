@@ -19,7 +19,7 @@ public class RT_ArchiveUtil_runProcess extends BaseRegression {
 		ArchiveUtil.getInstance().setSwitches("-t7z -m0=BCJ2 -m1=LZMA:d25:fb255 -m2=LZMA:d19 -m3=LZMA:d19 -mb0:1 -mb0s1:2 -mb0s2:3 -mx");
 		
 		int success = ArchiveUtil.getInstance().runProcess("testdata\\RegressionTestData", "C:\\Program Files\\7-Zip\\7z.exe", "..\\RegressionTestData.7z");
-		BaseRegression.testResult(success, "State", 0);
+		BaseRegression.testResult(success, "State", 1);
 		BaseRegression.testResult(String.valueOf(new File("testdata/RegressionTestData.7z").exists()), "Compressed folder exists", "true");
 		
 
