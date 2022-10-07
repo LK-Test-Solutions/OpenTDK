@@ -1,5 +1,6 @@
 package RegressionTest;
 
+import RegressionTest.ArchiveUtility.RT_ArchiveUtil_runProcess;
 import RegressionTest.CSVContainer.RT_CSVContainer_addColumn;
 import RegressionTest.CSVContainer.RT_CSVContainer_addRow;
 import RegressionTest.CSVContainer.RT_CSVContainer_getColumns;
@@ -55,6 +56,10 @@ public class RegressionTestRunner {
 
 	public static void main(String[] args) {
 		for (int i = 0; i < loops; i++) {
+			
+			// RegressionTest.ArchiveUtility
+			RT_ArchiveUtil_runProcess.main(args);
+			
 			// RegressionTest.CommonUtility
 			RT_CommonUtil_get.main(args);
 

@@ -51,3 +51,4 @@ javadoc*
 **/classes/**
 
 /.metadata/
+*.7z

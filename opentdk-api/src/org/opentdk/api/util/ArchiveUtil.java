@@ -11,16 +11,35 @@ import org.apache.commons.lang3.StringUtils;
 import org.opentdk.api.logger.MLogger;
 
 /**
- * This class gets used to compress and extract directories by calling the 7 ZIP executable.<br><br>
- * Example:
+ * This class gets used to compress and extract (or generally archive) directories by calling the 7
+ * ZIP executable.<br>
+ * <br>
+ * Compress example:
+ * 
  * <pre>
  * ArchiveUtil.getInstance().setFileNames("*.json *.yaml *.properties *.xml *.csv");
- * ArchiveUtil.getInstance().doOperation("testdata\\RegressionTestData", "C:\\Program Files\\7 Zip\\7z.exe", "RegressionTestData");
+ * ArchiveUtil.getInstance().runProcess("testdata\\RegressionTestData", "C:\\Program Files\\7 Zip\\7z.exe", "RegressionTestData");
  * </pre>
  * 
- * This would compress all files with the defined extension in the folder 'RegressionTestData' as .7z archive with name 'RegressionTestData'.<br><br>
+ * This would compress all files with the defined extension in the folder 'RegressionTestData' as
+ * .7z archive with name 'RegressionTestData'.<br>
+ * <br>
  * 
- * To get all available 7 ZIP settings go to the installation folder via command prompt and type 7z.
+ * Extract example:
+ * 
+ * <pre>
+ * ArchiveUtil.getInstance().setSwitches("{@literal -}o\"RegressionTestData_Extracted\" {@literal -}t7z {@literal -}y {@literal -}x!*.cmd {@literal -}x!config.txt {@literal -}x!*.html");
+ * ArchiveUtil.getInstance().runProcess("testdata", "C:\\Program Files\\7{@literal -}Zip\\7z.exe", "RegressionTestData.7z", ArchiveCommand.Extract, true);
+ * </pre>
+ * 
+ * This would jump to the folder 'testdata' and extract the archive 'RegressionTestData.7z' as
+ * 'RegressionTestData_Extracted'. The problem is that the output name has to be set as switch. The
+ * last parameter 'true' triggers the 'print to console' option.<br>
+ * <br>
+ * 
+ * To get all available 7 ZIP settings go to the installation folder via command prompt and type
+ * 7z.<br>
+ * <br>
  * 
  * @author FME (LK Test Solutions)
  */
@@ -30,13 +49,14 @@ public class ArchiveUtil {
 	 */
 	private static ArchiveUtil instance;
 	/**
-	 * Possibility to include/exclude file types from the compression/extraction. Default is *.* which allows all
-	 * file names and all file extensions. E.g. *.json *.yaml would only allow JSON and YAML files with
-	 * any file name.
+	 * Possibility to include/exclude file types from the compression/extraction. Default is *.* which
+	 * allows all file names and all file extensions. E.g. *.json *.yaml would only allow JSON and YAML
+	 * files with any file name.
 	 */
 	private String fileNames = "*.*";
 	/**
-	 * Possibility to define all other options of the compression like archive type or compression rate. Default is {@literal -t7z} to set the 7z archive type.
+	 * Possibility to define all other options of the compression like archive type or compression rate.
+	 * Default is {@literal -t7z} to set the 7z archive type.
 	 */
 	private String switches = "-t7z";
 
@@ -44,12 +64,12 @@ public class ArchiveUtil {
 	 * Possibility to differentiate between the 7 ZIP compression commands like add, delete, list or
 	 * update.
 	 */
-	public enum CompressCommand {
+	public enum ArchiveCommand {
 		Add("a"), Delete("d"), List("l"), Update("u"), Extract("e");
 
 		private String shortcut;
 
-		CompressCommand(String abrev) {
+		ArchiveCommand(String abrev) {
 			shortcut = abrev;
 		}
 
@@ -70,12 +90,12 @@ public class ArchiveUtil {
 	 * When calling this method the fist time, a new instance of the ArchiveUtil class will be created
 	 * and returned to the caller. For every further call, the already created instance will be
 	 * returned. This construct allows access to all methods and properties of an instance of the
-	 * ArchiveUtil class from any other class during runtime of an application. The usage of the
-	 * methods is like it is in a static way, but with an instantiated class.<br>
+	 * ArchiveUtil class from any other class during runtime of an application. The usage of the methods
+	 * is like it is in a static way, but with an instantiated class.<br>
 	 * <br>
 	 * 
 	 * e.g.:<br>
-	 * <code>ArchiveUtil.getInstance().compress(currentDirectory, zipExecutable, archiveName);</code>
+	 * <code>ArchiveUtil.getInstance().runProcess(currentDirectory, zipExecutable, archiveName);</code>
 	 * 
 	 * @return The instance of the ArchiveUtil class
 	 */
@@ -95,8 +115,8 @@ public class ArchiveUtil {
 	 * @return {@literal -1}: Invalid method call, 0: Command execution succeeded, 1: Command execution
 	 *         failed
 	 */
-	public int doOperation(String currentDirectory, String zipExecutable, String archiveName) {
-		return doOperation(currentDirectory, zipExecutable, archiveName, CompressCommand.Add);
+	public int runProcess(String currentDirectory, String zipExecutable, String archiveName) {
+		return runProcess(currentDirectory, zipExecutable, archiveName, ArchiveCommand.Add);
 	}
 
 	/**
@@ -105,13 +125,13 @@ public class ArchiveUtil {
 	 * @param currentDirectory The path to the folder with the files to compress (folder name included)
 	 * @param zipExecutable    The full name (path + name) of the 7 ZIP executable
 	 * @param archiveName      The name of the compressed folder (without extension)
-	 * @param command          One of the compress commands in {@link CompressCommand} with default ADD
+	 * @param command          One of the compress commands in {@link ArchiveCommand} with default ADD
 	 *                         (create archive or add if already exists)
 	 * @return {@literal -1}: Invalid method call, 0: Command execution succeeded, 1: Command execution
 	 *         failed
 	 */
-	public int doOperation(String currentDirectory, String zipExecutable, String archiveName, CompressCommand command) {
-		return doOperation(currentDirectory, zipExecutable, archiveName, command, false);
+	public int runProcess(String currentDirectory, String zipExecutable, String archiveName, ArchiveCommand command) {
+		return runProcess(currentDirectory, zipExecutable, archiveName, command, false);
 	}
 
 	/**
@@ -120,13 +140,13 @@ public class ArchiveUtil {
 	 * @param currentDirectory The path to the folder with the files to compress (folder name included)
 	 * @param zipExecutable    The full name (path + name) of the 7 ZIP executable
 	 * @param archiveName      The name of the compressed folder (without extension)
-	 * @param command          One of the compress commands in {@link CompressCommand} with default ADD
+	 * @param command          One of the compress commands in {@link ArchiveCommand} with default ADD
 	 *                         (create archive or add if already exists)
 	 * @param printDetails     If true the stream of the command line gets written to the console
 	 * @return {@literal -1}: Invalid method call, 0: Command execution succeeded, 1: Command execution
 	 *         failed
 	 */
-	public int doOperation(String currentDirectory, String zipExecutable, String archiveName, CompressCommand command, boolean printDetails) {
+	public int runProcess(String currentDirectory, String zipExecutable, String archiveName, ArchiveCommand command, boolean printDetails) {
 		int ret = -1;
 
 		if (StringUtils.isBlank(currentDirectory) || StringUtils.isBlank(zipExecutable) || StringUtils.isBlank(archiveName)) {
@@ -137,8 +157,7 @@ public class ArchiveUtil {
 			throw new IllegalArgumentException("ArchiveUtil.doOperation: Committed directory does not exist or is a file");
 		}
 
-		String cmd = "cmd /c cd " + currentDirectory + " && " + "\"" + zipExecutable + "\" " + command.getShortcut() + " \"" + archiveName + "\" " + fileNames + " " + switches;	
-		System.out.println(cmd);
+		String cmd = "cmd /c cd " + currentDirectory + " && " + "\"" + zipExecutable + "\" " + command.getShortcut() + " \"" + archiveName + "\" " + fileNames + " " + switches;
 		Process process = null;
 		BufferedReader reader = null;
 		try {
