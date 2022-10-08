@@ -4,6 +4,7 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.io.UncheckedIOException;
 import java.util.logging.Level;
 
 import org.apache.commons.lang3.StringUtils;
@@ -16,8 +17,9 @@ import org.opentdk.api.logger.MLogger;
  * Compress example:
  * 
  * <pre>
- * ArchiveUtil.getInstance().setFileNames("*.json *.yaml *.properties *.xml *.csv");
- * ArchiveUtil.getInstance().runProcess("testdata\\RegressionTestData", "C:\\Program Files\\7 Zip\\7z.exe", "RegressionTestData");
+ * ArchiveUtil archive = ArchiveUtil.newInstance();
+ * archive.setFileNames("*.json *.yaml *.properties *.xml *.csv");
+ * archive.runProcess("testdata\\RegressionTestData", "C:\\Program Files\\7 Zip\\7z.exe", "..\\RegressionTestData.7z");
  * </pre>
  * 
  * This would compress all files with the defined extension in the folder 'RegressionTestData' as
@@ -27,13 +29,14 @@ import org.opentdk.api.logger.MLogger;
  * Extract example:
  * 
  * <pre>
- * ArchiveUtil.getInstance().setSwitches("{@literal -}o\"RegressionTestData_Extracted\" {@literal -}t7z {@literal -}y {@literal -}x!*.cmd {@literal -}x!config.txt {@literal -}x!*.html");
- * ArchiveUtil.getInstance().runProcess("testdata", "C:\\Program Files\\7{@literal -}Zip\\7z.exe", "RegressionTestData.7z", ArchiveCommand.Extract, true);
+ * ArchiveUtil archive = ArchiveUtil.newInstance();
+ * archive.setSwitches("{@literal -}o\"RegressionTestData_Extracted\" {@literal -}t7z {@literal -}y {@literal -}x!*.cmd {@literal -}x!config.txt {@literal -}x!*.html");
+ * archive.runProcess("testdata", "C:\\Program Files\\7{@literal -}Zip\\7z.exe", "RegressionTestData.7z", ArchiveCommand.Extract, true);
  * </pre>
  * 
  * This would jump to the folder 'testdata' and extract the archive 'RegressionTestData.7z' as
- * 'RegressionTestData_Extracted'. The problem is that the output name has to be set as switch. The
- * last parameter 'true' triggers the 'print to console' option.<br>
+ * 'RegressionTestData_Extracted'. Note that the output name has to be set as switch. The last
+ * parameter 'true' triggers the 'print to console' option.<br>
  * <br>
  * 
  * To get all available 7 ZIP settings go to the installation folder via command prompt and type
@@ -44,10 +47,6 @@ import org.opentdk.api.logger.MLogger;
  */
 public class ArchiveUtil {
 	/**
-	 * The one and only instance of the {@code ArchiveUtil} class.
-	 */
-	private static ArchiveUtil instance;
-	/**
 	 * Possibility to include/exclude file types from the compression/extraction. Default is *.* which
 	 * allows all file names and all file extensions. E.g. *.json *.yaml would only allow JSON and YAML
 	 * files with any file name.
@@ -55,7 +54,7 @@ public class ArchiveUtil {
 	private String fileNames = "*.*";
 	/**
 	 * Possibility to define all other options of the compression like archive type or compression rate.
-	 * Default is {@literal -t7z} to set the 7z archive type.
+	 * Default is only {@literal -t7z} to set the 7z archive type.
 	 */
 	private String switches = "-t7z";
 
@@ -78,31 +77,17 @@ public class ArchiveUtil {
 	}
 
 	/**
-	 * Invisible constructor that gets called when using {@link #getInstance()} for the first time in an
-	 * application.
+	 * Invisible constructor that gets called when using the {@link #newInstance()} method.
 	 */
 	private ArchiveUtil() {
 
 	}
 
 	/**
-	 * When calling this method the fist time, a new instance of the ArchiveUtil class will be created
-	 * and returned to the caller. For every further call, the already created instance will be
-	 * returned. This construct allows access to all methods and properties of an instance of the
-	 * ArchiveUtil class from any other class during runtime of an application. The usage of the methods
-	 * is like it is in a static way, but with an instantiated class.<br>
-	 * <br>
-	 * 
-	 * e.g.:<br>
-	 * <code>ArchiveUtil.getInstance().runProcess(currentDirectory, zipExecutable, archiveName);</code>
-	 * 
-	 * @return The instance of the ArchiveUtil class
+	 * @return a new instance of the ArchiveUtil class to work with
 	 */
-	public static ArchiveUtil getInstance() {
-		if (instance == null) {
-			instance = new ArchiveUtil();
-		}
-		return instance;
+	public static ArchiveUtil newInstance() {
+		return new ArchiveUtil();
 	}
 
 	/**
@@ -110,9 +95,11 @@ public class ArchiveUtil {
 	 * 
 	 * @param currentDirectory The path to the folder with the files to compress (folder name included)
 	 * @param zipExecutable    The full name (path + name) of the 7 ZIP executable
-	 * @param archiveName      The name of the compressed folder (without extension)
-	 * @return {@literal -1}: Invalid method call, 0 or 1: Command execution succeeded, {@literal >}1:
-	 *         Command execution failed
+	 * @param archiveName      The name of the compressed folder (with extension)
+	 * @return {@literal -}1: Return value of the process could not be determined, 0: Execution
+	 *         succeeded, {@literal >}1: Execution failed
+	 * @throws IllegalArgumentException in case of null or blank parameter or invalid directory
+	 * @throws UncheckedIOException when the process execution failed
 	 */
 	public int runProcess(String currentDirectory, String zipExecutable, String archiveName) {
 		return runProcess(currentDirectory, zipExecutable, archiveName, ArchiveCommand.Add);
@@ -123,11 +110,13 @@ public class ArchiveUtil {
 	 * 
 	 * @param currentDirectory The path to the folder with the files to compress (folder name included)
 	 * @param zipExecutable    The full name (path + name) of the 7 ZIP executable
-	 * @param archiveName      The name of the compressed folder (without extension)
+	 * @param archiveName      The name of the compressed folder (with extension)
 	 * @param command          One of the compress commands in {@link ArchiveCommand} with default ADD
 	 *                         (create archive or add if already exists)
-	 * @return {@literal -1}: Invalid method call, 0 or 1: Command execution succeeded, {@literal >}1:
-	 *         Command execution failed
+	 * @return {@literal -}1: Return value of the process could not be determined, 0: Execution
+	 *         succeeded, {@literal >}1: Execution failed
+	 * @throws IllegalArgumentException in case of null or blank parameter or invalid directory
+	 * @throws UncheckedIOException when the process execution failed
 	 */
 	public int runProcess(String currentDirectory, String zipExecutable, String archiveName, ArchiveCommand command) {
 		return runProcess(currentDirectory, zipExecutable, archiveName, command, false);
@@ -138,23 +127,25 @@ public class ArchiveUtil {
 	 * 
 	 * @param currentDirectory The path to the folder with the files to compress (folder name included)
 	 * @param zipExecutable    The full name (path + name) of the 7 ZIP executable
-	 * @param archiveName      The name of the compressed folder (without extension)
+	 * @param archiveName      The name of the compressed folder (with extension)
 	 * @param command          One of the compress commands in {@link ArchiveCommand} with default ADD
 	 *                         (create archive or add if already exists)
 	 * @param printDetails     If true the stream of the command line gets written to the console
-	 * @return {@literal -1}: Invalid method call, 0 of 1: Command execution succeeded, {@literal >}1:
-	 *         Command execution failed
+	 * @return {@literal -}1: Return value of the process could not be determined, 0: Execution
+	 *         succeeded, {@literal >}1: Execution failed
+	 * @throws IllegalArgumentException in case of null or blank parameter or invalid directory
+	 * @throws UncheckedIOException when the process execution failed
 	 */
 	public int runProcess(String currentDirectory, String zipExecutable, String archiveName, ArchiveCommand command, boolean printDetails) {
-		int ret = -1;
-
 		if (StringUtils.isBlank(currentDirectory) || StringUtils.isBlank(zipExecutable) || StringUtils.isBlank(archiveName)) {
-			throw new IllegalArgumentException("ArchiveUtil.doOperation: Null or blank parameter committed");
+			throw new IllegalArgumentException("ArchiveUtil.runProcess: Null or blank parameter committed");
 		}
 		File checkDir = new File(currentDirectory);
 		if (!checkDir.exists() || checkDir.isFile()) {
-			throw new IllegalArgumentException("ArchiveUtil.doOperation: Committed directory does not exist or is a file");
+			throw new IllegalArgumentException("ArchiveUtil.runProcess: Committed directory does not exist or is a file");
 		}
+
+		int ret = -1;
 
 		String cmd = "cmd /c cd " + currentDirectory + " && " + "\"" + zipExecutable + "\" " + command.getShortcut() + " \"" + archiveName + "\" " + fileNames + " " + switches;
 		Process process = null;
@@ -169,14 +160,17 @@ public class ArchiveUtil {
 					System.out.println(line);
 				}
 			}
-
 		} catch (IOException e) {
 			MLogger.getInstance().log(Level.SEVERE, e);
-			throw new RuntimeException(e);
+			throw new UncheckedIOException(e);
 		} finally {
 			if (process != null) {
+				try {
+					ret = process.waitFor();
+				} catch (InterruptedException e) {
+					MLogger.getInstance().log(Level.SEVERE, e);
+				}
 				process.destroy();
-				ret = process.exitValue();
 			}
 			if (reader != null) {
 				try {

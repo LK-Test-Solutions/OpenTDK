@@ -127,24 +127,29 @@ public class CommonUtil {
 		}
 		return result;
 	}
-	
+
 	/**
-	 * Executes any command via Runtime.getRuntime.exec.
+	 * Executes any command via getRuntime().exec() of {@link java.lang.Runtime}.
+	 * 
+	 * @param command a valid batch or shell command to execute
+	 * @return {@literal -}1: Return value of the process could not be determined, 0: Execution
+	 *         succeeded, {@literal >}1: Execution failed
 	 */
-	public static int exeucteCommand(String command) {
+	public static int executeCommand(String command) {
 		int ret = -1;
 		Process process = null;
 		try {
-			process = Runtime.getRuntime().exec(command);								
-		} catch(IOException e) {
+			process = Runtime.getRuntime().exec(command);
+		} catch (IOException e) {
 			MLogger.getInstance().log(Level.SEVERE, e);
 		} finally {
-			if(process != null) {
-				process.destroy();
-				ret = process.exitValue();
-				if(ret > 1) {
-					MLogger.getInstance().log(Level.SEVERE, "Execute command failed for ==> " + command);
+			if (process != null) {
+				try {
+					ret = process.waitFor();
+				} catch (InterruptedException e) {
+					MLogger.getInstance().log(Level.SEVERE, e);
 				}
+				process.destroy();
 			}
 		}
 		return ret;
