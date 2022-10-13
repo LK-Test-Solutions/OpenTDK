@@ -2,15 +2,14 @@ package RegressionTest.Dispatcher;
 
 import RegressionTest.BaseRegression;
 
-public class RT_Settings_exportContainer extends BaseRegression {
-
+public class RT_Settings_values extends BaseRegression {
+	
 	public static void main(String[] args) {
-		new RT_Settings_exportContainer();
+		new RT_Settings_values();
 	}
 	
 	@Override
 	public void runTest() {
-		System.out.println("Not yet implemented");
+		RT_Settings_values_Dispatcher.VALUE.getValue("name=");
 	}
-
 }

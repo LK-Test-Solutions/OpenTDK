@@ -49,7 +49,7 @@ public class YAMLDataContainer implements CustomContainer {
 		json = new JSONDataContainer(dCont);
 
 		if (!dCont.getFileName().isEmpty()) {
-			content = yaml.load(FileUtil.getContent(dCont.getFileName()));
+			content = yaml.load(FileUtil.getRowsAsString(dCont.getFileName()));
 		} else if (dCont.getInputStream() != null) {
 			content = yaml.load(dCont.getInputStream());
 		} else {

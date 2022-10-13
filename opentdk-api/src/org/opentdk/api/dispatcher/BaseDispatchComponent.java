@@ -22,32 +22,32 @@ import org.opentdk.api.util.ListUtil;
 /**
  * Similar to the native <code><b>enum</b></code> type of java, the <code><b>BaseDispatchComponent</b></code> class is used 
  * to build a set of variables with the difference that their values are not static and extended access to the variables
- * values and their attributes will be provided.<br> 
+ * values and their attributes is provided.<br> 
  * Each <code><b>BaseDispatchComponent</b></code> instance will be declared within a dispatcher definition class like {@link EBaseSettings} 
  * and the instance is associated with a node or field, depending on the format of the underlying DataContainer (tree or table format).<br><br>
  * Main features of <code><b>BaseDispatchComponent</b></code>:<br>
- * 	- Values and attributes of defined nodes or fields can be read from and written to the structure of the underlying DataContainer.<br>
- * 	- In case the defined file file does not exist, it will be created once a setter method is called.<br>
- *  - In case that no file is associated with the dispatcher component, their values will be stored in runtime objects (DOM Document, Hashmap, Arraylist etc.) depending on the container format.<br>
- * 	- Default values can be assigned to nodes or fields. They will be returned in case that the node or field does not exist in the runtime objects or associated files.<br>
- *
+ * 	{@literal -} Values and attributes of defined nodes or fields can be read from and written to the structure of the underlying DataContainer.<br>
+ * 	{@literal -} In case the defined file file does not exist, it will be created once a setter method is called.<br>
+ *  {@literal -} In case that no file is associated with the dispatcher component, their values will be stored in runtime objects (DOM Document, HashMap, ArrayList etc.) depending on the container format.<br>
+ * 	{@literal -} Default values can be assigned to nodes or fields. They will be returned in case that the node or field does not exist in the runtime objects or associated files.<br>
+ * <br>
  * XML sample:
  * <pre>
- * 	Declaration of a set of variables in class EBaseSettings.java:
+ * 	Declare a set of variables in class EBaseSettings.java:
  * 	<code><b>public static final BaseDispatchComponent APP_AUTO_POSITION = new BaseDispatchComponent(EBaseSettings.class.getSimpleName(), "AutoPosition", "/AppSettings", "true");
  * 	public static final BaseDispatchComponent APP_LANGUAGE = new BaseDispatchComponent(EBaseSettings.class.getSimpleName(), "Language", "/AppSettings", "en");
  * 	public static final BaseDispatchComponent APP_LOGFILE = new BaseDispatchComponent(EBaseSettings.class.getSimpleName(), "Logfile", "/AppSettings", "./logs/Application.log");
  * 	</b></code>
  * 
- * 	Assign XML file to the EBaseAppSettings class within the main class of the application where the settings are used:
- * 	<code><b>EBaseAppSettings.setDataContainer(EBaseSettings.class, "./conf/AppSettings.xml");</b></code>
+ * 	Assign a XML file to the EBaseSettings class within the main class of the application where the settings are used:
+ * 	<code><b>BaseDispatcher.setDataContainer(EBaseSettings.class, "./conf/AppSettings.xml");</b></code>
  * 
  * 	Read a value from the settings by using getter method of the BaseDispatchComponent instance:
  * 	<code><b>System.out.println(EBaseSettings.APP_LANGUAGE.getValue());</b></code>
  * 	=&gt; if the tag &lt;Language&gt; exist in the XML file, than the value of the tag will be returned (fr)
  * 	=&gt; if the tag &lt;Language&gt; does not exist in the XML file, the default defined in the declaration will be returned (en)
  * 
- * 	(Over)Write the value of a tag into the associated XML file:
+ * 	Write the value of a tag into the associated XML file:
  * 	<code><b>EBaseSettings.APP_LANGUAGE.setValue("de");</b></code>
  * 
  * 	Sample content of an associated XML file:
@@ -67,16 +67,6 @@ public class BaseDispatchComponent {
 	 * is called, the DataContainer will be stored in the HashMap with the simple name of the settings class as key.
 	 */
 	private static Map<String, DataContainer> dcMap = new HashMap<String, DataContainer>();
-	
-	/**
-	 * This HashMap stores a list with all declared BaseDispatchComponent variables of each settings class used within an application. 
-	 * Once the setDataContainer method of a settings class is called, the list is automatically created and stored in the HashMap with 
-	 * the simple name of the settings class as key.
-	 */
-//	private static Map<String, List<Field>> fieldsMap = new HashMap<String, List<Field>>();
-//	
-//	private static Map<String, String> rootNodeMap = new HashMap<String, String>();
-
 
 	/**
 	 * This property assigns the key name of the related DataContainer to each BaseDispatchComponent variable.
@@ -562,19 +552,6 @@ public class BaseDispatchComponent {
 	public static DataContainer getDataContainer(String keyName) {
 		return dcMap.get(keyName);
 	}
-	
-//	public static List<Field> getFields(String keyName){
-//		return fieldsMap.get(keyName);
-//	}
-	
-	/**
-	 * Retrieves the fieldsMap which includes the names of all {@link org.opentdk.api.dispatcher.BaseDispatchComponent} variables, used by the application at runtime.
-	 * 
-	 * @return fielsMap property of type HashMap
-	 */
-//	public static Map<String, List<Field>> getFieldsMap() {
-//		return fieldsMap;
-//	}
 
 	/**
 	 * Returns the parameterName property of the {@link org.opentdk.api.dispatcher.BaseDispatchComponent}.
@@ -677,10 +654,10 @@ public class BaseDispatchComponent {
 	}
 	
 	/**
-	 * This method replaces all parameter wildcards of the parentXPath of a BaseDispatchComponent instance by the values
-	 * defined in the params attribute.
+	 * This method replaces all parameter wild cards of the parentXPath of a BaseDispatchComponent instance by the values
+	 * defined in the committed parameter string.
 	 * <pre>
-	 * e.g. 
+	 * E.g. 
 	 * <b>resolveXPath("CUSTOMERS;LASTNAME");</b>
 	 * executed by the following declared BaseDispatchComponent:
 	 * <b>public static final BaseDispatchComponent OUTPUT_COLUMNNAME = new BaseDispatchComponent(ECollectionRules.class.getSimpleName(), "column", "/Rules/rule[@name='{param_1}']/Output/ResultTypes/resultType[@name='{param_2}']", "");</b>
@@ -689,21 +666,58 @@ public class BaseDispatchComponent {
 	 * into
 	 * <b>"/Rules/rule[@name='CUSTOMERS']/Output/ResultTypes/resultType[@name='LASTNAME']"</b>
 	 * </pre>
+	 * 
+	 * In case that one parameter contains a '=' the left string gets used as variable attribute and the right string as value.  
+	 * <pre>
+	 * E.g. 
+	 * <b>resolveXPath("name=CUSTOMERS;name=LASTNAME");</b>
+	 * executed by the following declared BaseDispatchComponent:
+	 * <b>public static final BaseDispatchComponent OUTPUT_COLUMNNAME = new BaseDispatchComponent(ECollectionRules.class.getSimpleName(), "column", "/Rules/rule[@{attribute_1}='{param_1}']/Output/ResultTypes/resultType[@{attribute_2}='{param_2}']", "");</b>
+	 * will transform the XPath 
+	 * <b>"/Rules/rule[@{attribute_1}='{param_1}']/Output/ResultTypes/resultType[@{attribute_2}='{param_2}']"</b>
+	 * into
+	 * <b>"/Rules/rule[@name='CUSTOMERS']/Output/ResultTypes/resultType[@name='LASTNAME']"</b>
+	 * </pre>
+	 * 
+	 * In case that multiple attributes should be taken into account, another expression in square brackets has to be added. Make sure to have a unique index in the parameter declaration.
+     * <pre>
+	 * E.g. 
+	 * <b>resolveXPath("name=CUSTOMERS;id=1;name=LASTNAME");</b>
+	 * executed by the following declared BaseDispatchComponent:
+	 * <b>public static final BaseDispatchComponent OUTPUT_COLUMNNAME = new BaseDispatchComponent(ECollectionRules.class.getSimpleName(), "column", "/Rules/rule[@{attribute_1}='{param_1}'][@{attribute_2}='{param_2}']/Output/ResultTypes/resultType[@{attribute_3}='{param_3}']", "");</b>
+	 * will transform the XPath 
+	 * <b>"/Rules/rule[@{attribute_1}='{param_1}'][@{attribute_2}='{param_2}']/Output/ResultTypes/resultType[@{attribute_3}='{param_3}']"</b>
+	 * into
+	 * <b>"/Rules/rule[@name='CUSTOMERS'][@id='1']/Output/ResultTypes/resultType[@name='LASTNAME']"</b>
+	 * </pre>
+	 * 
+	 * Note that the variable attribute is not quoted and the index always has to be the same than the value index.<br><br>
 	 *  
-	 * @param params 	Semicolon separated string with attribute values of parent nodes within the XPath hierarchy. 
-	 * @return transformed XPath with substituted attribute values of the parent nodes within the XPath hierarchy.
+	 * @param params 	Semicolon separated string with attribute values of parent nodes within the XPath hierarchy
+	 * @return transformed XPath with substituted attribute values of the parent nodes within the XPath hierarchy
 	 */
 	private String resolveXPath(String params) {
 		String pxp = parentXPath;
 		if (StringUtils.isBlank(params)) {
-			// remove all attributes placeholder like "[@name='{param_1}']"
+			// remove all attributes and parameter placeholder like "[@name='{param_1}']"
 			pxp = pxp.replaceAll("param_[0-9]*", "");
+			pxp = pxp.replaceAll("attribute_[0-9]*", "");
 			pxp = pxp.replaceAll("\\[@.*\\='\\{\\}'\\]", "");
-		} else {
-			String[] p = params.split(";");
+		} 
+		else {
+			String[] paramsToSet = params.split(";");
 			// replace parameter place holders by parameter values
-			for (int i = 0; i < p.length; i++) {
-				pxp = pxp.replace("{param_" + String.valueOf(i + 1) + "}", p[i]);
+			for (int i = 0; i < paramsToSet.length; i++) {
+				// syntax attribute=value allows variable attribute names
+				if(paramsToSet[i].contains("=")) {
+					String attributeToSet = paramsToSet[i].split("=")[0];
+					String valueToSet = paramsToSet[i].split("=")[1];
+					pxp = pxp.replace("{attribute_" + String.valueOf(i + 1) + "}", attributeToSet);
+					pxp = pxp.replace("{param_" + String.valueOf(i + 1) + "}", valueToSet);
+				} 
+				else {
+					pxp = pxp.replace("{param_" + String.valueOf(i + 1) + "}", paramsToSet[i]);
+				}
 			}
 		}
 		return pxp;
@@ -805,21 +819,6 @@ public class BaseDispatchComponent {
 	public static void setDataContainer(String keyName, InputStream inStream) {
 		dcMap.put(keyName, new DataContainer(inStream));
 	}
-
-	/**
-	 * This method is called within the {@link BaseDispatcher#setDataContainer} methods to assign a list with all declared
-	 * {@link BaseDispatchComponent} variables, declared within a dispatcher class.  
-	 * 
-	 * @param setKey - The key under which the fields list will be stored within the HashMap. This should be the simple name of the dispatcher class, where the {@link BaseDispatchComponent} variables are declared.
-	 * @param fields - A List object with the names of all {@link BaseDispatchComponent} variables of a dispatcher class. 
-	 */
-//	public static void setFields(String setKey, List<Field> fields) {
-//		fieldsMap.put(setKey, fields);
-//	}
-	
-//	public static void setRootNode(String keyName, String rn) {
-//		rootNodeMap.put(keyName, rn);
-//	}
 
 	/**
 	 * This method searches within the associated document for the first tree node or field, that matches the name and path (for tree formats)

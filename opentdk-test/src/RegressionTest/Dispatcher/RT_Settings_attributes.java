@@ -1,5 +1,7 @@
 package RegressionTest.Dispatcher;
 
+import org.opentdk.api.dispatcher.BaseDispatcher;
+
 import RegressionTest.BaseRegression;
 
 public class RT_Settings_attributes extends BaseRegression {
@@ -10,24 +12,16 @@ public class RT_Settings_attributes extends BaseRegression {
 	
 	@Override
 	public void runTest() {
-		// Generate some data
-//		testResult(EAttributes.RULE.getAttribute("name"), "EAttributes.RULE", "");
-		EAttributes.RULE.setAttribute("name", "Select_Statement");
-		testResult(EAttributes.RULE.getAttribute("name"), "EAttributes.RULE", "Select_Statement");
 
-//		E_XMLFile_Dispatcher_values.ATTRIBUTE.addValue("Orbit;SQL_Statement", "INSERT");
-//		System.out.println(E_XMLFile_Dispatcher_values.ATTRIBUTE.getValue());
-//		
-//		// Check the generation
-//		testResult(E_XMLFile_Dispatcher_values.ATTRIBUTE.getValue("Orbit;SQL_Statement"), "E_XMLFile_Dispatcher_values.ATTRIBUTE", "SELECT");
-//		
-//		// Rename the parent tag
-//		E_XMLFile_Dispatcher_values.ELEMENT.setAttribute("SQL_Statement", "Orbit", "name", "Prepared_Statement");
-//		testResult(E_XMLFile_Dispatcher_values.ELEMENT.getAttribute("Orbit", "name"), "E_XMLFile_Dispatcher_values.ELEMENT", "Prepared_Statement");
-//		
-//		E_XMLFile_Dispatcher_values.RULE.delete("name", "Orbit");
-//		testResult(E_XMLFile_Dispatcher_values.RULE.getAttribute("name"), "E_XMLFile_Dispatcher_values.RULE", null);
+		RT_Settings_attributes_Dispatcher.QUERY_FILTERVALUE.setValue("name=Select_Statement;id=1;column=filter1", "queryFilterValue");
+			
+		System.out.println(BaseDispatcher.getDataContainer(RT_Settings_attributes_Dispatcher.class).asString());
+		System.out.println();
 		
-//		BaseDispatcher.clearDataContainer();
+		BaseRegression.testResult(RT_Settings_attributes_Dispatcher.RULE.getAttribute("name"), "RULE", "Select_Statement");
+		BaseRegression.testResult(RT_Settings_attributes_Dispatcher.QUERY_FILTER.getAttribute("Select_Statement;1", "column"), "QUERY_FILTER", "filter1");
+		BaseRegression.testResult(RT_Settings_attributes_Dispatcher.QUERY_FILTERVALUE.getValue("name=Select_Statement;id=1;column=filter1"), "QUERY_FILTERVALUE", "queryFilterValue");
+		
+		
 	}
 }
