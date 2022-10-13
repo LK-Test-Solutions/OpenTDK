@@ -69,17 +69,21 @@ public class Filter {
 	}
 
 	/**
-	 * Directly adds several <code>FilterRule</code> to the {@link #rules} list.
+	 * Directly adds several {@link FilterRule} instances to the {@link #rules} list.
 	 * 
-	 * @param filterRules see {@link FilterRule}
+	 * @param filterRules A {@link java.util.List} object with items of type {@link FilterRule}
 	 */
 	public void addFilterRules(List<FilterRule> filterRules) {
 		rules.addAll(filterRules);
 	}
 
-//	/**
-//	 * See {@link #addFilterRule(String, String[], BaseDispatchComponent)} for single value comparison.
-//	 */
+	/**
+	 * Creates a new instance of type {@link FilterRule} and adds the instance to the {@link #rules} list.
+	 * 
+	 * @param headerName	Name of the field or column header, where the rule 
+	 * @param value			
+	 * @param mode			An instance of type BaseDispatchComponent within the class {@link org.opentdk.api.mapping.EOperator} e.g. <code>EOperator.CONTAINS</code>
+	 */
 	public void addFilterRule(String headerName, String value, BaseDispatchComponent mode) {
 		addFilterRule(headerName, new String[] { value }, mode);
 	}

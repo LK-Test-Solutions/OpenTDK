@@ -34,8 +34,12 @@ import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.OutputStream;
+import java.io.UnsupportedEncodingException;
 import java.net.URLConnection;
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.FileVisitResult;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -548,12 +552,26 @@ public class FileUtil {
 	}
 
 	/**
-	 * Read the content of a file and close.
+	 * Reads content of a file, closes the file and returns the content as String. This method will
+	 * return the content with UTF-8 {@link java.nio.charset.Charset} by default. Please use the 
+	 * method {@link #getContent(String, Charset)} to return the content with other charsets.
 	 * 
-	 * @param path Full name (path + name) of the file to work with.
+	 * @param path Full name (path + name) of the file to read the content from.
 	 * @return The file content as string.
 	 */
 	public static String getContent(String path) {
+		return getContent(path, StandardCharsets.UTF_8);
+	}
+	
+	/**
+	 * Reads content of a file, closes the file and returns the content as String. This method will
+	 * return the content with the {@link java.nio.charset.Charset}, defined by the Charset attribute.
+	 * 
+	 * @param path Full name (path + name) of the file to read the content from.
+	 * @param cs The {@link java.nio.charset.Charset}, used to transfer the file content into the returned string.
+	 * @return The file content as string.
+	 */
+	public static String getContent(String path, Charset cs) {
 		InputStream stream = null;
 		try {
 			stream = new FileInputStream(path);
@@ -561,11 +579,13 @@ public class FileUtil {
 			MLogger.getInstance().log(Level.SEVERE, e);
 			throw new RuntimeException(e);
 		}
-		return FileUtil.getContent(stream);
+		return FileUtil.getContent(stream, cs);
 	}
 
 	/**
-	 * Read the content of a InputStream and close.<br>
+	 * Reads content of an InputStream, closes the InputStream and returns the content as String. This 
+	 * method will return the content with UTF-8 {@link java.nio.charset.Charset} by default. Please use 
+	 * the method {@link #getContent(InputStream, Charset)} to return the content with other charsets.<br>
 	 * <br>
 	 * Usage:
 	 * 
@@ -576,20 +596,43 @@ public class FileUtil {
 	 * } catch (FileNotFoundException e) {
 	 *   e.printStackTrace();
 	 * }
-	 * FileUtil.getContent(stream)
+	 * FileUtil.getContent(stream);
 	 * </pre>
 	 * 
-	 * @param is An input stream for the file to read.
-	 * @return The file content as string.
+	 * @param is An object of type {@link java.io.InputStream} with the content
+	 * @return The content of the {@link java.io.InputStream} object as string.
 	 */
 	public static String getContent(InputStream is) {
-
-		BufferedInputStream isb = new BufferedInputStream(is);
+		return getContent(is, StandardCharsets.UTF_8);
+	}
+	
+	/**
+	 * Reads content of an InputStream, closes the InputStream and returns the content as String. This 
+	 * method will return the content with the {@link java.nio.charset.Charset}, defined by the Charset 
+	 * attribute.<br>
+	 * <br>
+	 * Usage:
+	 * 
+	 * <pre>
+	 * InputStream stream = null;
+	 * try {
+	 *   stream = new FileInputStream(path);
+	 * } catch (FileNotFoundException e) {
+	 *   e.printStackTrace();
+	 * }
+	 * FileUtil.getContent(stream, StandardCharsets.UFT_16);
+	 * </pre>
+	 * 
+	 * @param is An object of type {@link java.io.InputStream} with the content
+	 * @return The content of the {@link java.io.InputStream} object as string.
+	 */
+	public static String getContent(InputStream is, Charset cs) {
 		StringBuilder sb = new StringBuilder();
 		try {
-			int c;
-			while (0 < (c = isb.read())) {
-				sb.append((char) c);
+			BufferedReader br = new BufferedReader(new InputStreamReader(is, cs));
+			String line;
+			while ((line = br.readLine()) != null) {
+				sb.append(line);
 			}
 		} catch (IOException e) {
 			MLogger.getInstance().log(Level.SEVERE, e);
@@ -605,7 +648,7 @@ public class FileUtil {
 		}
 		return new String(sb);
 	}
-
+	
 	/**
 	 * Transfers the content of a string list into a defined file. Existing files with the same name
 	 * will be overwritten.
