@@ -121,9 +121,9 @@ public class BaseDispatchComponent {
 	/**
 	 * Constructor used to declare variables for tabular formats like .properties or .csv files or tree formats (if no XPath gets used).
 	 * 
-	 * @param key - Name of the dispatcher class where the BaseDispatchComponent variable is declared. If the class is an extended subclass, then the name of the superclass needs to be used. 
-	 * @param paramName - Header name of the field. Tabular formats can either have column header or row headers.
-	 * @param dVal - Default value returned by the variable in case the field doesn't exist in the associated DataContainer or file.
+	 * @param key Name of the dispatcher class where the BaseDispatchComponent variable is declared. If the class is an extended subclass, then the name of the superclass needs to be used. 
+	 * @param paramName Header name of the field. Tabular formats can either have column header or row headers.
+	 * @param dVal Default value returned by the variable in case the field doesn't exist in the associated DataContainer or file.
 	 */
 	public BaseDispatchComponent(String key, String paramName, String dVal) {
 		this(key, paramName, "", dVal);
@@ -132,9 +132,9 @@ public class BaseDispatchComponent {
 	/**
 	 * Constructor used for tabular formats like .properties or .csv Files or tree formats (if no XPath gets used).
 	 * 
-	 * @param parentClass - The dispatcher class where the BaseDispatchComponent variable is declared. If the class is an extended subclass, then the superclass needs to be used. 
-	 * @param paramName - Header name of the field. Tabular formats can either have column header or row headers.
-	 * @param dVal - Default value returned by the variable in cases the field doesn't exist in the associated DataContainer or file.
+	 * @param parentClass The dispatcher class where the BaseDispatchComponent variable is declared. If the class is an extended subclass, then the superclass needs to be used. 
+	 * @param paramName Header name of the field. Tabular formats can either have column header or row headers.
+	 * @param dVal Default value returned by the variable in cases the field doesn't exist in the associated DataContainer or file.
 	 */
 	public BaseDispatchComponent(Class<?> parentClass, String paramName, String dVal) {
 		this(parentClass, paramName, "", dVal);
@@ -143,10 +143,10 @@ public class BaseDispatchComponent {
 	/**
 	 * This constructor is used to declare variables for tree formats like XML, JSON or YAML.
 	 * 
-	 * @param parentClass - The dispatcher class where the BaseDispatchComponent variable is declared. If the class is an extended subclass, then the superclass needs to be used.
-	 * @param paramName - Name of a node, associated with the variable
-	 * @param pxp - Path, where the tag is located within a tree structure 
-	 * @param dVal - Default value returned by the variable in case the node doesn't exist in the associated DataContainer or file
+	 * @param parentClass The dispatcher class where the BaseDispatchComponent variable is declared. If the class is an extended subclass, then the superclass needs to be used.
+	 * @param paramName Name of a node, associated with the variable
+	 * @param pxp Path, where the tag is located within a tree structure 
+	 * @param dVal Default value returned by the variable in case the node doesn't exist in the associated DataContainer or file
 	 */
 	public BaseDispatchComponent(Class<?> parentClass, String paramName, String pxp, String dVal) {
 		this(parentClass.getSimpleName(), paramName, pxp, dVal);
@@ -157,10 +157,10 @@ public class BaseDispatchComponent {
 	/**
 	 * This constructor is used to declare variables for tree formats like XML, JSON or YAML.
 	 * 
-	 * @param setKey - Name of the dispatcher class where the BaseDispatchComponent variable is declared. If the class is an extended subclass, then the name of the superclass needs to be used.
-	 * @param paramName - Name of a node, associated with the variable
-	 * @param pxp - Path, where the tag is located within a tree structure 
-	 * @param dVal - Default value returned by the variable in cases the node doesn't exist in the associated DataContainer or file
+	 * @param setKey Name of the dispatcher class where the BaseDispatchComponent variable is declared. If the class is an extended subclass, then the name of the superclass needs to be used.
+	 * @param paramName Name of a node, associated with the variable
+	 * @param pxp Path, where the tag is located within a tree structure 
+	 * @param dVal Default value returned by the variable in cases the node doesn't exist in the associated DataContainer or file
 	 */
 	public BaseDispatchComponent(String setKey, String paramName, String pxp, String dVal) {
 		settingsKey = setKey;
@@ -170,7 +170,7 @@ public class BaseDispatchComponent {
 		if(!dcMap.containsKey(settingsKey)) {
 			if(!pxp.isEmpty()) {
 				String[] tags = pxp.split("/");
-				String rootTag = "<" + tags[1] + ">" + "</" + tags[1] + ">";
+				String rootTag = "<" + tags[1] + ">" + "</" + tags[1] + ">"; // TODO no XML specific code in Dispatcher. General method in DataContainer required that adapts to the specific ones.
 				InputStream stream = new ByteArrayInputStream(rootTag.getBytes(StandardCharsets.UTF_8));
 				setDataContainer(settingsKey, new DataContainer(stream));
 			} else {
@@ -198,7 +198,7 @@ public class BaseDispatchComponent {
 	 * &lt;/AppSettings&gt;
 	 * </pre>
 	 * 
-	 * @param value - The value which will be set to the node or field
+	 * @param value The value which will be set to the node or field
 	 */
 	public void addValue(String value) {
 		addValue("", value);	
@@ -326,7 +326,7 @@ public class BaseDispatchComponent {
 		File file = new File(fileName);
 		if (createNew || !file.exists() || StringUtils.isBlank(FileUtil.getContent(fileName))) {
 			FileUtil.deleteFile(fileName);			
-			XMLEditor xEdit = new XMLEditor(fileName, rootNode);
+			XMLEditor xEdit = new XMLEditor(fileName, rootNode); // TODO no XML specific code in Dispatcher. Good thing: Only gets called in BaseDispatcher when a root tag is used
 			xEdit.save(fileName);
 		}
 		return file.exists();

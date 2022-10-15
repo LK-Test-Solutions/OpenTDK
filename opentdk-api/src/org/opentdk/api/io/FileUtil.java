@@ -647,7 +647,7 @@ public class FileUtil {
 		}
 		return new String(sb);
 	}
-	
+
 	/**
 	 * Transfers the content of a string list into a defined file. Existing files with the same name
 	 * will be overwritten.
