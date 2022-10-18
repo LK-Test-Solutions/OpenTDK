@@ -12,11 +12,11 @@ public class RT_Settings_values extends BaseRegression {
 
 	@Override
 	public void runTest() {
-		BaseDispatcher.setDataContainer(RT_Settings_values_Dispatcher.class, "testdata/RegressionTestData/Parameter.xml");
-		String[] result = RT_Settings_values_Dispatcher.NAME.getValues();
+		BaseDispatcher.setDataContainer(ESettings_values_Dispatcher.class, "testdata/RegressionTestData/Parameter.xml");
+		String[] result = ESettings_values_Dispatcher.NAME.getValues();
 		for (int i = 0; i < result.length; i++) {
 			String name = result[i];
-			String value = RT_Settings_values_Dispatcher.VALUE.getValue(String.valueOf(i + 1));
+			String value = ESettings_values_Dispatcher.VALUE.getValue(String.valueOf(i + 1));
 			System.out.println(name + ": " + value);
 		}
 	}

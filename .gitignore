@@ -31,6 +31,7 @@
 *.zip
 *.tar.gz
 *.rar
+*.7z
 
 # virtual machine crash logs
 hs_err_pid*
@@ -44,11 +45,11 @@ javadoc*
 
 # Folders
 /.metadata/**
-#**/conf/**
+# **/conf/**
 **/logs/**
 **/target/**
 **/bin/**
 **/classes/**
-
 /.metadata/
-*.7z
+**/RegressionTestData_Extracted/**
+

@@ -1,21 +1,13 @@
 package org.opentdk.api.dispatcher;
 
 import java.io.ByteArrayInputStream;
-import java.io.File;
-import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.logging.Level;
 
 import org.apache.commons.lang3.StringUtils;
 import org.opentdk.api.application.EBaseSettings;
 import org.opentdk.api.datastorage.DataContainer;
 import org.opentdk.api.filter.Filter;
-import org.opentdk.api.io.FileUtil;
-import org.opentdk.api.io.XMLEditor;
-import org.opentdk.api.logger.MLogger;
 import org.opentdk.api.mapping.EOperator;
 import org.opentdk.api.util.ListUtil;
 
@@ -61,12 +53,6 @@ import org.opentdk.api.util.ListUtil;
  * @author LK Test Solutions
  */
 public class BaseDispatchComponent {
-
-	/**
-	 * This HashMap stores the DataContainers of all settings used within an application. Once the setDataContainer method of a settings class
-	 * is called, the DataContainer will be stored in the HashMap with the simple name of the settings class as key.
-	 */
-	private static Map<String, DataContainer> dcMap = new HashMap<String, DataContainer>();
 
 	/**
 	 * This property assigns the key name of the related DataContainer to each BaseDispatchComponent variable.
@@ -167,18 +153,18 @@ public class BaseDispatchComponent {
 		parameterName = paramName;
 		parentXPath = pxp;
 		defaultValue = dVal;
-		if(!dcMap.containsKey(settingsKey)) {
+		if(!BaseDispatcher.dcMap.containsKey(settingsKey)) {
 			if(!pxp.isEmpty()) {
 				String[] tags = pxp.split("/");
 				String rootTag = "<" + tags[1] + ">" + "</" + tags[1] + ">"; // TODO no XML specific code in Dispatcher. General method in DataContainer required that adapts to the specific ones.
 				InputStream stream = new ByteArrayInputStream(rootTag.getBytes(StandardCharsets.UTF_8));
-				setDataContainer(settingsKey, new DataContainer(stream));
+				BaseDispatcher.setDataContainer(settingsKey, new DataContainer(stream));
 			} else {
-				setDataContainer(settingsKey, new DataContainer());
+				BaseDispatcher.setDataContainer(settingsKey, new DataContainer());
 			}
 		}
-		if(!getDataContainer(settingsKey).getHeaders().containsKey(paramName)) {
-			getDataContainer(settingsKey).getHeaders().put(paramName, getDataContainer(settingsKey).getHeaders().size());
+		if(!BaseDispatcher.getDataContainer(settingsKey).getHeaders().containsKey(paramName)) {
+			BaseDispatcher.getDataContainer(settingsKey).getHeaders().put(paramName, BaseDispatcher.getDataContainer(settingsKey).getHeaders().size());
 		}
 	}
 	
@@ -282,63 +268,7 @@ public class BaseDispatchComponent {
 		if (noDuplicates && ListUtil.asList(getValues()).contains(value)) {
 			return;
 		}
-		dcMap.get(settingsKey).addField(parameterName, value, fltr);
-	}
-	
-	/**
-	 * Checks if the assigned file matches with the expected format of the {@link org.opentdk.api.dispatcher.BaseDispatchComponent}.
-	 * 
-	 * @param fileName - Full name of the file to check.
-	 * @param rootNode - The value of this parameter defines the expected name of the root node within tree formated file.
-	 * @return true = rootNode matches with the first node within the file ; false = rootNode does not match to the first node within the file
-	 * @throws IOException TODO
-	 */
-	public static boolean checkDispatcherFile(String fileName, String rootNode) throws IOException {
-		return checkDispatcherFile(fileName, rootNode, false);
-	}
-
-	/**
-	 * Checks if the file, associated with the DataContainer <code>dc</code>, matches with the expected format of the {@link org.opentdk.api.dispatcher.BaseDispatchComponent}.
-	 * 
-	 * @param dc - DataContainer instance with the associated file, that needs to be checked
-	 * @param rootNode - The value of this parameter defines the expected name of the root node within tree formated file.
-	 * @return true = rootNode matches with the first node within the file ; false = rootNode does not match to the first node within the file
-	 */
-	public static boolean checkDispatcherFile(DataContainer dc, String rootNode) {
-		try {
-			return checkDispatcherFile(dc.getFileName(), rootNode, false);
-		} catch (IOException e) {
-			MLogger.getInstance().log(Level.SEVERE, e, "readData");
-			throw new RuntimeException(e);
-		}
-	}
-
-	/**
-	 * Checks if the file, associated with the DataContainer <code>dc</code>, matches with the expected format of the {@link org.opentdk.api.dispatcher.BaseDispatchComponent}.
-	 * 
-	 * @param fileName - Full name of the file to check.
-	 * @param rootNode - The value of this parameter defines the expected name of the root node within tree formated file.
-	 * @param createNew - defines the behavior if the file does not exist.<br> true = create new file with first node and return true<br> false = do nothing and return false
-	 * @return true = rootNode matches with the first node within the file ; false = rootNode does not match to the first node within the file
-	 * @throws IOException TODO
-	 */
-	public static boolean checkDispatcherFile(String fileName, String rootNode, boolean createNew) throws IOException {
-		File file = new File(fileName);
-		if (createNew || !file.exists() || StringUtils.isBlank(FileUtil.getContent(fileName))) {
-			FileUtil.deleteFile(fileName);			
-			XMLEditor xEdit = new XMLEditor(fileName, rootNode); // TODO no XML specific code in Dispatcher. Good thing: Only gets called in BaseDispatcher when a root tag is used
-			xEdit.save(fileName);
-		}
-		return file.exists();
-	}
-
-	/**
-	 * Removes all the mappings from the DataContainer HashMap.
-	 * 
-	 * @see java.util.Map#clear
-	 */
-	public static void clearDataContainer() {
-		dcMap.clear();
+		BaseDispatcher.dcMap.get(settingsKey).addField(parameterName, value, fltr);
 	}
 	
 	/**
@@ -434,7 +364,7 @@ public class BaseDispatchComponent {
 		if (!parentXPath.isEmpty()) {
 			fltr.addFilterRule("XPath", xPath, EOperator.EQUALS);
 		}
-		dcMap.get(settingsKey).deleteField(parameterName, attrName, attrValue, fltr);
+		BaseDispatcher.dcMap.get(settingsKey).deleteField(parameterName, attrName, attrValue, fltr);
 	}
 	
 	/**
@@ -455,7 +385,7 @@ public class BaseDispatchComponent {
 		if (!parentXPath.isEmpty()) {
 			expr = parentXPath + "/" + parameterName;
 		}
-		DataContainer dc = dcMap.get(settingsKey);
+		DataContainer dc = BaseDispatcher.dcMap.get(settingsKey);
 		String[] attributes = dc.getAttributes(expr, attrName);
 		if(attributes.length == 0) {
 			return null;
@@ -486,7 +416,7 @@ public class BaseDispatchComponent {
 		if (!parentXPath.isEmpty()) {
 			expr = resolveXPath(params) + "/" + parameterName;
 		}
-		DataContainer dc = dcMap.get(settingsKey);
+		DataContainer dc = BaseDispatcher.dcMap.get(settingsKey);
 		String[] attributes = dc.getAttributes(expr, attrName);
 		if(attributes.length == 0) {
 			return null;
@@ -513,7 +443,7 @@ public class BaseDispatchComponent {
 		if (!parentXPath.isEmpty()) {
 			expr = parentXPath + "/" + parameterName;
 		}
-		return dcMap.get(settingsKey).getAttributes(expr, attrName);
+		return BaseDispatcher.dcMap.get(settingsKey).getAttributes(expr, attrName);
 	}
 	
 	/**
@@ -539,18 +469,7 @@ public class BaseDispatchComponent {
 		if (!parentXPath.isEmpty()) {
 			expr = resolveXPath(params) + "/" + parameterName;
 		}
-		return dcMap.get(settingsKey).getAttributes(expr, attrName);
-	}
-
-	
-	/**
-	 * Returns the DataContainer that acts as runtime storage for the values linked to the {@link org.opentdk.api.dispatcher.BaseDispatchComponent} instances.
-	 * 
-	 * @param keyName - Name of the key where the DataContainer is stored within the HashMap. This should be the simple name of the dispatcher class. If the dispatcher class is an extended class, then the simple name of its superclass needs to be defined.
-	 * @return The DataContainer object, representing the runtime storage for the dispatcher
-	 */
-	public static DataContainer getDataContainer(String keyName) {
-		return dcMap.get(keyName);
+		return BaseDispatcher.dcMap.get(settingsKey).getAttributes(expr, attrName);
 	}
 
 	/**
@@ -590,10 +509,10 @@ public class BaseDispatchComponent {
 		if((parentXPath != null) && (!parentXPath.isEmpty())) {
 			return getValue("");
 		}
-		if(dcMap.containsKey(settingsKey)) {
-			if((dcMap.get(settingsKey).getHeaderIndex(parameterName) >= 0) && (dcMap.get(settingsKey).getRowCount() > 0)) {
-				if(dcMap.get(settingsKey).getValue(parameterName) != null) {
-					return dcMap.get(settingsKey).getValue(parameterName);
+		if(BaseDispatcher.dcMap.containsKey(settingsKey)) {
+			if((BaseDispatcher.dcMap.get(settingsKey).getHeaderIndex(parameterName) >= 0) && (BaseDispatcher.dcMap.get(settingsKey).getRowCount() > 0)) {
+				if(BaseDispatcher.dcMap.get(settingsKey).getValue(parameterName) != null) {
+					return BaseDispatcher.dcMap.get(settingsKey).getValue(parameterName);
 				}
 			}
 		}
@@ -611,7 +530,7 @@ public class BaseDispatchComponent {
 	 */
 	public String getValue(String params) {
 		String outVal = defaultValue;
-		if(dcMap.containsKey(settingsKey)) {
+		if(BaseDispatcher.dcMap.containsKey(settingsKey)) {
 			String[] values = getValues(params);
 			if (values.length > 0) {
 				outVal = values[0];
@@ -647,8 +566,8 @@ public class BaseDispatchComponent {
 			String pxp = resolveXPath(params);
 			fltr.addFilterRule("XPath", pxp, EOperator.EQUALS);
 		}
-		if(dcMap.get(settingsKey).getValuesAsList(parameterName, fltr).size() > 0) {
-			return dcMap.get(settingsKey).getValuesAsList(parameterName, fltr).toArray(new String[dcMap.get(settingsKey).getValuesAsList(parameterName, fltr).size()]);
+		if(BaseDispatcher.dcMap.get(settingsKey).getValuesAsList(parameterName, fltr).size() > 0) {
+			return BaseDispatcher.dcMap.get(settingsKey).getValuesAsList(parameterName, fltr).toArray(new String[BaseDispatcher.dcMap.get(settingsKey).getValuesAsList(parameterName, fltr).size()]);
 		}
 		return new String[0];
 	}
@@ -759,65 +678,7 @@ public class BaseDispatchComponent {
 		String xPath = resolveXPath(params);
 		Filter fltr = new Filter();
 		fltr.addFilterRule("XPath", xPath, EOperator.EQUALS);
-		dcMap.get(settingsKey).addField(parameterName, attrName, oldValue, attrValue, fltr);
-	}
-	
-	/**
-	 * Creates a DataContainer instance from a given file and adds the instance to the {@link #dcMap} HashMap of {@link org.opentdk.api.dispatcher.BaseDispatchComponent}.
-	 * The keyName within the HashMap should be the simple name of the dispatcher class, where the BaseDispatchComponent variables are declared. In case the
-	 * dispatcher class is a subclass of a superclass with predefined BaseDispatchComponent variables like EBaseSettings, then the simple name 
-	 * of the superclass needs to be used.<br><br>
-	 * 
-	 * <pre>
-	 * <b>Sample usage:</b>
-	 * 	ECollectorSettings.setDataContainer(ECollectorSettings.class, "c:\\Appdata\\MetricsCollector\\conf\\msettings.xml");
-	 * </pre>
-	 * 
-	 * @param keyName - Name of the key where the DataContainer is stored within the HashMap. This should be the simplename of the settings class.
-	 * @param settingsFile - Full name of the XML file that will be associated with the settings class where the BaseDispatchComponent variable is declared.
-	 */
-	public static void setDataContainer(String keyName, String settingsFile) {
-		dcMap.put(keyName, new DataContainer(settingsFile));
-	}
-
-	/**
-	 * Adds an DataContainer instance to the {@link #dcMap} HashMap of {@link org.opentdk.api.dispatcher.BaseDispatchComponent}.
-	 * The keyName within the HashMap should be the simple name of the dispatcher class, where the BaseDispatchComponent variables are declared. In case the
-	 * dispatcher class is a subclass of a superclass with predefined {@link org.opentdk.api.dispatcher.BaseDispatchComponent} variables like EBaseSettings, 
-	 * then the simple name of the superclass needs to be used.<br><br>
-	 * 
-	 * <pre>
-	 * <b>Sample usage:</b>
-	 * 	DataContainer dc = new DataContainer("c:\\Appdata\\MetricsCollector\\conf\\msettings.xml");
-	 * 	ECollectorSettings.setDataContainer(ECollectorSettings.class, dc);
-	 * </pre>
-	 * 
-	 * @param setKey - Name of the key where the DataContainer is stored within the HashMap. This should be the simple name of the settings class.
-	 * @param dc - A DataContainer instance which is associated to a file in a format, described by the dispatcher class.
-	 */
-	public static void setDataContainer(String setKey, DataContainer dc) {
-		dcMap.put(setKey, dc);
-	}
-
-	/**
-	 * Creates a DataContainer instance from an InputStream and adds the instance to the {@link #dcMap} HashMap of {@link BaseDispatchComponent}.
-	 * The keyName within the HashMap should be the simple name of the dispatcher class, where the BaseDispatchComponent variables are declared. In case the
-	 * dispatcher class is a subclass of a superclass with predefined BaseDispatchComponent variables like EBaseSettings, then the simple name 
-	 * of the superclass needs to be used.<br><br>
-	 * 
-	 * <pre>
-	 * <b>XML sample:</b>
-	 * String xmlContent = "&lt;?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?&gt;&lt;rootTag&gt;...&lt;/rootTag&gt;"
-	 * InputStream stream = new ByteArrayInputStream(xmlContent.getBytes(StandardCharsets.UTF_8));
-	 * ECollectorSettings.setDataContainer(ECollectorSettings.class, stream);
-	 * </pre>
-	 * 
-	 * @param keyName - Name of the key where the DataContainer is stored within the HashMap.
-	 * @param inStream - A InputStream with content in a format of any supported {@link org.opentdk.api.datastorage.DataContainer}
-	 * @see org.opentdk.api.datastorage.DataContainer#DataContainer(InputStream)
-	 */
-	public static void setDataContainer(String keyName, InputStream inStream) {
-		dcMap.put(keyName, new DataContainer(inStream));
+		BaseDispatcher.dcMap.get(settingsKey).addField(parameterName, attrName, oldValue, attrValue, fltr);
 	}
 
 	/**
@@ -837,7 +698,7 @@ public class BaseDispatchComponent {
 	 */
 	public void setValue(String value) {
 		if((parentXPath == null) || (parentXPath.isEmpty())) {
-			dcMap.get(settingsKey).setValue(parameterName, value);
+			BaseDispatcher.dcMap.get(settingsKey).setValue(parameterName, value);
 		}else {
 			setValue("", value);
 		}
@@ -864,7 +725,7 @@ public class BaseDispatchComponent {
 		String xPath = resolveXPath(params);
 		Filter fltr = new Filter();
 		fltr.addFilterRule("XPath", xPath, EOperator.EQUALS);
-		dcMap.get(settingsKey).setValue(parameterName, value, fltr);
+		BaseDispatcher.dcMap.get(settingsKey).setValue(parameterName, value, fltr);
 	}
 	
 	/**
@@ -892,7 +753,7 @@ public class BaseDispatchComponent {
 		Filter fltr = new Filter();
 		fltr.addFilterRule("XPath", xPath, EOperator.EQUALS);
 		fltr.addFilterRule(parameterName, oldValue, EOperator.EQUALS);
-		dcMap.get(settingsKey).setValue(parameterName, newValue, fltr);
+		BaseDispatcher.dcMap.get(settingsKey).setValue(parameterName, newValue, fltr);
 	}
 
 	/**
@@ -912,7 +773,7 @@ public class BaseDispatchComponent {
 			fltr.addFilterRule("XPath", xPath, EOperator.EQUALS);
 		}
 		fltr.addFilterRule(parameterName, oldValue, EOperator.EQUALS);
-		dcMap.get(settingsKey).setValues(parameterName, newValue, fltr, allOccurences);
+		BaseDispatcher.dcMap.get(settingsKey).setValues(parameterName, newValue, fltr, allOccurences);
 	}
 	
 }

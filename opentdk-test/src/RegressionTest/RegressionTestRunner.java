@@ -28,6 +28,7 @@ import RegressionTest.DateUtility.RT_DateUtil_getNumber;
 import RegressionTest.Dispatcher.RT_File_Properties_values;
 import RegressionTest.Dispatcher.RT_File_XML_values;
 import RegressionTest.Dispatcher.RT_Settings_attributes;
+import RegressionTest.Dispatcher.RT_Settings_values;
 import RegressionTest.Dispatcher.RT_noFile_Default_values;
 import RegressionTest.Dispatcher.RT_noFile_XML_values;
 import RegressionTest.IO.RT_FileUtil;
@@ -99,6 +100,7 @@ public class RegressionTestRunner {
 			RT_noFile_Default_values.main(args);
 			RT_noFile_XML_values.main(args);
 			RT_Settings_attributes.main(args);
+			RT_Settings_values.main(args);
 
 			// RegressionTest.IO
 			RT_FileUtil.main(args);
