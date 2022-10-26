@@ -22,6 +22,7 @@ import java.util.stream.Stream;
 import org.apache.commons.lang3.StringUtils;
 import org.json.JSONObject;
 import org.opentdk.api.filter.Filter;
+import org.opentdk.api.io.FileUtil;
 import org.opentdk.api.io.XFileWriter;
 import org.opentdk.api.io.XMLEditor;
 import org.opentdk.api.logger.*;
@@ -1716,7 +1717,8 @@ public class DataContainer extends BaseContainer {
 							inputStream.reset();
 							return EContainerFormat.XML;
 						}
-						inputStream.reset();
+						inputStream.reset();	
+						
 					} else if (inputContent.startsWith("{")) {
 						if(StringUtils.isNotBlank(JSONObject.valueToString(inputContent))) {
 							return EContainerFormat.JSON;

@@ -2,8 +2,11 @@ package org.opentdk.api.io;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.ByteArrayInputStream;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.StringWriter;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -1080,6 +1083,25 @@ public class XMLEditor {
 	public static Boolean validateXMLString(InputStream inStream) {
 		try {
 			SAXParserFactory.newInstance().newSAXParser().getXMLReader().parse(new InputSource(inStream));
+		} catch (IOException e) {
+			MLogger.getInstance().log(Level.WARNING, "Invalid input used for XML parser", "XMLEditor", "validateXMLString");
+			return false;
+		} catch (ParserConfigurationException e) {
+			MLogger.getInstance().log(Level.WARNING, "Probably non supported feature used for the XML processor.", "XMLEditor", "validateXMLString");
+			return false;
+		} catch (SAXException e) {
+			MLogger.getInstance().log(Level.WARNING, "A DOCTYPE was passed into the XML document.", "XMLEditor", "validateXMLString");
+			return false;
+		}
+		return true;
+	}
+	
+	public static Boolean validateXMLString(String inString) {
+		try {
+			
+			InputStream inStream = new ByteArrayInputStream(inString.getBytes(StandardCharsets.UTF_8));
+			SAXParserFactory.newInstance().newSAXParser().getXMLReader().parse(new InputSource(inStream));
+//			SAXParserFactory.newInstance().newSAXParser().getXMLReader().parse(new InputSource(inStream));
 		} catch (IOException e) {
 			MLogger.getInstance().log(Level.WARNING, "Invalid input used for XML parser", "XMLEditor", "validateXMLString");
 			return false;

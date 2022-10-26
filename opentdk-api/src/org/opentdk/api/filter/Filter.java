@@ -51,18 +51,23 @@ public class Filter {
 	}
 
 	/**
-	 * Add a filter to the {@link #rules} list by passing the whole condition as string.
+	 * Add a filter to the List property {@link #rules} by passing the whole condition as string.<br>
+	 * e.g.: 
+	 * <pre> 
+	 * Filter fltr = new Filter();
+	 * fltr.addFilterRule("AND Company = LK Test Solutions");
+	 * </pre>
 	 * 
-	 * @param rule e.g. 'AND Company = LK Test Solutions'
+	 * @param rule The rule definition as String
 	 */
 	public void addFilterRule(String rule) {
 		rules.add(new FilterRule(rule));
 	}
 
 	/**
-	 * Directly add a new <code>FilterRule</code> to the {@link #rules} list.
+	 * Adds an instance of type {@link org.opentdk.api.filter.FilterRule} to the List property {@link #rules}.
 	 * 
-	 * @param rule see {@link FilterRule}
+	 * @param rule instance of type {@link org.opentdk.api.filter.FilterRule}
 	 */
 	public void addFilterRule(FilterRule rule) {
 		rules.add(rule);

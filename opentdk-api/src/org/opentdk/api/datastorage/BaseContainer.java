@@ -141,6 +141,13 @@ public abstract class BaseContainer {
 	 * like XML, JSON or JAML.
 	 */
 	protected InputStream inputStream;
+	
+	/**
+	 * This property is used to assign the data as an {@link String} to the {@link DataContainer} instance
+	 * in case that no source file exists. This is valid for data formats like XML, JSON or JAML.
+	 */
+	// TODO implement constructor, getter and setter for initializing the DataContainer with String content - similar to inputStream
+	protected String inputString;
 
 	/**
 	 * The HashMap {@link #metaData} is used to define fields and values that will be appended to each
@@ -458,6 +465,10 @@ public abstract class BaseContainer {
 		return inputStream;
 	}
 
+	public String getInputString() {
+		return inputString;
+	}
+	
 	/**
 	 * Gets the HashMap with MetaData
 	 *
@@ -592,6 +603,10 @@ public abstract class BaseContainer {
 	 */
 	public void setInputStream(InputStream inStream) {
 		inputStream = inStream;
+	}
+	
+	public void setInputString(String inStr) {
+		inputString = inStr;
 	}
 
 	/**
