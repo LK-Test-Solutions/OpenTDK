@@ -29,13 +29,11 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.io.OutputStream;
 import java.net.URLConnection;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
@@ -50,6 +48,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;
 
+import org.apache.commons.io.FileUtils;
 import org.opentdk.api.logger.MLogger;
 import org.opentdk.api.util.CommonUtil;
 
@@ -206,16 +205,16 @@ public class FileUtil {
 	}
 
 	/**
-	 * Creates a copy of the input source file to the chosen target file.
+	 * Creates a copy of the input source file to the chosen target file by using {@link FileUtils}. 
 	 * 
 	 * @param sourceFile Full source file name (path + name) that should be copied.
 	 * @param targetFile Full target file name (path + name) for the copy operation.
-	 * @return the number of bytes transferred.
 	 * @throws IOException If an I/O error occurred.
 	 */
-	public static long copyFile(String sourceFile, String targetFile) throws IOException {
-		OutputStream os = new FileOutputStream(targetFile);
-		return Files.copy(Paths.get(sourceFile), os);
+	public static void copyFile(String sourceFile, String targetFile) throws IOException {
+		FileUtils.copyFile(new File(sourceFile), new File(targetFile));
+//		OutputStream os = new FileOutputStream(targetFile);
+//		return Files.copy(Paths.get(sourceFile), os);
 	}
 
 	/**
@@ -361,6 +360,7 @@ public class FileUtil {
 
 			InputStream is = new BufferedInputStream(new FileInputStream(path));
 			String type = URLConnection.guessContentTypeFromStream(is);
+			is.close();
 
 			if (type == null) {
 				type = URLConnection.guessContentTypeFromName(name);
@@ -375,7 +375,7 @@ public class FileUtil {
 			}
 
 			if (type != null) {
-				if ((!type.endsWith("/pdf")) && (!type.startsWith("image/")) && (!type.startsWith("application/"))) {
+				if (type.endsWith("/pdf") || type.startsWith("image/") || type.startsWith("application/")) {
 					isText = false;
 				} else if (checkBinaryFileExtension(name)) {
 					isText = false;

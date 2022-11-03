@@ -77,15 +77,7 @@ public class BaseDispatchComponent {
 	 * in case that no settings file entry with the XPath and node name exists. 
 	 */
 	private String defaultValue;
-		
-	/**
-	 * This property keeps the dispatcher class where the BaseDispatchComponent variable is declared. Since the BaseDispatchComponent classes are static,
-	 * there is no reference to the parent class, where they are declared. This is why the parent class needs to be set for the runtime instance of 
-	 * the BaseDispatchComponent class.
-	 */
-	@SuppressWarnings("unused")
-	private Class<?> cls;
-	
+
 	/**
 	 * The default constructor if this class that is called when creating a new instance without attributes.
 	 */
@@ -136,8 +128,6 @@ public class BaseDispatchComponent {
 	 */
 	public BaseDispatchComponent(Class<?> parentClass, String paramName, String pxp, String dVal) {
 		this(parentClass.getSimpleName(), paramName, pxp, dVal);
-		cls = parentClass;
-
 	}
 	
 	/**
@@ -230,8 +220,8 @@ public class BaseDispatchComponent {
 	 * &lt;/AppSettings&gt;
 	 * </pre>
 	 * 
-	 * @param value - The value which will be set to the node or field
-	 * @param noDuplicates - true = do not create duplicate nodes or fields; false = create duplicate nodes or fields
+	 * @param value The value which will be set to the node or field
+	 * @param noDuplicates true = do not create duplicate nodes or fields; false = create duplicate nodes or fields
 	 */
 	public void addValue(String value, boolean noDuplicates) {
 		addValue("", value, noDuplicates);
@@ -254,9 +244,9 @@ public class BaseDispatchComponent {
 	 * &lt;/Mappings&gt;
 	 * </pre>
 	 * 
-	 * @param params - Semicolon separated string with attribute values of the parent nodes that describe the path more uniquely.
-	 * @param value - The value which will be set to the new node
-	 * @param noDuplicates - true = do not create duplicate nodes; false = create duplicate nodes
+	 * @param params Semicolon separated string with attribute values of the parent nodes that describe the path more uniquely.
+	 * @param value The value which will be set to the new node
+	 * @param noDuplicates true = do not create duplicate nodes; false = create duplicate nodes
 	 */
 	//ToDo: Filter not allowed for tabular formats!
 	public void addValue(String params, String value, boolean noDuplicates) {
@@ -268,7 +258,7 @@ public class BaseDispatchComponent {
 		if (noDuplicates && ListUtil.asList(getValues()).contains(value)) {
 			return;
 		}
-		BaseDispatcher.dcMap.get(settingsKey).addField(parameterName, value, fltr);
+		BaseDispatcher.getDataContainer(settingsKey).addField(parameterName, value, fltr);
 	}
 	
 	/**
@@ -316,8 +306,8 @@ public class BaseDispatchComponent {
 	 * </pre>
 	 * If multiple tags with the same name and XPath exist, then all matching tags will be deleted.
 	 * 
-	 * @param attrName - Attribute name of the node or field that will be deleted
-	 * @param attrValue - Attribute value of the node or field that will be deleted
+	 * @param attrName Attribute name of the node or field that will be deleted
+	 * @param attrValue Attribute value of the node or field that will be deleted
 	 */
 	public void delete(String attrName, String attrValue) {
 		delete("", attrName, attrValue);
@@ -354,9 +344,9 @@ public class BaseDispatchComponent {
 	 * </pre>
 	 * If multiple tags with the same name and XPath exist, then all matching tags will be deleted.
 	 * 
-	 * @param params - Semicolon separated string with attribute values of parent nodes within the path hierarchy. 
-	 * @param attrName - Attribute name of the node or field that will be deleted
-	 * @param attrValue - Attribute value of the node or field that will be deleted
+	 * @param params Semicolon separated string with attribute values of parent nodes within the path hierarchy. 
+	 * @param attrName Attribute name of the node or field that will be deleted
+	 * @param attrValue Attribute value of the node or field that will be deleted
 	 */
 	public void delete(String params, String attrName, String attrValue) {
 		String xPath = resolveXPath(params);
@@ -364,7 +354,7 @@ public class BaseDispatchComponent {
 		if (!parentXPath.isEmpty()) {
 			fltr.addFilterRule("XPath", xPath, EOperator.EQUALS);
 		}
-		BaseDispatcher.dcMap.get(settingsKey).deleteField(parameterName, attrName, attrValue, fltr);
+		BaseDispatcher.getDataContainer(settingsKey).deleteField(parameterName, attrName, attrValue, fltr);
 	}
 	
 	/**
@@ -377,7 +367,7 @@ public class BaseDispatchComponent {
 	 * returns the value "X"
 	 * </pre>
 	 * 
-	 * @param attrName - the name of the nodes attribute to search for
+	 * @param attrName the name of the nodes attribute to search for
 	 * @return the value of the defined attribute
 	 */
 	public String getAttribute(String attrName) {
@@ -385,7 +375,7 @@ public class BaseDispatchComponent {
 		if (!parentXPath.isEmpty()) {
 			expr = parentXPath + "/" + parameterName;
 		}
-		DataContainer dc = BaseDispatcher.dcMap.get(settingsKey);
+		DataContainer dc = BaseDispatcher.getDataContainer(settingsKey);
 		String[] attributes = dc.getAttributes(expr, attrName);
 		if(attributes.length == 0) {
 			return null;
@@ -407,8 +397,8 @@ public class BaseDispatchComponent {
 	 * returns the value "X1"
 	 * </pre>
 	 * 
-	 * @param params - a semicolon separated string with attribute values within the path
-	 * @param attrName - the name of the node attribute to search for
+	 * @param params a semicolon separated string with attribute values within the path
+	 * @param attrName the name of the node attribute to search for
 	 * @return the value of the matching attribute
 	 */
 	public String getAttribute(String params, String attrName) {
@@ -416,7 +406,7 @@ public class BaseDispatchComponent {
 		if (!parentXPath.isEmpty()) {
 			expr = resolveXPath(params) + "/" + parameterName;
 		}
-		DataContainer dc = BaseDispatcher.dcMap.get(settingsKey);
+		DataContainer dc = BaseDispatcher.getDataContainer(settingsKey);
 		String[] attributes = dc.getAttributes(expr, attrName);
 		if(attributes.length == 0) {
 			return null;
@@ -435,7 +425,7 @@ public class BaseDispatchComponent {
 	 * returns the values ["X", "Y"]
 	 * </pre>
 	 * 
-	 * @param attrName - the name of the nodes attribute to search for
+	 * @param attrName the name of the nodes attribute to search for
 	 * @return the values of all matching attributes as array of type String
 	 */
 	public String[] getAttributes(String attrName) {
@@ -443,7 +433,7 @@ public class BaseDispatchComponent {
 		if (!parentXPath.isEmpty()) {
 			expr = parentXPath + "/" + parameterName;
 		}
-		return BaseDispatcher.dcMap.get(settingsKey).getAttributes(expr, attrName);
+		return BaseDispatcher.getDataContainer(settingsKey).getAttributes(expr, attrName);
 	}
 	
 	/**
@@ -460,8 +450,8 @@ public class BaseDispatchComponent {
 	 * returns the values ["X1", "Y1"]
 	 * </pre>
 	 * 
-	 * @param params - a semicolon separated string with attribute values within the path
-	 * @param attrName - the name of the nodes attribute to search for
+	 * @param params a semicolon separated string with attribute values within the path
+	 * @param attrName the name of the nodes attribute to search for
 	 * @return the values of all matching attribute as array of type String
 	 */
 	public String[] getAttributes(String params, String attrName) {
@@ -469,7 +459,7 @@ public class BaseDispatchComponent {
 		if (!parentXPath.isEmpty()) {
 			expr = resolveXPath(params) + "/" + parameterName;
 		}
-		return BaseDispatcher.dcMap.get(settingsKey).getAttributes(expr, attrName);
+		return BaseDispatcher.getDataContainer(settingsKey).getAttributes(expr, attrName);
 	}
 
 	/**
@@ -499,9 +489,9 @@ public class BaseDispatchComponent {
 	
 	/**
 	 * This method retrieves the value that is assigned to the {@link org.opentdk.api.dispatcher.BaseDispatchComponent} variable in the following way:<br>
-	 * - Search the node or field, defined by property {@link #parameterName}. For tree formats the node will be searched within the XPath, defined by property {@link #parentXPath}<br>
-	 * - If the node or field does not exist within the associated DataContainer, the default value defined by property {@link #defaultValue} will be retrieved.<br>
-	 * - If multiple nodes or fields exist, then the first value will be retrieved
+	 * {@literal -} Search the node or field, defined by property {@link #parameterName}. For tree formats the node will be searched within the XPath, defined by property {@link #parentXPath}<br>
+	 * {@literal -} If the node or field does not exist within the associated DataContainer, the default value defined by property {@link #defaultValue} will be retrieved.<br>
+	 * {@literal -} If multiple nodes or fields exist, then the first value will be retrieved
 	 * 
 	 * @return the value, assigned to the {@link org.opentdk.api.dispatcher.BaseDispatchComponent} variable as String
 	 */
@@ -510,9 +500,10 @@ public class BaseDispatchComponent {
 			return getValue("");
 		}
 		if(BaseDispatcher.dcMap.containsKey(settingsKey)) {
-			if((BaseDispatcher.dcMap.get(settingsKey).getHeaderIndex(parameterName) >= 0) && (BaseDispatcher.dcMap.get(settingsKey).getRowCount() > 0)) {
-				if(BaseDispatcher.dcMap.get(settingsKey).getValue(parameterName) != null) {
-					return BaseDispatcher.dcMap.get(settingsKey).getValue(parameterName);
+			DataContainer dc = BaseDispatcher.getDataContainer(settingsKey);
+			if((dc.getHeaderIndex(parameterName) >= 0) && (dc.getRowCount() > 0)) {
+				if(dc.getValue(parameterName) != null) {
+					return dc.getValue(parameterName);
 				}
 			}
 		}
@@ -521,11 +512,11 @@ public class BaseDispatchComponent {
 	
 	/**
 	 * This method retrieves the value that is assigned to the {@link org.opentdk.api.dispatcher.BaseDispatchComponent} variable in the following way:<br>
-	 * - Search the node or field, defined by property {@link #parameterName}. For tree formats the node will be searched within the XPath, defined by property {@link #parentXPath}<br>
-	 * - If the node or field does not exist within the associated DataContainer, the default value defined by property {@link #defaultValue} will be retrieved.<br>
-	 * - If multiple nodes or fields exist, then the first value will be retrieved
+	 * {@literal -} Search the node or field, defined by property {@link #parameterName}. For tree formats the node will be searched within the XPath, defined by property {@link #parentXPath}<br>
+	 * {@literal -} If the node or field does not exist within the associated DataContainer, the default value defined by property {@link #defaultValue} will be retrieved.<br>
+	 * {@literal -} If multiple nodes or fields exist, then the first value will be retrieved
 	 * 
-	 * @param params - Semicolon separated string with the values of node attributes within the parentXPath
+	 * @param params Semicolon separated string with the values of node attributes within the parentXPath
 	 * @return the value, assigned to the {@link org.opentdk.api.dispatcher.BaseDispatchComponent} variable as String
 	 */
 	public String getValue(String params) {
@@ -541,9 +532,9 @@ public class BaseDispatchComponent {
 
 	/**
 	 * This method retrieves the values that are assigned to the {@link org.opentdk.api.dispatcher.BaseDispatchComponent} variable in the following way:<br>
-	 * - Search the nodes or fields, defined by property {@link #parameterName}. For tree formats the nodes will be searched within the XPath, defined by property {@link #parentXPath}<br>
-	 * - If the nodes or fields do not exist within the associated DataContainer, the default value defined by property {@link #defaultValue} will be retrieved.<br>
-	 * - Otherwise the values of all matching nodes or fields will be retrieved.
+	 * {@literal -} Search the nodes or fields, defined by property {@link #parameterName}. For tree formats the nodes will be searched within the XPath, defined by property {@link #parentXPath}<br>
+	 * {@literal -} If the nodes or fields do not exist within the associated DataContainer, the default value defined by property {@link #defaultValue} will be retrieved.<br>
+	 * {@literal -} Otherwise the values of all matching nodes or fields will be retrieved.
 	 * 
 	 * @return the values, assigned to the {@link org.opentdk.api.dispatcher.BaseDispatchComponent} variable as Array of type String
 	 */
@@ -553,9 +544,9 @@ public class BaseDispatchComponent {
 
 	/**
 	 * This method retrieves the values that are assigned to the {@link org.opentdk.api.dispatcher.BaseDispatchComponent} variable in the following way:<br>
-	 * - Search the nodes or fields, defined by property {@link #parameterName}. For tree formats the nodes will be searched within the XPath, defined by property {@link #parentXPath}<br>
-	 * - If the nodes or fields do not exist within the associated DataContainer, the default value defined by property {@link #defaultValue} will be retrieved.<br>
-	 * - Otherwise the values of all matching nodes will be retrieved
+	 * {@literal -} Search the nodes or fields, defined by property {@link #parameterName}. For tree formats the nodes will be searched within the XPath, defined by property {@link #parentXPath}<br>
+	 * {@literal -} If the nodes or fields do not exist within the associated DataContainer, the default value defined by property {@link #defaultValue} will be retrieved.<br>
+	 * {@literal -} Otherwise the values of all matching nodes will be retrieved
 	 * 
 	 * @param params - Semicolon separated string with the values of tag attributes within the parentXPath
 	 * @return the values, assigned to the {@link org.opentdk.api.dispatcher.BaseDispatchComponent} variable as Array of type String
@@ -566,8 +557,9 @@ public class BaseDispatchComponent {
 			String pxp = resolveXPath(params);
 			fltr.addFilterRule("XPath", pxp, EOperator.EQUALS);
 		}
-		if(BaseDispatcher.dcMap.get(settingsKey).getValuesAsList(parameterName, fltr).size() > 0) {
-			return BaseDispatcher.dcMap.get(settingsKey).getValuesAsList(parameterName, fltr).toArray(new String[BaseDispatcher.dcMap.get(settingsKey).getValuesAsList(parameterName, fltr).size()]);
+		DataContainer dc = BaseDispatcher.getDataContainer(settingsKey);
+		if(dc.getValuesAsList(parameterName, fltr).size() > 0) {
+			return dc.getValuesAsList(parameterName, fltr).toArray(new String[dc.getValuesAsList(parameterName, fltr).size()]);
 		}
 		return new String[0];
 	}
@@ -646,8 +638,8 @@ public class BaseDispatchComponent {
 	 * Sets the attribute of a node. The method overwrites identical node with this attribute, in case the existing attributes value is empty.
 	 * In any other case the tag will be added to the parendXPath.
 	 * 
-	 * @param attrName - Attribute name of the node 
-	 * @param attrValue - Attribute value of the node that will be set
+	 * @param attrName Attribute name of the node 
+	 * @param attrValue Attribute value of the node that will be set
 	 */
 	public void setAttribute(String attrName, String attrValue) {
 		setAttribute("", attrName, attrValue);
@@ -657,9 +649,9 @@ public class BaseDispatchComponent {
 	 * Sets the attribute of a node. The method overwrites identical node with this attribute, in case the existing attributes value is empty.
 	 * In any other case the node will be added to the parendXPath.
 	 * 
-	 * @param params - Semicolon separated string with attribute values of parent tags within the XPath hierarchy. 
-	 * @param attrName - Attribute name of the node 
-	 * @param attrValue - Attribute value of the node that will be set
+	 * @param params Semicolon separated string with attribute values of parent tags within the XPath hierarchy. 
+	 * @param attrName Attribute name of the node 
+	 * @param attrValue Attribute value of the node that will be set
 	 */
 	public void setAttribute(String params, String attrName, String attrValue) {
 		setAttribute("", params, attrName, attrValue);
@@ -678,7 +670,7 @@ public class BaseDispatchComponent {
 		String xPath = resolveXPath(params);
 		Filter fltr = new Filter();
 		fltr.addFilterRule("XPath", xPath, EOperator.EQUALS);
-		BaseDispatcher.dcMap.get(settingsKey).addField(parameterName, attrName, oldValue, attrValue, fltr);
+		BaseDispatcher.getDataContainer(settingsKey).addField(parameterName, attrName, oldValue, attrValue, fltr);
 	}
 
 	/**
@@ -694,11 +686,11 @@ public class BaseDispatchComponent {
 	 * <b>&lt;AppSettings&gt;&lt;Geometry&gt;&lt;PosX&gt;50&lt;/PosX&gt;&lt;/Geometry&gt;&lt;/AppSettings&gt;</b>
 	 * </pre>
 	 * 
-	 * @param value - the value that will be written into the node or field
+	 * @param value the value that will be written into the node or field
 	 */
 	public void setValue(String value) {
 		if((parentXPath == null) || (parentXPath.isEmpty())) {
-			BaseDispatcher.dcMap.get(settingsKey).setValue(parameterName, value);
+			BaseDispatcher.getDataContainer(settingsKey).setValue(parameterName, value);
 		}else {
 			setValue("", value);
 		}
@@ -718,14 +710,14 @@ public class BaseDispatchComponent {
 	 * <b>&lt;AppSettings&gt;&lt;Geometry window="Help"&gt;&lt;PosX&gt;50&lt;/PosX&gt;&lt;/Geometry&gt;&lt;/AppSettings&gt;</b>
 	 * </pre>
 	 * 
-	 * @param params - Semicolon separated string with the values of node attributes within the nodes path
-	 * @param value - the value that will be written into the node
+	 * @param params Semicolon separated string with the values of node attributes within the nodes path
+	 * @param value the value that will be written into the node
 	 */
 	public void setValue(String params, String value) {
 		String xPath = resolveXPath(params);
 		Filter fltr = new Filter();
 		fltr.addFilterRule("XPath", xPath, EOperator.EQUALS);
-		BaseDispatcher.dcMap.get(settingsKey).setValue(parameterName, value, fltr);
+		BaseDispatcher.getDataContainer(settingsKey).setValue(parameterName, value, fltr);
 	}
 	
 	/**
@@ -744,16 +736,16 @@ public class BaseDispatchComponent {
 	 * <b>&lt;AppSettings&gt;&lt;Geometry window="Help"&gt;&lt;PosX&gt;50&lt;/PosX&gt;&lt;/Geometry&gt;&lt;/AppSettings&gt;</b>
 	 * </pre>
 	 * 
-	 * @param params - Semicolon separated string with the values of tag attributes within the parent path
-	 * @param oldValue - the node value that will be replaced
-	 * @param newValue - the value that will overwrite the oldValue
+	 * @param params Semicolon separated string with the values of tag attributes within the parent path
+	 * @param oldValue the node value that will be replaced
+	 * @param newValue the value that will overwrite the oldValue
 	 */
 	public void setValue(String params, String oldValue, String newValue) {
 		String xPath = resolveXPath(params);
 		Filter fltr = new Filter();
 		fltr.addFilterRule("XPath", xPath, EOperator.EQUALS);
 		fltr.addFilterRule(parameterName, oldValue, EOperator.EQUALS);
-		BaseDispatcher.dcMap.get(settingsKey).setValue(parameterName, newValue, fltr);
+		BaseDispatcher.getDataContainer(settingsKey).setValue(parameterName, newValue, fltr);
 	}
 
 	/**
@@ -761,9 +753,9 @@ public class BaseDispatchComponent {
 	 * of this {@link BaseDispatchComponent} and where the current value is equal to the value defined by oldValue argument. 
 	 * The argument allOccurences defines if all matching node or field values will be replaced or only the first one.
 	 * 
-	 * @param oldValue - The value of a node or field that will be searched for
-	 * @param newValue - The value that will be used to overwrite the found nodes or fields
-	 * @param allOccurences	- true = overwrite all matching node or field values; false = overwrite only the first matching node or field value
+	 * @param oldValue The value of a node or field that will be searched for
+	 * @param newValue The value that will be used to overwrite the found nodes or fields
+	 * @param allOccurences	true = overwrite all matching node or field values; false = overwrite only the first matching node or field value
 	 */
 	public void setValues(String oldValue, String newValue, boolean allOccurences) {
 		String xPath = "";
@@ -773,7 +765,7 @@ public class BaseDispatchComponent {
 			fltr.addFilterRule("XPath", xPath, EOperator.EQUALS);
 		}
 		fltr.addFilterRule(parameterName, oldValue, EOperator.EQUALS);
-		BaseDispatcher.dcMap.get(settingsKey).setValues(parameterName, newValue, fltr, allOccurences);
+		BaseDispatcher.getDataContainer(settingsKey).setValues(parameterName, newValue, fltr, allOccurences);
 	}
 	
 }

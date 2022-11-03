@@ -26,7 +26,7 @@ public class RT_FileUtil extends BaseRegression {
 		try {
 			FileUtil.deleteFileOrFolder(path);
 		} catch (IOException e) {
-			System.out.println(path + " - does not exist. Will be created.");
+			System.out.println(path + " - does not exist. Will be created in the test run.");
 		}
 		try {
 			FileUtil.deleteFileOrFolder(path_copy);
@@ -46,6 +46,7 @@ public class RT_FileUtil extends BaseRegression {
 		
 		boolean exists = FileUtil.checkDir(path, false);
 		BaseRegression.testResult(String.valueOf(exists), "CHECK_DIR", "true");
+		
 		// CHECK EXISTING FILE
 		boolean fileExists = FileUtil.checkFile(path);
 		BaseRegression.testResult(String.valueOf(fileExists), "CHECK_FILE", "true");
@@ -106,7 +107,7 @@ public class RT_FileUtil extends BaseRegression {
 			if(isTextFile) {
 				BaseRegression.testResult(String.valueOf(isTextFile), "CHECK_FILE_TEXT", "true");
 			} else {
-				System.out.println("FileUtil.isTextFile: File is blocked and not readable");
+				System.err.println("FileUtil.isTextFile: File is blocked and not readable");
 			}
 		} catch (IOException e) {
 			System.err.println(e.getMessage());
