@@ -1,4 +1,5 @@
 module opentdk.test {
+	exports RegressionTest.Application;
 	
 	requires java.desktop;
 	requires java.logging;
@@ -11,4 +12,5 @@ module opentdk.test {
 	requires opentdk.gui;
 	requires org.json;
 	requires snakeyaml;
+	requires org.apache.commons.io;
 }
