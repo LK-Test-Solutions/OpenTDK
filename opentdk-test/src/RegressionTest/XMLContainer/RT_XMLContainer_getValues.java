@@ -18,7 +18,7 @@ public class RT_XMLContainer_getValues extends BaseRegression {
 	public void runTest() {
 		int i=0;
 
-		DataContainer dc = new DataContainer("./testdata/RegressionTestData/TST_XMLContainer_Data.xml");
+		DataContainer dc = new DataContainer("./testdata/RegressionTestData/XMLContainer_Data.xml");
 		
 		System.out.println();
 		System.out.println("##############################");

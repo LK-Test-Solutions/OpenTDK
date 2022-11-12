@@ -1,25 +1,6 @@
-<Environment>
-	<Variable>
-		<Name>Version</Name>
-		<Value>Release 22.1</Value>
-	</Variable>
-	<Variable>
-		<Name>FunctionLibs</Name>
-		<Value>OSPlus_Neo.qfl;OSPlus_Portal.qfl</Value>
-	</Variable>
-	<Variable>
-		<Name>OSPBrowser_Version</Name>
-		<Value>78</Value>
-	</Variable>
-	<Variable>
-		<Name></Name>	 
-	</Variable>
-	<Variable>
-		<Name>Institut</Name>
-		<Value>421</Value>		
-	</Variable>
-	<Variable>
-		<Name>OSPBrowserPath</Name>	 
-		<Value></Value>
-	</Variable>
-</Environment>
+<TestConfig>
+	<Anwendung>OSPlus_neo</Anwendung>
+	<Release>22.0</Release>
+	<Environment>Abnahme</Environment>
+	<Institut></Institut>
+</TestConfig>

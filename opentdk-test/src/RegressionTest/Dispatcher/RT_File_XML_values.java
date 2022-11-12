@@ -28,7 +28,7 @@ public class RT_File_XML_values extends BaseRegression {
 	@Override
 	public void runTest() {	
 		
-		E_XMLFile_Dispatcher_values.setDataContainer(EBaseSettings.class, "testdata/RegressionTestData/RT_File_XML_values.xml");
+		E_XMLFile_Dispatcher_values.setDataContainer(EBaseSettings.class, "testdata/RegressionTestData/File_XML_values.xml");
 		
 		// Gets the default values of dispatcher components that are declared within EBaseSettings class
 		testResult(E_XMLFile_Dispatcher_values.LOGFILE.getValue(), "APP_LOGFILE", "./logs/Application.log");
