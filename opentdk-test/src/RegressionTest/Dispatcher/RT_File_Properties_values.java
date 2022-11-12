@@ -14,7 +14,7 @@ public class RT_File_Properties_values extends BaseRegression {
 		 * Precondition: The loaded file needs to be empty!
 		 * Otherwise the first getValue methods will fail in case a value for Country, Language or CapitalCity exists within the file.
 		 */
-		E_PropertiesFile_Dispatcher_values.setDataContainer(E_PropertiesFile_Dispatcher_values.class, "testdata/RegressionTestData/RT_File_Properties_values.properties");
+		E_PropertiesFile_Dispatcher_values.setDataContainer(E_PropertiesFile_Dispatcher_values.class, "testdata/RegressionTestData/File_Properties_values.properties");
 		
 		// Check default values defined in E_PropertiesFile_Dispatcher_values.java
 		testResult(E_PropertiesFile_Dispatcher_values.COUNTRY.getValue(), "Country", "Germany");
