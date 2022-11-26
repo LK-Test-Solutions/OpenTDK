@@ -1,6 +1,7 @@
 # OpenTDK
 
-The `Open Tool Development Kit` provides packages and classes for easy implementation of java tools or applications. Developers don't need to take care about implementing code for the handling of data souces. Once a data source is required within an application it can be connected to the application by one of the following concepts:
+The `Open Tool Development Kit` provides packages and classes for easy implementation of java tools or applications. Developers don't need to take care about implementing code for the handling of data souces. Once a data source is required within an application it can be connected to the application by one of the concepts, provided by OpenTDK. These data sources can be configuration files, result sets of DB requests, Webservice responses (JSON, XML, YAML) and several more.
+The OpenTDK project includes the following packages:
 
 ## Base Application
 The package `org.opentdk.api.application` is used to implement base classes that can be inherited by the classes created for a new non-GUI java applications. In the current stage there is only a dispatcher class `EBaseSettings` that shows how to setup application settings that will be connected to a XML structure.
