@@ -1,10 +1,12 @@
-# Implementation steps
+# Create main class of a new application
+
+## Implementation steps
 1. Create a new class that extends the class org.opentdk.api.application.BaseApplication
 2. Implement a main method which creates a new instance of the application class
 3. Implement a constructor with an args argument
 4. Call the methods `parseArgs`and `initRuntimeSettings` to force an initial setup of the settings, used at runtime of the application
 
-# Code sample
+## Code sample
 ```
     import org.opentdk.api.application.BaseApplication;
     public class Application extends BaseApplication {
