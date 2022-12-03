@@ -1,15 +1,26 @@
 # OpenTDK
 
-The `Open Tool Development Kit` provides packages and classes for easy implementation of java tools or applications. Developers don't need to take care about implementing code for the handling of data souces. Once a data source is required within an application it can be connected to the application by one of the concepts, provided by OpenTDK. These data sources can be configuration files, result sets of DB requests, Webservice responses (JSON, XML, YAML) and several more.
-
+| Property | Value |
 |----------|-----------------|
 | Maturity | moderate stable |
-| Author | Neotys |
+| Author | LK Test Solutions GmbH |
 | License |	BSD 2-Clause "Simplified" |
-| Download Binaries	| Test |
+| Documentation, Tutorials, Samples | !! coming up soon !!  GitHub Repsoitory [OpenTDK_Labs](https://github.com/LK-Test-Solutions/OpenTDK_Labs) |
+| Download Binaries	| [opentdk-api-1.5.9.jar](https://github.com/LK-Test-Solutions/OpenTDK/releases/download/opentdk-1.5.9.8/opentdk-api-1.5.9.jar) |
+| | [opentdk-api-1.5.9-sources.jar](https://github.com/LK-Test-Solutions/OpenTDK/releases/download/opentdk-1.5.9.8/opentdk-api-1.5.9-sources.jar) |
+| | [opentdk-gui-1.5.9.jar](https://github.com/LK-Test-Solutions/OpenTDK/releases/download/opentdk-1.5.9.8/opentdk-gui-1.5.9.jar) |
+| | [opentdk-gui-1.5.9-sources.jar](https://github.com/LK-Test-Solutions/OpenTDK/releases/download/opentdk-1.5.9.8/opentdk-gui-1.5.9-sources.jar) |
+| | [opentdk-1.5.9-dependencies.zip](https://github.com/LK-Test-Solutions/OpenTDK/files/9739602/opentdk-1.5.9-dependencies.zip) |
 
+The `Open Tool Development Kit` provides packages and classes for easy implementation of java tools or applications. Developers don't need to take care about implementing code for the handling of data souces. Once a data source is required within an application it can be connected to the application by one of the concepts, provided by OpenTDK. These data sources can be configuration files, result sets of DB requests, Webservice responses (JSON, XML, YAML) and several more.
+There are two java projects includes in this repository, which are:
 
-The OpenTDK project includes the following packages:
+| Project name | Project purpose |
+|--------------|-----------------|
+| opentdk_api | Implements the functional concepts of OpenTDK to create non-GUI applications |
+| opentdk_gui | Implements concepts and base classes to create JavaFX GUI applications |
+
+The opentdk_api project includes the following packages:
 
 ## Base Application
 The package `org.opentdk.api.application` is used to implement base classes that can be inherited by the classes created for a new non-GUI java applications. In the current stage there is only a dispatcher class `EBaseSettings` that shows how to setup application settings that will be connected to a XML structure.
@@ -61,16 +72,3 @@ With its implemented default behaviour the `MLogger` will write all messages of 
 `MLogger.getInstance().setLogKeepAge(100); // Keep archived log files for 100 days`<br><br>
 `/* Log an error message */`<br>
 `MLogger.getInstance().log(Level.SEVERE, "The mesh trace string has the wrong format! ", FileUtil.class.getSimpleName(), "createResultsFileName");`<br><br>
-
-## Download 
-### Recent version with sources and dependencies
-
-[opentdk-api-1.5.9.jar](https://github.com/LK-Test-Solutions/OpenTDK/releases/download/opentdk-1.5.9.8/opentdk-api-1.5.9.jar)
-
-[opentdk-api-1.5.9-sources.jar](https://github.com/LK-Test-Solutions/OpenTDK/releases/download/opentdk-1.5.9.8/opentdk-api-1.5.9-sources.jar)
-
-[opentdk-gui-1.5.9.jar](https://github.com/LK-Test-Solutions/OpenTDK/releases/download/opentdk-1.5.9.8/opentdk-gui-1.5.9.jar)
-
-[opentdk-gui-1.5.9-sources.jar](https://github.com/LK-Test-Solutions/OpenTDK/releases/download/opentdk-1.5.9.8/opentdk-gui-1.5.9-sources.jar)
-
-[opentdk-1.5.9-dependencies.zip](https://github.com/LK-Test-Solutions/OpenTDK/files/9739602/opentdk-1.5.9-dependencies.zip)
