@@ -1,6 +1,13 @@
 # OpenTDK
 
 The `Open Tool Development Kit` provides packages and classes for easy implementation of java tools or applications. Developers don't need to take care about implementing code for the handling of data souces. Once a data source is required within an application it can be connected to the application by one of the concepts, provided by OpenTDK. These data sources can be configuration files, result sets of DB requests, Webservice responses (JSON, XML, YAML) and several more.
+
+Maturity | moderate stable
+Author	 | Neotys
+License |	BSD 2-Clause "Simplified"
+Download Binaries	| [opentdk-api-1.5.9.jar](https://github.com/LK-Test-Solutions/OpenTDK/releases/download/opentdk-1.5.9.8/opentdk-api-1.5.9.jar)
+
+
 The OpenTDK project includes the following packages:
 
 ## Base Application
