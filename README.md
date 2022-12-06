@@ -19,6 +19,7 @@ There are two java projects includes in this repository, which are:
 |--------------|-----------------|
 | opentdk_api | Implements the functional concepts of OpenTDK to create non-GUI applications |
 | opentdk_gui | Implements concepts and base classes to create JavaFX GUI applications |
+| opentdk_test | Implements java classes, used for regression test of OpenTDK |
 
 The opentdk_api project includes the following packages:
 
