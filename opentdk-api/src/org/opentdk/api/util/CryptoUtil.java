@@ -28,54 +28,83 @@
 package org.opentdk.api.util;
 
 import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileWriter;
 import java.io.IOException;
-import java.security.InvalidAlgorithmParameterException;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
 import java.security.InvalidKeyException;
-import java.security.Key;
+import java.security.KeyFactory;
+import java.security.KeyPair;
+import java.security.KeyPairGenerator;
 import java.security.NoSuchAlgorithmException;
-import java.util.Scanner;
+import java.security.PrivateKey;
+import java.security.PublicKey;
+import java.security.spec.EncodedKeySpec;
+import java.security.spec.InvalidKeySpecException;
+import java.security.spec.X509EncodedKeySpec;
 import java.util.logging.Level;
 
 import javax.crypto.BadPaddingException;
 import javax.crypto.Cipher;
 import javax.crypto.IllegalBlockSizeException;
-import javax.crypto.KeyGenerator;
 import javax.crypto.NoSuchPaddingException;
-import javax.crypto.SecretKey;
-import javax.crypto.spec.SecretKeySpec;
 
-import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.codec.binary.StringUtils;
 import org.opentdk.api.io.FileUtil;
 import org.opentdk.api.logger.MLogger;
 
 /**
- * Class to decode and encode passwords.<br>
+ * Class to encode and decode strings.<br>
  * <br>
  * Usage:
  * 
  * <pre>
- * String toEncrypt = "MyPassword";
- * String encrypted = CryptoUtil.encrypt(toEncrypt);
- * System.out.println("Encrypted password: " + encrypted);
  * </pre>
  * 
  * @author LK Test Solutions
  *
  */
 public class CryptoUtil {
-
-	public static final String AES = "AES";
+	/**
+	 * Used algorithm for the encryption. It is asynchronous which requires a private and a public key that
+	 * can be generated with the {@link #generateKeyPair(int, String, String)} method. The public one
+	 * gets used for encryption and only the private one can be used to decode.
+	 */
+	private static final String algorithm = "RSA";
 
 	/**
-	 * Encrypts the committed string with a generated key with the {@link #AES} algorithm.
+	 * Generates a private key file and a public key file.
 	 * 
-	 * @param value the input string to encrypt.
-	 * @return Null, if the key generation or encryption failed, the encrypted string otherwise.
+	 * @param size
+	 * @param privateKeyFullName
+	 * @param publicKeyFullName
 	 */
-	public static String encrypt(String value) {
-		return encrypt(value, new File("conf" + File.separator + "temp.key"));
+	public static void generateKeyPair(int size, String privateKeyFullName, String publicKeyFullName) {
+		KeyPairGenerator generator = null;
+		try {
+			generator = KeyPairGenerator.getInstance(algorithm);
+		} catch (NoSuchAlgorithmException e) {
+			MLogger.getInstance().log(Level.SEVERE, e);
+			throw new RuntimeException(e);
+		}
+		generator.initialize(size);
+		KeyPair pair = generator.generateKeyPair();
+
+		PrivateKey privateKey = pair.getPrivate();
+		PublicKey publicKey = pair.getPublic();
+
+		String privateKeyContent = StringUtils.newStringUtf8(privateKey.getEncoded());
+		FileUtil.writeOutputFile(privateKeyContent, privateKeyFullName);
+
+		String publicKeyContent = StringUtils.newStringUtf8(publicKey.getEncoded());
+		FileUtil.writeOutputFile(publicKeyContent, publicKeyFullName);
+
+//		try (FileOutputStream fos = new FileOutputStream(publicKeyFullName)) {
+//		    fos.write(publicKey.getEncoded());
+//		} catch (FileNotFoundException e) {
+//			e.printStackTrace();
+//		} catch (IOException e) {
+//			e.printStackTrace();
+//		}
 	}
 
 	/**
@@ -86,68 +115,54 @@ public class CryptoUtil {
 	 * @param keyFile the file that contains the key public that gets used for encryption.
 	 * @return Null, if the key generation or encryption failed, the encrypted string otherwise.
 	 */
-	public static String encrypt(String value, File keyFile) {
+	public static String encrypt(String value, File publicKeyFile) {
 		String ret = null;
-
-		if (!keyFile.exists()) {
-			KeyGenerator keyGen;
-			try {
-				keyGen = KeyGenerator.getInstance(AES);
-			} catch (NoSuchAlgorithmException e) {
-				MLogger.getInstance().log(Level.SEVERE, "KeyGenerator does not support the algorithm: " + AES);
-				keyGen = null;
-			}
-			if (keyGen != null) {
-				keyGen.init(128);
-				SecretKey sk = keyGen.generateKey();
-				FileWriter fw = null;
-				try {
-					fw = new FileWriter(keyFile);
-					fw.write(CryptoUtil.byteArrayToHexString(sk.getEncoded()));
-				} catch (IOException e) {
-					MLogger.getInstance().log(Level.SEVERE, e);
-				} finally {
-					try {
-						if (fw != null) {
-							fw.flush();
-							fw.close();
-						}
-					} catch (IOException e) {
-						MLogger.getInstance().log(Level.SEVERE, e);
-					}
-				}
-			}
+		byte[] publicKeyBytes = null;
+		try {
+			publicKeyBytes = Files.readAllBytes(publicKeyFile.toPath());
+		} catch (IOException e) {
+			MLogger.getInstance().log(Level.SEVERE, e);
 		}
-		if (keyFile.exists()) {
-			SecretKeySpec sks = CryptoUtil.getSecretKeySpec(keyFile);
-			if (sks != null) {
-				Cipher cipher = null;
+		if (publicKeyBytes != null) {
+			KeyFactory keyFactory = null;
+			try {
+				keyFactory = KeyFactory.getInstance(algorithm);
+			} catch (NoSuchAlgorithmException e) {
+				MLogger.getInstance().log(Level.SEVERE, e);
+				throw new RuntimeException(e);
+			}
+			EncodedKeySpec publicKeySpec = new X509EncodedKeySpec(publicKeyBytes);
+			PublicKey publicKey = null;
+			try {
+				publicKey = keyFactory.generatePublic(publicKeySpec);
+			} catch (InvalidKeySpecException e) {
+				MLogger.getInstance().log(Level.SEVERE, e);
+				throw new RuntimeException(e);
+			}
+			if (publicKey != null) {
+				Cipher encryptCipher = null;
 				try {
-					cipher = Cipher.getInstance(AES);
+					encryptCipher = Cipher.getInstance(algorithm);
 				} catch (NoSuchAlgorithmException | NoSuchPaddingException e) {
 					MLogger.getInstance().log(Level.SEVERE, e);
+					throw new RuntimeException(e);
 				}
-				if (cipher != null) {
-					try {
-						cipher.init(1, (Key) sks, cipher.getParameters());
-					} catch (InvalidKeyException | InvalidAlgorithmParameterException e) {
-						MLogger.getInstance().log(Level.SEVERE, e);
-					}
-					byte[] encrypted = null;
-					try {
-						encrypted = cipher.doFinal(value.getBytes());
-					} catch (IllegalBlockSizeException | BadPaddingException e) {
-						MLogger.getInstance().log(Level.SEVERE, e);
-					}
-					if (encrypted != null) {
-						ret = CryptoUtil.byteArrayToHexString(encrypted);
-					}
+				try {
+					encryptCipher.init(Cipher.ENCRYPT_MODE, publicKey);
+				} catch (InvalidKeyException e) {
+					MLogger.getInstance().log(Level.SEVERE, e);
+					throw new RuntimeException(e);
 				}
-			}
-			try {
-				FileUtil.deleteFile(keyFile.getPath());
-			} catch (IOException e) {
-				MLogger.getInstance().log(Level.SEVERE, e);
+				byte[] secretMessageBytes = value.getBytes(StandardCharsets.UTF_8);
+				byte[] encryptedMessageBytes = null;
+				try {
+					encryptedMessageBytes = encryptCipher.doFinal(secretMessageBytes);
+				} catch (IllegalBlockSizeException | BadPaddingException e) {
+					MLogger.getInstance().log(Level.SEVERE, e);
+				}
+				if (encryptedMessageBytes != null) {
+					ret = StringUtils.newStringUtf8(encryptedMessageBytes);
+				}
 			}
 		}
 		return ret;
@@ -160,120 +175,16 @@ public class CryptoUtil {
 	 * @param keyFile   The file that contains the key public that gets used for encryption.
 	 * @return Null, if the decoding failed, the decoded string otherwise.
 	 */
-	public static String decrypt(String toDecrypt, File keyFile) {
+	public static String decrypt(String toDecrypt, File privateKeyFile) {
 		String ret = null;
-
-		SecretKeySpec sks = CryptoUtil.getSecretKeySpec(keyFile);
-		if (sks == null) {
-			MLogger.getInstance().log(Level.SEVERE, "Key file not available. No decoding gets performed.");
-		} else {
-			Cipher cipher = null;
-			try {
-				cipher = Cipher.getInstance(AES);
-			} catch (NoSuchAlgorithmException | NoSuchPaddingException e) {
-				MLogger.getInstance().log(Level.SEVERE, e);
-			}
-			if (cipher != null) {
-				try {
-					cipher.init(2, sks);
-				} catch (InvalidKeyException e) {
-					MLogger.getInstance().log(Level.SEVERE, e);
-				}
-				if (cipher != null) {
-					byte[] decrypted = null;
-					try {
-						decrypted = cipher.doFinal(CryptoUtil.hexStringToByteArray(toDecrypt));
-					} catch (IllegalBlockSizeException | BadPaddingException e) {
-						MLogger.getInstance().log(Level.SEVERE, e);
-					}
-					if (decrypted != null) {
-						ret = new String(decrypted);
-					}
-				}
-			}
-		}
+//		Cipher decryptCipher = Cipher.getInstance("RSA");
+//		decryptCipher.init(Cipher.DECRYPT_MODE, privateKey);
+//		
+//	
+//		byte[] decryptedMessageBytes = decryptCipher.doFinal(toDecrypt);
+//		String decryptedMessage = new String(decryptedMessageBytes, StandardCharsets.UTF_8);
+		
 		return ret;
 	}
 
-	/**
-	 * @param keyFile The file that contains the public key that gets used for encryption.
-	 * @return SecretKeySpec object for further operations or null, if the key file could not be read or
-	 *         {@link #AES} is not supported.
-	 */
-	private static SecretKeySpec getSecretKeySpec(File keyFile) {
-		SecretKeySpec sks = null;
-		byte[] key = CryptoUtil.readKeyFile(keyFile);
-		if (key != null) {
-			sks = new SecretKeySpec(key, AES);
-		}
-		return sks;
-	}
-
-	/**
-	 * @param keyFile The file that contains the public key that gets used for encryption.
-	 * @return The public key as byte array or null, if reading the key failed.
-	 */
-	private static byte[] readKeyFile(File keyFile) {
-		byte[] ret = null;
-		String keyValue = null;
-		Scanner scanner = null;
-		try {
-			scanner = new Scanner(keyFile).useDelimiter("\\Z");
-			keyValue = scanner.next();
-		} catch (FileNotFoundException e) {
-			MLogger.getInstance().log(Level.SEVERE, e);
-		} finally {
-			if (scanner != null) {
-				scanner.close();
-			}
-		}
-		if (keyValue != null) {
-			ret = CryptoUtil.hexStringToByteArray(keyValue);
-		}
-		return ret;
-	}
-
-	/**
-	 * @param input The string that should be transformed.
-	 * @return The committed byte array as string or null if the input is null or too large.
-	 */
-	private static String byteArrayToHexString(byte[] input) {
-		String ret = null;
-		if (input != null && input.length < Integer.MAX_VALUE) {
-			StringBuffer sb = new StringBuffer(input.length * 2);
-			for (int i = 0; i < input.length; ++i) {
-				int v = input[i] & 255;
-				if (v < 16) {
-					sb.append('0');
-				}
-				sb.append(Integer.toHexString(v));
-			}
-			ret = sb.toString().toUpperCase();
-		}
-		return ret;
-	}
-
-	/**
-	 * @param input The string that should be transformed.
-	 * @return The committed string as byte array or null if the transformation could not be completed.
-	 */
-	private static byte[] hexStringToByteArray(String input) {
-		byte[] ret = null;
-		if (input != null && StringUtils.isNotBlank(input) && input.length() < Integer.MAX_VALUE) {
-			ret = new byte[input.length() / 2];
-			for (int i = 0; i < ret.length; ++i) {
-				int index = i * 2;
-				int v = 0;
-				try {
-					v = Integer.parseInt(input.substring(index, index + 2), 16);
-				} catch (NumberFormatException e) {
-					MLogger.getInstance().log(Level.SEVERE, e);
-					ret = null;
-					break;
-				}
-				ret[i] = (byte) v;
-			}
-		}
-		return ret;
-	}
 }

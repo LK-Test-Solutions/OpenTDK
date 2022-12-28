@@ -21,4 +21,5 @@ module opentdk.api {
 	requires org.json;
 	requires org.apache.commons.lang3;
 	requires snakeyaml;
+	requires org.apache.commons.codec;
 }
