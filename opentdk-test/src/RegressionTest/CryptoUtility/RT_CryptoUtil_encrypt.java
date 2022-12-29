@@ -17,9 +17,11 @@ public class RT_CryptoUtil_encrypt extends BaseRegression {
 	
 	@Override
 	public void runTest() {
+		String encrypt = "test";
 		CryptoUtil.generateKeyPair(2048, privateKey, publicKey);
-		CryptoUtil.encrypt("test", new File(publicKey));
-		
+		String secret = CryptoUtil.encrypt(encrypt, new File(publicKey));
+		String decrypt = CryptoUtil.decrypt(secret, new File(privateKey));
+		BaseRegression.testResult(decrypt, "Decrypted string", "test");
 	}
 
 }
