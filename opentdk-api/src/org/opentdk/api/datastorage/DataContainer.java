@@ -1717,8 +1717,7 @@ public class DataContainer extends BaseContainer {
 							inputStream.reset();
 							return EContainerFormat.XML;
 						}
-						inputStream.reset();	
-						
+						inputStream.reset();
 					} else if (inputContent.startsWith("{")) {
 						if(StringUtils.isNotBlank(JSONObject.valueToString(inputContent))) {
 							return EContainerFormat.JSON;
