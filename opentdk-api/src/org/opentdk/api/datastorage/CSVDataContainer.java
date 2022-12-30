@@ -161,7 +161,8 @@ public class CSVDataContainer implements CustomContainer {
 				if (headerState != 0)
 					sortMap = sortHeadersIndexes(valArray);
 			} else {
-				if (dc.addMetaValues(valArray).length == dc.getHeaders().size()) {
+				// FIXME This condition fails when metadata columns get added to the dataset
+				if (dc.addMetaValues(valArray).length == (dc.getHeaders().size() + dc.metaData.size())) {
 					if (headerState == 0) {
 						dc.addRow(valArray);
 					} else {

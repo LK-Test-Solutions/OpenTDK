@@ -614,15 +614,27 @@ public abstract class BaseContainer {
 	 * metadata with the same headerName will be overwritten. This method should be used preferably to
 	 * avoid duplicated column headers.
 	 * 
+	 * In case a new header/value set is added to the DataContainer an empty string will be added as an
+	 * additional element to the existing data arrays.
+	 * 
 	 * @param headerName Header name of DataSet within the DataContainer
 	 * @param value      Value as String that will be added to each DataSet into the column of
 	 *                   headerName
 	 */
 	public void setMetaData(String headerName, String value) {
+		int i = 0;
 		if (metaData.containsValue(headerName)) {
 			metaData.replace(headerName, value);
 		} else {
 			metaData.put(headerName, value);
+			
+			// Add a new array element to each existing array in ArrayList values with an empty string as value			
+			for (String[] element: values) {
+				ArrayList<String> valList = new ArrayList<String>(Arrays.asList(element));
+				valList.add("");
+				values.set(i, valList.toArray(new String[valList.size()]));
+				i++;
+			}
 		}
 	}
 

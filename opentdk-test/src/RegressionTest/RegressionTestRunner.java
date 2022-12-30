@@ -10,6 +10,7 @@ import RegressionTest.CSVContainer.RT_CSVContainer_getRows;
 import RegressionTest.CSVContainer.RT_CSVContainer_getValues;
 import RegressionTest.CSVContainer.RT_CSVContainer_mergeRows;
 import RegressionTest.CSVContainer.RT_CSVContainer_putMetaData;
+import RegressionTest.CSVContainer.RT_CSVContainer_setMetaData;
 import RegressionTest.CSVContainer.RT_CSVContainer_setRow;
 import RegressionTest.CSVContainer.RT_CSVContainer_setValues;
 import RegressionTest.CommonUtility.RT_CommonUtil_get;
@@ -88,6 +89,7 @@ public class RegressionTestRunner {
 			RT_CSVContainer_getValues.main(args);
 			RT_CSVContainer_mergeRows.main(args);
 			RT_CSVContainer_putMetaData.main(args);
+			RT_CSVContainer_setMetaData.main(args);
 			RT_CSVContainer_setRow.main(args);
 			RT_CSVContainer_setValues.main(args);
 
