@@ -6,11 +6,12 @@
 | Author | LK Test Solutions GmbH |
 | License |	BSD 2-Clause "Simplified" |
 | Documentation, Tutorials, Samples | !! Under construction !!  GitHub Repsoitory [OpenTDK_Labs](https://github.com/LK-Test-Solutions/OpenTDK_Labs) |
-| Download Binaries	| [opentdk-api-1.5.9.jar](https://github.com/LK-Test-Solutions/OpenTDK/releases/download/opentdk-1.5.9.8/opentdk-api-1.5.9.jar) |
-| | [opentdk-api-1.5.9-sources.jar](https://github.com/LK-Test-Solutions/OpenTDK/releases/download/opentdk-1.5.9.8/opentdk-api-1.5.9-sources.jar) |
-| | [opentdk-gui-1.5.9.jar](https://github.com/LK-Test-Solutions/OpenTDK/releases/download/opentdk-1.5.9.8/opentdk-gui-1.5.9.jar) |
-| | [opentdk-gui-1.5.9-sources.jar](https://github.com/LK-Test-Solutions/OpenTDK/releases/download/opentdk-1.5.9.8/opentdk-gui-1.5.9-sources.jar) |
-| | [opentdk-1.5.9-dependencies.zip](https://github.com/LK-Test-Solutions/OpenTDK/files/9739602/opentdk-1.5.9-dependencies.zip) |
+| Download Binaries	| [opentdk-api-1.6.0.jar](https://github.com/LK-Test-Solutions/OpenTDK/releases/download/opentdk-1.6.0/opentdk-api-1.6.0.jar) |
+| | [opentdk-api-1.6.0-sources.jar](https://github.com/LK-Test-Solutions/OpenTDK/releases/download/opentdk-1.6.0/opentdk-api-1.6.0-sources.jar) |
+| | [opentdk-api-1.6.0-javadoc.jar](https://github.com/LK-Test-Solutions/OpenTDK/releases/download/opentdk-1.6.0/opentdk-api-1.6.0-javadoc.jar) |
+| | [opentdk-gui-1.6.0.jar](https://github.com/LK-Test-Solutions/OpenTDK/releases/download/opentdk-1.6.0/opentdk-gui-1.6.0.jar) |
+| | [opentdk-gui-1.6.0-sources.jar](https://github.com/LK-Test-Solutions/OpenTDK/releases/download/opentdk-1.6.0/opentdk-gui-1.6.0-sources.jar) |
+| | [opentdk-1.6.0-dependencies.zip](https://github.com/LK-Test-Solutions/OpenTDK/files/9739602/opentdk-1.6.0-dependencies.zip) |
 
 The `Open Tool Development Kit` provides packages and classes for easy implementation of java tools or applications. Developers don't need to take care about implementing code for the handling of data souces. Once a data source is required within an application it can be connected to the application by one of the concepts, provided by OpenTDK. These data sources can be configuration files, result sets of DB requests, Webservice responses (JSON, XML, YAML) and several more.
 There are two java projects includes in this repository, which are:
