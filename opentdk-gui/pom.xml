@@ -1,18 +1,50 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0"
-	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
+	<!-- Coordinates -->
 	<groupId>org.opentdk</groupId>
 	<artifactId>opentdk-gui</artifactId>
 	<version>1.5.9</version>
-	<name>opentdk-gui</name>
+	<packaging>jar</packaging>
+	<!-- Name, description and URL -->
+	<name>${project.groupId}:${project.artifactId}</name>
+	<description>The Open Tool Development Kit provides packages and classes for easy implementation of Java tools or applications.</description>
+	<url>https://github.com/LK-Test-Solutions/OpenTDK</url>
+	<!-- License information -->
+	<licenses>
+		<license>
+			<name>BSD 2-Clause "Simplified"</name>
+			<url>https://opensource.org/licenses/BSD-2-Clause</url>
+		</license>
+	</licenses>
+	<!-- Developer information -->
+	<developers>
+		<developer>
+			<id>hwa</id>
+			<name>Holger Walter</name>
+			<email>holger.walter@lk-test.de</email>
+			<organization>LK Test Solutions</organization>
+			<organizationUrl>https://www.lk-test.de/</organizationUrl>
+		</developer>
+		<developer>
+			<id>fme</id>
+			<name>Fabian Meisinger</name>
+			<email>fabian.meisinger@lk-test.de</email>
+			<organization>LK Test Solutions</organization>
+			<organizationUrl>https://www.lk-test.de/</organizationUrl>
+		</developer>
+	</developers>
+	<!-- Source control information -->
+	<scm>
+		<connection>scm:git:git://github.com/LK-Test-Solutions/OpenTDK.git</connection>
+		<developerConnection>scm:git:ssh://github.com:LK-Test-Solutions/OpenTDK.git</developerConnection>
+		<url>https://github.com/LK-Test-Solutions/OpenTDK/tree/main</url>
+	</scm>
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
 	</properties>
 	<build>
 		<sourceDirectory>src</sourceDirectory>
-		<!--<testSourceDirectory>test</testSourceDirectory>  -->
 		<resources>
 			<resource>
 				<directory>src</directory>
@@ -62,8 +94,24 @@
 					<skipTests>true</skipTests>
 				</configuration>
 			</plugin>
+			<!-- Sign artifact -->
+			<!--<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-gpg-plugin</artifactId>
+				<version>1.6</version>
+				<executions>
+					<execution>
+						<id>sign-artifacts</id>
+						<phase>verify</phase>
+						<goals>
+							<goal>sign</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>-->
 		</plugins>
 	</build>
+	<!-- Required external libaries -->
 	<dependencies>
 		<dependency>
 			<groupId>org.openjfx</groupId>

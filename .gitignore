@@ -53,3 +53,5 @@ javadoc*
 /.metadata/
 **/RegressionTestData_Extracted/**
 
+opentdk-test/output/private.key
+opentdk-test/output/public.key
