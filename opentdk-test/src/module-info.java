@@ -1,5 +1,6 @@
 module opentdk.test {
 	exports RegressionTest.Application;
+	exports Tests.BaseApplication;
 	
 	requires java.desktop;
 	requires java.logging;
