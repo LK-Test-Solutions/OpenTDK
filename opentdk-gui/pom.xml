@@ -39,6 +39,13 @@
 			<organization>LK Test Solutions</organization>
 			<organizationUrl>https://www.lk-test.de/</organizationUrl>
 		</developer>
+		<developer>
+			<id>mla</id>
+			<name>Matthias Langer</name>
+			<email>matthias.langer@lk-test.de</email>
+			<organization>LK Test Solutions</organization>
+			<organizationUrl>https://www.lk-test.de/</organizationUrl>
+		</developer>
 	</developers>
 	<!-- Source control information -->
 	<scm>
