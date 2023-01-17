@@ -45,6 +45,7 @@ javadoc*
 
 # Folders
 /.metadata/**
+/.idea/**
 # **/conf/**
 **/logs/**
 **/target/**
