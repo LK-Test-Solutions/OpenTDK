@@ -14,7 +14,7 @@
         <module>opentdk-api</module>
 		<!--module>opentdk-gui</module>-->
     </modules>
-		<!-- License information -->
+	<!-- License information -->
 	<licenses>
 		<license>
 			<name>BSD 2-Clause "Simplified"</name>
