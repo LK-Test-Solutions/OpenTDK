@@ -10,16 +10,16 @@ module opentdk.api {
 	exports org.opentdk.api.meter;
 	exports org.opentdk.api.util;							
 
-	requires java.scripting;
+	requires transitive java.scripting;
 	requires transitive java.sql;
-	requires java.desktop; 
-	requires java.xml;
-	requires java.logging;
+	requires transitive java.desktop; 
+	requires transitive java.xml;
+	requires transitive java.logging;
 	
-	requires org.apache.commons.io;
-	requires commons.math3;
-	requires org.json;
-	requires org.apache.commons.lang3;
-	requires snakeyaml;
-	requires org.apache.commons.codec;
+	requires transitive org.apache.commons.io;
+	requires transitive commons.math3;
+	requires transitive org.json;
+	requires transitive org.apache.commons.lang3;
+	requires transitive snakeyaml;
+	requires transitive org.apache.commons.codec;
 }

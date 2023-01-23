@@ -5,69 +5,11 @@
 	<artifactId>opentdk-api</artifactId>
 	<version>1.6.0-SNAPSHOT</version>
 	<packaging>jar</packaging>
-	<!-- Name, description and URL -->
-	<name>${project.groupId}:${project.artifactId}</name>
-	<description>The Open Tool Development Kit provides packages and classes for easy implementation of Java tools or applications.</description>
-	<url>https://github.com/LK-Test-Solutions/OpenTDK</url>
-	<!-- License information -->
-	<licenses>
-		<license>
-			<name>BSD 2-Clause "Simplified"</name>
-			<url>https://opensource.org/licenses/BSD-2-Clause</url>
-		</license>
-	</licenses>
-	<!-- Developer information -->
-	<developers>
-		<developer>
-			<id>hwa</id>
-			<name>Holger Walter</name>
-			<email>holger.walter@lk-test.de</email>
-			<organization>LK Test Solutions</organization>
-			<organizationUrl>https://www.lk-test.de/</organizationUrl>
-		</developer>
-		<developer>
-			<id>fme</id>
-			<name>Fabian Meisinger</name>
-			<email>fabian.meisinger@lk-test.de</email>
-			<organization>LK Test Solutions</organization>
-			<organizationUrl>https://www.lk-test.de/</organizationUrl>
-		</developer>
-		<developer>
-			<id>tku</id>
-			<name>Thomas Kunschner</name>
-			<email>thomas.kunschner@lk-test.de</email>
-			<organization>LK Test Solutions</organization>
-			<organizationUrl>https://www.lk-test.de/</organizationUrl>
-		</developer>
-		<developer>
-			<id>mla</id>
-			<name>Matthias Langer</name>
-			<email>matthias.langer@lk-test.de</email>
-			<organization>LK Test Solutions</organization>
-			<organizationUrl>https://www.lk-test.de/</organizationUrl>
-		</developer>
-	</developers>
-	<!-- Distribution managment and authentication -->
-	<distributionManagement>
-		<snapshotRepository>
-			<id>ossrh</id>
-			<url>https://s01.oss.sonatype.org/content/repositories/snapshots</url>
-		</snapshotRepository>
-		<repository>
-			<id>ossrh</id>
-			<url>https://s01.oss.sonatype.org/service/local/staging/deploy/maven2</url>
-		</repository>
-	</distributionManagement>
-	<!-- Source control information -->
-	<scm>
-		<connection>scm:git:git://github.com/LK-Test-Solutions/OpenTDK.git</connection>
-		<developerConnection>scm:git:ssh://github.com:LK-Test-Solutions/OpenTDK.git</developerConnection>
-		<url>https://github.com/LK-Test-Solutions/OpenTDK/tree/main</url>
-	</scm>
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
 	</properties>
+	<!-- Build settings -->
 	<build>
 		<sourceDirectory>src</sourceDirectory>
 		<resources>
@@ -121,38 +63,6 @@
 			</plugin>		
 		</plugins>
 	</build>
-	<!-- Sign artifact -->	
-	<profiles>
-		<profile>
-			<id>ci-cd</id>
-			<build>
-				<plugins>
-					<plugin>
-						<groupId>org.apache.maven.plugins</groupId>
-						<artifactId>maven-gpg-plugin</artifactId>
-						<version>1.6</version>
-						<executions>
-							<execution>
-								<id>sign-artifacts</id>
-								<phase>verify</phase>
-								<goals>
-									<goal>sign</goal>
-								</goals>
-								<configuration>
-									<!-- Prevent gpg from using pinentry programs. Fixes: gpg: signing 
-										failed: Inappropriate ioctl for device -->
-									<gpgArguments>
-										<arg>--pinentry-mode</arg>
-										<arg>loopback</arg>
-									</gpgArguments>
-								</configuration>
-							</execution>
-						</executions>
-					</plugin>
-				</plugins>
-			</build>
-		</profile>
-	</profiles>
 	<!-- Required external libaries -->
 	<dependencies>
 		<dependency>
