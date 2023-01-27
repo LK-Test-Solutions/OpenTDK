@@ -43,7 +43,6 @@ import javafx.beans.property.SimpleObjectProperty;
  * 
  * @author FME (LK Test Solutions)
  *
- * @param <T>
  */
 public class ObjectPropertyWrapper<T> {
 

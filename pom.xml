@@ -12,7 +12,7 @@
 	<!-- pom.xml to execute -->
 	<modules>
         <module>opentdk-api</module>
-		<!--module>opentdk-gui</module>-->
+		<module>opentdk-gui</module>
     </modules>
 	<!-- License information -->
 	<licenses>

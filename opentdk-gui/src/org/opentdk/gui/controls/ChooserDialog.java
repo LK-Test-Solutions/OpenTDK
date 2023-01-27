@@ -109,6 +109,7 @@ public final class ChooserDialog {
 	 * @param title      the title of the chooser dialog
 	 * @param ext        the extension of the files that should be displayed by
 	 *                   default
+	 * @param type choose or save dialog           
 	 * @param latestPath if the latest path was stored, it can be used to open the
 	 *                   chooser at this location again
 	 * @return the chosen file as <code>File</code> list instance

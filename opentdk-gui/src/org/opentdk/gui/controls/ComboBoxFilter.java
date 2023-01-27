@@ -49,7 +49,6 @@ import javafx.scene.control.ComboBox;
 public class ComboBoxFilter {
 	/**
 	 * Call this method when combo box items need to be filtered in the application.
-	 * @param <T>
 	 * @param allItems The current combo box items without any filter
 	 * @param cbo the combo box object
 	 * @return the combo box with filtered values

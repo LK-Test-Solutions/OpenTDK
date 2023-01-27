@@ -48,7 +48,7 @@ import javafx.util.Pair;
  * 
  * <pre>
  * ChoiceBox box = new ChoiceBox(new Insets(20, 150, 10, 10), "OK", "Cancel");
- * List{@literal <}String{@literal >} options = new ArrayList<>();
+ * List{@literal <}String{@literal >} options = new ArrayList{@literal <>}();
  * options.add("A");
  * options.add("B");
  * Pair{@literal <}ApplyOption, String{@literal >} result = box.showChoiceBox("Title", "Info", options);
@@ -107,9 +107,7 @@ public class ChoiceBox {
 	 * @param title   title text of the dialog window
 	 * @param header  content text of the dialog window
 	 * @param options possibilities that the user has in the dialog in a combo box
-	 * @param apply   text of the apply button e.g. 'OK'
-	 * @param skip    text of the cancel button e.g. 'Cancel'
-	 * @return javafx.util.Pair with the selected {@link #ApplyDialog()} as key and
+	 * @return javafx.util.Pair with the selected ApplyDialog as key and
 	 *         the selected value as string
 	 */
 	public Pair<ApplyOption, String> showChoiceBox(String title, String header, List<String> options) {

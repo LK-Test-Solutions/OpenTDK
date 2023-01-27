@@ -216,7 +216,7 @@ public abstract class BaseApplication extends Application {
 	}
 
 	/**
-	 * Returns an instance of the InputDialog object. InputDialog can be
+	 * @return an instance of the InputDialog object. InputDialog can be
 	 * used to pass user input into the application.
 	 */
 	public InputDialog getInputDialog() {
@@ -224,7 +224,7 @@ public abstract class BaseApplication extends Application {
 	}
 
 	/**
-	 * Returns the instance of the MessageDialog object. MessageDialog is
+	 * @return the instance of the MessageDialog object. MessageDialog is
 	 * used to display any application message like error, warning, information etc.
 	 * in a pop up dialog.
 	 */
@@ -371,24 +371,14 @@ public abstract class BaseApplication extends Application {
 		this.posY = posY;
 	}
 
-	/**
-	 * {@link #showStage(String, String)}
-	 */
 	public BaseController showStage(String fxmlFile) throws IOException {
 		return showStage(fxmlFile, "Application");
 	}
 
-	/**
-	 * {@link #showStage(String, String, boolean)}
-	 */
 	public BaseController showStage(String fxmlFile, String title) throws IOException {
 		return this.showStage(fxmlFile, title, false);
 	}
 
-	/**
-	 * {@link #showStage(String, String, Stage)} Use the model option to define if
-	 * the window can be used parallel to the origin window (true).
-	 */
 	public BaseController showStage(String fxmlFile, String title, boolean modal) throws IOException {
 		Stage stage = new Stage();
 		if (modal) {
@@ -407,7 +397,7 @@ public abstract class BaseApplication extends Application {
 	 *                 unknown use {@link #showStage(String, String)} to simply pass
 	 *                 <code>new Stage()</code>.
 	 * @return <code>BaseController</code> instance that controls the FXMl file.
-	 * @throws IOException
+	 * @throws IOException if any IO error occurs
 	 */
 	public BaseController showStage(String fxmlFile, String title, Stage stage) throws IOException {
 		BaseController bc = null;
@@ -454,7 +444,7 @@ public abstract class BaseApplication extends Application {
 	 * 
 	 * @param fxmlFile The FXML file that defines the looks of the container.
 	 * @return <code>BaseController</code> instance that controls the FXMl file.
-	 * @throws IOException
+	 * @throws IOException if any IO error occurs
 	 */
 	public BaseController createComponent(String fxmlFile) throws IOException {
 		BaseController bc = null;
