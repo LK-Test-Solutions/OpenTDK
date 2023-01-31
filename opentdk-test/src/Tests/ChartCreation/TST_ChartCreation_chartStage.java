@@ -84,7 +84,7 @@ public class TST_ChartCreation_chartStage extends Application {
 	private List<String> xCategories = new ArrayList<>();
 	private List<Double> backendNumbers = new ArrayList<>();
 	private List<String> backendValues = new ArrayList<>();
-	private final String meshtrace = "Vertrag öffnen";
+	private final String meshtrace = "Vertrag Oeffnen";
 	private DecimalFormat numberFormat;
 	
 	public static void main(String[] args) {
