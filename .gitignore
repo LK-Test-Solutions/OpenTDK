@@ -44,14 +44,13 @@ javadoc*
 .DS_Store*
 
 # Folders
-/.metadata/**
-/.idea/**
-# **/conf/**
+**/.metadata/**
+**/.settings/**
+**/.idea/**
 **/logs/**
 **/target/**
 **/bin/**
 **/classes/**
-/.metadata/
 **/RegressionTestData_Extracted/**
 
 opentdk-test/output/private.key
