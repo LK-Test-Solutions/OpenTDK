@@ -359,9 +359,10 @@ public abstract class BaseContainer {
 		int retVal = -1;
 		if (headerNames.containsKey(headerName)) {
 			retVal = headerNames.get(headerName);
-		} else {
-			MLogger.getInstance().log(Level.INFO, "Invalid Column Header Name '" + headerName + "'", this.getClass().getSimpleName(), this.getClass().getName(), "getHeaderIndex");
-		}
+		} 
+//		else {
+//			MLogger.getInstance().log(Level.INFO, "Invalid Column Header Name '" + headerName + "'", this.getClass().getSimpleName(), this.getClass().getName(), "getHeaderIndex");
+//		}
 		return retVal;
 	}
 

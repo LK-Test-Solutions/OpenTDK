@@ -1,5 +1,9 @@
 package RegressionTest;
 
+import java.util.Vector;
+
+import org.opentdk.api.datastorage.DataContainer;
+
 /**
  * Super class of all test classes with predefined assertion methods.
  * 
@@ -7,6 +11,20 @@ package RegressionTest;
  *
  */
 public abstract class BaseRegression {
+	/**
+	 * Storage object to display the result overview at the end of the test(s).
+	 */
+	static final DataContainer resultContainer = new DataContainer();
+	static {
+		resultContainer.setColumnDelimiter(" | ");
+		resultContainer.setHeaders(new String[] { "TEST CLASS", "SUCCESS" });
+	}
+	/**
+	 * Set to false if any error occurred during one test case execution. Set to true before running a
+	 * test.
+	 */
+	private static boolean success;
+
 	/**
 	 * Usage in the sub classes:
 	 * 
@@ -26,8 +44,10 @@ public abstract class BaseRegression {
 		System.out.println("=================== < Run test class: " + getClass().getSimpleName() + " >");
 		System.out.println();
 		try {
-			runTest();
-		} catch(Exception e) {
+			success = true;
+			runTest(); // Sets success to false in case of an error
+			resultContainer.addRow(new String[] { getClass().getSimpleName(), String.valueOf(success) });
+		} catch (Exception e) {
 			e.printStackTrace();
 		}
 		System.out.println();
@@ -46,12 +66,14 @@ public abstract class BaseRegression {
 				System.out.println("Success: " + fieldName + " == " + actual);
 			} else {
 				System.err.println(fieldName + " is \"" + actual + "\" but should be \"" + expected + "\"");
+				success = false;
 			}
 		} else {
 			if (expected == null) {
 				System.out.println("Success: " + fieldName + " == " + actual);
 			} else {
 				System.err.println(fieldName + " is \"" + actual + "\" but should be \"" + expected + "\"");
+				success = false;
 			}
 		}
 	}
@@ -61,6 +83,7 @@ public abstract class BaseRegression {
 			System.out.println("Success: " + fieldName + " == " + actual);
 		} else {
 			System.err.println(fieldName + " is \"" + actual + "\" but should be \"" + expected + "\"");
+			success = false;
 		}
 
 	}

@@ -136,6 +136,9 @@ public class RegressionTestRunner {
 			// RegressionTest.YAMLContainer
 			RT_YAMLContainer_dispatchYAML.main(args);
 		}
-
+		System.out.println();
+		System.out.println("RUN OVERVIEW (NAME | SUCCESS)");
+		System.out.println();
+		System.out.println(BaseRegression.resultContainer.asString());
 	}
 }
