@@ -1,7 +1,5 @@
 package RegressionTest.CSVContainer;
 
-import org.opentdk.api.datastorage.BaseContainer.EHeader;
-
 import RegressionTest.BaseRegression;
 
 import org.opentdk.api.datastorage.DataContainer;
@@ -9,9 +7,7 @@ import org.opentdk.api.datastorage.DataContainer;
 public class RT_CSVContainer_setMetaData extends BaseRegression {
 
 	public static void main(String[] args) {
-		// TODO Auto-generated method stub
-		RT_CSVContainer_setMetaData csvdc = new RT_CSVContainer_setMetaData();
-		csvdc.runTest();
+		new RT_CSVContainer_setMetaData();
 	}
 	
 	@Override
@@ -23,7 +19,7 @@ public class RT_CSVContainer_setMetaData extends BaseRegression {
 		
 		
 		// Instantiate DataContainer and populate with data from CSV
-		DataContainer dc = new DataContainer("./testdata/RegressionTestData/CSVContainer_TestData.csv", ";", EHeader.COLUMN);
+		DataContainer dc = new DataContainer("./testdata/RegressionTestData/CSVContainer_TestData.csv", ";");
 		testResult(dc.getRowsList().size(), "# of rows in datacontainer", 4);
 		
 		// Add Metadata header/value pair

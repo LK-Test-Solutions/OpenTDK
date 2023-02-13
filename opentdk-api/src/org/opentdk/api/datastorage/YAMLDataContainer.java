@@ -97,6 +97,11 @@ public class YAMLDataContainer implements CustomContainer {
 	public void writeData(String srcFileName) throws IOException {
 		yaml.dump(yaml.dumpAsMap(json.getJsonAsMap()), new FileWriter(srcFileName));
 	}
+	
+	@Override
+	public void createFile(String srcFile) throws IOException {	
+		json.createFile(srcFile);
+	}
 
 	@Override
 	public Object[] getColumn(String headerName, Filter fltr) {

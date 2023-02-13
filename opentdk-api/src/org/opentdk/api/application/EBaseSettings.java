@@ -28,7 +28,6 @@
 package org.opentdk.api.application;
 
 import org.opentdk.api.dispatcher.BaseDispatchComponent;
-import org.opentdk.api.dispatcher.BaseDispatcher;
 
 /**
  * Settings class with predefined set of common application settings of type {@link org.opentdk.api.dispatcher.BaseDispatchComponent}.
@@ -54,7 +53,7 @@ import org.opentdk.api.dispatcher.BaseDispatcher;
  * @author LK Test Solutions GmbH
  *
  */
-public class EBaseSettings extends BaseDispatcher {
+public class EBaseSettings {
 	/**
 	 * The variable LOGFILE defines the full path and name of the file, where {@link org.opentdk.api.logger.MLogger} will log all messages and errors.
 	 */

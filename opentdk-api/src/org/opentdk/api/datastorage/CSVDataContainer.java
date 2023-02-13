@@ -36,7 +36,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.logging.Level;
 
-import org.opentdk.api.datastorage.BaseContainer.EContainerFormat;
+import org.apache.commons.lang3.StringUtils;
 import org.opentdk.api.filter.Filter;
 import org.opentdk.api.io.FileUtil;
 import org.opentdk.api.io.XFileWriter;
@@ -66,7 +66,7 @@ public class CSVDataContainer implements CustomContainer {
 	 */
 	CSVDataContainer(DataContainer dCont) {
 		dc = dCont;
-		dc.containerFormat = EContainerFormat.CSV;
+//		dc.containerFormat = EContainerFormat.CSV;
 	}
 
 	/**
@@ -235,7 +235,9 @@ public class CSVDataContainer implements CustomContainer {
 	 */
 	@Override
 	public void readData(Filter filter) {
-		putFile(dc.fileName, dc.columnDelimiter);
+		if(StringUtils.isNotBlank(dc.getFileName())) {
+			putFile(dc.getFileName(), dc.getColumnDelimiter());
+		}
 	}
 
 	/**
@@ -280,11 +282,11 @@ public class CSVDataContainer implements CustomContainer {
 	/**
 	 * This method writes data to a existing or newly created CSV-file when called.
 	 *
-	 * @param fileName The filename of the file to write to or to create.
+	 * @param srcFile The filename of the file to write to or to create.
 	 * 
 	 */
 	@Override
-	public void writeData(String fileName) {
+	public void writeData(String srcFile) {
 		List<String[]> writeable = new ArrayList<>();
 		if (dc.getContainerFormat().getHeaderType().equals(BaseContainer.EHeader.COLUMN)) {
 			// for Column Header oriented output
@@ -304,9 +306,8 @@ public class CSVDataContainer implements CustomContainer {
 				writeable.add(row.toArray(new String[row.size()]));
 			}
 		}
-		// Write content of List writeable to output-file
 		try {
-			File f = new File(fileName);
+			File f = new File(srcFile);
 			FileUtil.checkDir(f.getParent(), true);
 			XFileWriter writer = new XFileWriter(f);
 			writer.writeLines(writeable);
@@ -318,7 +319,13 @@ public class CSVDataContainer implements CustomContainer {
 	}
 
 	@Override
+	public void createFile(String srcFile) throws IOException {
+		FileUtil.createFile(srcFile, true);
+	}
+	
+	@Override
 	public String asString() {
 		return dc.getValuesAsString();
 	}
+
 }

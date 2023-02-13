@@ -59,9 +59,7 @@ public class RT_File_Properties_values extends BaseRegression {
 		testResult(E_PropertiesFile_Dispatcher_values.COUNTRY.getValue(), "Country", "Germany");
 		testResult(E_PropertiesFile_Dispatcher_values.LANGUAGE.getValue(), "Language", "german");
 		testResult(E_PropertiesFile_Dispatcher_values.CAPITAL_CITY.getValue(), "CapitalCity", "Berlin");
-		
-		// Reset
-//		BaseDispatcher.clearDataContainer();
+
 	}
 
 }

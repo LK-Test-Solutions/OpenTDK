@@ -49,69 +49,110 @@ import java.util.stream.Stream;
 import org.apache.commons.lang3.StringUtils;
 import org.json.JSONObject;
 import org.opentdk.api.filter.Filter;
-import org.opentdk.api.io.FileUtil;
 import org.opentdk.api.io.XFileWriter;
 import org.opentdk.api.io.XMLEditor;
 import org.opentdk.api.logger.*;
 import org.yaml.snakeyaml.Yaml;
 
 /**
- * Class used to store data from different sources at runtime of an application
- * in an <code>ArrayList</code>. The source data needs to be in a structured
- * format, and keys can be assigned to the coordinates of the fields. In
- * general, the keys are column- or row-headers, that will be assigned to a
- * column- or row-index within the <code>ArrayList</code>. <br>
- * The class provides methods for putting data from different sources into an
- * instance of DataContainer, as well as getter and setter methods, for reading
- * data from, and writing data into the object.<br>
- * This will allow to build applications with standardized data interface with
- * minimum maintenance effort in case that the data source changes.
+ * Class used to store data from different sources at runtime of an application in an
+ * <code>ArrayList</code>. The source data needs to be in a structured format, and keys can be
+ * assigned to the coordinates of the fields. In general, the keys are column- or row-headers, that
+ * will be assigned to a column- or row-index within the <code>ArrayList</code>. <br>
+ * The class provides methods for putting data from different sources into an instance of
+ * DataContainer, as well as getter and setter methods, for reading data from, and writing data into
+ * the object.<br>
+ * This will allow to build applications with standardized data interface with minimum maintenance
+ * effort in case that the data source changes.
  *
  * @author LK Test Solutions GmbH
  */
 public class DataContainer extends BaseContainer {
-
-	/**
-	 * The filter object that does not filter the data in the
-	 * <code>DataContainer</code> during runtime but when reading from and writing
-	 * to the configuration file.
-	 */
-	private Filter filter;
-
 	/**
 	 * The object that will be adapted to a specific <code>DataContainer</code> like
-	 * {@link XMLDataContainer} or {@link PropertiesDataContainer}. The caller of
-	 * the <code>DataContainer</code> does not need to know about the adaption
-	 * process. In other words: The caller can use the <code>DataContainer</code> on
-	 * all supported file formats without calling specific functions for the source
-	 * file type.
+	 * {@link XMLDataContainer} or {@link PropertiesDataContainer}. The caller of the
+	 * <code>DataContainer</code> does not need to know about the adaption process. In other words: The
+	 * caller can use the <code>DataContainer</code> on all supported file formats without calling
+	 * specific functions for the source file type.
 	 */
 	private CustomContainer instance;
 
+	// =============== //
+	// EMPTY CONTAINER //
+	// =============== //
+
 	/**
-	 * Default constructor for the specific <code>DataContainer</code>.
+	 * The non argument constructor get used to have an empty container instance without a connected
+	 * file, stream or result set and without knowing the container format. In this case all the fields
+	 * in the {@link org.opentdk.api.datastorage.BaseContainer} super class keep their default value.
+	 * The container gets initialized as <code>CSVDataContainer</code> that stores text formats as well.
 	 */
 	public DataContainer() {
-		columnDelimiter = "";
-		fileName = "";
-		containerFormat = EContainerFormat.DEFAULT;
-		adaptContainer();
+		adaptContainer();	
 	}
 
 	/**
-	 * Constructor that is called, when a DataContainer shall be copied. The copy
-	 * holds only the columns with the headers specified in headerIndices.
+	 * The non argument constructor get used to have an empty container instance without a connected
+	 * file, stream or result set but with knowing the container format. In this case all the fields in
+	 * the {@link org.opentdk.api.datastorage.BaseContainer} super class keep their default value except
+	 * of the container format.
+	 *
+	 * @param srcHeader {@link org.opentdk.api.datastorage.BaseContainer.EHeader}
+	 */
+	public DataContainer(EHeader srcHeader) {
+		this(srcHeader, "");
+	}
+	
+	/**
+	 * The non argument constructor get used to have an empty container instance without a connected
+	 * file, stream or result set but with knowing the container format. In this case all the fields in
+	 * the {@link org.opentdk.api.datastorage.BaseContainer} super class keep their default value except
+	 * of the container format.
+	 *
+	 * @param srcHeader {@link org.opentdk.api.datastorage.BaseContainer.EHeader}
+	 * @param rootNode if the format has a root node like XML
+	 */
+	public DataContainer(EHeader srcHeader, String rootNode) {
+		super.rootNode = rootNode;
+		switch (srcHeader) {
+		case COLUMN:
+			containerFormat = EContainerFormat.CSV;
+			break;
+		case ROW:
+			containerFormat = EContainerFormat.CSV;
+			break;
+		case TREE:
+			if(StringUtils.isNotBlank(rootNode)) {
+				containerFormat = EContainerFormat.XML;
+			} else {
+				containerFormat = EContainerFormat.JSON;
+			}		
+			break;
+		case UNKNOWN:
+			containerFormat = EContainerFormat.DEFAULT;
+			break;
+		}
+		adaptContainer();
+	}
+
+	// ==================== //
+	// FROM OTHER CONTAINER //
+	// ==================== //
+
+	/**
+	 * Constructor that is called, when a DataContainer shall be copied. The copy holds only the columns
+	 * with the headers specified in headerIndices.
 	 * 
-	 * @param dc            Original DataContainer from which the columns shall be
-	 *                      copied.
+	 * @param dc            Original DataContainer from which the columns shall be copied.
 	 * @param headerIndices Headers which shall be copied to the new DataContainer
 	 * 
 	 */
 	public DataContainer(DataContainer dc, int[] headerIndices) {
-		instance = dc.instance.getClass().cast(dc.instance);
+		instance = dc.instance;
 		fileName = dc.getFileName();
 		columnDelimiter = dc.getColumnDelimiter();
 		headerNamesIndex = dc.getHeaderRowIndex();
+		containerFormat = dc.getContainerFormat();
 		filter = dc.filter;
 		String[] headerNames = new String[headerIndices.length];
 		for (int i = 0; i < headerIndices.length; i++) {
@@ -123,13 +164,138 @@ public class DataContainer extends BaseContainer {
 		}
 	}
 
+	// ================ //
+	// FROM SOURCE FILE //
+	// ================ //
+
 	/**
-	 * Constructor that is called when no input file exists and the container for
-	 * the specific data format also accepts {@link java.io.InputStream} for the
-	 * data.<br>
-	 * e.g.: An application dynamically receives data by calling RestAPI Service
-	 * Requests and the XML responses will be passed to the
-	 * {@link org.opentdk.api.dispatcher.BaseDispatcher} that creates an
+	 * Constructor that is called, when creating a new instance with an ASCII File of structured data.
+	 *
+	 * @param srcFile Full path and name of the source file, from which the data will be loaded into
+	 *                DataContainer
+	 */
+	public DataContainer(String srcFile) {
+		this(srcFile, ";", 0, new String[0], new Filter());
+	}
+
+	/**
+	 * Constructor that is called with the source file to store data from and a filter to decide if part
+	 * of the data should be ignored. The file string must be valid, the filter may be null.
+	 *
+	 * @param srcFile Full path and name of the source file, from which the data will be loaded into
+	 *                DataContainer
+	 * @param fltr    The {@link #filter} object to decide which data should be ignored.
+	 */
+	public DataContainer(String srcFile, Filter fltr) {
+		this(srcFile, ";", 0, new String[0], fltr);
+	}
+
+	/**
+	 * Constructor that is called when the source file, the column delimiter and the filter is known.
+	 * 
+	 * @param srcFile   Full path and name of the source file, from which the data will be loaded into
+	 *                  DataContainer
+	 * @param delimiter The delimiter to separate the stored data.
+	 */
+	public DataContainer(String srcFile, String delimiter) {
+		this(srcFile, delimiter, 0, new String[0], new Filter());
+	}
+
+	/**
+	 * Constructor that is called when the source file, the column delimiter and the filter is known.
+	 * 
+	 * @param srcFile   Full path and name of the source file, from which the data will be loaded into
+	 *                  DataContainer
+	 * @param delimiter The delimiter to separate the stored data.
+	 * @param fltr      The {@link #filter} object to decide which data should be ignored.
+	 */
+	public DataContainer(String srcFile, String delimiter, Filter fltr) {
+		this(srcFile, delimiter, 0, new String[0], fltr);
+	}
+
+	/**
+	 * Constructor that is called when creating a new instance with column separated file.
+	 *
+	 * @param srcFile     Full path and name of the source file, from which the data will be loaded into
+	 *                    DataContainer
+	 * @param delimiter   Character(s) that are used as delimiter within the file
+	 * @param headerIndex TODO description
+	 */
+	public DataContainer(String srcFile, String delimiter, int headerIndex) {
+		this(srcFile, delimiter, headerIndex, new String[0], new Filter());
+	}
+
+	/**
+	 * Constructor that is called when the source file, the column delimiter, the header index and the
+	 * filter is known.
+	 * 
+	 * @param srcFile     Full path and name of the source file, from which the data will be loaded into
+	 *                    DataContainer
+	 * @param delimiter   The delimiter to separate the stored data.
+	 * @param headerIndex TODO description
+	 * @param fltr        A {@link org.opentdk.api.filter.Filter} object to define which data should be
+	 *                    ignored. If it is null no filter gets used.
+	 */
+	public DataContainer(String srcFile, String delimiter, int headerIndex, Filter fltr) {
+		this(srcFile, delimiter, headerIndex, new String[0], fltr);
+	}
+
+	/**
+	 * Constructor that is called when the source file, the data delimiter and the column header are
+	 * known.
+	 * 
+	 * @param srcFile   Full path and name of the source file, from which the data will be loaded into
+	 *                  DataContainer
+	 * @param delimiter Character(s) that are used as delimiter within the file
+	 * @param headers   The column header as string array.
+	 */
+	public DataContainer(String srcFile, String delimiter, String[] headers) {
+		this(srcFile, delimiter, -1, headers, new Filter());
+	}
+
+	/**
+	 * Constructor that is called, when creating a new instance by just committing the data container
+	 * column headers. Used when the data gets loaded into the container afterwards, but the structure
+	 * is known. The semicolon is used as column separator.
+	 * 
+	 * @param headers The column headers as array of type string.
+	 */
+	public DataContainer(String[] headers) {
+		this("", ";", -1, headers, new Filter());
+	}
+
+	/**
+	 * Constructor that is called when the source file, the data delimiter, the header orientation, the
+	 * header index, the header names and the filter are known.
+	 * 
+	 * @param srcFile     Full path and name of the source file, from which the data will be loaded into
+	 *                    DataContainer
+	 * @param delimiter   Character(s) that are used as delimiter within the file
+	 * @param headerIndex TODO description
+	 * @param headers     The column header as string array.
+	 * @param fltr        A {@link org.opentdk.api.filter.Filter} object to define which data should be
+	 *                    ignored. If it is null no filter gets used.
+	 */
+	public DataContainer(String srcFile, String delimiter, int headerIndex, String[] headers, Filter fltr) {
+		fileName = srcFile;
+		columnDelimiter = delimiter;
+		headerNamesIndex = headerIndex;
+		filter = fltr;
+		if (headers.length > 0) {
+			setHeaders(headers);
+		}
+		adaptContainer();	
+	}
+
+	// ================= //
+	// FROM INPUT STREAM //
+	// ================= //
+
+	/**
+	 * Constructor that is called when no input file exists and the container for the specific data
+	 * format also accepts {@link java.io.InputStream} for the data.<br>
+	 * e.g.: An application dynamically receives data by calling RestAPI Service Requests and the XML
+	 * responses will be passed to the {@link org.opentdk.api.dispatcher.BaseDispatcher} that creates an
 	 * {@link XMLDataContainer} for parsing the XML response.<br>
 	 * <br>
 	 * 
@@ -144,16 +310,17 @@ public class DataContainer extends BaseContainer {
 	 * @param inStream Object of type {@link java.io.InputStream}
 	 */
 	public DataContainer(InputStream inStream) {
-		filter = new Filter();
 		inputStream = inStream;
-		containerFormat = EContainerFormat.DEFAULT;
 		adaptContainer();
 	}
 
+	// =============== //
+	// FROM RESULT SET //
+	// =============== //
+
 	/**
-	 * Constructor that is called, when importing data from a database request to
-	 * the container. No filter will be used and the column delimiter for the
-	 * imported data is the semicolon.
+	 * Constructor that is called, when importing data from a database request to the container. No
+	 * filter will be used and the column delimiter for the imported data is the semicolon.
 	 * 
 	 * @param rs The result of the database request.
 	 */
@@ -162,204 +329,56 @@ public class DataContainer extends BaseContainer {
 	}
 
 	/**
-	 * Constructor that is called, when importing data from a database request to
-	 * the container with the possibility to filter the data before it gets
-	 * imported. The column delimiter of the imported data is the semicolon.
+	 * Constructor that is called, when importing data from a database request to the container with the
+	 * possibility to filter the data before it gets imported. The column delimiter of the imported data
+	 * is the semicolon.
 	 * 
 	 * @param rs   The result of the database request.
-	 * @param fltr A {@link org.opentdk.api.filter.Filter} object to define
-	 *             which data should be ignored. If it is null no filter gets used.
+	 * @param fltr A {@link org.opentdk.api.filter.Filter} object to define which data should be
+	 *             ignored. If it is null no filter gets used.
 	 */
 	public DataContainer(ResultSet rs, Filter fltr) {
 		this(rs, fltr, ";");
 	}
 
 	/**
-	 * Constructor that is called, when importing data from a database request to
-	 * the container with the possibility to filter the data before it gets imported
-	 * and define a column delimiter for the imported data.
+	 * Constructor that is called, when importing data from a database request to the container with the
+	 * possibility to filter the data before it gets imported and define a column delimiter for the
+	 * imported data.
 	 * 
 	 * @param rs           The result of the database request.
-	 * @param fltr         A {@link org.opentdk.api.filter.Filter} object to
-	 *                     define which data should be ignored. If it is null no
-	 *                     filter gets used.
-	 * @param colDelimiter Possibility to define a column delimiter for the imported
-	 *                     table data like semicolon.
+	 * @param fltr         A {@link org.opentdk.api.filter.Filter} object to define which data should be
+	 *                     ignored. If it is null no filter gets used.
+	 * @param colDelimiter Possibility to define a column delimiter for the imported table data like
+	 *                     semicolon.
 	 */
 	public DataContainer(ResultSet rs, Filter fltr, String colDelimiter) {
 		resultSet = rs;
 		filter = fltr;
 		columnDelimiter = colDelimiter;
-		adaptContainer();
+		adaptContainer();		
 	}
 
 	/**
-	 * Constructor that is called, when creating a new instance with an ASCII File
-	 * of structured data.
-	 *
-	 * @param srcFile Full path and name of the source file, from which the data
-	 *                will be loaded into DataContainer
-	 */
-	public DataContainer(String srcFile) {
-		this(srcFile, ";", 0, new String[0], new Filter());
-	}
-
-	/**
-	 * Constructor that is called with the source file to store data from and a
-	 * filter to decide if part of the data should be ignored. The file string must
-	 * be valid, the filter may be null.
-	 *
-	 * @param srcFile Full path and name of the source file, from which the data
-	 *                will be loaded into DataContainer
-	 * @param fltr    The {@link #filter} object to decide which data should be
-	 *                ignored.
-	 */
-	public DataContainer(String srcFile, Filter fltr) {
-		this(srcFile, ";", 0, new String[0], fltr);
-	}
-
-	/**
-	 * Constructor that is called when the source file, the column delimiter and the
-	 * filter is known.
+	 * This method is designed for tabular data formats to add column names to existing
+	 * <code>DataContainer</code>. In case the column name already exists, an suffix with the next
+	 * available index will be appended to the column name.
 	 * 
-	 * @param srcFile   Full path and name of the source file, from which the data
-	 *                  will be loaded into DataContainer
-	 * @param delimiter The delimiter to separate the stored data.
-	 */
-	public DataContainer(String srcFile, String delimiter) {
-		this(srcFile, delimiter, 0, new String[0], new Filter());
-	}
-
-	/**
-	 * Constructor that is called when the source file, the data delimiter and the
-	 * header orientation are known.
-	 *
-	 * @param srcFile   Full path and name of the source file, from which the data
-	 *                  will be loaded into DataContainer
-	 * @param delimiter Character(s) that are used as delimiter within the file
-	 * @param srcHeader The header orientation (column or row header)
-	 */
-	public DataContainer(String srcFile, String delimiter, EHeader srcHeader) {
-		this(srcFile, delimiter, 0, new String[0], new Filter());
-	}
-
-	/**
-	 * Constructor that is called when the source file, the column delimiter and the
-	 * filter is known.
-	 * 
-	 * @param srcFile   Full path and name of the source file, from which the data
-	 *                  will be loaded into DataContainer
-	 * @param delimiter The delimiter to separate the stored data.
-	 * @param fltr      The {@link #filter} object to decide which data should be
-	 *                  ignored.
-	 */
-	public DataContainer(String srcFile, String delimiter, Filter fltr) {
-		this(srcFile, delimiter, 0, new String[0], fltr);
-	}
-
-	/**
-	 * Constructor that is called when creating a new instance with column separated
-	 * file.
-	 *
-	 * @param srcFile     Full path and name of the source file, from which the data
-	 *                    will be loaded into DataContainer
-	 * @param delimiter   Character(s) that are used as delimiter within the file
-	 * @param headerIndex TODO description
-	 */
-	public DataContainer(String srcFile, String delimiter, int headerIndex) {
-		this(srcFile, delimiter, headerIndex, new String[0], new Filter());
-	}
-
-	/**
-	 * Constructor that is called when the source file, the column delimiter, the
-	 * header index and the filter is known.
-	 * 
-	 * @param srcFile     Full path and name of the source file, from which the data
-	 *                    will be loaded into DataContainer
-	 * @param delimiter   The delimiter to separate the stored data.
-	 * @param headerIndex TODO description
-	 * @param fltr        A {@link org.opentdk.api.filter.Filter} object to
-	 *                    define which data should be ignored. If it is null no
-	 *                    filter gets used.
-	 */
-	public DataContainer(String srcFile, String delimiter, int headerIndex, Filter fltr) {
-		this(srcFile, delimiter, headerIndex, new String[0], fltr);
-	}
-
-	/**
-	 * Constructor that is called when the source file, the data delimiter, the
-	 * header orientation, the header index, the header names and the filter are
-	 * known.
-	 * 
-	 * @param srcFile     Full path and name of the source file, from which the data
-	 *                    will be loaded into DataContainer
-	 * @param delimiter   Character(s) that are used as delimiter within the file
-	 * @param headerIndex TODO description
-	 * @param headers     The column header as string array.
-	 * @param fltr        A {@link org.opentdk.api.filter.Filter} object to
-	 *                    define which data should be ignored. If it is null no
-	 *                    filter gets used.
-	 */
-	public DataContainer(String srcFile, String delimiter, int headerIndex, String[] headers, Filter fltr) {
-		fileName = srcFile;
-		columnDelimiter = delimiter;
-		headerNamesIndex = headerIndex;
-		filter = fltr;
-		containerFormat = EContainerFormat.DEFAULT;
-		if (headers.length > 0) {
-			setHeaders(headers);
-		}
-		adaptContainer();
-	}
-
-	/**
-	 * Constructor that is called when the source file, the data delimiter and the
-	 * column header are known.
-	 * 
-	 * @param srcFile   Full path and name of the source file, from which the data
-	 *                  will be loaded into DataContainer
-	 * @param delimiter Character(s) that are used as delimiter within the file
-	 * @param headers   The column header as string array.
-	 */
-	public DataContainer(String srcFile, String delimiter, String[] headers) {
-		this(srcFile, delimiter, -1, headers, new Filter());
-	}
-
-	/**
-	 * Constructor that is called, when creating a new instance by just committing
-	 * the data container column headers. Used when the data gets loaded into the
-	 * container afterwards, but the structure is known. The semicolon is used as
-	 * column separator.
-	 * 
-	 * @param headers The column headers as array of type string.
-	 */
-	public DataContainer(String[] headers) {
-		this("", ";", -1, headers, new Filter());
-	}
-
-	/**
-	 * This method is designed for tabular data formats to add column names to
-	 * existing <code>DataContainer</code>. In case the column name already exists,
-	 * an suffix with the next available index will be appended to the column name.
-	 * 
-	 * @param col Name of the column that will be added to the
-	 *            {@link BaseContainer#headerNames}
+	 * @param col Name of the column that will be added to the {@link BaseContainer#headerNames}
 	 */
 	public void addColumn(String col) {
 		addColumn(col, false);
 	}
-	
+
 	/**
-	 * This method is designed for tabular data formats to add column names to
-	 * existing <code>DataContainer</code>. The useExisting argument specifies the
-	 * behavior for existing columns with the same name. Either use the existing
-	 * column or create a new column by appending a unique index to the name.
+	 * This method is designed for tabular data formats to add column names to existing
+	 * <code>DataContainer</code>. The useExisting argument specifies the behavior for existing columns
+	 * with the same name. Either use the existing column or create a new column by appending a unique
+	 * index to the name.
 	 * 
-	 * @param col         Name of the column that will be added to the
-	 *                    {@link BaseContainer#headerNames}
-	 * @param useExisting Boolean value - true = if column name exist, then use the
-	 *                    existing column; false = if column name exists, then add
-	 *                    column name with an index suffix
+	 * @param col         Name of the column that will be added to the {@link BaseContainer#headerNames}
+	 * @param useExisting Boolean value - true = if column name exist, then use the existing column;
+	 *                    false = if column name exists, then add column name with an index suffix
 	 */
 	public void addColumn(String col, boolean useExisting) {
 		if (!this.headerNames.containsKey(col)) {
@@ -382,12 +401,10 @@ public class DataContainer extends BaseContainer {
 		}
 	}
 
-
 	/**
-	 * This method is designed for data formats, where single fields like tree nodes
-	 * or XML tags can be addressed, instead of columns or rows with multiple
-	 * values. The field will be added with name and value into parent node, which
-	 * path needs to be defined by filter conditions.<br>
+	 * This method is designed for data formats, where single fields like tree nodes or XML tags can be
+	 * addressed, instead of columns or rows with multiple values. The field will be added with name and
+	 * value into parent node, which path needs to be defined by filter conditions.<br>
 	 * Usage sample with {@link XMLDataContainer#addField(String, String, Filter)}:
 	 * 
 	 * <pre>
@@ -398,8 +415,8 @@ public class DataContainer extends BaseContainer {
 	 * 
 	 * @param headerName Name of the field or node that will be added.
 	 * @param value      Value that will be assigned to the field or node.
-	 * @param fltr       The filter object to insert the new node at the right
-	 *                   position as demonstrated above.
+	 * @param fltr       The filter object to insert the new node at the right position as demonstrated
+	 *                   above.
 	 */
 	public void addField(String headerName, String value, Filter fltr) {
 		switch (getContainerFormat().getHeaderType()) {
@@ -413,12 +430,10 @@ public class DataContainer extends BaseContainer {
 	}
 
 	/**
-	 * This method is designed for data formats, where single fields like tree nodes
-	 * or XML tags can be addressed, instead of columns or rows with multiple
-	 * values. The field will be added with name and an attribute into parent node,
-	 * which path needs to be defined by filter conditions.<br>
-	 * Usage sample with
-	 * {@link XMLDataContainer#addField(String, String, String, Filter)}:
+	 * This method is designed for data formats, where single fields like tree nodes or XML tags can be
+	 * addressed, instead of columns or rows with multiple values. The field will be added with name and
+	 * an attribute into parent node, which path needs to be defined by filter conditions.<br>
+	 * Usage sample with {@link XMLDataContainer#addField(String, String, String, Filter)}:
 	 * 
 	 * <pre>
 	 * Filter fltr = new Filter();
@@ -427,12 +442,10 @@ public class DataContainer extends BaseContainer {
 	 * </pre>
 	 * 
 	 * @param headerName     Name of the field or node that will be added.
-	 * @param attributeName  Name of the attribute that will be assigned to the
-	 *                       field or node.
-	 * @param attributeValue Value that will be assigned to the attribute of the
-	 *                       field or node.
-	 * @param fltr           The filter object to insert the new node at the right
-	 *                       position as demonstrated above.
+	 * @param attributeName  Name of the attribute that will be assigned to the field or node.
+	 * @param attributeValue Value that will be assigned to the attribute of the field or node.
+	 * @param fltr           The filter object to insert the new node at the right position as
+	 *                       demonstrated above.
 	 */
 	public void addField(String headerName, String attributeName, String attributeValue, Filter fltr) {
 		switch (getContainerFormat().getHeaderType()) {
@@ -446,16 +459,14 @@ public class DataContainer extends BaseContainer {
 	}
 
 	/**
-	 * This method is designed for data formats, where single fields like tree nodes
-	 * or XML tags can be addressed, instead of columns or rows with multiple
-	 * values. The method is reserved to add or overwrite elements within the data
-	 * source. These elements can be e.g. nodes, tags or attributes of existing
-	 * nodes or tags, depending on the implementation for the specific
+	 * This method is designed for data formats, where single fields like tree nodes or XML tags can be
+	 * addressed, instead of columns or rows with multiple values. The method is reserved to add or
+	 * overwrite elements within the data source. These elements can be e.g. nodes, tags or attributes
+	 * of existing nodes or tags, depending on the implementation for the specific
 	 * <code>Data Container</code>.<br>
 	 * <br>
 	 * 
-	 * Usage sample with
-	 * {@link XMLDataContainer#addField(String, String, String, String, Filter)}:
+	 * Usage sample with {@link XMLDataContainer#addField(String, String, String, String, Filter)}:
 	 * 
 	 * <pre>
 	 * Filter fltr = new Filter();
@@ -464,14 +475,11 @@ public class DataContainer extends BaseContainer {
 	 * </pre>
 	 * 
 	 * @param headerName     Name of the field or node that will be added.
-	 * @param attributeName  Name of the attribute that will be assigned to the
-	 *                       field or node.
-	 * @param oldAttrValue   The attribute value that will be replaced, in case it
-	 *                       exists.
-	 * @param attributeValue Value that will be assigned to the attribute of the
-	 *                       field or node.
-	 * @param fltr           The filter object to insert the new node at the right
-	 *                       position as demonstrated above.
+	 * @param attributeName  Name of the attribute that will be assigned to the field or node.
+	 * @param oldAttrValue   The attribute value that will be replaced, in case it exists.
+	 * @param attributeValue Value that will be assigned to the attribute of the field or node.
+	 * @param fltr           The filter object to insert the new node at the right position as
+	 *                       demonstrated above.
 	 */
 	public void addField(String headerName, String attributeName, String oldAttrValue, String attributeValue, Filter fltr) {
 		switch (getContainerFormat().getHeaderType()) {
@@ -485,8 +493,7 @@ public class DataContainer extends BaseContainer {
 	}
 
 	/**
-	 * Adds an empty row to the values ArrayList that is used for tabular data
-	 * formats.
+	 * Adds an empty row to the values ArrayList that is used for tabular data formats.
 	 */
 	public void addRow() {
 		int rowSize = values.size() - getMetaData().size();
@@ -494,9 +501,9 @@ public class DataContainer extends BaseContainer {
 	}
 
 	/**
-	 * Inserts a string array with the row content into the
-	 * {@link BaseContainer#values} ArrayList at a specified position in this list.
-	 * Shifts the row currently at that position (if any) and any subsequent row.
+	 * Inserts a string array with the row content into the {@link BaseContainer#values} ArrayList at a
+	 * specified position in this list. Shifts the row currently at that position (if any) and any
+	 * subsequent row.
 	 * 
 	 * @param rowIndex  index at which the specified row is to be inserted
 	 * @param rowValues String array with all row values to be inserted
@@ -506,8 +513,7 @@ public class DataContainer extends BaseContainer {
 	}
 
 	/**
-	 * Adds a string array with the row content into the
-	 * {@link BaseContainer#values} ArrayList.
+	 * Adds a string array with the row content into the {@link BaseContainer#values} ArrayList.
 	 *
 	 * @param row String array with the content of the row to be added
 	 */
@@ -526,8 +532,8 @@ public class DataContainer extends BaseContainer {
 	}
 
 	/**
-	 * Adds one or more string arrays with the row content into the
-	 * {@link BaseContainer#values} ArrayList.
+	 * Adds one or more string arrays with the row content into the {@link BaseContainer#values}
+	 * ArrayList.
 	 * 
 	 * @param rows List of string arrays with the content of the rows to be added
 	 */
@@ -538,14 +544,13 @@ public class DataContainer extends BaseContainer {
 	}
 
 	/**
-	 * This method reads data from a specified source file and appends it to the
-	 * existing data within the container.
+	 * This method reads data from a specified source file and appends it to the existing data within
+	 * the container.
 	 * 
-	 * @param fileName Full path and name of the source file, from which the data
-	 *                 will be added to the <code>DataContainer</code>
-	 * @throws FileNotFoundException If the committed file does not exist.
+	 * @param fileName Full path and name of the source file, from which the data will be added to the
+	 *                 <code>DataContainer</code>
 	 */
-	public void appendData(String fileName) throws FileNotFoundException {
+	public void appendData(String fileName) {
 		if (getColumnDelimiter() == null) {
 			setColumnDelimiter(";");
 		}
@@ -553,15 +558,14 @@ public class DataContainer extends BaseContainer {
 	}
 
 	/**
-	 * This method reads data from a specified source file and appends it to the
-	 * existing data within the container.
+	 * This method reads data from a specified source file and appends it to the existing data within
+	 * the container.
 	 * 
-	 * @param fileName        Full path and name of the source file, from which the
-	 *                        data will be added to the <code>DataContainer</code>
+	 * @param fileName        Full path and name of the source file, from which the data will be added
+	 *                        to the <code>DataContainer</code>
 	 * @param columnDelimiter The column separator to structure the data.
-	 * @throws FileNotFoundException If the committed file does not exist.
 	 */
-	public void appendData(String fileName, String columnDelimiter) throws FileNotFoundException {
+	public void appendData(String fileName, String columnDelimiter) {
 		setFileName(fileName);
 		setColumnDelimiter(columnDelimiter);
 
@@ -571,19 +575,16 @@ public class DataContainer extends BaseContainer {
 		if (instance == null) {
 			adaptContainer();
 		}
-
 		instance.readData(filter);
 	}
 
 	/**
-	 * This method checks if the headers-of the assigned <code>DataContainer</code>
-	 * match with the headers of the current instance and appends all data of the
-	 * assigned <code>DataContainer</code> to the values List of the DataContaner
-	 * instance which is calling the method, in case the headers of both
-	 * <code>DataContainer</code> are the same.
+	 * This method checks if the headers-of the assigned <code>DataContainer</code> match with the
+	 * headers of the current instance and appends all data of the assigned <code>DataContainer</code>
+	 * to the values List of the DataContaner instance which is calling the method, in case the headers
+	 * of both <code>DataContainer</code> are the same.
 	 *
-	 * @param dc The DataContanier which content will be appended to the current
-	 *           DataContainer instance.
+	 * @param dc The DataContanier which content will be appended to the current DataContainer instance.
 	 */
 	public void appendDataContainer(DataContainer dc) {
 		if (checkHeader(dc.getHeaders()) == 0) {
@@ -623,12 +624,32 @@ public class DataContainer extends BaseContainer {
 	}
 
 	/**
-	 * This method is designed for data formats, where single fields like tree nodes
-	 * or XML tags can be addressed, instead of columns or rows with multiple
-	 * values. The field matching the defined arguments will be deleted from the
-	 * data source.<br>
-	 * Usage sample with
-	 * {@link XMLDataContainer#deleteField(String, String, String, Filter)}
+	 * Creates the file that is connected to the container instance.
+	 * 
+	 * @param srcFile The name of the source file to write to
+	 * @throws IOException if the creation failed
+	 */
+	public void createFile(String srcFile) throws IOException {
+		instance.createFile(srcFile);
+	}
+
+	/**
+	 * Creates the file that is connected to the container instance.
+	 * 
+	 * @param srcFile  The name of the source file to write to
+	 * @param rootNode for formats that have a root node this parameter can be used to check its
+	 *                 existence as well
+	 * @throws IOException if the creation failed the user can handle the cause
+	 */
+	public void createFile(String srcFile, String rootNode) throws IOException {
+		instance.createFile(srcFile, rootNode);
+	}
+
+	/**
+	 * This method is designed for data formats, where single fields like tree nodes or XML tags can be
+	 * addressed, instead of columns or rows with multiple values. The field matching the defined
+	 * arguments will be deleted from the data source.<br>
+	 * Usage sample with {@link XMLDataContainer#deleteField(String, String, String, Filter)}
 	 * 
 	 * <pre>
 	 * Filter fltr = new Filter();
@@ -637,16 +658,15 @@ public class DataContainer extends BaseContainer {
 	 * </pre>
 	 * 
 	 * @param headerName     Name of the field or node that will be deleted.
-	 * @param attributeName  Name of the attribute that is part of the field or node
-	 *                       description.
-	 * @param attributeValue Value of the attribute that is part of the field or
-	 *                       node description.
-	 * @param fltr           The filter object to find the field or node at the
-	 *                       right position as demonstrated above.
+	 * @param attributeName  Name of the attribute that is part of the field or node description.
+	 * @param attributeValue Value of the attribute that is part of the field or node description.
+	 * @param fltr           The filter object to find the field or node at the right position as
+	 *                       demonstrated above.
 	 */
 	public void deleteField(String headerName, String attributeName, String attributeValue, Filter fltr) {
 		instance.deleteField(headerName, attributeName, attributeValue, fltr);
 	}
+
 	/**
 	 * Removes the row of the container instance at the specified index.
 	 * 
@@ -657,12 +677,11 @@ public class DataContainer extends BaseContainer {
 	}
 
 	/**
-	 * Deletes all rows of the container instance that match the defined filter
-	 * criteria. If no rows could be detected the method returns. If there is a file
-	 * defined for the container the changes get written to it afterwards.
+	 * Deletes all rows of the container instance that match the defined filter criteria. If no rows
+	 * could be detected the method returns. If there is a file defined for the container the changes
+	 * get written to it afterwards.
 	 * 
-	 * @param fltr {@link org.opentdk.api.filter.Filter} object with the set
-	 *             filter rules.
+	 * @param fltr {@link org.opentdk.api.filter.Filter} object with the set filter rules.
 	 */
 	public void deleteRows(Filter fltr) {
 		int[] indexes = getRowsIndexes(fltr);
@@ -679,12 +698,11 @@ public class DataContainer extends BaseContainer {
 	}
 
 	/**
-	 * This method writes data to a existing or newly created CSV file. Useful if
-	 * the current state of the container should be saved. The semicolon gets used
-	 * as column separator.
+	 * This method writes data to a existing or newly created CSV file. Useful if the current state of
+	 * the container should be saved. The semicolon gets used as column separator.
 	 * 
-	 * @param fileName Full path and name of the source file, from which the data
-	 *                 will be loaded into DataContainer
+	 * @param fileName Full path and name of the source file, from which the data will be loaded into
+	 *                 DataContainer
 	 * @throws IOException If any error occurred when writing to the file.
 	 */
 	public void exportContainer(String fileName) throws IOException {
@@ -692,9 +710,8 @@ public class DataContainer extends BaseContainer {
 	}
 
 	/**
-	 * This method writes data to a existing or newly created CSV file. Useful if
-	 * the current state of the container should be saved. The column separator can
-	 * be set.
+	 * This method writes data to a existing or newly created CSV file. Useful if the current state of
+	 * the container should be saved. The column separator can be set.
 	 *
 	 * @param fileName        The file path of the file to write to or to create.
 	 * @param columnDelimiter The column separator to structure the data.
@@ -727,8 +744,7 @@ public class DataContainer extends BaseContainer {
 	}
 
 	/**
-	 * A specific method for type {@link XMLDataContainer} to get the attributes of
-	 * a XML tag.
+	 * A specific method for type {@link XMLDataContainer} to get the attributes of a XML tag.
 	 * 
 	 * @param tag      The name of the XML tag to refer to.
 	 * @param attrName The name of the XML attribute to refer to.
@@ -745,84 +761,72 @@ public class DataContainer extends BaseContainer {
 	}
 
 	/**
-	 * Gets the content of a column from the <code>DataContainer</code> instance. In
-	 * order to get the columns content, it is iterated through each row saved. The
-	 * column is specified with index and the content is returned as
-	 * <code>Array</code> of type String
+	 * Gets the content of a column from the <code>DataContainer</code> instance. In order to get the
+	 * columns content, it is iterated through each row saved. The column is specified with index and
+	 * the content is returned as <code>Array</code> of type String
 	 *
 	 * @param index The column's index, which content is searched.
-	 * @return The content of the specified column as <code>Array</code> of type
-	 *         String.
+	 * @return The content of the specified column as <code>Array</code> of type String.
 	 */
 	public String[] getColumn(int index) {
 		return getColumn(getHeaderName(index), new int[0], new Filter());
 	}
 
 	/**
-	 * Gets filtered content of a column from the <code>DataContainer</code>
-	 * instance. Only values of a column that match to one or more conditions. In
-	 * order to get the columns content, it is iterated through each row saved. The
-	 * column is specified with index and the content is returned as
+	 * Gets filtered content of a column from the <code>DataContainer</code> instance. Only values of a
+	 * column that match to one or more conditions. In order to get the columns content, it is iterated
+	 * through each row saved. The column is specified with index and the content is returned as
 	 * <code>Array</code> of type <code>String</code>.
 	 *
 	 * @param index The column's index, which content is searched.
-	 * @param fltr  A {@link org.opentdk.api.filter.Filter} object to define
-	 *              which data should be ignored. If it is null no filter gets used.
-	 * @return the content of the specified column as <code>Array</code> of type
-	 *         <code>String</code>.
+	 * @param fltr  A {@link org.opentdk.api.filter.Filter} object to define which data should be
+	 *              ignored. If it is null no filter gets used.
+	 * @return the content of the specified column as <code>Array</code> of type <code>String</code>.
 	 */
 	public String[] getColumn(int index, Filter fltr) {
 		return getColumn(getHeaderName(index), new int[0], fltr);
 	}
 
 	/**
-	 * Gets the content of a column from the <code>DataContainer</code> instance. In
-	 * order to get the columns content, it is iterated through each row saved. The
-	 * column is specified with header name and the content is returned as
-	 * <code>Array</code> of type String
+	 * Gets the content of a column from the <code>DataContainer</code> instance. In order to get the
+	 * columns content, it is iterated through each row saved. The column is specified with header name
+	 * and the content is returned as <code>Array</code> of type String
 	 *
 	 * @param colName The header name of the column.
-	 * @return The content of the specified column as <code>Array</code> of type
-	 *         String.
+	 * @return The content of the specified column as <code>Array</code> of type String.
 	 */
 	public String[] getColumn(String colName) {
 		return getColumn(colName, new int[0], new Filter());
 	}
 
 	/**
-	 * Gets filtered content of a column from the <code>DataContainer</code>
-	 * instance. Only values of a column, that match to one or more conditions. In
-	 * order to get the columns content, it is iterated through each row saved. The
-	 * column is specified with column header name and the content is returned as
-	 * <code>Array</code> of type <code>String</code>.
+	 * Gets filtered content of a column from the <code>DataContainer</code> instance. Only values of a
+	 * column, that match to one or more conditions. In order to get the columns content, it is iterated
+	 * through each row saved. The column is specified with column header name and the content is
+	 * returned as <code>Array</code> of type <code>String</code>.
 	 * 
 	 * @param colName The header name of the column.
-	 * @param fltr    A {@link org.opentdk.api.filter.Filter} object to define
-	 *                which data should be ignored. If it is null no filter gets
-	 *                used.
-	 * @return the content of the specified column as <code>Array</code> of type
-	 *         <code>String</code>.
+	 * @param fltr    A {@link org.opentdk.api.filter.Filter} object to define which data should be
+	 *                ignored. If it is null no filter gets used.
+	 * @return the content of the specified column as <code>Array</code> of type <code>String</code>.
 	 */
 	public String[] getColumn(String colName, Filter fltr) {
 		return getColumn(colName, new int[0], fltr);
 	}
 
 	/**
-	 * Gets filtered content of a column from the <code>DataContainer</code>
-	 * instance. Only values of a column, that match to one or more conditions. In
-	 * order to get the columns content, it is iterated through each row saved. The
-	 * column is specified with column header name and the content is returned as
-	 * <code>Array</code> of type <code>String</code>, but only if the detected rows
-	 * in the column match the committed row indexes.
+	 * Gets filtered content of a column from the <code>DataContainer</code> instance. Only values of a
+	 * column, that match to one or more conditions. In order to get the columns content, it is iterated
+	 * through each row saved. The column is specified with column header name and the content is
+	 * returned as <code>Array</code> of type <code>String</code>, but only if the detected rows in the
+	 * column match the committed row indexes.
 	 * 
 	 * @param colName    The header name of the column.
-	 * @param rowIndexes An array of type integer that contains all row indexes that
-	 *                   should be taken into account when searching in the column.
-	 * @param fltr       A {@link org.opentdk.api.filter.Filter} object to
-	 *                   define which data should be ignored. If it is null no
-	 *                   filter gets used.
-	 * @return the content of the specified column as <code>Array</code> of type
-	 *         <code>String</code>.
+	 * @param rowIndexes An array of type integer that contains all row indexes that should be taken
+	 *                   into account when searching in the column.
+	 * @param fltr       A {@link org.opentdk.api.filter.Filter} object to define which data should be
+	 *                   ignored. If it is null no filter gets used.
+	 * @return the content of the specified column as <code>Array</code> of type <code>String</code>.
 	 */
 	public String[] getColumn(String colName, int[] rowIndexes, Filter fltr) {
 		List<String[]> outLst = getColumnsList(colName.split(";"), rowIndexes, fltr);
@@ -846,65 +850,62 @@ public class DataContainer extends BaseContainer {
 	 * Gets a <code>List</code> of string arrays with all column values of the
 	 * <code>DataContainer</code> instance.
 	 *
-	 * @return Object of type <code>List</code> with string arrays, including all
-	 *         matching values of a column.
+	 * @return Object of type <code>List</code> with string arrays, including all matching values of a
+	 *         column.
 	 */
 	public List<String[]> getColumnsList() {
 		return getColumnsList(new String[0], new int[0], new Filter());
 	}
 
 	/**
-	 * Gets a <code>List</code> of string arrays with all column values that match
-	 * to the defined filter. The Filter defines the rules for matching rows. <br>
+	 * Gets a <code>List</code> of string arrays with all column values that match to the defined
+	 * filter. The Filter defines the rules for matching rows. <br>
 	 * <br>
-	 * e.g. get string arrays for each column of table 'Customer' where the value of
-	 * 'City' equals to 'Munich'.
+	 * e.g. get string arrays for each column of table 'Customer' where the value of 'City' equals to
+	 * 'Munich'.
 	 *
-	 * @param rowFilter Object of type {@link org.opentdk.api.filter.Filter}
-	 *                  which defines rules for matching rows
-	 * @return Object of type <code>List</code> with string arrays, including all
-	 *         matching values of a column.
+	 * @param rowFilter Object of type {@link org.opentdk.api.filter.Filter} which defines rules for
+	 *                  matching rows
+	 * @return Object of type <code>List</code> with string arrays, including all matching values of a
+	 *         column.
 	 */
 	public List<String[]> getColumnsList(Filter rowFilter) {
 		return getColumnsList(new String[0], new int[0], rowFilter);
 	}
 
 	/**
-	 * Gets a <code>List</code> of string arrays with all column values that match
-	 * to the defined filter. The Filter defines the rules for matching rows. <br>
+	 * Gets a <code>List</code> of string arrays with all column values that match to the defined
+	 * filter. The Filter defines the rules for matching rows. <br>
 	 * <br>
-	 * e.g. get string arrays for each column of table 'Customer' where the value of
-	 * 'City' equals to 'Munich'.
+	 * e.g. get string arrays for each column of table 'Customer' where the value of 'City' equals to
+	 * 'Munich'.
 	 *
-	 * @param columnHeaders Semicolon separated string with the column names of
-	 *                      which the values will be returned.
-	 * @param rowFilter     Object of type
-	 *                      {@link org.opentdk.api.filter.Filter} which defines
-	 *                      rules for matching rows.
-	 * @return Object of type <code>List</code> with string arrays, including all
-	 *         matching values of a column.
+	 * @param columnHeaders Semicolon separated string with the column names of which the values will be
+	 *                      returned.
+	 * @param rowFilter     Object of type {@link org.opentdk.api.filter.Filter} which defines rules for
+	 *                      matching rows.
+	 * @return Object of type <code>List</code> with string arrays, including all matching values of a
+	 *         column.
 	 */
 	public List<String[]> getColumnsList(String columnHeaders, Filter rowFilter) {
 		return getColumnsList(columnHeaders.split(";"), new int[0], rowFilter);
 	}
 
 	/**
-	 * Gets a <code>List</code> of string arrays with all column values that match
-	 * to the defined filter. The Filter defines the rules for matching rows.
-	 * Additionally it is possible to define the row indices that should be taken
-	 * into account. <br>
+	 * Gets a <code>List</code> of string arrays with all column values that match to the defined
+	 * filter. The Filter defines the rules for matching rows. Additionally it is possible to define the
+	 * row indices that should be taken into account. <br>
 	 * <br>
-	 * e.g. get string arrays for each column of table 'Customer' where the value of
-	 * 'City' equals to 'Munich'.
+	 * e.g. get string arrays for each column of table 'Customer' where the value of 'City' equals to
+	 * 'Munich'.
 	 *
-	 * @param columnHeaders Semicolon separated string with the column names of
-	 *                      which the values will be returned.
-	 * @param rowFilter     Object of type
-	 *                      {@link org.opentdk.api.filter.Filter} which defines
-	 *                      rules for matching rows.
+	 * @param columnHeaders Semicolon separated string with the column names of which the values will be
+	 *                      returned.
+	 * @param rowFilter     Object of type {@link org.opentdk.api.filter.Filter} which defines rules for
+	 *                      matching rows.
 	 * @param rowIndexes    The row numbers that should be used as search criteria.
-	 * @return Object of type <code>List</code> with string arrays, including all
-	 *         matching values of a column.
+	 * @return Object of type <code>List</code> with string arrays, including all matching values of a
+	 *         column.
 	 */
 	public List<String[]> getColumnsList(String[] columnHeaders, int[] rowIndexes, Filter rowFilter) {
 		List<String[]> colList = new ArrayList<String[]>();
@@ -936,8 +937,8 @@ public class DataContainer extends BaseContainer {
 	/**
 	 * Gets the maximum length of the values corresponding to the headerName.
 	 *
-	 * @param headerName The name of the header, which can be column or row,
-	 *                   depending on the orientation
+	 * @param headerName The name of the header, which can be column or row, depending on the
+	 *                   orientation
 	 * @return Length of the longest String corresponding to headerName
 	 */
 	public int getMaxLen(String headerName) {
@@ -951,9 +952,8 @@ public class DataContainer extends BaseContainer {
 	}
 
 	/**
-	 * Gets the content of a row of the container instance. The row is specified by
-	 * index. If the given index is bigger than the list's size, it will return
-	 * <code>null</code>.
+	 * Gets the content of a row of the container instance. The row is specified by index. If the given
+	 * index is bigger than the list's size, it will return <code>null</code>.
 	 *
 	 * @param rowIndex The row's index, which content is searched.
 	 * @return The content of the specified row.
@@ -963,14 +963,13 @@ public class DataContainer extends BaseContainer {
 	}
 
 	/**
-	 * Gets the content of a row of the container instance. The row is specified by
-	 * index. If the given index is bigger than the list's size, it will return
-	 * <code>null</code>.
+	 * Gets the content of a row of the container instance. The row is specified by index. If the given
+	 * index is bigger than the list's size, it will return <code>null</code>.
 	 *
 	 * @param rowIndex      The row's index, which content is searched.
-	 * @param columnHeaders The column headers that should be taken into account,
-	 *                      separated by semicolon. If only one header should be
-	 *                      specified, no separation is needed of course.
+	 * @param columnHeaders The column headers that should be taken into account, separated by
+	 *                      semicolon. If only one header should be specified, no separation is needed
+	 *                      of course.
 	 * @return The content of the specified row.
 	 */
 	public String[] getRow(int rowIndex, String columnHeaders) {
@@ -978,17 +977,15 @@ public class DataContainer extends BaseContainer {
 	}
 
 	/**
-	 * Gets the content of a row of the container instance. The row is specified by
-	 * index. If the given index is bigger than the list's size, it will return
-	 * <code>null</code>.
+	 * Gets the content of a row of the container instance. The row is specified by index. If the given
+	 * index is bigger than the list's size, it will return <code>null</code>.
 	 *
 	 * @param rowIndex      The row's index, which content is searched.
-	 * @param columnHeaders The column headers that should be taken into account,
-	 *                      separated by semicolon. If only one header should be
-	 *                      specified, no separation is needed of course.
-	 * @param fltr          Object of type
-	 *                      {@link org.opentdk.api.filter.Filter} which defines
-	 *                      rules for matching rows.
+	 * @param columnHeaders The column headers that should be taken into account, separated by
+	 *                      semicolon. If only one header should be specified, no separation is needed
+	 *                      of course.
+	 * @param fltr          Object of type {@link org.opentdk.api.filter.Filter} which defines rules for
+	 *                      matching rows.
 	 * @return The content of the specified row.
 	 */
 	public String[] getRow(int rowIndex, String columnHeaders, Filter fltr) {
@@ -1006,14 +1003,13 @@ public class DataContainer extends BaseContainer {
 	}
 
 	/**
-	 * Gets the content of a row of the container instance. The row is specified by
-	 * index. If the given index is bigger than the list's size, it will return
-	 * <code>null</code>.
+	 * Gets the content of a row of the container instance. The row is specified by index. If the given
+	 * index is bigger than the list's size, it will return <code>null</code>.
 	 *
 	 * @param rowIndex      The row's index, which content is searched.
-	 * @param columnHeaders The column headers that should be taken into account,
-	 *                      separated by semicolon. If only one header should be
-	 *                      specified, no separation is needed of course.
+	 * @param columnHeaders The column headers that should be taken into account, separated by
+	 *                      semicolon. If only one header should be specified, no separation is needed
+	 *                      of course.
 	 * @return The content of the specified row.
 	 */
 	public String[] getRow(int rowIndex, String[] columnHeaders) {
@@ -1030,22 +1026,20 @@ public class DataContainer extends BaseContainer {
 	}
 
 	/**
-	 * Returns the number of rows of the current <code>DataContainer</code>
-	 * instance.
+	 * Returns the number of rows of the current <code>DataContainer</code> instance.
 	 *
-	 * @return Number of rows e.g number of lines in case of a CSV format or number
-	 *         of key value pairs in case of a properties file.
+	 * @return Number of rows e.g number of lines in case of a CSV format or number of key value pairs
+	 *         in case of a properties file.
 	 */
 	public int getRowCount() {
 		return values.size();
 	}
 
 	/**
-	 * Possibility to search for integer values of the <code>DataContainer</code>
-	 * rows.
+	 * Possibility to search for integer values of the <code>DataContainer</code> rows.
 	 * 
-	 * @param filter Object of type {@link org.opentdk.api.filter.Filter} which
-	 *               defines rules for matching rows.
+	 * @param filter Object of type {@link org.opentdk.api.filter.Filter} which defines rules for
+	 *               matching rows.
 	 * @return The numbers of the matching rows as integer array.
 	 */
 	public int[] getRowsIndexes(Filter filter) {
@@ -1071,8 +1065,7 @@ public class DataContainer extends BaseContainer {
 	}
 
 	/**
-	 * Returns a list with all rows stored in the <code>DataContainer</code>
-	 * instance.
+	 * Returns a list with all rows stored in the <code>DataContainer</code> instance.
 	 *
 	 * @return list object with stored data rows.
 	 */
@@ -1083,8 +1076,8 @@ public class DataContainer extends BaseContainer {
 	/**
 	 * Returns a list with all rows, that match to the defined rowFilter.
 	 *
-	 * @param rowFilter Object of type {@link org.opentdk.api.filter.Filter}
-	 *                  which defines rules for matching rows.
+	 * @param rowFilter Object of type {@link org.opentdk.api.filter.Filter} which defines rules for
+	 *                  matching rows.
 	 * @return A list with all rows. Each row is stored in one string array.
 	 */
 	public List<String[]> getRowsList(Filter rowFilter) {
@@ -1092,15 +1085,12 @@ public class DataContainer extends BaseContainer {
 	}
 
 	/**
-	 * Returns a list of row values for defined columns that match to a defined
-	 * rowFilter.
+	 * Returns a list of row values for defined columns that match to a defined rowFilter.
 	 *
-	 * @param rowIndexes    The numbers of the rows that should be taken into
-	 *                      account.
+	 * @param rowIndexes    The numbers of the rows that should be taken into account.
 	 * @param columnHeaders The header name of the column to search in.
-	 * @param rowFilter     Object of type
-	 *                      {@link org.opentdk.api.filter.Filter} which defines
-	 *                      rules for matching rows.
+	 * @param rowFilter     Object of type {@link org.opentdk.api.filter.Filter} which defines rules for
+	 *                      matching rows.
 	 * 
 	 * @return A list with all rows. Each row is stored in one string array.
 	 */
@@ -1149,12 +1139,11 @@ public class DataContainer extends BaseContainer {
 	}
 
 	/**
-	 * Returns a list of row values for defined columns that match to a defined
-	 * rowFilter.
+	 * Returns a list of row values for defined columns that match to a defined rowFilter.
 	 *
 	 * @param columnHeader The header name of the column to search in.
-	 * @param rowFilter    Object of type {@link org.opentdk.api.filter.Filter}
-	 *                     which defines rules for matching rows.
+	 * @param rowFilter    Object of type {@link org.opentdk.api.filter.Filter} which defines rules for
+	 *                     matching rows.
 	 * @return A list with all rows. Each row is stored in one string array.
 	 */
 	public List<String[]> getRowsList(String columnHeader, Filter rowFilter) {
@@ -1162,8 +1151,8 @@ public class DataContainer extends BaseContainer {
 	}
 
 	/**
-	 * Use the <code>getValue</code> method to return a value from a field addressed
-	 * by headerName of the column and index of the row.
+	 * Use the <code>getValue</code> method to return a value from a field addressed by headerName of
+	 * the column and index of the row.
 	 *
 	 * @param headerIndex The name of the column header
 	 * @param rowIndex    row-index of the field
@@ -1174,8 +1163,7 @@ public class DataContainer extends BaseContainer {
 	}
 
 	/**
-	 * Use the <code>getValue</code> method to return the first value in column
-	 * addressed by headerName.
+	 * Use the <code>getValue</code> method to return the first value in column addressed by headerName.
 	 *
 	 * @param headerName The name of the column header
 	 * @return the first value in column addressed by headerName.
@@ -1185,8 +1173,8 @@ public class DataContainer extends BaseContainer {
 	}
 
 	/**
-	 * Use the <code>getValue</code> method to return a value from a field addressed
-	 * by headerName of the column and prepared filter.
+	 * Use the <code>getValue</code> method to return a value from a field addressed by headerName of
+	 * the column and prepared filter.
 	 *
 	 * @param headerName The name of the column header
 	 * @param fltr       A prepared Filter instance to categorize the result
@@ -1197,8 +1185,8 @@ public class DataContainer extends BaseContainer {
 	}
 
 	/**
-	 * Use the <code>getValue</code> method to return a value from a field addressed
-	 * by headerName of the column and index of the row.
+	 * Use the <code>getValue</code> method to return a value from a field addressed by headerName of
+	 * the column and index of the row.
 	 *
 	 * @param headerName The name of the column header
 	 * @param rowIndex   row index of the field
@@ -1209,12 +1197,12 @@ public class DataContainer extends BaseContainer {
 	}
 
 	/**
-	 * Use the getValuesAsList() method to search for a value by header name, row
-	 * index and prepared filter.
+	 * Use the getValuesAsList() method to search for a value by header name, row index and prepared
+	 * filter.
 	 * 
 	 * @param headerName The name of the column header
-	 * @param rowIndex   The row index. If it is unknown or not used, commit -1 to
-	 *                   search for header name and filter
+	 * @param rowIndex   The row index. If it is unknown or not used, commit -1 to search for header
+	 *                   name and filter
 	 * @param fltr       A prepared Filter instance to categorize the result.
 	 * @return the value as String or an empty string if no result could be found
 	 */
@@ -1242,12 +1230,12 @@ public class DataContainer extends BaseContainer {
 	}
 
 	/**
-	 * Gets a sequence of distincted values from the DataContainer instance.
-	 * Depending on the header orientation, this method will retrieve the values of
-	 * one row, or one column, which is defined by headerName.
+	 * Gets a sequence of distincted values from the DataContainer instance. Depending on the header
+	 * orientation, this method will retrieve the values of one row, or one column, which is defined by
+	 * headerName.
 	 *
-	 * @param headerName The name of the header, which can be column or row,
-	 *                   depending on the orientation
+	 * @param headerName The name of the header, which can be column or row, depending on the
+	 *                   orientation
 	 * @return distincted list of type String with the selected values
 	 */
 	public List<String> getValuesAsDistinctedList(String headerName) {
@@ -1257,13 +1245,12 @@ public class DataContainer extends BaseContainer {
 	}
 
 	/**
-	 * Gets a sequence of numeric values from the DataContainer instance and returns
-	 * them as List of Double. Depending on the header orientation, this method will
-	 * retrieve the values of one row, or one column, which is defined by
-	 * headerName.
+	 * Gets a sequence of numeric values from the DataContainer instance and returns them as List of
+	 * Double. Depending on the header orientation, this method will retrieve the values of one row, or
+	 * one column, which is defined by headerName.
 	 *
-	 * @param headerName The name of the header, which can be column or row,
-	 *                   depending on the orientation
+	 * @param headerName The name of the header, which can be column or row, depending on the
+	 *                   orientation
 	 * @return List of type Double with all selected values
 	 */
 	public List<Double> getValuesAsDoubleList(String headerName) {
@@ -1271,14 +1258,13 @@ public class DataContainer extends BaseContainer {
 	}
 
 	/**
-	 * Gets a sequence of numeric values from the current DataContainer instance,
-	 * that matches to a defined filter and returns them as a List of Double.
-	 * Depending on the header orientation, this method will retrieve the values of
-	 * one row, or one column, which is defined by headerName.
+	 * Gets a sequence of numeric values from the current DataContainer instance, that matches to a
+	 * defined filter and returns them as a List of Double. Depending on the header orientation, this
+	 * method will retrieve the values of one row, or one column, which is defined by headerName.
 	 *
 	 * @param headerName The name of the header
-	 * @param rowFilter  Object of type {@link org.opentdk.api.filter.Filter}
-	 *                   which defines rules for matching rows
+	 * @param rowFilter  Object of type {@link org.opentdk.api.filter.Filter} which defines rules for
+	 *                   matching rows
 	 * @return List of type Double with all selected values
 	 */
 	public List<Double> getValuesAsDoubleList(String headerName, Filter rowFilter) {
@@ -1293,13 +1279,12 @@ public class DataContainer extends BaseContainer {
 	}
 
 	/**
-	 * Gets a sequence of numeric values from the DataContainer instance and returns
-	 * them as List of integer. Depending on the header orientation, this method
-	 * will retrieve the values of one row, or one column, which is defined by
-	 * headerName.
+	 * Gets a sequence of numeric values from the DataContainer instance and returns them as List of
+	 * integer. Depending on the header orientation, this method will retrieve the values of one row, or
+	 * one column, which is defined by headerName.
 	 *
-	 * @param headerName The name of the header, which can be column or row,
-	 *                   depending on the orientation
+	 * @param headerName The name of the header, which can be column or row, depending on the
+	 *                   orientation
 	 * @return List of type Integer with all selected values
 	 */
 	public List<Integer> getValuesAsIntList(String headerName) {
@@ -1307,14 +1292,13 @@ public class DataContainer extends BaseContainer {
 	}
 
 	/**
-	 * Gets a sequence of numeric values from the current DataContainer instance,
-	 * that matches to a defined filter and returns them as a List of Integer.
-	 * Depending on the header orientation, this method will retrieve the values of
-	 * one row, or one column, which is defined by headerName.
+	 * Gets a sequence of numeric values from the current DataContainer instance, that matches to a
+	 * defined filter and returns them as a List of Integer. Depending on the header orientation, this
+	 * method will retrieve the values of one row, or one column, which is defined by headerName.
 	 *
 	 * @param headerName The name of the header
-	 * @param rowFilter  Object of type {@link org.opentdk.api.filter.Filter}
-	 *                   which defines rules for matching rows
+	 * @param rowFilter  Object of type {@link org.opentdk.api.filter.Filter} which defines rules for
+	 *                   matching rows
 	 * @return List of type integer with all selected values
 	 */
 	public List<Integer> getValuesAsIntList(String headerName, Filter rowFilter) {
@@ -1327,12 +1311,11 @@ public class DataContainer extends BaseContainer {
 	}
 
 	/**
-	 * Gets a sequence of values from the DataContainer instance. Depending on the
-	 * header orientation, this method will retrieve the values of one row, or one
-	 * column, which is defined by headerName.
+	 * Gets a sequence of values from the DataContainer instance. Depending on the header orientation,
+	 * this method will retrieve the values of one row, or one column, which is defined by headerName.
 	 *
-	 * @param headerName The name of the header, which can be column or row,
-	 *                   depending on the orientation
+	 * @param headerName The name of the header, which can be column or row, depending on the
+	 *                   orientation
 	 * @return List of type String with all selected values
 	 */
 	public List<String> getValuesAsList(String headerName) {
@@ -1340,14 +1323,13 @@ public class DataContainer extends BaseContainer {
 	}
 
 	/**
-	 * Gets a sequence of values from the current DataContainer instance, that
-	 * matches to a defined filter. Depending on the header orientation, this method
-	 * will retrieve the values of one row, or one column, which is defined by
-	 * headerName.
+	 * Gets a sequence of values from the current DataContainer instance, that matches to a defined
+	 * filter. Depending on the header orientation, this method will retrieve the values of one row, or
+	 * one column, which is defined by headerName.
 	 *
 	 * @param headerName The name of the header
-	 * @param rowFilter  Object of type {@link org.opentdk.api.filter.Filter}
-	 *                   which defines rules for matching rows
+	 * @param rowFilter  Object of type {@link org.opentdk.api.filter.Filter} which defines rules for
+	 *                   matching rows
 	 * @return List of type String with all selected values
 	 */
 	public List<String> getValuesAsList(String headerName, Filter rowFilter) {
@@ -1355,16 +1337,14 @@ public class DataContainer extends BaseContainer {
 	}
 
 	/**
-	 * Gets a sequence of values from the current DataContainer instance, that
-	 * matches to a defined filter and defined row indexes. Depending on the header
-	 * orientation, this method will retrieve the values of one row, or one column,
-	 * which is defined by headerName.
+	 * Gets a sequence of values from the current DataContainer instance, that matches to a defined
+	 * filter and defined row indexes. Depending on the header orientation, this method will retrieve
+	 * the values of one row, or one column, which is defined by headerName.
 	 *
 	 * @param headerName The name of the header
-	 * @param rowIndexes int array with index numbers of the rows that will be
-	 *                   retrieved
-	 * @param fltr       Object of type {@link org.opentdk.api.filter.Filter}
-	 *                   which defines rules for matching rows
+	 * @param rowIndexes int array with index numbers of the rows that will be retrieved
+	 * @param fltr       Object of type {@link org.opentdk.api.filter.Filter} which defines rules for
+	 *                   matching rows
 	 * @return List of type String with all selected values
 	 */
 	public List<String> getValuesAsList(String headerName, int[] rowIndexes, Filter fltr) {
@@ -1377,8 +1357,8 @@ public class DataContainer extends BaseContainer {
 	}
 
 	/**
-	 * Gets a representation of all values within the DataContainer. Columns will be
-	 * separated by the associated or default column delimiter, rows by a new line.
+	 * Gets a representation of all values within the DataContainer. Columns will be separated by the
+	 * associated or default column delimiter, rows by a new line.
 	 *
 	 * @return String with the complete content of the DataContainer
 	 */
@@ -1392,9 +1372,8 @@ public class DataContainer extends BaseContainer {
 	}
 
 	/**
-	 * Compares the row at committed index with the committed string array. If one
-	 * of the still existing row values is null or empty, it gets replaced by the
-	 * value from the new array.
+	 * Compares the row at committed index with the committed string array. If one of the still existing
+	 * row values is null or empty, it gets replaced by the value from the new array.
 	 * 
 	 * @param rowIndex  row number to identify the row that should be merged
 	 * @param newValues the new data as string array
@@ -1412,34 +1391,34 @@ public class DataContainer extends BaseContainer {
 	}
 
 	/**
-	 * If the <code>DataContainer</code> initialization and the data import needs to
-	 * be done separately, this method can be used. This method requires that the
-	 * data source is known by the specific <code>DataContainer</code>, e.g. a valid
-	 * source file is assigned to the {@link BaseContainer#fileName} property.
+	 * If the <code>DataContainer</code> initialization and the data import needs to be done separately,
+	 * this method can be used. This method requires that the data source is known by the specific
+	 * <code>DataContainer</code>, e.g. a valid source file is assigned to the
+	 * {@link BaseContainer#fileName} property.
 	 */
 	public void readData() {
 		instance.readData(new Filter());
 	}
 
 	/**
-	 * If the <code>DataContainer</code> initialization and the data import needs to
-	 * be done separately, this method can be used. This method requires that the
-	 * data source is known by the specific <code>DataContainer</code>, e.g. a valid
-	 * source file is assigned to the {@link BaseContainer#fileName} property.
+	 * If the <code>DataContainer</code> initialization and the data import needs to be done separately,
+	 * this method can be used. This method requires that the data source is known by the specific
+	 * <code>DataContainer</code>, e.g. a valid source file is assigned to the
+	 * {@link BaseContainer#fileName} property.
 	 * 
-	 * @param fltr A {@link org.opentdk.api.filter.Filter} object to define
-	 *             which data should be ignored. If it is null no filter gets used.
+	 * @param fltr A {@link org.opentdk.api.filter.Filter} object to define which data should be
+	 *             ignored. If it is null no filter gets used.
 	 */
 	public void readData(Filter fltr) {
 		instance.readData(fltr);
 	}
 
 	/**
-	 * If the <code>DataContainer</code> initialization and the data import needs to
-	 * be done separately, this method can be used.
+	 * If the <code>DataContainer</code> initialization and the data import needs to be done separately,
+	 * this method can be used.
 	 * 
-	 * @param fileName Full path and name of the source file, from which the data
-	 *                 will be loaded into DataContainer
+	 * @param fileName Full path and name of the source file, from which the data will be loaded into
+	 *                 DataContainer
 	 */
 	public void readData(String fileName) {
 		this.setFileName(fileName);
@@ -1447,15 +1426,14 @@ public class DataContainer extends BaseContainer {
 	}
 
 	/**
-	 * If the <code>DataContainer</code> initialization and the data import needs to
-	 * be done separately, this method can be used.
+	 * If the <code>DataContainer</code> initialization and the data import needs to be done separately,
+	 * this method can be used.
 	 * 
-	 * @param fileName Full path and name of the source file, from which the data
-	 *                 will be loaded into DataContainer
+	 * @param fileName Full path and name of the source file, from which the data will be loaded into
+	 *                 DataContainer
 	 * 
-	 * @param fltr     A {@link org.opentdk.api.filter.Filter} object to define
-	 *                 which data should be ignored. If it is null no filter gets
-	 *                 used.
+	 * @param fltr     A {@link org.opentdk.api.filter.Filter} object to define which data should be
+	 *                 ignored. If it is null no filter gets used.
 	 */
 	public void readData(String fileName, Filter fltr) {
 		this.setFileName(fileName);
@@ -1463,12 +1441,11 @@ public class DataContainer extends BaseContainer {
 	}
 
 	/**
-	 * Sets a column in the <code>DataContainer</code> instance with the specified
-	 * new content. If the new column is bigger than the old one, new rows with
-	 * empty values will be added.
+	 * Sets a column in the <code>DataContainer</code> instance with the specified new content. If the
+	 * new column is bigger than the old one, new rows with empty values will be added.
 	 *
-	 * @param headerName   The name of the column. Existing column will be
-	 *                     overwritten and non-existing column will be created.
+	 * @param headerName   The name of the column. Existing column will be overwritten and non-existing
+	 *                     column will be created.
 	 * @param columnValues The values for the column as List of strings.
 	 */
 	public void setColumn(String headerName, List<String> columnValues) {
@@ -1476,12 +1453,11 @@ public class DataContainer extends BaseContainer {
 	}
 
 	/**
-	 * Sets a column in the <code>DataContainer</code> instance with the specified
-	 * new content. If the new column is bigger than the old one, new rows with
-	 * empty values will be added.
+	 * Sets a column in the <code>DataContainer</code> instance with the specified new content. If the
+	 * new column is bigger than the old one, new rows with empty values will be added.
 	 *
-	 * @param headerName   The name of the column. Existing column will be
-	 *                     overwritten and non-existing column will be created.
+	 * @param headerName   The name of the column. Existing column will be overwritten and non-existing
+	 *                     column will be created.
 	 * @param columnValues The values for the column as string array.
 	 */
 	public void setColumn(String headerName, String[] columnValues) {
@@ -1515,8 +1491,7 @@ public class DataContainer extends BaseContainer {
 	}
 
 	/**
-	 * Replaces the row at the committed index with the data of the committed string
-	 * array.
+	 * Replaces the row at the committed index with the data of the committed string array.
 	 * 
 	 * @param rowIndex  row number to identify the row that should be replaced
 	 * @param rowValues the new data as string array
@@ -1526,10 +1501,9 @@ public class DataContainer extends BaseContainer {
 	}
 
 	/**
-	 * Sets content of a defined field by header name and index with a specified
-	 * value. The existing content of that field will be overwritten. If a header
-	 * does not exist, it will be created by shifting all existing values one
-	 * position backward and setting the new one at the first position.
+	 * Sets content of a defined field by header name and index with a specified value. The existing
+	 * content of that field will be overwritten. If a header does not exist, it will be created by
+	 * shifting all existing values one position backward and setting the new one at the first position.
 	 *
 	 * @param headerName Name of the sequence header
 	 * @param index      Index of the field within the DataSet
@@ -1540,15 +1514,14 @@ public class DataContainer extends BaseContainer {
 	}
 
 	/**
-	 * Sets content of a defined field by header name, index and filter with a
-	 * specified value. The existing content of the field within the dataset will be
-	 * overwritten. If a header does not exist, it will be created by shifting all
-	 * existing values one position backward and setting the new one at the first
-	 * position.
+	 * Sets content of a defined field by header name, index and filter with a specified value. The
+	 * existing content of the field within the dataset will be overwritten. If a header does not exist,
+	 * it will be created by shifting all existing values one position backward and setting the new one
+	 * at the first position.
 	 *
 	 * @param headerName Name of the sequence header
-	 * @param index      zero based index that defines the position of the field in
-	 *                   case that multiple fields were found
+	 * @param index      zero based index that defines the position of the field in case that multiple
+	 *                   fields were found
 	 * @param value      Value as String that will be set to the field
 	 * @param fltr       Filter for selection of the target dataset (row or column)
 	 */
@@ -1557,8 +1530,8 @@ public class DataContainer extends BaseContainer {
 	}
 
 	/**
-	 * Sets content to the first field of a sequence defined by header name with a
-	 * specified value. The existing content of that field will be overwritten.
+	 * Sets content to the first field of a sequence defined by header name with a specified value. The
+	 * existing content of that field will be overwritten.
 	 *
 	 * @param headerName Name of the sequence header
 	 * @param value      Value as String that will be set to the field
@@ -1568,11 +1541,10 @@ public class DataContainer extends BaseContainer {
 	}
 
 	/**
-	 * Sets content of a defined field by header name and filter with a specified
-	 * value. The existing content of the field within the first matching dataset
-	 * will be overwritten. If a header does not exist, it will be created by
-	 * shifting all existing values one position backward and setting the new one at
-	 * the first position.
+	 * Sets content of a defined field by header name and filter with a specified value. The existing
+	 * content of the field within the first matching dataset will be overwritten. If a header does not
+	 * exist, it will be created by shifting all existing values one position backward and setting the
+	 * new one at the first position.
 	 *
 	 * @param headerName Name of the sequence header
 	 * @param value      Value as String that will be set to the field
@@ -1583,15 +1555,14 @@ public class DataContainer extends BaseContainer {
 	}
 
 	/**
-	 * Sets content of multiple fields by header name, index and filter with a
-	 * specified value. The existing content of the fields within the dataset will
-	 * be overwritten. If a header does not exist, it will be created by shifting
-	 * all existing values one position backward and setting the new one at the
-	 * first position.
+	 * Sets content of multiple fields by header name, index and filter with a specified value. The
+	 * existing content of the fields within the dataset will be overwritten. If a header does not
+	 * exist, it will be created by shifting all existing values one position backward and setting the
+	 * new one at the first position.
 	 *
 	 * @param headerName Name of the sequence header
-	 * @param indexes    Array with indexes, defining the position of all fields
-	 *                   which will be overwritten
+	 * @param indexes    Array with indexes, defining the position of all fields which will be
+	 *                   overwritten
 	 * @param value      Value as String that will be set to the field
 	 * @param fltr       Filter for selection of the target dataset (row or column)
 	 */
@@ -1628,11 +1599,10 @@ public class DataContainer extends BaseContainer {
 	}
 
 	/**
-	 * Sets content of the first matching field defined by header name and filter
-	 * with a specified value. The existing content of the field within the dataset
-	 * will be overwritten. If a header does not exist, it will be created by
-	 * shifting all existing values one position backward and setting the new one at
-	 * the first position.
+	 * Sets content of the first matching field defined by header name and filter with a specified
+	 * value. The existing content of the field within the dataset will be overwritten. If a header does
+	 * not exist, it will be created by shifting all existing values one position backward and setting
+	 * the new one at the first position.
 	 *
 	 * @param headerName Name of the sequence header
 	 * @param value      Value as String that will be set to the field
@@ -1651,9 +1621,8 @@ public class DataContainer extends BaseContainer {
 	}
 
 	/**
-	 * Adapt to the specific data container when the caller of the
-	 * <code>DataContainer</code> wants to save the changes to the configuration
-	 * output file.
+	 * Adapt to the specific data container when the caller of the <code>DataContainer</code> wants to
+	 * save the changes to the configuration output file.
 	 *
 	 * @param srcFile The path to the source file.
 	 */
@@ -1668,19 +1637,16 @@ public class DataContainer extends BaseContainer {
 
 	/**
 	 * This method adapts the one {@link CustomContainer} instance to a specific
-	 * <code>DataContainer</code> depending on the source file ending. The needed
-	 * objects like header or filter will be initialized with default values if they
-	 * were not explicitly set or the information could not be read from the source
-	 * file.
+	 * <code>DataContainer</code> depending on the source file ending. The needed objects like header or
+	 * filter will be initialized with default values if they were not explicitly set or the information
+	 * could not be read from the source file.
+	 * @throws IOException 
+	 * @throws TikaException 
 	 * 
-	 * @throws FileNotFoundException If the file name is null or empty or the file
-	 *                               does not exist.
+	 * @throws FileNotFoundException If the file name is null or empty or the file does not exist.
 	 */
 	private final void adaptContainer() {
-		if (filter == null) {
-			filter = new Filter();
-		}
-		switch (detectDataFormat()) {
+		switch (containerFormat = detectDataFormat()) {
 		case CSV:
 			instance = new CSVDataContainer(this);
 			break;
@@ -1713,73 +1679,75 @@ public class DataContainer extends BaseContainer {
 		}
 		instance.readData(filter);
 	}
-	
+
 	/**
-	 * Analyzes the file extension and/or structure of the data content and an enumeration
-	 * of type {@link EContainerFormat} which defines the type of DataContaner that
-	 * needs to be adapted.
+	 * Analyzes the file extension and/or structure of the data content and an enumeration of type
+	 * {@link EContainerFormat} which defines the type of DataContaner that needs to be adapted.
 	 * 
 	 * @return enumeration of type {@link EContainerFormat}
 	 */
-	private final EContainerFormat detectDataFormat() {
+	private final EContainerFormat detectDataFormat()  {
+		EContainerFormat ret = EContainerFormat.CSV;
+//		final Tika tika = new Tika();
+		
 		if (resultSet != null) {
-			return EContainerFormat.RESULTSET;
+			ret = EContainerFormat.RESULTSET;
 		} else if (inputStream != null) {
 			try {
 				if (inputStream.available() > 0) {
 					InputStreamReader inputStreamReader = new InputStreamReader(inputStream);
 					Stream<String> streamOfString = new BufferedReader(inputStreamReader).lines();
 					String inputContent = streamOfString.collect(Collectors.joining());
-					
+
 					// Reader not needed anymore after stored to string
 					inputStreamReader.close();
 					streamOfString.close();
-					
+
 					// Every access consumes the stream so a reset is necessary
 					inputStream.reset();
-					
+
 					if (inputContent.startsWith("<")) {
 						// Own if clause due to performance reasons
-						if(XMLEditor.validateXMLString(inputStream)) {
+						if (XMLEditor.validateXMLString(inputStream)) {
 							inputStream.reset();
-							return EContainerFormat.XML;
+							ret =  EContainerFormat.XML;
 						}
 						inputStream.reset();
 					} else if (inputContent.startsWith("{")) {
-						if(StringUtils.isNotBlank(JSONObject.valueToString(inputContent))) {
-							return EContainerFormat.JSON;
+						if (StringUtils.isNotBlank(JSONObject.valueToString(inputContent))) {
+							ret = EContainerFormat.JSON;
 						}
 					} else {
 						Map<String, Object> yamlContent = new Yaml().load(inputContent);
-						if(!yamlContent.isEmpty()) {
-							return EContainerFormat.YAML;
-						}						
-						return EContainerFormat.DEFAULT;
+						if (!yamlContent.isEmpty()) {
+							ret = EContainerFormat.YAML;
+						}
 					}
 				}
 			} catch (IOException e) {
 				MLogger.getInstance().log(Level.SEVERE, e);
-				return EContainerFormat.CSV;
 			}
-		} else if (StringUtils.isNotBlank(fileName)) {
+		} else if (StringUtils.isNotBlank(fileName)) {			
 			if (fileName.endsWith(".properties")) {
-				return EContainerFormat.PROPERTIES;
+				ret = EContainerFormat.PROPERTIES;
 			} else if (fileName.endsWith(".xml")) {
-				return EContainerFormat.XML;
+				ret = EContainerFormat.XML;
 			} else if (fileName.endsWith(".json")) {
-				return EContainerFormat.JSON;
+				ret = EContainerFormat.JSON;
 			} else if (fileName.endsWith(".yaml")) {
-				return EContainerFormat.YAML;
-			} else {
-				return EContainerFormat.CSV;
+				ret = EContainerFormat.YAML;
+			}
+//			System.out.println(tika.detect(fileName));
+		} else {
+			if (getContainerFormat().getHeaderType() == EHeader.TREE) {
+				ret = EContainerFormat.XML;
 			}
 		}
-		return EContainerFormat.DEFAULT;
+		return ret;
 	}
-	
+
 	/**
-	 * Sub method that finally edits the values object e.g. when a setValue call
-	 * occurs.
+	 * Sub method that finally edits the values object e.g. when a setValue call occurs.
 	 * 
 	 * @param headerName Name of the sequence header.
 	 * @param index      Index of the field within the DataSet.

@@ -27,13 +27,13 @@
  */
 package org.opentdk.api.datastorage;
 
+import java.io.IOException;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;
 
-import org.opentdk.api.datastorage.BaseContainer.EContainerFormat;
 import org.opentdk.api.filter.Filter;
 import org.opentdk.api.logger.MLogger;
 
@@ -41,9 +41,14 @@ public class RSDataContainer implements CustomContainer {
 
     /**
      * An instance of the DataContainer that should be filled with the data from the connected source file.
-     * -> Task of the specific data containers.
+     * {@literal ->} Task of the specific data containers.
      */
-    private final DataContainer dc;
+    private final DataContainer dc;   
+    /**
+	 * Gets used instead of programming own RSDataContainer methods because the formats are
+	 * transformable.
+	 */
+	private final CSVDataContainer csv;
 
     /**
 	 * Construct a new specific <code>DataContainer</code> for database requests.
@@ -53,7 +58,7 @@ public class RSDataContainer implements CustomContainer {
 	 */
     public RSDataContainer(DataContainer dCont) {
         dc = dCont;
-        dc.containerFormat = EContainerFormat.RESULTSET;
+        csv = new CSVDataContainer(dCont);
     }
 	
     /**
@@ -95,12 +100,17 @@ public class RSDataContainer implements CustomContainer {
 
 	@Override
 	public void writeData(String srcFile) {
-
+		csv.writeData(srcFile);
 	}
 
 	@Override
 	public String asString() {
-		return dc.getValuesAsString();
+		return csv.asString();
+	}
+
+	@Override
+	public void createFile(String srcFile) throws IOException {
+		csv.createFile(srcFile);	
 	}
 
 }

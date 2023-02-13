@@ -626,6 +626,7 @@ public class FileUtil {
 	 * </pre>
 	 * 
 	 * @param is An object of type {@link java.io.InputStream} with the content
+	 * @param cs {@link java.nio.charset.StandardCharsets}
 	 * @return The content of the {@link java.io.InputStream} object as string.
 	 */
 	public static String getContent(InputStream is, Charset cs) {

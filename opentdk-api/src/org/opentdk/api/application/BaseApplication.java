@@ -197,7 +197,7 @@ public class BaseApplication {
     	// in case a settings-file is defined, the file will be assigned to the appSettingsClass
     	if(runtimeProperties.keySet().contains("SETTINGSFILE")) {
     		if(!runtimeProperties.get("SETTINGSFILE").getValue().isEmpty()) {
-    			BaseDispatcher.setDataContainer(EBaseSettings.class, runtimeProperties.get("SETTINGSFILE").getValue(), "AppSettings");
+    			BaseDispatcher.setDataContainer(EBaseSettings.class, runtimeProperties.get("SETTINGSFILE").getValue(), true);
     		}
     	}
     	// assign the value from the appSettings duplicate instances to all empty runtimeProperties instances

@@ -61,10 +61,31 @@ interface CustomContainer {
 	 * to implement a method that writes the data from the runtime instance of the
 	 * <code>DataContainer</code> into a file.
 	 * 
-	 * @param srcFileName The name of the source file to write to
+	 * @param srcFile The name of the source file to write to
 	 * @throws IOException Throws an exception if file is missing
 	 */
-	void writeData(String srcFileName) throws IOException;
+	void writeData(String srcFile) throws IOException;
+
+	/**
+	 * Each specific <code>DataContainer</code> has to implement a method that checks if the connected
+	 * file exists and create it if required.
+	 * 
+	 * @param srcFile The name of the source file to write to
+	 * @throws IOException if the creation failed the user can handle the cause
+	 */
+	void createFile(String srcFile) throws IOException;
+	
+	/**
+	 * Each specific <code>DataContainer</code> has to implement a method that checks if the connected
+	 * file exists and create it if required. 
+	 * 
+	 * @param srcFile The name of the source file to write to
+	 * @param rootNode if the format has a root node that has to be checked
+	 * @throws IOException if the creation failed the user can handle the cause
+	 */
+	default void createFile(String srcFile, String rootNode) throws IOException {
+		return;
+	}
 
 	/**
 	 * Each specific container class has to have a method that provides the container content as string.

@@ -3,12 +3,13 @@ package Tests.Utility;
 import java.io.IOException;
 
 import org.opentdk.api.application.EBaseSettings;
+import org.opentdk.api.dispatcher.BaseDispatcher;
 import org.opentdk.api.logger.MLogger;
 
 public class helloWorld {
 
 	public static void main(String[] args) throws IOException {
-		ESettings.setDataContainer(EBaseSettings.class, "logs/helloWorld.xml", "AppSettings");
+		BaseDispatcher.setDataContainer(EBaseSettings.class, "logs/helloWorld.xml");
 		
 		MLogger.getInstance().setLogFile(ESettings.LOGFILE.getValue());
 		MLogger.getInstance().log(ESettings.HUNDNAME.getValue());

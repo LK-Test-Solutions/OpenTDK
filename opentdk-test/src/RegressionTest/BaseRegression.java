@@ -1,7 +1,5 @@
 package RegressionTest;
 
-import java.util.Vector;
-
 import org.opentdk.api.datastorage.DataContainer;
 
 /**
@@ -46,9 +44,11 @@ public abstract class BaseRegression {
 		try {
 			success = true;
 			runTest(); // Sets success to false in case of an error
-			resultContainer.addRow(new String[] { getClass().getSimpleName(), String.valueOf(success) });
 		} catch (Exception e) {
-			e.printStackTrace();
+			success = false;
+			e.printStackTrace();			
+		} finally {
+			resultContainer.addRow(new String[] { getClass().getSimpleName(), String.valueOf(success) });
 		}
 		System.out.println();
 		System.out.println("=================== >> Finished ");
@@ -79,6 +79,16 @@ public abstract class BaseRegression {
 	}
 
 	public static void testResult(int actual, String fieldName, int expected) {
+		if (actual == expected) {
+			System.out.println("Success: " + fieldName + " == " + actual);
+		} else {
+			System.err.println(fieldName + " is \"" + actual + "\" but should be \"" + expected + "\"");
+			success = false;
+		}
+
+	}
+	
+	public static void testResult(Object actual, String fieldName, Object expected) {
 		if (actual == expected) {
 			System.out.println("Success: " + fieldName + " == " + actual);
 		} else {

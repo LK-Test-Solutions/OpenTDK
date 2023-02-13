@@ -37,11 +37,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.Map.Entry;
-import java.util.logging.Level;
 
 import org.opentdk.api.filter.Filter;
 import org.opentdk.api.filter.FilterRule;
-import org.opentdk.api.logger.MLogger;
 import org.opentdk.api.util.*;
 
 /**
@@ -52,7 +50,7 @@ import org.opentdk.api.util.*;
  * @author LK Test Solutions
  */
 public abstract class BaseContainer {
-
+	
 	/**
 	 * Enumeration that defines all source types, supported by the {@link org.opentdk.api.datastorage}
 	 * package with its header format.
@@ -110,21 +108,7 @@ public abstract class BaseContainer {
 		 */
 		UNKNOWN;
 	}
-
-	/**
-	 * The character(s) that define the delimiter of columns within tabular files. This delimiter is
-	 * used by the {@link DataContainer#readData()} methods to split the rows of the source file into a
-	 * String Array and by the {@link DataContainer#exportContainer(String)} methods to write the
-	 * elements of the {@link #values} ArrayList into the target file.
-	 */
-	protected String columnDelimiter = ";";
-
-	/**
-	 * Property that stores the container format for the instance of the {@link DataContainer} as an
-	 * enumeration of type {@link EContainerFormat}.
-	 */
-	protected EContainerFormat containerFormat;
-
+	
 	/**
 	 * Full path and name of the file for DataContainers with file based sources like
 	 * {@link CSVDataContainer}, {@link PropertiesDataContainer} or {@link XMLDataContainer}. This file
@@ -132,17 +116,15 @@ public abstract class BaseContainer {
 	 * attribute.
 	 */
 	protected String fileName = "";
-
+	
 	/**
-	 * The {@link #headerNames} property is used to assign header names to each index of the string
-	 * arrays, stored as elements of the ArrayList {@link #values}. This HashMap allows to locate values
-	 * within the string arrays by name instead of index.<br>
-	 * E.g. if the first row of a CSV file includes header names and all other rows include values, then
-	 * the names of the first row will be stored in the {@link #headerNames} HashMap with their original
-	 * index.
+	 * The character(s) that define the delimiter of columns within tabular files. This delimiter is
+	 * used by the {@link DataContainer#readData()} methods to split the rows of the source file into a
+	 * String Array and by the {@link DataContainer#exportContainer(String)} methods to write the
+	 * elements of the {@link #values} ArrayList into the target file.
 	 */
-	protected final HashMap<String, Integer> headerNames = new HashMap<>();
-
+	protected String columnDelimiter = ";";
+	
 	/**
 	 * This property defines the record index of the source, where the header names are read from. All
 	 * values of this record will be put into the HashMap {@link #headerNames}.<br>
@@ -152,16 +134,24 @@ public abstract class BaseContainer {
 	 * {@link #headerNamesIndex} defines the column index of the source that includes the header names.
 	 */
 	protected int headerNamesIndex = 0;
-
+	
 	/**
-	 * This property is used for the adaption of different source formats, to make the data accessible
-	 * in a similar way, as they were organized in tabular format.<br>
-	 * E.g. source data of tree format will be transposed into a tree table with the parent path stored
-	 * within an additional column for each node. This allows access to the node with the same methods
-	 * as implemented for tabular formated data.
+	 * The filter object that does not filter the data in the <code>DataContainer</code> during runtime
+	 * but when reading from and writing to the configuration file.
 	 */
-	protected Set<String> implicitHeaders = new HashSet<>();
-
+	protected Filter filter = new Filter();
+	
+	/**
+	 * Property that stores the container format for the instance of the {@link DataContainer} as an
+	 * enumeration of type {@link EContainerFormat}.
+	 */
+	protected EContainerFormat containerFormat = EContainerFormat.DEFAULT;	
+	
+	/**
+	 * Stores the root node of the {@link org.opentdk.api.datastorage.XMLDataContainer}.
+	 */
+	protected String rootNode = "";
+	
 	/**
 	 * This property is used to assign the data as an {@link java.io.InputStream} to the
 	 * {@link DataContainer} instance in case that no source file exists. This is valid for data formats
@@ -170,12 +160,45 @@ public abstract class BaseContainer {
 	protected InputStream inputStream;
 	
 	/**
-	 * This property is used to assign the data as an {@link String} to the {@link DataContainer} instance
-	 * in case that no source file exists. This is valid for data formats like XML, JSON or JAML.
+	 * Keeps the SQL result set of {@link org.opentdk.api.datastorage.RSDataContainer}.
 	 */
-	// TODO implement constructor, getter and setter for initializing the DataContainer with String content - similar to inputStream
-	protected String inputString;
-
+	protected ResultSet resultSet;
+	
+	/**
+	 * The {@link #headerNames} property is used to assign header names to each index of the string
+	 * arrays, stored as elements of the ArrayList {@link #values}. This HashMap allows to locate values
+	 * within the string arrays by name instead of index.<br>
+	 * E.g. if the first row of a CSV file includes header names and all other rows include values, then
+	 * the names of the first row will be stored in the {@link #headerNames} HashMap with their original
+	 * index.
+	 */
+	protected final HashMap<String, Integer> headerNames = new HashMap<>();
+	
+	/**
+	 * This property is used for the adaption of different source formats, to make the data accessible
+	 * in a similar way, as they were organized in tabular format.<br>
+	 * E.g. source data of tree format will be transposed into a tree table with the parent path stored
+	 * within an additional column for each node. This allows access to the node with the same methods
+	 * as implemented for tabular formated data.
+	 */
+	protected final Set<String> implicitHeaders = new HashSet<>();
+	
+	/**
+	 * ArrayList with an array of strings where content of tabular sources is stored at runtime of an
+	 * application. <br>
+	 * If the associated source includes row based records and column based fields like SQL result sets,
+	 * CSV files etc., then each element of the ArrayList represents a row of the source and the header
+	 * names are column headers of the source. <br>
+	 * If the associated source includes column based records and row based fields like Properties
+	 * files, then the data will be transposed while writing into the ArrayList. In this case each
+	 * element of the ArrayList represents a column of the source and the header names are row headers
+	 * of the source.<br>
+	 * If the associated source is not in tabular format, then the data will not be stored within the
+	 * ArrayList. In this case the adapted DataContainer class needs to implement the logic how to store
+	 * the data at runtime e.g. {@link org.w3c.dom.Document} for HTML and XML files.
+	 */
+	protected ArrayList<String[]> values = new ArrayList<String[]>();
+	
 	/**
 	 * The HashMap {@link #metaData} is used to define fields and values that will be appended to each
 	 * record added to the {@link DataContainer} by the {@link DataContainer#readData()},
@@ -193,32 +216,6 @@ public abstract class BaseContainer {
 	 * </pre>
 	 */
 	protected final HashMap<String, String> metaData = new HashMap<String, String>();
-
-	/**
-	 * Keeps the SQL result set of {@link org.opentdk.api.datastorage.RSDataContainer}.
-	 */
-	protected ResultSet resultSet;
-
-	/**
-	 * Stores the root node of the {@link org.opentdk.api.datastorage.XMLDataContainer}.
-	 */
-	protected String rootNode = "";
-
-	/**
-	 * ArrayList with an array of strings where content of tabular sources is stored at runtime of an
-	 * application. <br>
-	 * If the associated source includes row based records and column based fields like SQL result sets,
-	 * CSV files etc., then each element of the ArrayList represents a row of the source and the header
-	 * names are column headers of the source. <br>
-	 * If the associated source includes column based records and row based fields like Properties
-	 * files, then the data will be transposed while writing into the ArrayList. In this case each
-	 * element of the ArrayList represents a column of the source and the header names are row headers
-	 * of the source.<br>
-	 * If the associated source is not in tabular format, then the data will not be stored within the
-	 * ArrayList. In this case the adapted DataContainer class needs to implement the logic how to store
-	 * the data at runtime e.g. {@link org.w3c.dom.Document} for HTML and XML files.
-	 */
-	protected ArrayList<String[]> values = new ArrayList<String[]>();
 
 	/**
 	 * Compares the assigned <code>HashMap</code> with header names and indexes with the headers of the
@@ -488,13 +485,12 @@ public abstract class BaseContainer {
 	public Set<String> getImplicitHeaders() {
 		return implicitHeaders;
 	}
-
+	
+	/**
+	 * @return {@link #inputStream}
+	 */
 	public InputStream getInputStream() {
 		return inputStream;
-	}
-
-	public String getInputString() {
-		return inputString;
 	}
 	
 	/**
@@ -516,6 +512,9 @@ public abstract class BaseContainer {
 		return resultSet;
 	}
 
+	/**
+	 * @return {@link #rootNode}
+	 */
 	public String getRootNode() {
 		return rootNode;
 	}
@@ -627,14 +626,10 @@ public abstract class BaseContainer {
 	 * {@link org.w3c.dom.Document} for XML and HTML formats. The {@link #inputStream} property can be
 	 * used in case that the data source is not a file.
 	 * 
-	 * @param inStream Data of type {@link java.io.InputStream}
+	 * @param inStream {@link #inputStream}
 	 */
 	public void setInputStream(InputStream inStream) {
 		inputStream = inStream;
-	}
-	
-	public void setInputString(String inStr) {
-		inputString = inStr;
 	}
 
 	/**
@@ -676,6 +671,9 @@ public abstract class BaseContainer {
 		resultSet = rs;
 	}
 
+	/**
+	 * @param rn {@link #rootNode}
+	 */
 	public void setRootNode(String rn) {
 		rootNode = rn;
 	}

@@ -27,17 +27,19 @@
  */
 package org.opentdk.api.datastorage;
 
+import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.stream.Collectors;
 
-import org.opentdk.api.datastorage.BaseContainer.EContainerFormat;
 import org.opentdk.api.filter.Filter;
 import org.opentdk.api.filter.FilterRule;
+import org.opentdk.api.io.FileUtil;
 import org.opentdk.api.io.XMLEditor;
 import org.opentdk.api.logger.MLogger;
 import org.w3c.dom.Element;
@@ -50,17 +52,10 @@ import org.w3c.dom.Element;
  * @see org.opentdk.api.datastorage.DataContainer
  */
 public class XMLDataContainer implements CustomContainer {
-
-	// Unused?
-	public enum EImplicitHeaders {
-		XPath;
-	}
-
 	/**
 	 * An instance of the class that handles XML files.
 	 */
-	private XMLEditor xEdit;
-	
+	private XMLEditor xEdit;	
 	/**
 	 * An instance of the DataContainer that should be filled with the data from the
 	 * connected source file. -> Task of the specific data containers.
@@ -75,7 +70,6 @@ public class XMLDataContainer implements CustomContainer {
 	 */
 	public XMLDataContainer(DataContainer dCont) {
 		dc = dCont;
-		dc.containerFormat = EContainerFormat.XML;
 		dc.getImplicitHeaders().add("XPath");
 	}
 
@@ -99,6 +93,10 @@ public class XMLDataContainer implements CustomContainer {
 			}
 		} else if(dc.getInputStream() != null) {
 			xEdit = new XMLEditor(dc.getInputStream());
+		} else {
+			String rootTag = "<" + dc.getRootNode() + ">" + "</" + dc.getRootNode() + ">";
+			dc.setInputStream(new ByteArrayInputStream(rootTag.getBytes(StandardCharsets.UTF_8)));
+			xEdit = new XMLEditor(dc.getInputStream());
 		}
 		dc.setHeaders(xEdit.getXmlTags());
 		for (String header : dc.getHeaders().keySet()) {
@@ -109,6 +107,20 @@ public class XMLDataContainer implements CustomContainer {
 	@Override
 	public void writeData(String srcFile) {
 		xEdit.save(srcFile);
+	}
+	
+	@Override
+	public void createFile(String srcFile) throws IOException {
+		FileUtil.createFile(srcFile);
+		xEdit = new XMLEditor(srcFile);
+		xEdit.save();
+	}
+	
+	@Override
+	public void createFile(String srcFile, String rootNode) throws IOException {
+		FileUtil.createFile(srcFile);
+		xEdit = new XMLEditor(srcFile, rootNode);
+		xEdit.save();
 	}
 	
 	/**

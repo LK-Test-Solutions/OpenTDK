@@ -78,7 +78,6 @@ public class JSONDataContainer implements CustomContainer {
 	 */
 	JSONDataContainer(DataContainer dCont) {
 		dc = dCont;
-		dc.containerFormat = EContainerFormat.JSON;
 		dc.getImplicitHeaders().add("XPath");
 	}
 
@@ -139,19 +138,23 @@ public class JSONDataContainer implements CustomContainer {
 	}
 
 	@Override
-	public void writeData(String srcFileName) {
+	public void writeData(String srcFile) {
 		if (json == null || json.isEmpty()) {
 			MLogger.getInstance().log(Level.WARNING, "JSON object is not initialized or empty ==> No JSON content to write", getClass().getSimpleName(), "writeData");
 		} else {
 			try {
-				FileUtil.createFile(srcFileName, true);
-				FileUtil.writeOutputFile(json.toString(1), srcFileName);
+				FileUtil.createFile(srcFile, true);
+				FileUtil.writeOutputFile(json.toString(1), srcFile);
 			} catch (JSONException | IOException e) {
 				MLogger.getInstance().log(Level.SEVERE, e);
 				throw new RuntimeException(e);
 			}
 		}
-
+	}
+	
+	@Override
+	public void createFile(String srcFile) throws IOException {
+		FileUtil.createFile(srcFile, true);	
 	}
 
 	@Override

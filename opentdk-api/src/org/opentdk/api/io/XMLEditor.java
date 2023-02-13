@@ -69,67 +69,148 @@ import org.xml.sax.helpers.DefaultHandler;
 /**
  * This class is used for read and write access to data which is stored in XML format.
  * 
+ * @author LK Test Solutions
  */
 public class XMLEditor {
-
+	/**
+	 * File object with the relative or absolute path and filename of the XML file.
+	 */
 	private File xmlFile;
-	private InputStream xmlStream;
-	private Document doc;
+	/**
+	 * Name of the root tag that has the default value 'rootTag'.
+	 */
 	private String rootNodeName = "rootTag";
+	/**
+	 * {@link java.io.InputStream}
+	 */
+	private InputStream xmlStream;
+	/**
+	 * {@link org.w3c.dom.Document}
+	 */
+	private Document doc;
+	/**
+	 * The top level XML tag that has all other elements.
+	 */
 	private Element rootElement;
 
 	/**
-	 * Constructor that is used to create a new instance of this object with a given file-object,
-	 * defined by the argument <code>xml_src</code>. After creating an instance with this constructor,
-	 * immediate read and write access can be performed to the xml file, using the methods provided by
-	 * this class.
+	 * Constructor that is used to create a new instance of this object with a given string object.
+	 * After initialization read and write access can be performed to the XML file, using the methods
+	 * provided by this class.
 	 * 
-	 * @param xml_src Object of type {@link java.io.File}
-	 * @throws IOException if any I/O error occurred
+	 * @param fullPath String with the relative or absolute path and filename of the XML file
+	 * @throws IOException allows the user to handle I/O errors
 	 */
-	public XMLEditor(File xml_src) throws IOException {
-		this(xml_src, "");
+	public XMLEditor(String fullPath) throws IOException {
+		this(fullPath, "");
 	}
 
+	/**
+	 * Constructor that is used to create a new instance of this object with a given file object. After
+	 * initialization read and write access can be performed to the XML file, using the methods provided
+	 * by this class.
+	 * 
+	 * @param fullPath {@link #xmlFile}
+	 * @throws IOException allows the user to handle I/O errors
+	 */
+	public XMLEditor(File fullPath) throws IOException {
+		this(fullPath, "");
+	}
+
+	/**
+	 * Constructor that is used to create a new instance of this object with a given string object and a
+	 * root tag. After initialization read and write access can be performed to the XML file, using the
+	 * methods provided by this class.
+	 * 
+	 * @param fullPath String with the relative or absolute path and filename of the XML file
+	 * @param rootNode root tag of the XML file
+	 * @throws IOException allows the user to handle I/O errors
+	 */
 	public XMLEditor(String fullPath, String rootNode) throws IOException {
 		this(new File(fullPath), rootNode);
 	}
 
 	/**
-	 * Constructor that is used to create a new instance of this object with a given file, defined by
-	 * the argument <code>fullPath</code>. After creating an instance with this constructor, immediate
-	 * read and write access can be performed to the xml file, using the methods provided by this class.
+	 * Constructor that is used to create a new instance of this object with a given file object and a
+	 * root tag. After initialization read and write access can be performed to the XML file, using the
+	 * methods provided by this class.
 	 * 
-	 * @param fullPath String with the relative or absolute path and filename of the xml file
-	 * @throws IOException if any I/O error occurred
+	 * @param sourceFile {@link #xmlFile}
+	 * @param rootNode   root tag of the XML file
+	 * @throws IOException allows the user to handle I/O errors
 	 */
-	public XMLEditor(String fullPath) throws IOException {
-		this(new File(fullPath), "");
-	}
-
-	public XMLEditor(File xml_src, String rootNode) throws IOException {
-		xmlFile = xml_src;
+	public XMLEditor(File sourceFile, String rootNode) throws IOException {
+		xmlFile = sourceFile;
 		if (StringUtils.isNotBlank(rootNode)) {
 			rootNodeName = rootNode;
 		}
-//		try {
 		FileUtil.checkDir(xmlFile.getParentFile(), true);
 		createXMLEditor();
-//		} catch (IOException e) {
-//			MLogger.getInstance().log(Level.SEVERE, e);
-//		}
 	}
 
+	/**
+	 * Possibility to initialize this class with an InputStream.
+	 * 
+	 * @param inStream {@link #xmlStream}
+	 */
 	public XMLEditor(InputStream inStream) {
 		this(inStream, "");
 	}
 
+	/**
+	 * Possibility to initialize this class with an InputStream.
+	 * 
+	 * @param inStream {@link #xmlStream}
+	 * @param rootNode root tag of the XML file
+	 */
 	public XMLEditor(InputStream inStream, String rootNode) {
 		xmlStream = inStream;
-			if (StringUtils.isNotBlank(rootNode)) {
+		if (StringUtils.isNotBlank(rootNode)) {
 			rootNodeName = rootNode;
 		}
 		createXMLEditor();
+	}
+
+	private void createXMLEditor() {
+		DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
+		String feature = null;
+		try {
+			// Security settings: If document type definitions (DTD) are disallowed, almost all XML entity
+			// attacks are prevented
+			feature = "http://apache.org/xml/features/disallow-doctype-decl";
+			dbf.setFeature(feature, true);
+		} catch (ParserConfigurationException e) {
+			MLogger.getInstance().log(Level.WARNING, "The feature '" + feature + "' is probably not supported the XML processor. XML will not be read.", getClass().getSimpleName(), "createXMLEditor");
+		}
+		// Security settings: This prevents the parser to expand the entity reference node
+		dbf.setExpandEntityReferences(false);
+		// Security settings: Set an empty string to deny all access to external references
+		dbf.setAttribute(XMLConstants.ACCESS_EXTERNAL_DTD, "");
+		dbf.setAttribute(XMLConstants.ACCESS_EXTERNAL_SCHEMA, "");
+
+		try {
+			DocumentBuilder docBuilder = dbf.newDocumentBuilder();
+			if ((xmlFile != null) && (xmlFile.exists())) {
+				doc = docBuilder.parse(xmlFile);
+				doc.getDocumentElement().normalize();
+				rootElement = doc.getDocumentElement();
+			} else if (xmlStream != null) {
+				xmlStream.reset();
+				doc = docBuilder.parse(xmlStream);
+				doc.getDocumentElement().normalize();
+				rootElement = doc.getDocumentElement();
+			} else {
+				doc = docBuilder.newDocument();
+				rootElement = doc.createElement(rootNodeName);
+				doc.appendChild(rootElement);
+			}
+		} catch (ParserConfigurationException e) {
+			MLogger.getInstance().log(Level.SEVERE, "The feature '" + feature + "' is probably not supported the XML processor.", getClass().getSimpleName(), "createXMLEditor");
+		} catch (SAXException e) {
+			MLogger.getInstance().log(Level.SEVERE, "A DOCTYPE was passed into the XML document.", getClass().getSimpleName(), "createXMLEditor");
+		} catch (IOException e) {
+			MLogger.getInstance().log(Level.SEVERE, "Exception occured: XXE may still possible ==> XML will not be read.", getClass().getSimpleName(), "createXMLEditor");
+		}
 	}
 
 	public Element addChildElement(Element parent, Element child) {
@@ -421,48 +502,6 @@ public class XMLEditor {
 		HashMap<String, String> hm = new HashMap<String, String>();
 		hm.put(attributeName, attributeValue);
 		return createElement(tagName, hm);
-	}
-
-	private void createXMLEditor() {
-		DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
-		String feature = null;
-		try {
-			// Security settings: If document type definitions (DTD) are disallowed, almost all XML entity
-			// attacks are prevented
-			feature = "http://apache.org/xml/features/disallow-doctype-decl";
-			dbf.setFeature(feature, true);
-		} catch (ParserConfigurationException e) {
-			MLogger.getInstance().log(Level.WARNING, "The feature '" + feature + "' is probably not supported the XML processor. XML will not be read.", getClass().getSimpleName(), "createXMLEditor");
-		}
-		// Security settings: This prevents the parser to expand the entity reference node
-		dbf.setExpandEntityReferences(false);
-		// Security settings: Set an empty string to deny all access to external references
-		dbf.setAttribute(XMLConstants.ACCESS_EXTERNAL_DTD, "");
-		dbf.setAttribute(XMLConstants.ACCESS_EXTERNAL_SCHEMA, "");
-
-		try {
-			DocumentBuilder docBuilder = dbf.newDocumentBuilder();
-			if ((xmlFile != null) && (xmlFile.exists())) {
-				doc = docBuilder.parse(xmlFile);
-				doc.getDocumentElement().normalize();
-				rootElement = doc.getDocumentElement();
-			} else if (xmlStream != null) {
-				xmlStream.reset();
-				doc = docBuilder.parse(xmlStream);
-				doc.getDocumentElement().normalize();
-				rootElement = doc.getDocumentElement();
-			} else {
-				doc = docBuilder.newDocument();
-				rootElement = doc.createElement(rootNodeName);
-				doc.appendChild(rootElement);
-			}
-		} catch (ParserConfigurationException e) {
-			MLogger.getInstance().log(Level.SEVERE, "The feature '" + feature + "' is probably not supported the XML processor.", getClass().getSimpleName(), "createXMLEditor");
-		} catch (SAXException e) {
-			MLogger.getInstance().log(Level.SEVERE, "A DOCTYPE was passed into the XML document.", getClass().getSimpleName(), "createXMLEditor");
-		} catch (IOException e) {
-			MLogger.getInstance().log(Level.SEVERE, "Exception occured: XXE may still possible ==> XML will not be read.", getClass().getSimpleName(), "createXMLEditor");
-		}
 	}
 
 	/**
@@ -1061,15 +1100,15 @@ public class XMLEditor {
 		try {
 			Transformer transformer = tf.newTransformer();
 			transformer.setOutputProperty(OutputKeys.INDENT, "yes");
-			
+
 			this.removeEmptySpace(rootElement);
-			
+
 			StringWriter writer = new StringWriter();
 			transformer.transform(new DOMSource(doc), new StreamResult(writer));
 			ret = writer.getBuffer().toString();
 		} catch (TransformerException e) {
 			e.printStackTrace();
-		} 
+		}
 		return ret;
 	}
 
@@ -1121,10 +1160,10 @@ public class XMLEditor {
 		}
 		return true;
 	}
-	
+
 	public static Boolean validateXMLString(String inString) {
 		try {
-			
+
 			InputStream inStream = new ByteArrayInputStream(inString.getBytes(StandardCharsets.UTF_8));
 			SAXParserFactory.newInstance().newSAXParser().getXMLReader().parse(new InputSource(inStream));
 //			SAXParserFactory.newInstance().newSAXParser().getXMLReader().parse(new InputSource(inStream));

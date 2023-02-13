@@ -34,7 +34,6 @@ import java.util.List;
 import java.util.logging.Level;
 
 import org.apache.commons.lang3.StringUtils;
-import org.opentdk.api.datastorage.BaseContainer.EContainerFormat;
 import org.opentdk.api.filter.Filter;
 import org.opentdk.api.io.FileUtil;
 import org.opentdk.api.logger.MLogger;
@@ -66,7 +65,6 @@ public class PropertiesDataContainer implements CustomContainer {
 	 */
 	public PropertiesDataContainer(DataContainer dCont) {
 		dc = dCont;
-		dc.containerFormat = EContainerFormat.PROPERTIES;
 	}
 	
 	public void deleteField(String headerName, String attributeName, String attributeValue, Filter fltr) {
@@ -168,6 +166,12 @@ public class PropertiesDataContainer implements CustomContainer {
 			outputProps.store(fos, "Store properties");
 			
 		}
+	}
+	
+
+	@Override
+	public void createFile(String srcFile) throws IOException {
+		FileUtil.createFile(srcFile, true);
 	}
 
 	@Override

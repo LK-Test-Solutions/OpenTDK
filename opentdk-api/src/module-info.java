@@ -20,6 +20,7 @@ module opentdk.api {
 	requires transitive commons.math3;
 	requires transitive org.json;
 	requires transitive org.apache.commons.lang3;
-	requires transitive snakeyaml;
 	requires transitive org.apache.commons.codec;
+//	requires transitive org.apache.tika.core;
+	requires transitive org.yaml.snakeyaml;
 }

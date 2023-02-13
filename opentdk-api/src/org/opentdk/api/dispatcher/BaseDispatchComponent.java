@@ -30,9 +30,11 @@ package org.opentdk.api.dispatcher;
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
+import java.util.Map;
 
 import org.apache.commons.lang3.StringUtils;
 import org.opentdk.api.application.EBaseSettings;
+import org.opentdk.api.datastorage.BaseContainer.EHeader;
 import org.opentdk.api.datastorage.DataContainer;
 import org.opentdk.api.filter.Filter;
 import org.opentdk.api.mapping.EOperator;
@@ -106,9 +108,10 @@ public class BaseDispatchComponent {
 	private String defaultValue;
 
 	/**
-	 * The default constructor if this class that is called when creating a new instance without attributes.
+	 * Hide no argument constructor because a BaseDispatchComponent without parameter cannot be used.
 	 */
-	public BaseDispatchComponent() {
+	@SuppressWarnings("unused")
+	private BaseDispatchComponent() {
 
 	}
 	
@@ -120,7 +123,7 @@ public class BaseDispatchComponent {
 	 * @param paramName Name of a node, associated with the variable
 	 */
 	public BaseDispatchComponent(Class<?> parentClass, String paramName) {
-		this(parentClass.getSimpleName(), paramName, "", "");
+		this(parentClass, paramName, "", "");
 	}
 	
 	/**
@@ -129,8 +132,10 @@ public class BaseDispatchComponent {
 	 * @param key Name of the dispatcher class where the BaseDispatchComponent variable is declared. If the class is an extended subclass, then the name of the superclass needs to be used. 
 	 * @param paramName Header name of the field. Tabular formats can either have column header or row headers.
 	 * @param dVal Default value returned by the variable in case the field doesn't exist in the associated DataContainer or file.
+	 * @throws ClassNotFoundException if the committed class string could not be retrieved via {@link Class#forName} 
 	 */
-	public BaseDispatchComponent(String key, String paramName, String dVal) {
+	@Deprecated
+	public BaseDispatchComponent(String key, String paramName, String dVal) throws ClassNotFoundException {
 		this(key, paramName, "", dVal);
 	}
 
@@ -154,7 +159,25 @@ public class BaseDispatchComponent {
 	 * @param dVal Default value returned by the variable in case the node doesn't exist in the associated DataContainer or file
 	 */
 	public BaseDispatchComponent(Class<?> parentClass, String paramName, String pxp, String dVal) {
-		this(parentClass.getSimpleName(), paramName, pxp, dVal);
+		settingsKey = parentClass.getSimpleName();
+		parameterName = paramName;
+		parentXPath = pxp;
+		defaultValue = dVal;
+		
+		if(!BaseDispatcher.dcMap.containsKey(settingsKey)) {
+			DataContainer dc = null;
+			if(!StringUtils.isBlank(parentXPath)) {
+				dc = new DataContainer(EHeader.TREE, getRootNode());
+			} else {
+				dc = new DataContainer();
+			}
+			BaseDispatcher.setDataContainer(parentClass, dc);
+
+		}
+		Map<String, Integer> headers = BaseDispatcher.getDataContainer(settingsKey).getHeaders();
+		if(!headers.containsKey(parameterName)) {
+			headers.put(parameterName, headers.size()); 
+		}
 	}
 	
 	/**
@@ -164,24 +187,28 @@ public class BaseDispatchComponent {
 	 * @param paramName Name of a node, associated with the variable
 	 * @param pxp Path, where the tag is located within a tree structure 
 	 * @param dVal Default value returned by the variable in cases the node doesn't exist in the associated DataContainer or file
+	 * @throws ClassNotFoundException if the committed class string could not be retrieved via {@link Class#forName}
 	 */
-	public BaseDispatchComponent(String setKey, String paramName, String pxp, String dVal) {
+	@Deprecated
+	public BaseDispatchComponent(String setKey, String paramName, String pxp, String dVal) throws ClassNotFoundException {
 		settingsKey = setKey;
 		parameterName = paramName;
 		parentXPath = pxp;
 		defaultValue = dVal;
+		
 		if(!BaseDispatcher.dcMap.containsKey(settingsKey)) {
-			if(!pxp.isEmpty()) {
-				String[] tags = pxp.split("/");
-				String rootTag = "<" + tags[1] + ">" + "</" + tags[1] + ">"; // TODO no XML specific code in Dispatcher. General method in DataContainer required that adapts to the specific ones.
+			if(!parentXPath.isEmpty()) {
+				String[] tags = parentXPath.split("/");
+				String rootTag = "<" + tags[1] + ">" + "</" + tags[1] + ">";
 				InputStream stream = new ByteArrayInputStream(rootTag.getBytes(StandardCharsets.UTF_8));
 				BaseDispatcher.setDataContainer(settingsKey, new DataContainer(stream));
 			} else {
 				BaseDispatcher.setDataContainer(settingsKey, new DataContainer());
 			}
 		}
-		if(!BaseDispatcher.getDataContainer(settingsKey).getHeaders().containsKey(paramName)) {
-			BaseDispatcher.getDataContainer(settingsKey).getHeaders().put(paramName, BaseDispatcher.getDataContainer(settingsKey).getHeaders().size());
+		Map<String, Integer> headers = BaseDispatcher.getDataContainer(settingsKey).getHeaders();
+		if(!headers.containsKey(parameterName)) {
+			headers.put(parameterName, headers.size());
 		}
 	}
 	
