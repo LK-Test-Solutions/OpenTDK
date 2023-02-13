@@ -48,7 +48,7 @@ import org.opentdk.api.logger.MLogger;
  * <pre>
  * import org.opentdk.api.dispatcher.*;
  * 
- * public class ESampleSettings extends BaseDispatcher {
+ * public class ESampleSettings {
  * 	public static final BaseDispatchComponent MY_TITLE = new BaseDispatchComponent("Title", "/SampleSettings", "Sample Application");
  * 	public static final BaseDispatchComponent MY_HOMEPATH = new BaseDispatchComponent("HomePath", "/SampleSettings", "/temp/sample");
  * }
@@ -207,7 +207,8 @@ public abstract class BaseDispatcher {
 				break;
 			}
 		}
-		dcMap.put(dispatcherClass.getSimpleName(), dc);
+		// Add or overwrite a container with the key of the dispatcher class name
+		dcMap.put(dispatcherClass.getSimpleName(), dc);	
 		
 		if(StringUtils.isNotBlank(dc.getFileName())) {
 			try {
