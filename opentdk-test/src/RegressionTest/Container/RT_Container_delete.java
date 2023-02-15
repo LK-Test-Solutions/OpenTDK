@@ -18,21 +18,40 @@ public class RT_Container_delete extends BaseRegression {
 	}
 	
 	private void deleteRow() {
+		// Use tabular container directly
 		DataContainer dc = new DataContainer();
-		dc.setHeaders(new String[] {"A", "B", "C"});
+		dc.getTabContainer().setHeaders(new String[] {"A", "B", "C"});
 		
-		dc.addRow(new String[] {"1", "2", "3"});
-		dc.addRow(new String[] {"4", "5", "6"});
-		dc.addRow(new String[] {"7", "8", "9"});
+		dc.getTabContainer().addRow(new String[] {"1", "2", "3"});
+		dc.getTabContainer().addRow(new String[] {"4", "5", "6"});
+		dc.getTabContainer().addRow(new String[] {"7", "8", "9"});
 		
-		dc.deleteRow(1);
+		dc.getTabContainer().deleteRow(1);
 		
 		Filter filter = new Filter();
 		filter.addFilterRule("B", "2", EOperator.EQUALS);
-		dc.deleteRows(filter);
+		dc.getTabContainer().deleteRows(filter);
 		
-		testResult(dc.getRowCount(), "Container row count", 1);
-		testResult(dc.getRow(0)[2], "Container remaining data", "9");
+		testResult(dc.getTabContainer().getRowCount(), "Container row count", 1);
+		testResult(dc.getTabContainer().getRow(0)[2], "Container remaining data", "9");
+		
+		
+		// Use general methods
+		dc = new DataContainer();
+		dc.set(new String[] {"A", "B", "C"});
+		
+		dc.add(new String[] {"1", "2", "3"});
+		dc.add(new String[] {"4", "5", "6"});
+		dc.add(new String[] {"7", "8", "9"});
+		
+		dc.delete(1);
+		
+		Filter filter = new Filter();
+		filter.addFilterRule("B", "2", EOperator.EQUALS);
+		dc.delete(filter);
+		
+		testResult(dc.get(), "Container row count", 1);
+		testResult(dc.get(0)[2], "Container remaining data", "9");
 	}
 
 }

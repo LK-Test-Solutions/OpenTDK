@@ -37,42 +37,24 @@ import java.util.logging.Level;
 import org.opentdk.api.filter.Filter;
 import org.opentdk.api.logger.MLogger;
 
-public class RSDataContainer implements CustomContainer {
+public class RSDataContainer extends CSVDataContainer {
 
-    /**
-     * An instance of the DataContainer that should be filled with the data from the connected source file.
-     * {@literal ->} Task of the specific data containers.
-     */
-    private final DataContainer dc;   
-    /**
-	 * Gets used instead of programming own RSDataContainer methods because the formats are
-	 * transformable.
-	 */
-	private final CSVDataContainer csv;
+	RSDataContainer(DataContainer dCont) {
+		super(dCont);
+	}
 
-    /**
-	 * Construct a new specific <code>DataContainer</code> for database requests.
-	 *
-	 * @param dCont the <code>DataContainer</code> instance to use it in the read
-	 *              and write methods of this specific data container
-	 */
-    public RSDataContainer(DataContainer dCont) {
-        dc = dCont;
-        csv = new CSVDataContainer(dCont);
-    }
-	
-    /**
+	/**
      * Reads data from a {@link java.sql.ResultSet} and puts it into the DataContainer.
      * 
      * @param filter Filter parameter to accomplish interface requirement (has no
 	 *               use here)	
      */
 	@Override
-	public void readData(Filter filter) {
-		if (dc.resultSet != null) {
+	public void readData(Filter filter) throws IOException {
+		if (dc.getResultSet() != null) {
 			try {
 				// read description of the ResultSet columns
-				ResultSetMetaData rsmd = dc.resultSet.getMetaData();
+				ResultSetMetaData rsmd = dc.getResultSet().getMetaData();
 				int cols = rsmd.getColumnCount();
 				List<String> columns = new ArrayList<String>();
 				// fill columns List with the column names of the result set
@@ -81,36 +63,21 @@ public class RSDataContainer implements CustomContainer {
 					columns.add(col);
 				}
 				// transfer all column names from the colums list to the HashMap columns
-				dc.setHeaders(columns.toArray(new String[]{}));
+				setHeaders(columns.toArray(new String[]{}));
 				// transfer all data rows of the ResultSet to the ArrayList of this class
                 do {
                     String[] row = new String[cols];
                     for (int i = 0; i < cols; i++) {
-                    	row[i] = String.valueOf(dc.resultSet.getObject(i + 1));
+                    	row[i] = String.valueOf(dc.getResultSet().getObject(i + 1));
                     }
-                   dc.addRow(row);
-                } while (dc.resultSet.next());
-                dc.resultSet.close();
+                   addRow(row);
+                } while (dc.getResultSet().next());
+                dc.getResultSet().close();
 			} catch (SQLException e) {
 				MLogger.getInstance().log(Level.SEVERE, e, "putResultSet");
 				throw new RuntimeException(e);
 			}
 		}
-	}
-
-	@Override
-	public void writeData(String srcFile) {
-		csv.writeData(srcFile);
-	}
-
-	@Override
-	public String asString() {
-		return csv.asString();
-	}
-
-	@Override
-	public void createFile(String srcFile) throws IOException {
-		csv.createFile(srcFile);	
 	}
 
 }

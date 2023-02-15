@@ -14,8 +14,8 @@ public abstract class BaseRegression {
 	 */
 	static final DataContainer resultContainer = new DataContainer();
 	static {
-		resultContainer.setColumnDelimiter(" | ");
-		resultContainer.setHeaders(new String[] { "TEST CLASS", "SUCCESS" });
+		resultContainer.getTabContainer().setColumnDelimiter(" | ");
+		resultContainer.getTabContainer().setHeaders(new String[] { "TEST CLASS", "SUCCESS" });
 	}
 	/**
 	 * Set to false if any error occurred during one test case execution. Set to true before running a
@@ -48,7 +48,7 @@ public abstract class BaseRegression {
 			success = false;
 			e.printStackTrace();			
 		} finally {
-			resultContainer.addRow(new String[] { getClass().getSimpleName(), String.valueOf(success) });
+			resultContainer.getTabContainer().addRow(new String[] { getClass().getSimpleName(), String.valueOf(success) });
 		}
 		System.out.println();
 		System.out.println("=================== >> Finished ");

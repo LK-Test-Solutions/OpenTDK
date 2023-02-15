@@ -46,33 +46,34 @@ import java.io.IOException;
 
 /**
  * 
- * @author LK Test Solutions GmbH
+ * @author LK Test Solutions
  *
  */
-public class PropertiesDataContainer implements CustomContainer {
+public class PropertiesDataContainer extends CSVDataContainer {
 
-	/**
-	 * An instance of the DataContainer that should be filled with the data from the
-	 * connected source file. -> Task of the specific data containers.
-	 */
-	private final DataContainer dc;
-
-	/**
-	 * Construct a new specific <code>DataContainer</code> for PROPERTIES files.
-	 *
-	 * @param dCont the <code>DataContainer</code> instance to use it in the read
-	 *              and write methods of this specific data container
-	 */
-	public PropertiesDataContainer(DataContainer dCont) {
-		dc = dCont;
+	PropertiesDataContainer(DataContainer dCont) {
+		super(dCont);	
 	}
-	
+
+	@Override
+	public String asString() {
+		StringBuilder ret = new StringBuilder();
+		String[] values = getRow(0);
+		for (String key : getHeaders().keySet()) {
+			String value = values[getHeaders().get(key)];
+			if(value != null) {
+				ret.append(StringUtils.strip(key)).append(" = ").append(StringUtils.strip(value)).append("\n");
+			}
+		}
+		return ret.toString();
+	}
+
 	public void deleteField(String headerName, String attributeName, String attributeValue, Filter fltr) {
-		int headerIndex = dc.getHeaderIndex(headerName);
-		dc.values.get(0)[headerIndex] = null;
-		if(!dc.getFileName().isEmpty()) {
+		int headerIndex = getHeaderIndex(headerName);
+		getValues().get(0)[headerIndex] = null;
+		if(!dc.getInputFile().getPath().isEmpty()) {
 			try {
-				writeData(dc.getFileName());
+				writeData(dc.getInputFile().getPath());
 			} catch (IOException e) {
 				MLogger.getInstance().log(Level.SEVERE, e, "getRowsIndexes");
 				throw new RuntimeException(e);
@@ -80,15 +81,9 @@ public class PropertiesDataContainer implements CustomContainer {
 		}
 	}
 
-	/**
-	 * Reads data from a file of type {@link java.util.Properties} and puts its
-	 * property names and values into the DataContainer.
-	 *
-	 * @param filter Unused in the <code>PropertiesDataContainer</code>
-	 */
 	@Override
 	public void readData(Filter filter) {
-		SortedProperties props = readProps(dc.getFileName());
+		SortedProperties props = readProps(dc.getInputFile().getPath());
 		// get all property names and add them to a List
 		if ((props != null) && (!props.isEmpty())) {
 			Enumeration<?> e = props.propertyNames();
@@ -97,14 +92,13 @@ public class PropertiesDataContainer implements CustomContainer {
 				pNames.add(String.valueOf(e.nextElement()));
 			}
 			// set property names as headers
-			dc.setHeaders(pNames.toArray(new String[pNames.size()]));
+			setHeaders(pNames.toArray(new String[pNames.size()]));
 			// get values of the properties
 			String[] row = new String[pNames.size()];
 			for (int i = 0; i < pNames.size(); i++) {
 				row[i] = String.valueOf(props.get(pNames.get(i)));
-//				addRow(new String[] { String.valueOf(props.get(key)) });
 			}
-			dc.addRow(row);
+			addRow(row);
 		}
 	}
 
@@ -129,61 +123,43 @@ public class PropertiesDataContainer implements CustomContainer {
 	 * @param srcFile Name and full path of the properties file
 	 * @throws IOException If any I/O error occurred
 	 */
+	@Override
 	public void writeData(String srcFile) throws IOException {
 		File f = new File(srcFile);
 		FileUtil.checkDir(f.getParent(), true);
 		FileWriter fw = null;
-		fw = new FileWriter(dc.getFileName());
-		SortedProperties existingProps = readProps(dc.getFileName());
+		fw = new FileWriter(dc.getInputFile());
+		SortedProperties existingProps = readProps(dc.getInputFile().getPath());
 		SortedProperties outputProps = new SortedProperties();
 		if ((existingProps != null) && (!existingProps.isEmpty())) {
-			List<String> doc = FileUtil.getRowsAsList(dc.getFileName());
+			List<String> doc = FileUtil.getRowsAsList(dc.getInputFile());
 
 			List<String> usedKeys = new ArrayList<String>();
 			for (String line : doc) {
-				if (dc.getHeaders().containsKey(line.split("=")[0].trim())) {
-					fw.write(line.split("=")[0].trim() + "=" + dc.getValue(line.split("=")[0].trim(), 0) + "\n");
+				if (getHeaders().containsKey(line.split("=")[0].trim())) {
+					fw.write(line.split("=")[0].trim() + "=" + getValue(line.split("=")[0].trim(), 0) + "\n");
 					usedKeys.add(line.split("=")[0].trim());
 				} else {
 					fw.write(line + "\n");
 				}
 			}
-			for (String k : dc.getHeaders().keySet()) {
+			for (String k : getHeaders().keySet()) {
 				if (!usedKeys.contains(k))
-					fw.write(k + "=" + dc.getValue(k, 0) + "\n");
+					fw.write(k + "=" + getValue(k, 0) + "\n");
 			}
 
 			fw.close();
 
 		} else {
-			String[] ds = dc.getRow(0);
-			for (String s : dc.getHeaders().keySet()) {
-				if(ds[dc.getHeaders().get(s)] != null) {
-					outputProps.put(s, ds[dc.getHeaders().get(s)]);
+			String[] ds = getRow(0);
+			for (String s : getHeaders().keySet()) {
+				if(ds[getHeaders().get(s)] != null) {
+					outputProps.put(s, ds[getHeaders().get(s)]);
 				}
 			}
-			FileOutputStream fos = new FileOutputStream(dc.getFileName());
+			FileOutputStream fos = new FileOutputStream(dc.getInputFile());
 			outputProps.store(fos, "Store properties");
 			
 		}
-	}
-	
-
-	@Override
-	public void createFile(String srcFile) throws IOException {
-		FileUtil.createFile(srcFile, true);
-	}
-
-	@Override
-	public String asString() {
-		StringBuilder ret = new StringBuilder();
-		String[] values = dc.getRow(0);
-		for (String key : dc.getHeaders().keySet()) {
-			String value = values[dc.getHeaders().get(key)];
-			if(value != null) {
-				ret.append(StringUtils.strip(key)).append(" = ").append(StringUtils.strip(value)).append("\n");
-			}
-		}
-		return ret.toString();
 	}
 }

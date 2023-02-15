@@ -88,21 +88,6 @@ public abstract class BaseDispatcher {
 	public static DataContainer getDataContainer(String dispatcherClassName) {
 		return dcMap.get(dispatcherClassName);
 	}
-
-
-	/**
-	 * Assigns a {@link org.opentdk.api.datastorage.DataContainer} to the {@link BaseDispatchComponent} fields that are declared in an 
-	 * extended sub class of {@link BaseDispatcher}. The DataContainer acts as a runtime storage for the values of the {@link BaseDispatchComponent} 
-	 * variables.
-	 * 
-	 * @param dispatcherClass the dispatcher class simple name where the variables of type {@link BaseDispatchComponent} are declared
-	 * @param dc {@link org.opentdk.api.datastorage.DataContainer} instance, representing the runtime storage for values of the {@link BaseDispatchComponent} variables
-	 * @throws ClassNotFoundException if the committed class string could not be retrieved via {@link Class#forName}
-	 */
-	@Deprecated
-	public static void setDataContainer(String dispatcherClass, DataContainer dc) throws ClassNotFoundException {
-		setDataContainer(Class.forName(dispatcherClass), dc, false);
-	}
 	
 	/**
 	 * Assigns a {@link org.opentdk.api.datastorage.DataContainer} to the {@link BaseDispatchComponent} fields that are declared in an 
@@ -143,37 +128,6 @@ public abstract class BaseDispatcher {
 	}
 	
 	/**
-	 * Assigns a {@link org.opentdk.api.datastorage.DataContainer} to the {@link BaseDispatchComponent} fields that are declared in an 
-	 * extended sub class of {@link BaseDispatcher}. The DataContainer acts as a runtime storage for the values of the {@link BaseDispatchComponent} 
-	 * variables.
-	 * This method will also check if the root node of tree formatted DataContainer matches with the root node defined within the corresponding dispatcher class.
-	 * 
-	 * @param dispatcherClass the dispatcher class where the variables of type {@link BaseDispatchComponent} are declared
-	 * @param dc {@link org.opentdk.api.datastorage.DataContainer} instance, representing the runtime storage for values of the {@link BaseDispatchComponent} variables
-	 * @param rootNode name of the root node within the dispatcher class, used to check if the content of the DataContainer matches to the dispatcher class
-	 */
-	@Deprecated
-	public static void setDataContainer(Class<?> dispatcherClass, DataContainer dc, String rootNode) {
-		setDataContainer(dispatcherClass, dc.getFileName(), rootNode);
-	}
-
-	/**
-	 * Assigns a {@link org.opentdk.api.datastorage.DataContainer} to the {@link BaseDispatchComponent} fields that are declared in an  
-	 * extended sub class of {@link BaseDispatcher}. The DataContainer acts as a runtime storage for the values of the {@link BaseDispatchComponent} 
-	 * variables that is linked to the defined file, which acts as the permanent storage for the {@link org.opentdk.api.datastorage.DataContainer}.
-	 * This method will also check if the root node of tree formatted file matches with the root node defined within the corresponding dispatcher class.
-	 * 
-	 * @param dispatcherClass the dispatcher class where the variables of type {@link BaseDispatchComponent} are declared
-	 * @param dispatcherFile full path and name of the file that stores the values of {@link BaseDispatchComponent} 
-	 * 						 variables which are defined within the dispatcher class
-	 * @param rootNode name of the root node within the tree formated file, used to check if the content of the file matches to the dispatcher class
-	 */
-	@Deprecated
-	public static void setDataContainer(Class<?> dispatcherClass, String dispatcherFile, String rootNode) {
-		setDataContainer(dispatcherClass, dispatcherFile, false);
-	}	
-	
-	/**
 	 * Assigns a {@link org.opentdk.api.datastorage.DataContainer} to the {@link BaseDispatchComponent} fields that are declared in an  
 	 * extended sub class of {@link BaseDispatcher}. The DataContainer acts as a runtime storage for the values of the {@link BaseDispatchComponent} 
 	 * variables that is linked to the defined file, which acts as the permanent storage for the {@link org.opentdk.api.datastorage.DataContainer}.
@@ -207,10 +161,10 @@ public abstract class BaseDispatcher {
 				break;
 			}
 		}
-		// Add or overwrite a container with the key of the dispatcher class name
+		
 		dcMap.put(dispatcherClass.getSimpleName(), dc);	
 		
-		if(StringUtils.isNotBlank(dc.getFileName())) {
+		if(StringUtils.isNotBlank(dc.getInputFile().getPath())) {
 			try {
 				checkDispatcherFile(dc, rn, createFile);
 			} catch (IOException e) {
@@ -285,7 +239,7 @@ public abstract class BaseDispatcher {
 	 * @throws IOException 
 	 */
 	static boolean checkDispatcherFile(DataContainer dc, String rootNode, boolean createNew) throws IOException {
-		File file = new File(dc.getFileName());		
+		File file = new File(dc.getInputFile().getPath());		
 		if (createNew && !file.exists()) {	
 			String filePath = file.getPath();
 			if(StringUtils.isBlank(rootNode)) {

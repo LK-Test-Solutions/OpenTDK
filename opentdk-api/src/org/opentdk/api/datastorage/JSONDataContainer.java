@@ -41,7 +41,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.opentdk.api.datastorage.BaseContainer.EContainerFormat;
 import org.opentdk.api.filter.Filter;
 import org.opentdk.api.filter.FilterRule;
 import org.opentdk.api.io.FileUtil;
@@ -57,7 +56,7 @@ import org.yaml.snakeyaml.Yaml;
  * @author LK Test Solutions
  * @see org.opentdk.api.datastorage.DataContainer
  */
-public class JSONDataContainer implements CustomContainer {
+public class JSONDataContainer implements TreeContainer {
 
 	/**
 	 * The instance of the {@link DataContainer} that the JSONDataContainer works with.
@@ -82,83 +81,151 @@ public class JSONDataContainer implements CustomContainer {
 	}
 
 	@Override
-	public void readData(Filter filter) {
-		String content = null;
-		if (!dc.getFileName().isEmpty()) {
-			content = FileUtil.getContent(dc.getFileName());
-		} else if (dc.getInputStream() != null) {
-			InputStreamReader inputStreamReader = new InputStreamReader(dc.getInputStream());
-			Stream<String> streamOfString = new BufferedReader(inputStreamReader).lines();
-			content = streamOfString.collect(Collectors.joining());
-
-			streamOfString.close();
-			try {
-				inputStreamReader.close();
-			} catch (IOException e) {
-				MLogger.getInstance().log(Level.SEVERE, e);
-			}
-		}
-		if (content != null) {
-			json = new JSONObject(content);
-			fillDc();
-		}
+	public void add(String name, String value) {
+		// TODO Auto-generated method stub
+		
 	}
 
-	private void fillDc() {
-		if (!json.isEmpty()) {
-			String[] names = JSONObject.getNames(json);
-			if (names.length > 0) {
-				dc.setHeaders(names);
-				for (String header : names) {
-					dc.setColumn(header, new String[] { json.get(header).toString() });
-				}
-			}
-		}
-	}
+//	private void fillDc() {
+//		if (!json.isEmpty()) {
+//			String[] names = JSONObject.getNames(json);
+//			if (names.length > 0) {
+//				dc.setHeaders(names);
+//				for (String header : names) {
+//					dc.setColumn(header, new String[] { json.get(header).toString() });
+//				}
+//			}
+//		}
+//	}
 	
-	/**
-	 * @return {@link #json} object as map to access from other containers.
-	 */
-	Map<String, Object> getJsonAsMap() {
-		return json.toMap();
+	@Override
+	public void add(String headerName, String value, Filter fltr) {
+		this.add(headerName, "", value, fltr);
 	}
 
-	/**
-	 * Possibility to set the content of the {@link #json} object from other containers.
-	 * 
-	 * @param content map that has the whole content of the JSON source
-	 */
-	void setJsonWithMap(Map<String, Object> content) {
-		if(content == null) {
-			MLogger.getInstance().log(Level.WARNING, "Map object is not initialized ==> No JSON content to read", getClass().getSimpleName(), "setJsonWithMap");
-		} else {
-			json = new JSONObject(content);
-			fillDc();
+	@Override
+	public void add(String headerName, String fieldName, String newFieldValue, Filter fltr) {
+		if (fltr.getFilterRules().isEmpty()) {
+			Object newValue = this.getDataType(newFieldValue);
+			json.append(headerName, newValue);
+		}
+		for (FilterRule fltrRule : fltr.getFilterRules()) {
+			if (fltrRule.getHeaderName().equalsIgnoreCase("XPath") && StringUtils.isNotBlank(fltrRule.getValue())) {
+				String searchExp = fltrRule.getValue().replace(";", "/") + "/" + headerName;
+				Object newValue = this.getDataType(newFieldValue);
+				Object result = null;
+
+				List<String> keyList = ListUtil.asList(searchExp.split("/"));
+				int i = 0;
+				for (String key : keyList) {
+					if (i == 0) {
+						result = json.get(key);
+					} else {
+						if (result instanceof JSONObject && i < keyList.size() - 1) {
+							result = ((JSONObject) result).get(key);
+						} else if (result instanceof JSONArray && i < keyList.size() - 1) {
+							result = ((JSONArray) result).get(Integer.parseInt(key));
+						} else {
+							break;
+						}
+					}
+					i++;
+				}
+				((JSONObject) result).append(headerName, newValue);
+				break;
+			}
 		}
 	}
 
 	@Override
-	public void writeData(String srcFile) {
-		if (json == null || json.isEmpty()) {
-			MLogger.getInstance().log(Level.WARNING, "JSON object is not initialized or empty ==> No JSON content to write", getClass().getSimpleName(), "writeData");
-		} else {
-			try {
-				FileUtil.createFile(srcFile, true);
-				FileUtil.writeOutputFile(json.toString(1), srcFile);
-			} catch (JSONException | IOException e) {
-				MLogger.getInstance().log(Level.SEVERE, e);
-				throw new RuntimeException(e);
-			}
-		}
+	public void add(String name, String attr, String value, String oldValue, Filter filter) {
+		// TODO Auto-generated method stub
+		
 	}
 	
+	@Override
+	public String asString() {
+		String ret = "";
+		if (json == null || json.isEmpty()) {
+			MLogger.getInstance().log(Level.WARNING, "JSON object is not initialized or empty ==> No JSON content to return", getClass().getSimpleName(), "asString");
+		} else {
+			ret = json.toString(1);
+		}
+		return ret;
+	}
+
+	@Override
+	public String asString(EContainerFormat format) {
+		switch(format) {
+		case JSON:
+			MLogger.getInstance().log(Level.INFO, "Format already is JSON. Call asString", getClass().getSimpleName(), "asString(format)");
+			return asString();
+		case YAML:
+			Yaml yaml = new Yaml();
+			return yaml.dump(yaml.dumpAsMap(getJsonAsMap()));
+		default:
+			MLogger.getInstance().log(Level.WARNING, "Format not supported to export from YAML", getClass().getSimpleName(), "asString(format)");
+			return "";
+		}
+	}
+
 	@Override
 	public void createFile(String srcFile) throws IOException {
 		FileUtil.createFile(srcFile, true);	
 	}
 
 	@Override
-	public Object[] getColumn(String headerName, Filter fltr) {
+	public void delete(String name, String value) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void delete(String name, String value, Filter filter) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void delete(String headerName, String fieldName, String fieldValue, Filter fltr) {
+		if (fltr.getFilterRules().isEmpty()) {
+			json.remove(headerName);
+		}
+		for (FilterRule fltrRule : fltr.getFilterRules()) {
+			if (fltrRule.getHeaderName().equalsIgnoreCase("XPath") && StringUtils.isNotBlank(fltrRule.getValue())) {
+				String searchExp = fltrRule.getValue().replace(";", "/") + "/" + headerName;
+				Object result = null;
+
+				List<String> keyList = ListUtil.asList(searchExp.split("/"));
+				int i = 0;
+				for (String key : keyList) {
+					if (i == 0) {
+						result = json.get(key);
+					} else {
+						if (result instanceof JSONObject && i < keyList.size() - 1) {
+							result = ((JSONObject) result).get(key);
+						} else if (result instanceof JSONArray && i < keyList.size() - 1) {
+							result = ((JSONArray) result).get(Integer.parseInt(key));
+						} else {
+							break;
+						}
+					}
+					i++;
+				}
+				((JSONObject) result).remove(headerName);
+				break;
+			}
+		}
+	}
+
+	@Override
+	public String[] get(String name) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public String[] get(String headerName, Filter fltr) {
 		String[] ret = null;
 		List<FilterRule> implFilterRules = dc.getImplFilterRules(fltr);
 		List<String> filteredValues = new ArrayList<>();
@@ -203,129 +270,11 @@ public class JSONDataContainer implements CustomContainer {
 		}
 		return ret;
 	}
-
+	
 	@Override
-	public void addField(String headerName, String value, Filter fltr) {
-		this.addField(headerName, "", value, fltr);
-	}
-
-	@Override
-	public void addField(String headerName, String fieldName, String newFieldValue, Filter fltr) {
-		this.addField(headerName, fieldName, "", newFieldValue, fltr);
-	}
-
-	@Override
-	public void addField(String headerName, String fieldName, String oldFieldValue, String newFieldValue, Filter fltr) {
-		if (fltr.getFilterRules().isEmpty()) {
-			Object newValue = this.getDataType(newFieldValue);
-			json.append(headerName, newValue);
-		}
-		for (FilterRule fltrRule : fltr.getFilterRules()) {
-			if (fltrRule.getHeaderName().equalsIgnoreCase("XPath") && StringUtils.isNotBlank(fltrRule.getValue())) {
-				String searchExp = fltrRule.getValue().replace(";", "/") + "/" + headerName;
-				Object newValue = this.getDataType(newFieldValue);
-				Object result = null;
-
-				List<String> keyList = ListUtil.asList(searchExp.split("/"));
-				int i = 0;
-				for (String key : keyList) {
-					if (i == 0) {
-						result = json.get(key);
-					} else {
-						if (result instanceof JSONObject && i < keyList.size() - 1) {
-							result = ((JSONObject) result).get(key);
-						} else if (result instanceof JSONArray && i < keyList.size() - 1) {
-							result = ((JSONArray) result).get(Integer.parseInt(key));
-						} else {
-							break;
-						}
-					}
-					i++;
-				}
-				((JSONObject) result).append(headerName, newValue);
-				break;
-			}
-		}
-	}
-
-	@Override
-	public void deleteField(String headerName, String fieldName, String fieldValue, Filter fltr) {
-		if (fltr.getFilterRules().isEmpty()) {
-			json.remove(headerName);
-		}
-		for (FilterRule fltrRule : fltr.getFilterRules()) {
-			if (fltrRule.getHeaderName().equalsIgnoreCase("XPath") && StringUtils.isNotBlank(fltrRule.getValue())) {
-				String searchExp = fltrRule.getValue().replace(";", "/") + "/" + headerName;
-				Object result = null;
-
-				List<String> keyList = ListUtil.asList(searchExp.split("/"));
-				int i = 0;
-				for (String key : keyList) {
-					if (i == 0) {
-						result = json.get(key);
-					} else {
-						if (result instanceof JSONObject && i < keyList.size() - 1) {
-							result = ((JSONObject) result).get(key);
-						} else if (result instanceof JSONArray && i < keyList.size() - 1) {
-							result = ((JSONArray) result).get(Integer.parseInt(key));
-						} else {
-							break;
-						}
-					}
-					i++;
-				}
-				((JSONObject) result).remove(headerName);
-				break;
-			}
-		}
-	}
-
-	/**
-	 * Called when a value, array or object should be changed or created.
-	 * 
-	 * @param headerName JSON key
-	 * @param occurences unused
-	 * @param value      data to set {@literal -} the JSON data type gets parsed e.g. 'true' becomes a
-	 *                   boolean or '"Test"' becomes a string or '[value1,value2]' an array
-	 * @param fltr       filter object to find the correct field
-	 */
-	@Override
-	public void setFieldValues(String headerName, int[] occurences, String value, Filter fltr) {
-		occurences = null;
-		if (fltr.getFilterRules().isEmpty()) {
-			Object newValue = this.getDataType(value);
-			json.put(headerName, newValue);
-		}
-		for (FilterRule fltrRule : fltr.getFilterRules()) {
-			if (fltrRule.getHeaderName().equalsIgnoreCase("XPath") && StringUtils.isNotBlank(fltrRule.getValue())) {
-				String searchExp = fltrRule.getValue().replace(";", "/") + "/" + headerName;
-				Object newValue = this.getDataType(value);
-				Object result = null;
-
-				List<String> keyList = ListUtil.asList(searchExp.split("/"));
-				int i = 0;
-				for (String key : keyList) {
-					if (i == 0) {
-						result = json.get(key);
-					} else {
-						if (result instanceof JSONObject && i < keyList.size() - 1) {
-							result = ((JSONObject) result).get(key);
-						} else if (result instanceof JSONArray && i < keyList.size() - 1) {
-							result = ((JSONArray) result).get(Integer.parseInt(key));
-						} else {
-							break;
-						}
-					}
-					i++;
-				}
-				if (result instanceof JSONArray) {
-					((JSONArray) result).put(newValue);
-				} else {
-					((JSONObject) result).put(headerName, newValue);
-				}
-				break;
-			}
-		}
+	public String[] get(String name, String attr) {
+		// TODO Auto-generated method stub
+		return null;
 	}
 
 	/**
@@ -365,29 +314,133 @@ public class JSONDataContainer implements CustomContainer {
 		return ret;
 	}
 
-	@Override
-	public String asString() {
-		String ret = "";
-		if (json == null || json.isEmpty()) {
-			MLogger.getInstance().log(Level.WARNING, "JSON object is not initialized or empty ==> No JSON content to return", getClass().getSimpleName(), "asString");
-		} else {
-			ret = json.toString(1);
-		}
-		return ret;
+	/**
+	 * @return {@link #json} object as map to access from other containers.
+	 */
+	Map<String, Object> getJsonAsMap() {
+		return json.toMap();
 	}
-	
+
 	@Override
-	public String asString(EContainerFormat format) {
-		switch(format) {
-		case JSON:
-			MLogger.getInstance().log(Level.INFO, "Format already is JSON. Call asString", getClass().getSimpleName(), "asString(format)");
-			return asString();
-		case YAML:
-			Yaml yaml = new Yaml();
-			return yaml.dump(yaml.dumpAsMap(getJsonAsMap()));
-		default:
-			MLogger.getInstance().log(Level.WARNING, "Format not supported to export from YAML", getClass().getSimpleName(), "asString(format)");
-			return "";
+	public void readData(Filter filter) {
+		String content = null;
+		if (!dc.getInputFile().getName().isEmpty()) {
+			content = FileUtil.getContent(dc.getInputFile().getPath());
+		} else if (dc.getInputStream() != null) {
+			InputStreamReader inputStreamReader = new InputStreamReader(dc.getInputStream());
+			Stream<String> streamOfString = new BufferedReader(inputStreamReader).lines();
+			content = streamOfString.collect(Collectors.joining());
+
+			streamOfString.close();
+			try {
+				inputStreamReader.close();
+			} catch (IOException e) {
+				MLogger.getInstance().log(Level.SEVERE, e);
+			}
+		}
+		if (content != null) {
+			json = new JSONObject(content);
+//			fillDc();
+		}
+	}
+
+	@Override
+	public void set(String name, String value) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	/**
+	 * Called when a value, array or object should be changed or created.
+	 * 
+	 * @param headerName JSON key
+	 * @param occurences unused
+	 * @param value      data to set {@literal -} the JSON data type gets parsed e.g. 'true' becomes a
+	 *                   boolean or '"Test"' becomes a string or '[value1,value2]' an array
+	 * @param fltr       filter object to find the correct field
+	 */
+	@Override
+	public void set(String headerName, String value, Filter fltr) {
+		if (fltr.getFilterRules().isEmpty()) {
+			Object newValue = this.getDataType(value);
+			json.put(headerName, newValue);
+		}
+		for (FilterRule fltrRule : fltr.getFilterRules()) {
+			if (fltrRule.getHeaderName().equalsIgnoreCase("XPath") && StringUtils.isNotBlank(fltrRule.getValue())) {
+				String searchExp = fltrRule.getValue().replace(";", "/") + "/" + headerName;
+				Object newValue = this.getDataType(value);
+				Object result = null;
+
+				List<String> keyList = ListUtil.asList(searchExp.split("/"));
+				int i = 0;
+				for (String key : keyList) {
+					if (i == 0) {
+						result = json.get(key);
+					} else {
+						if (result instanceof JSONObject && i < keyList.size() - 1) {
+							result = ((JSONObject) result).get(key);
+						} else if (result instanceof JSONArray && i < keyList.size() - 1) {
+							result = ((JSONArray) result).get(Integer.parseInt(key));
+						} else {
+							break;
+						}
+					}
+					i++;
+				}
+				if (result instanceof JSONArray) {
+					((JSONArray) result).put(newValue);
+				} else {
+					((JSONObject) result).put(headerName, newValue);
+				}
+				break;
+			}
+		}
+	}
+
+	@Override
+	public void set(String name, String value, Filter filter, boolean allOccurences) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void set(String name, String value, Filter filter, int[] occurences) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void set(String name, String attr, String value, String oldValue, Filter filter) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	/**
+	 * Possibility to set the content of the {@link #json} object from other containers.
+	 * 
+	 * @param content map that has the whole content of the JSON source
+	 */
+	void setJsonWithMap(Map<String, Object> content) {
+		if(content == null) {
+			MLogger.getInstance().log(Level.WARNING, "Map object is not initialized ==> No JSON content to read", getClass().getSimpleName(), "setJsonWithMap");
+		} else {
+			json = new JSONObject(content);
+//			fillDc();
+		}
+	}
+
+	@Override
+	public void writeData(String srcFile) {
+		if (json == null || json.isEmpty()) {
+			MLogger.getInstance().log(Level.WARNING, "JSON object is not initialized or empty ==> No JSON content to write", getClass().getSimpleName(), "writeData");
+		} else {
+			try {
+				FileUtil.createFile(srcFile, true);
+				FileUtil.writeOutputFile(json.toString(1), srcFile);
+			} catch (JSONException | IOException e) {
+				MLogger.getInstance().log(Level.SEVERE, e);
+				throw new RuntimeException(e);
+			}
 		}
 	}
 

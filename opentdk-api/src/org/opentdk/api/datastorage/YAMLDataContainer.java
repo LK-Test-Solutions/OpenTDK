@@ -32,7 +32,6 @@ import java.io.IOException;
 import java.util.Map;
 import java.util.logging.Level;
 
-import org.opentdk.api.datastorage.BaseContainer.EContainerFormat;
 import org.opentdk.api.filter.Filter;
 import org.opentdk.api.io.FileUtil;
 import org.opentdk.api.logger.MLogger;
@@ -48,7 +47,7 @@ import org.yaml.snakeyaml.Yaml;
  * @author LK Test Solutions
  * @see org.opentdk.api.datastorage.DataContainer
  */
-public class YAMLDataContainer implements CustomContainer {
+public class YAMLDataContainer implements TreeContainer {
 	/**
 	 * Container object for the YAML data. Supports several read and write methods. Gets initialized in
 	 * the constructor.
@@ -75,8 +74,8 @@ public class YAMLDataContainer implements CustomContainer {
 		yaml = new Yaml();
 		json = new JSONDataContainer(dCont);
 
-		if (!dCont.getFileName().isEmpty()) {
-			content = yaml.load(FileUtil.getRowsAsString(dCont.getFileName()));
+		if (dCont.getInputFile().exists()) {
+			content = yaml.load(FileUtil.getRowsAsString(dCont.getInputFile()));
 		} else if (dCont.getInputStream() != null) {
 			content = yaml.load(dCont.getInputStream());
 		} else {
@@ -85,59 +84,30 @@ public class YAMLDataContainer implements CustomContainer {
 	}
 
 	@Override
-	public void readData(Filter filter) {
-		if (content == null) {
-			MLogger.getInstance().log(Level.WARNING, "YAML object is not initialized or empty ==> No YAML content to read", getClass().getSimpleName(), "readData");
-		} else {
-			json.setJsonWithMap(content);
-		}
+	public void add(String name, String value) {
+		add(name, value, new Filter());
 	}
 
 	@Override
-	public void writeData(String srcFileName) throws IOException {
-		yaml.dump(yaml.dumpAsMap(json.getJsonAsMap()), new FileWriter(srcFileName));
+	public void add(String headerName, String value, Filter fltr) {
+		add(headerName, "", value, fltr);
 	}
 	
 	@Override
-	public void createFile(String srcFile) throws IOException {	
-		json.createFile(srcFile);
+	public void add(String headerName, String fieldName, String newFieldValue, Filter fltr) {
+		add(headerName, fieldName, "", newFieldValue, fltr);
 	}
 
 	@Override
-	public Object[] getColumn(String headerName, Filter fltr) {
-		return json.getColumn(headerName, fltr);
-	}
-
-	@Override
-	public void addField(String headerName, String value, Filter fltr) {
-		this.addField(headerName, "", value, fltr);
-	}
-
-	@Override
-	public void addField(String headerName, String fieldName, String newFieldValue, Filter fltr) {
-		this.addField(headerName, fieldName, "", newFieldValue, fltr);
-	}
-
-	@Override
-	public void addField(String headerName, String fieldName, String oldFieldValue, String newFieldValue, Filter fltr) {
-		json.addField(headerName, newFieldValue, fltr);
-	}
-
-	@Override
-	public void deleteField(String headerName, String fieldName, String fieldValue, Filter fltr) {
-		json.deleteField(headerName, fieldName, fieldValue, fltr);
-	}
-
-	@Override
-	public void setFieldValues(String headerName, int[] occurences, String value, Filter fltr) {
-		json.setFieldValues(headerName, occurences, value, fltr);
+	public void add(String headerName, String fieldName, String oldFieldValue, String newFieldValue, Filter fltr) {
+		json.add(headerName, fieldName, oldFieldValue, newFieldValue, fltr);
 	}
 
 	@Override
 	public String asString() {
 		return yaml.dump(yaml.dumpAsMap(json.getJsonAsMap()));
 	}
-	
+
 	@Override
 	public String asString(EContainerFormat format) {
 		switch(format) {
@@ -150,6 +120,88 @@ public class YAMLDataContainer implements CustomContainer {
 			MLogger.getInstance().log(Level.WARNING, "Format not supported to export from YAML", getClass().getSimpleName(), "asString(format)");
 			return "";
 		}
+	}
+
+	@Override
+	public void createFile(String srcFile) throws IOException {	
+		json.createFile(srcFile);
+	}
+
+	@Override
+	public void delete(String name, String value) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void delete(String name, String value, Filter filter) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void delete(String headerName, String fieldName, String fieldValue, Filter fltr) {
+		json.delete(headerName, fieldName, fieldValue, fltr);
+	}
+	
+	@Override
+	public String[] get(String name) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public String[] get(String headerName, Filter fltr) {
+		return json.get(headerName, fltr);
+	}
+
+	@Override
+	public String[] get(String name, String attr) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public void readData(Filter filter) {
+		if (content == null) {
+			MLogger.getInstance().log(Level.WARNING, "YAML object is not initialized or empty ==> No YAML content to read", getClass().getSimpleName(), "readData");
+		} else {
+			json.setJsonWithMap(content);
+		}
+	}
+
+	@Override
+	public void set(String name, String value) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void set(String name, String value, Filter filter) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void set(String name, String value, Filter filter, boolean allOccurences) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void set(String headerName, String value, Filter fltr, int[] occurences) {
+		json.set(headerName, value, fltr, occurences);
+	}
+
+	@Override
+	public void set(String name, String attr, String value, String oldValue, Filter filter) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void writeData(String srcFileName) throws IOException {
+		yaml.dump(yaml.dumpAsMap(json.getJsonAsMap()), new FileWriter(srcFileName));
 	}
 	
 }
