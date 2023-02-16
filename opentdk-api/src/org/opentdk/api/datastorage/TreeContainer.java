@@ -1,10 +1,9 @@
 package org.opentdk.api.datastorage;
 
-
 import org.opentdk.api.filter.Filter;
 
 public interface TreeContainer extends SpecificContainer {
-	
+
 	/**
 	 * This method gets used to add a value into the data source.
 	 * 
@@ -132,12 +131,13 @@ public interface TreeContainer extends SpecificContainer {
 	 * This method gets used to replace a value in the data source.
 	 * 
 	 * @param name       Name of the element that will be added into the data source
+	 * @param occurences if there are more hits this parameter allows to decide which ones get replaced
+	 * 
 	 * @param value      Value that will be assigned to the name
 	 * @param filter     Filter condition for more precise localization of the element within the data
 	 *                   structure
-	 * @param occurences if there are more hits this parameter allows to decide which ones get replaced
 	 */
-	void set(String name, String value, Filter filter, int[] occurences);
+	void set(String name, int[] occurences, String value, Filter filter);
 
 	/**
 	 * This method gets used to replace a value in the data source.

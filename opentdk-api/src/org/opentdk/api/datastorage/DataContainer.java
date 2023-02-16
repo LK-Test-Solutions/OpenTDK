@@ -591,6 +591,11 @@ public class DataContainer implements SpecificContainer {
 		}
 
 	}
+	
+	@Override
+	public void readData(File srcFile) throws IOException {
+		instance.readData(srcFile);
+	}
 
 	@Override
 	public void readData(Filter filter) throws IOException {

@@ -85,22 +85,22 @@ public class YAMLDataContainer implements TreeContainer {
 
 	@Override
 	public void add(String name, String value) {
-		add(name, value, new Filter());
+		json.add(name, value);
 	}
 
 	@Override
-	public void add(String headerName, String value, Filter fltr) {
-		add(headerName, "", value, fltr);
+	public void add(String name, String value, Filter filter) {
+		json.add(name, value, filter);
 	}
 	
 	@Override
-	public void add(String headerName, String fieldName, String newFieldValue, Filter fltr) {
-		add(headerName, fieldName, "", newFieldValue, fltr);
+	public void add(String name, String fieldName, String newFieldValue, Filter filter) {
+		json.add(name, fieldName, newFieldValue, filter);
 	}
 
 	@Override
-	public void add(String headerName, String fieldName, String oldFieldValue, String newFieldValue, Filter fltr) {
-		json.add(headerName, fieldName, oldFieldValue, newFieldValue, fltr);
+	public void add(String name, String fieldName, String oldFieldValue, String newFieldValue, Filter filter) {
+		json.add(name, fieldName, oldFieldValue, newFieldValue, filter);
 	}
 
 	@Override
@@ -129,25 +129,22 @@ public class YAMLDataContainer implements TreeContainer {
 
 	@Override
 	public void delete(String name, String value) {
-		// TODO Auto-generated method stub
-		
+		json.set(name, value);
 	}
 
 	@Override
 	public void delete(String name, String value, Filter filter) {
-		// TODO Auto-generated method stub
-		
+		json.delete(name, value, filter);
 	}
 
 	@Override
-	public void delete(String headerName, String fieldName, String fieldValue, Filter fltr) {
-		json.delete(headerName, fieldName, fieldValue, fltr);
+	public void delete(String headerName, String fieldName, String fieldValue, Filter filter) {
+		json.delete(headerName, fieldName, fieldValue, filter);
 	}
 	
 	@Override
 	public String[] get(String name) {
-		// TODO Auto-generated method stub
-		return null;
+		return json.get(name);
 	}
 
 	@Override
@@ -157,8 +154,7 @@ public class YAMLDataContainer implements TreeContainer {
 
 	@Override
 	public String[] get(String name, String attr) {
-		// TODO Auto-generated method stub
-		return null;
+		return json.get(name, attr);
 	}
 
 	@Override
@@ -172,30 +168,27 @@ public class YAMLDataContainer implements TreeContainer {
 
 	@Override
 	public void set(String name, String value) {
-		// TODO Auto-generated method stub
-		
+		json.set(name, value);
 	}
 
 	@Override
 	public void set(String name, String value, Filter filter) {
-		// TODO Auto-generated method stub
-		
+		json.set(name, value, filter);
 	}
 
 	@Override
 	public void set(String name, String value, Filter filter, boolean allOccurences) {
-		// TODO Auto-generated method stub
-		
+		json.set(name, value, filter, allOccurences);
 	}
 
 	@Override
-	public void set(String headerName, String value, Filter fltr, int[] occurences) {
-		json.set(headerName, value, fltr, occurences);
+	public void set(String headerName, int[] occurences, String value, Filter fltr) {
+		json.set(headerName, occurences, value, fltr);
 	}
 
 	@Override
 	public void set(String name, String attr, String value, String oldValue, Filter filter) {
-		// TODO Auto-generated method stub
+		json.set(name, attr, value, oldValue, filter);
 		
 	}
 

@@ -1,6 +1,7 @@
 package RegressionTest.YAMLContainer;
 
 import java.io.ByteArrayInputStream;
+import java.io.IOException;
 
 import org.json.JSONException;
 import org.opentdk.api.dispatcher.BaseDispatcher;
@@ -90,7 +91,11 @@ public class RT_YAMLContainer_dispatchYAML extends BaseRegression {
 			System.out.println("Exception correctly catched ==> Field 'salary' was deleted");
 		}
 		
-		BaseDispatcher.getDataContainer(EYamlValues.class).writeData("output/YamlOutput.yaml");
+		try {
+			BaseDispatcher.getDataContainer(EYamlValues.class).writeData("output/YamlOutput.yaml");
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
 		
 		BaseDispatcher.clearDataContainer();
 	}

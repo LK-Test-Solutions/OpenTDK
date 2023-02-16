@@ -1,6 +1,6 @@
 package Tests.JSONContainer;
 
-import org.opentdk.api.datastorage.BaseContainer.EContainerFormat;
+import org.opentdk.api.datastorage.EContainerFormat;
 import org.opentdk.api.dispatcher.BaseDispatcher;
 import org.opentdk.api.io.FileUtil;
 

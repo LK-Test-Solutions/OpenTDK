@@ -31,12 +31,14 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.logging.Level;
 import java.util.stream.Collectors;
 
 import org.opentdk.api.filter.Filter;
 import org.opentdk.api.filter.FilterRule;
 import org.opentdk.api.io.FileUtil;
 import org.opentdk.api.io.XMLEditor;
+import org.opentdk.api.logger.MLogger;
 import org.w3c.dom.Element;
 
 /**
@@ -72,8 +74,7 @@ public class XMLDataContainer implements TreeContainer {
 
 	@Override
 	public void add(String name, String value) {
-		// TODO Auto-generated method stub
-		
+		add(name, value, new Filter());	
 	}
 
 	@Override
@@ -124,20 +125,18 @@ public class XMLDataContainer implements TreeContainer {
 	}
 
 	@Override
-	public void delete(String name, String value) {
-		// TODO Auto-generated method stub
-		
+	public void delete(String name, String value) {	
+		delete(name, value, new Filter());
 	}
 
 	@Override
 	public void delete(String name, String value, Filter filter) {
-		// TODO Auto-generated method stub
-		
+		delete(name, value, "", filter);
 	}
 
 	@Override
-	public void delete(String headerName, String attributeName, String attributeValue, Filter fltr) {
-		for (FilterRule fltrRule : fltr.getFilterRules()) {
+	public void delete(String headerName, String attributeName, String attributeValue, Filter filter) {
+		for (FilterRule fltrRule : filter.getFilterRules()) {
 			if (fltrRule.getHeaderName().equalsIgnoreCase("XPath")) {
 				xEdit.delElement(fltrRule.getValue(), headerName, attributeName, attributeValue);
 				break;
@@ -322,34 +321,30 @@ public class XMLDataContainer implements TreeContainer {
 
 	@Override
 	public void set(String name, String value) {
-		// TODO Auto-generated method stub
-		
+		set(name, value, new Filter());
 	}
 
 	@Override
 	public void set(String name, String value, Filter filter) {
-		// TODO Auto-generated method stub
-		
+		set(name, value, filter, false);
 	}
 
 	@Override
 	public void set(String name, String value, Filter filter, boolean allOccurences) {
-		// TODO Auto-generated method stub
-		
-	}
-
-	@Override
-	public void set(String headerName, String value, Filter fltr, int[] occurences) {
-		setFieldValues(headerName, occurences, value, fltr, false);
+		setFieldValues(name, new int[0], value, filter, false);
 	}
 
 	@Override
 	public void set(String name, String attr, String value, String oldValue, Filter filter) {
-		// TODO Auto-generated method stub
-		
+		MLogger.getInstance().log(Level.INFO, "Method not used", getClass().getSimpleName(), "set");
+	}
+	
+	@Override
+	public void set(String headerName, int[] occurences, String value, Filter fltr) {
+		setFieldValues(headerName, occurences, value, fltr, false);
 	}
 
-	public void setFieldValues(String headerName, int[] occurences, String value, Filter fltr, boolean newField) {
+	private void setFieldValues(String headerName, int[] occurences, String value, Filter fltr, boolean newField) {
 		// Initialize occurrences array with 0 item, in case it is empty
 		if(occurences.length < 1) {
 			occurences = new int[] {0};

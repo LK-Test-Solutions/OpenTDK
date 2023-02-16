@@ -1,6 +1,10 @@
 |
   new:
     person: 1
+  address:
+    zipcode: 87463
+    city: Munich
+    street: Schneckenburgerstrasse
   role: Manager
   cities:
   - Munich
@@ -10,7 +14,8 @@
   name: LK
   id: 2
   people:
-  - special: {}
+  - special:
+      salary: 30000
     name: Boss
     age: 52
   - name: Employee

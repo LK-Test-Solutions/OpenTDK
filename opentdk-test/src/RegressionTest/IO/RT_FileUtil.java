@@ -88,14 +88,14 @@ public class RT_FileUtil extends BaseRegression {
 			System.err.println(e.getMessage());
 		}
 		DataContainer dc = new DataContainer();
-		dc.addRow(new String[] { "Row1" });
-		dc.addRow(new String[] { "Row2" });
-		dc.addRow(new String[] { "Row3" });
-		dc.addRow(new String[] { "Row4" });
-		dc.addRow(new String[] { "Row5" });
-		dc.addRow(new String[] { "Row6" });
+		dc.tabInstance().addRow(new String[] { "Row1" });
+		dc.tabInstance().addRow(new String[] { "Row2" });
+		dc.tabInstance().addRow(new String[] { "Row3" });
+		dc.tabInstance().addRow(new String[] { "Row4" });
+		dc.tabInstance().addRow(new String[] { "Row5" });
+		dc.tabInstance().addRow(new String[] { "Row6" });
 		try {
-			dc.exportContainer(path_txt);
+			dc.tabInstance().exportContainer(path_txt);
 		} catch (IOException e) {
 			System.err.println(e.getMessage());
 		}

@@ -1,5 +1,6 @@
 package RegressionTest.CSVContainer;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -17,7 +18,7 @@ public class RT_CSVContainer_getRows extends BaseRegression {
 	
 	@Override
 	public void runTest() {
-		DataContainer dc = new DataContainer("./testdata/RegressionTestData/CSVContainer_Contacts.csv");
+		DataContainer dc = new DataContainer(new File("./testdata/RegressionTestData/CSVContainer_Contacts.csv"));
 		test1(dc);
 		test2(dc);
 		test3(dc);
@@ -35,8 +36,8 @@ public class RT_CSVContainer_getRows extends BaseRegression {
 		expResults1.add("Muster AG;Mustermann;12345;Musterhausen;Musterstrasse;1;0123/4567890;max@muster.mu");
 		expResults1.add("LK Test Solutions GmbH;Meisinger;86450;Muenchen;Schneckenburgerstrasse;32;null;fme@lk-test.de");
 		expResults1.add("LK Test Solutions GmbH;Winkler;81675;Muenchen;Schneckenburgerstrasse;32;null;lwi@lk-test.de");
-		for (int i = 0; i < dc.getRowCount(); i++) {
-			testResult(String.join(";", dc.getRow(i)), "getRow(" + i + ")", expResults1.get(i));
+		for (int i = 0; i < dc.tabInstance().getRowCount(); i++) {
+			testResult(String.join(";", dc.tabInstance().getRow(i)), "getRow(" + i + ")", expResults1.get(i));
 		}
 	}
 
@@ -46,8 +47,8 @@ public class RT_CSVContainer_getRows extends BaseRegression {
 		expResults1.add("Muster AG;12345;Musterhausen");
 		expResults1.add("LK Test Solutions GmbH;86450;Muenchen");
 		expResults1.add("LK Test Solutions GmbH;81675;Muenchen");;
-		for (int i = 0; i < dc.getRowCount(); i++) {
-			testResult(String.join(";", dc.getRow(i, "Firma;PLZ;Ort")), "getRow(" + i + ", headers)", expResults1.get(i));
+		for (int i = 0; i < dc.tabInstance().getRowCount(); i++) {
+			testResult(String.join(";", dc.tabInstance().getRow(i, "Firma;PLZ;Ort")), "getRow(" + i + ", headers)", expResults1.get(i));
 		}
 	}
 
@@ -57,8 +58,8 @@ public class RT_CSVContainer_getRows extends BaseRegression {
 		expResults1.add("Muster AG;12345;Musterhausen");
 		expResults1.add("LK Test Solutions GmbH;86450;Muenchen");
 		expResults1.add("LK Test Solutions GmbH;81675;Muenchen");
-		for (int i = 0; i < dc.getRowCount(); i++) {
-			testResult(String.join(";", dc.getRow(i, new String[] { "Firma", "PLZ", "Ort" })), "getRow(" + i + ", headers)", expResults1.get(i));
+		for (int i = 0; i < dc.tabInstance().getRowCount(); i++) {
+			testResult(String.join(";", dc.tabInstance().getRow(i, new String[] { "Firma", "PLZ", "Ort" })), "getRow(" + i + ", headers)", expResults1.get(i));
 		}
 	}
 
@@ -70,8 +71,8 @@ public class RT_CSVContainer_getRows extends BaseRegression {
 		expResults1.add("LK Test Solutions GmbH;81675;Muenchen");
 		Filter fltr1 = new Filter();
 		fltr1.addFilterRule("PLZ", "81675", EOperator.CONTAINS);
-		for (int i = 0; i < dc.getRowCount(); i++) {
-			testResult(String.join(";", dc.getRow(i, "Firma;PLZ;Ort", fltr1)), "getRow(" + i + ", headers)", expResults1.get(i));
+		for (int i = 0; i < dc.tabInstance().getRowCount(); i++) {
+			testResult(String.join(";", dc.tabInstance().getRow(i, "Firma;PLZ;Ort", fltr1)), "getRow(" + i + ", headers)", expResults1.get(i));
 		}
 	}
 
@@ -81,7 +82,7 @@ public class RT_CSVContainer_getRows extends BaseRegression {
 		expResults1.add("Muster AG;Mustermann;12345;Musterhausen;Musterstrasse;1;0123/4567890;max@muster.mu");
 		expResults1.add("LK Test Solutions GmbH;Meisinger;86450;Muenchen;Schneckenburgerstrasse;32;null;fme@lk-test.de");
 		expResults1.add("LK Test Solutions GmbH;Winkler;81675;Muenchen;Schneckenburgerstrasse;32;null;lwi@lk-test.de");
-		List<String[]> resLst = dc.getRowsList();
+		List<String[]> resLst = dc.tabInstance().getRowsList();
 		for (int i = 0; i < resLst.size(); i++) {
 			testResult(String.join(";", resLst.get(i)), "getRowsList() " + i, expResults1.get(i));
 		}
@@ -95,7 +96,7 @@ public class RT_CSVContainer_getRows extends BaseRegression {
 		Filter fltr1 = new Filter();
 		fltr1.addFilterRule("Firma", "LK Test", EOperator.STARTS_WITH);
 		try {
-			List<String[]> resLst = dc.getRowsList(fltr1);
+			List<String[]> resLst = dc.tabInstance().getRowsList(fltr1);
 			for (int i = 0; i < resLst.size(); i++) {
 				testResult(String.join(";", resLst.get(i)), "getRowsList(Filter) " + i, expResults1.get(i));
 			}
@@ -112,7 +113,7 @@ public class RT_CSVContainer_getRows extends BaseRegression {
 		Filter fltr2 = new Filter();
 		fltr2.addFilterRule("Firma", "GmbH", EOperator.ENDS_WITH);
 		try {
-			List<String[]> resLst = dc.getRowsList("Ort;Nachname", fltr2);
+			List<String[]> resLst = dc.tabInstance().getRowsList("Ort;Nachname", fltr2);
 			for (int i = 0; i < resLst.size(); i++) {
 				testResult(String.join(";", resLst.get(i)), "getRowsList(headers, filter) " + i, expResults1.get(i));
 			}
@@ -128,7 +129,7 @@ public class RT_CSVContainer_getRows extends BaseRegression {
 		Filter fltr3 = new Filter();
 		fltr3.addFilterRule("Email", "lk-test.de", EOperator.ENDS_WITH);
 		try {
-			List<String[]> resLst = dc.getRowsList(new int[] { 0, 1, 2, 3 }, new String[] { "Firma", "Nachname" }, fltr3);
+			List<String[]> resLst = dc.tabInstance().getRowsList(new int[] { 0, 1, 2, 3 }, new String[] { "Firma", "Nachname" }, fltr3);
 			for (int i = 0; i < resLst.size(); i++) {
 				testResult(String.join(";", resLst.get(i)), "getRowsList(rowIndexes[], columnHeaders[], filter)", expResults1.get(i));
 			}
@@ -145,7 +146,7 @@ public class RT_CSVContainer_getRows extends BaseRegression {
 		Filter fltr3 = new Filter();
 		fltr3.addFilterRule("Strasse", "Musterstrasse", EOperator.NOT_EQUALS);
 		try {
-			int[] resLst = dc.getRowsIndexes(fltr3);
+			int[] resLst = dc.tabInstance().getRowsIndexes(fltr3);
 			for (int i = 0; i < resLst.length; i++) {
 				testResult(String.valueOf(resLst[i]), "getRowsIndexed(filter) - number", expResults1.get(i));
 			}

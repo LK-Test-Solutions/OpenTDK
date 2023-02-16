@@ -12,14 +12,15 @@ public class RT_CSVContainer_mergeRows extends BaseRegression {
 	
 	@Override
 	public void runTest() {
-		DataContainer dc = new DataContainer(new String[] { "Index", "Time", "Value" });
-		dc.addRow(new String[] { "1", "02:30", "Sleeping" });
-		dc.addRow(new String[] { "2", "06:30", "Running" });
-		dc.addRow(new String[] { "3", "", "" });
-		dc.addRow(new String[] { "4", "12:00", "Eating" });
+		DataContainer dc = new DataContainer();
+		dc.tabInstance().setHeaders(new String[] { "Index", "Time", "Value" });
+		dc.tabInstance().addRow(new String[] { "1", "02:30", "Sleeping" });
+		dc.tabInstance().addRow(new String[] { "2", "06:30", "Running" });
+		dc.tabInstance().addRow(new String[] { "3", "", "" });
+		dc.tabInstance().addRow(new String[] { "4", "12:00", "Eating" });
 	
-		dc.mergeRows(2, new String[] { "3", "9:30", "Meeting"});	
-		testResult(dc.getValue("Value", 2), "mergeRows - value", "Meeting");
+		dc.tabInstance().mergeRows(2, new String[] { "3", "9:30", "Meeting"});	
+		testResult(dc.tabInstance().getValue("Value", 2), "mergeRows - value", "Meeting");
 		
 //		dc.mergeRows(2, new String[] { "3", "9:30", "Meeting", "Test"});
 	}

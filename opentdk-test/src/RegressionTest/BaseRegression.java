@@ -86,4 +86,22 @@ public abstract class BaseRegression {
 			success = false;
 		}
 	}
+	
+	public static void testResult(int actual, String fieldName, int expected) {
+		if (actual == expected) {
+			System.out.println("Success: " + fieldName + " == " + actual);
+		} else {
+			System.err.println(fieldName + " is \"" + actual + "\" but should be \"" + expected + "\"");
+			success = false;
+		}
+	}
+	
+	public static void testResult(boolean actual, String fieldName, boolean expected) {
+		if (actual == expected) {
+			System.out.println("Success: " + fieldName + " == " + actual);
+		} else {
+			System.err.println(fieldName + " is \"" + actual + "\" but should be \"" + expected + "\"");
+			success = false;
+		}
+	}
 }

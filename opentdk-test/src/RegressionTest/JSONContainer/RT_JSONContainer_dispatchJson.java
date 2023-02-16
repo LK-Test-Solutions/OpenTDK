@@ -1,6 +1,7 @@
 package RegressionTest.JSONContainer;
 
 import java.io.ByteArrayInputStream;
+import java.io.IOException;
 
 import org.json.JSONException;
 import org.opentdk.api.dispatcher.BaseDispatcher;
@@ -90,7 +91,11 @@ public class RT_JSONContainer_dispatchJson extends BaseRegression {
 			System.out.println("Exception correctly catched ==> Field 'salary' was deleted");
 		}
 		
-		BaseDispatcher.getDataContainer(EJsonValues.class).writeData("output/JsonOutput.json");
+		try {
+			BaseDispatcher.getDataContainer(EJsonValues.class).writeData("output/JsonOutput.json");
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
 		
 		BaseDispatcher.clearDataContainer();
 	}

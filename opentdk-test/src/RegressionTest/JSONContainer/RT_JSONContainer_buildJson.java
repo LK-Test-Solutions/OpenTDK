@@ -1,6 +1,7 @@
 package RegressionTest.JSONContainer;
 
 import java.io.ByteArrayInputStream;
+import java.io.IOException;
 
 import org.json.JSONException;
 import org.opentdk.api.dispatcher.BaseDispatcher;
@@ -28,7 +29,7 @@ public class RT_JSONContainer_buildJson extends BaseRegression {
         try {
         	BaseDispatcher.getDataContainer(EWebControlStep.class).readData();
         	System.out.println("Exception NOT correctly catched ==> Stream can only be consumed once");
-        } catch(JSONException e) {
+        } catch(JSONException | IOException e) {
         	System.out.println("Exception correctly catched ==> Stream can only be consumed once");
         }
         EWebControlRequest.BROWSERNAME.setValue("chrome");

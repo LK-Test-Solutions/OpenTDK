@@ -174,7 +174,7 @@ public class BaseDispatchComponent {
 			DataContainer dc = null;
 			if (StringUtils.isNotBlank(parentXPath)) {
 				dc = new DataContainer(EHeader.TREE);
-				dc.setRootNode(getRootNode());
+				dc.setRootNode(getRootNode()); // TODO XMLEditor is already initialized here
 			} else {
 				dc = new DataContainer();
 			}

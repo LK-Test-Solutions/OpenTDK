@@ -7,161 +7,41 @@ import org.opentdk.api.mapping.EOperator;
 import RegressionTest.BaseRegression;
 
 import java.io.File;
-import java.util.List;
 
+/**
+ * Tests if reading from a XML file with the {@link org.opentdk.api.datastorage.DataContainer} works
+ * using its get methods.
+ * 
+ * @author LK Test Solutions
+ *
+ */
 public class RT_XMLContainer_readFile extends BaseRegression {
-	
+
 	public static void main(String[] args) {
 		new RT_XMLContainer_readFile();
 	}
 
 	@Override
 	public void runTest() {
-		int i=0;
 
 		DataContainer dc = new DataContainer(new File("./testdata/RegressionTestData/XMLContainer_Data.xml"));
+		// General checks
 		BaseRegression.testResult(dc.getRootNode(), "Root Node", "parserRules");
 		BaseRegression.testResult(dc.getContainerFormat().name(), "Container Format", "XML");
-		
-		BaseRegression.testResult(dc.get("patternenabled")[0], "getValue first tag", "false");	
 
-//		System.out.println();
-//		System.out.println("################################################################");
-//		System.out.println("#  2.1 - getValue(headername);                                 #");
-//		System.out.println("#        retrieve first occurance of tag defined by headername #");
-//		System.out.println("################################################################");
-//		System.out.println();		
-//		System.out.println(dc.getValue("lbpattern"));
-//		System.out.println();
-//
-//		System.out.println();
-//		System.out.println("###############################################################");
-//		System.out.println("#  2.2 - getValue(headername, index);                         #");
-//		System.out.println("#        retrieve n'th occurance of tag defined by headername #");
-//		System.out.println("###############################################################");
-//		System.out.println();		
-//		System.out.println(dc.getValue("lbpattern", 1));
-//		System.out.println();
-//		
-//		System.out.println();
-//		System.out.println("###############################################################");
-//		System.out.println("#  2.3 - getValue(index, index);                              #");
-//		System.out.println("#        retrieve n'th occurance of tag defined by tag index  #");
-//		System.out.println("###############################################################");
-//		System.out.println();		
-//		System.out.println(dc.getValue(6, 1));
-//		System.out.println();
-//
-//		System.out.println();
-//		System.out.println("#######################################################");
-//		System.out.println("#  3.1 - getValuesAsList(headername);                 #");
-//		System.out.println("#        Get values of all tags defined by headername #");
-//		System.out.println("#######################################################");
-//		System.out.println();		
-//		try {
-//			List<String> items = dc.getValuesAsList("startswithpattern");
-//			i=0;
-//			for(String s: items) {
-//				System.out.println(i++ + ": " + s);
-//			}
-//		} catch (Exception e) {
-//			e.printStackTrace();
-//		}
-//		System.out.println();
-//		
-//		System.out.println();
-//		System.out.println("###########################################################################################");
-//		System.out.println("#  3.2 - getValuesAsList(headername, filter);                                             #");
-//		System.out.println("#        Get values of all tags defined by headername that match to implicit header XPath #");
-//		System.out.println("###########################################################################################");
-//		System.out.println();		
-//		Filter f1 = new Filter();
-//		f1.addFilterRule("XPath", "/parserRules/rule[@name='Orbit']/element[@name='PARAMETER']/attributelist", EOperator.EQUALS);
-//		try {
-//			List<String> items = dc.getValuesAsList("item", f1);
-//			for(String s: items) {
-//				System.out.println(s);
-//			}
-//		} catch (Exception e) {
-//			e.printStackTrace();
-//		}
-//		System.out.println();	
-//
-//		System.out.println();
-//		System.out.println("############################################################################################");
-//		System.out.println("#  3.3 - getValuesAsList(headername, filter);                                              #");
-//		System.out.println("#        Get values of all tags defined by headername that match to standard header filter #");
-//		System.out.println("############################################################################################");
-//		System.out.println();		
-//		Filter f2 = new Filter();
-//		f2.addFilterRule("item", "STATEMENT", EOperator.ENDS_WITH);
-//		try {
-//			List<String> items = dc.getValuesAsList("item", f2);
-//			for(String s: items) {
-//				System.out.println(s);
-//			}
-//		} catch (Exception e) {
-//			e.printStackTrace();
-//		}
-//		System.out.println();
-//
-//		System.out.println();
-//		System.out.println("################################################################################");
-//		System.out.println("#  3.4 - getValuesAsList(headername, filter);                                  #");
-//		System.out.println("#        Get values of all tags defined by headername that match to combined   #");
-//		System.out.println("#        standard with implicit header filter                                  #");
-//		System.out.println("################################################################################");
-//		System.out.println();		
-//		Filter f3 = new Filter();
-//		f3.addFilterRule("XPath", "/parserRules/rule[@name='Orbit']/element[@name='PARAMETER']/attributelist", EOperator.EQUALS);
-//		f3.addFilterRule("item", "STATEMENT", EOperator.ENDS_WITH);
-//		try {
-//			List<String> items = dc.getValuesAsList("item", f3);
-//			for(String s: items) {
-//				System.out.println(s);
-//			}
-//		} catch (Exception e) {
-//			e.printStackTrace();
-//		}
-//		System.out.println();
-//		
-//		System.out.println();
-//		System.out.println("###################################################################################");
-//		System.out.println("#  3.5 - getValuesAsList(headername, filter);                                     #");
-//		System.out.println("#        Get values of all tags defined by headername that match to Header filter #");
-//		System.out.println("###################################################################################");
-//		System.out.println();
-//		Filter f4 = new Filter();
-//		// EOperator.NOT_EQUALS is set to <> by default ==> no matches
-//		f4.addFilterRule("lbpattern", "", EOperator.NOT_EQUALS);
-//		try {
-//			List<String> items = dc.getValuesAsList("lbpattern", f4);
-//			i = 0;
-//			for(String s: items) {
-//				System.out.println(i++ + ": " + s);
-//			}
-//		} catch (Exception e) {
-//			e.printStackTrace();
-//		}
-//		System.out.println();	
-//		
-//		System.out.println();
-//		System.out.println("##################################");
-//		System.out.println("#  4.1 - getRowCount();          #");
-//		System.out.println("#        Get the number of rows  #");
-//		System.out.println("##################################");
-//		System.out.println();		
-//		System.out.println(dc.getRowCount());
-//		System.out.println();	
-//
-//		System.out.println();
-//		System.out.println("####################################################");
-//		System.out.println("#  4.2 - getRow(Index);                            #");
-//		System.out.println("#        Get all values of a row defined by index  #");
-//		System.out.println("####################################################");
-//		System.out.println();		
-//		System.out.println(String.join("; ", dc.getRow(3)));
-//		System.out.println();	
+		// Get with argument name
+		BaseRegression.testResult(dc.get("patternenabled")[0], "Get First Tag", "false");
 
+		// Get with argument name and filter
+		Filter fltr = new Filter();
+		fltr.addFilterRule("XPath", "/parserRules/rule[@name='Orbit']/element[@name='PARAMETER']/attributelist", EOperator.EQUALS);
+		BaseRegression.testResult(String.join(",", dc.get("item", fltr)), "Attribute List", "XML_REQUEST,SELECT_STATEMENT,PREPARED_STATEMENT");
+
+		fltr = new Filter();
+		fltr.addFilterRule("lbpattern", "", EOperator.NOT_EQUALS);
+		BaseRegression.testResult(dc.get("lbpattern", fltr).length, "All None Empty 'lbpattern'", 12);
+
+		// Get with argument name and attribute
+		BaseRegression.testResult(dc.treeInstance().get("/parserRules/rule[@name='Orbit']/element", "name")[0], "Get Attribute", "PARAMETER");
 	}
 }

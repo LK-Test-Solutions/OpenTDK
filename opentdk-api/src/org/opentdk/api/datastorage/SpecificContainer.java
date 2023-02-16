@@ -27,14 +27,15 @@
  */
 package org.opentdk.api.datastorage;
 
+import java.io.File;
 import java.io.IOException;
 
 import org.opentdk.api.filter.Filter;
 
 /**
- * The <code>BaseContainer</code> is used by the <code>DataContainer</code> to initialize the
- * right specific data container depending on the given source type. It contains all methods that
- * the <code>DataContainer</code> has to provide.
+ * The <code>BaseContainer</code> is used by the <code>DataContainer</code> to initialize the right
+ * specific data container depending on the given source type. It contains all methods that the
+ * <code>DataContainer</code> has to provide.
  * 
  * @author LK Test Solutions
  */
@@ -78,11 +79,22 @@ interface SpecificContainer {
 //	}
 
 	/**
-	 * Each specific <code>DataContainer</code> that implements the <code>CustomContainer</code>, needs
-	 * to implement a method that reads data from the source and store the data into tabular format
-	 * within the <code>DataContainer</code>. In case the source data is not in tabular format, the
-	 * specific method needs to implement also the logic to parse, filter and/or transpose the source
-	 * data into the format that is supported by the <code>DataContainer</code>.
+	 * Each specific container needs to implement a method that reads data from the source.
+	 */
+	default void readData() throws IOException {
+		readData(new Filter());
+	}
+	
+	/**
+	 * Each specific container needs to implement a method that reads data from the source.
+	 * @param srcFile input file
+	 */
+	default void readData(File srcFile) throws IOException {
+		readData();
+	}
+
+	/**
+	 * Each specific container needs to implement a method that reads data from the source.
 	 * 
 	 * @param filter Possibility to filter some of the source data
 	 */
@@ -97,5 +109,5 @@ interface SpecificContainer {
 	 * @throws IOException Throws an exception if file is missing
 	 */
 	void writeData(String srcFile) throws IOException;
-	
+
 }

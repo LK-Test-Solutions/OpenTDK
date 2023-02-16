@@ -80,11 +80,6 @@ public class JSONDataContainer implements TreeContainer {
 		dc.getImplicitHeaders().add("XPath");
 	}
 
-	@Override
-	public void add(String name, String value) {
-		// TODO Auto-generated method stub
-		
-	}
 
 //	private void fillDc() {
 //		if (!json.isEmpty()) {
@@ -97,22 +92,22 @@ public class JSONDataContainer implements TreeContainer {
 //			}
 //		}
 //	}
-	
-	@Override
-	public void add(String headerName, String value, Filter fltr) {
-		this.add(headerName, "", value, fltr);
-	}
 
 	@Override
-	public void add(String headerName, String fieldName, String newFieldValue, Filter fltr) {
-		if (fltr.getFilterRules().isEmpty()) {
-			Object newValue = this.getDataType(newFieldValue);
-			json.append(headerName, newValue);
+	public void add(String name, String value) {
+		add(name, value, new Filter());
+	}
+	
+	@Override
+	public void add(String name, String value, Filter filter) {
+		if (filter.getFilterRules().isEmpty()) {
+			Object newValue = this.getDataType(value);
+			json.append(name, newValue);
 		}
-		for (FilterRule fltrRule : fltr.getFilterRules()) {
+		for (FilterRule fltrRule : filter.getFilterRules()) {
 			if (fltrRule.getHeaderName().equalsIgnoreCase("XPath") && StringUtils.isNotBlank(fltrRule.getValue())) {
-				String searchExp = fltrRule.getValue().replace(";", "/") + "/" + headerName;
-				Object newValue = this.getDataType(newFieldValue);
+				String searchExp = fltrRule.getValue().replace(";", "/") + "/" + name;
+				Object newValue = this.getDataType(value);
 				Object result = null;
 
 				List<String> keyList = ListUtil.asList(searchExp.split("/"));
@@ -131,16 +126,22 @@ public class JSONDataContainer implements TreeContainer {
 					}
 					i++;
 				}
-				((JSONObject) result).append(headerName, newValue);
+				((JSONObject) result).append(name, newValue);
 				break;
 			}
 		}
 	}
+	
+	@Override
+	public void add(String name, String fieldName, String newValue, Filter filter) {
+		MLogger.getInstance().log(Level.INFO, "Method not used", getClass().getSimpleName(), "add");
+		return;
+	}
 
 	@Override
-	public void add(String name, String attr, String value, String oldValue, Filter filter) {
-		// TODO Auto-generated method stub
-		
+	public void add(String headerName, String fieldName, String oldFieldValue, String newFieldValue, Filter filter) {
+		MLogger.getInstance().log(Level.INFO, "Method not used", getClass().getSimpleName(), "add");
+		return;
 	}
 	
 	@Override
@@ -176,24 +177,17 @@ public class JSONDataContainer implements TreeContainer {
 
 	@Override
 	public void delete(String name, String value) {
-		// TODO Auto-generated method stub
-		
+		delete(name, value, new Filter());		
 	}
 
 	@Override
 	public void delete(String name, String value, Filter filter) {
-		// TODO Auto-generated method stub
-		
-	}
-
-	@Override
-	public void delete(String headerName, String fieldName, String fieldValue, Filter fltr) {
-		if (fltr.getFilterRules().isEmpty()) {
-			json.remove(headerName);
+		if (filter.getFilterRules().isEmpty()) {
+			json.remove(name);
 		}
-		for (FilterRule fltrRule : fltr.getFilterRules()) {
+		for (FilterRule fltrRule : filter.getFilterRules()) {
 			if (fltrRule.getHeaderName().equalsIgnoreCase("XPath") && StringUtils.isNotBlank(fltrRule.getValue())) {
-				String searchExp = fltrRule.getValue().replace(";", "/") + "/" + headerName;
+				String searchExp = fltrRule.getValue().replace(";", "/") + "/" + name;
 				Object result = null;
 
 				List<String> keyList = ListUtil.asList(searchExp.split("/"));
@@ -212,16 +206,26 @@ public class JSONDataContainer implements TreeContainer {
 					}
 					i++;
 				}
-				((JSONObject) result).remove(headerName);
+				((JSONObject) result).remove(name);
 				break;
 			}
 		}
 	}
 
 	@Override
+	public void delete(String headerName, String fieldName, String fieldValue, Filter fltr) {
+		MLogger.getInstance().log(Level.INFO, "Method not used", getClass().getSimpleName(), "delete");
+	}
+
+	@Override
 	public String[] get(String name) {
-		// TODO Auto-generated method stub
-		return null;
+		return get(name, new Filter());
+	}
+	
+	@Override
+	public String[] get(String name, String attr) {
+		MLogger.getInstance().log(Level.INFO, "Method not used", getClass().getSimpleName(), "get");
+		return new String[0];
 	}
 
 	@Override
@@ -269,12 +273,6 @@ public class JSONDataContainer implements TreeContainer {
 			}
 		}
 		return ret;
-	}
-	
-	@Override
-	public String[] get(String name, String attr) {
-		// TODO Auto-generated method stub
-		return null;
 	}
 
 	/**
@@ -346,28 +344,18 @@ public class JSONDataContainer implements TreeContainer {
 
 	@Override
 	public void set(String name, String value) {
-		// TODO Auto-generated method stub
-		
+		set(name, value, new Filter());
 	}
 
-	/**
-	 * Called when a value, array or object should be changed or created.
-	 * 
-	 * @param headerName JSON key
-	 * @param occurences unused
-	 * @param value      data to set {@literal -} the JSON data type gets parsed e.g. 'true' becomes a
-	 *                   boolean or '"Test"' becomes a string or '[value1,value2]' an array
-	 * @param fltr       filter object to find the correct field
-	 */
 	@Override
-	public void set(String headerName, String value, Filter fltr) {
-		if (fltr.getFilterRules().isEmpty()) {
+	public void set(String name, String value, Filter filter) {
+		if (filter.getFilterRules().isEmpty()) {
 			Object newValue = this.getDataType(value);
-			json.put(headerName, newValue);
+			json.put(name, newValue);
 		}
-		for (FilterRule fltrRule : fltr.getFilterRules()) {
+		for (FilterRule fltrRule : filter.getFilterRules()) {
 			if (fltrRule.getHeaderName().equalsIgnoreCase("XPath") && StringUtils.isNotBlank(fltrRule.getValue())) {
-				String searchExp = fltrRule.getValue().replace(";", "/") + "/" + headerName;
+				String searchExp = fltrRule.getValue().replace(";", "/") + "/" + name;
 				Object newValue = this.getDataType(value);
 				Object result = null;
 
@@ -390,7 +378,7 @@ public class JSONDataContainer implements TreeContainer {
 				if (result instanceof JSONArray) {
 					((JSONArray) result).put(newValue);
 				} else {
-					((JSONObject) result).put(headerName, newValue);
+					((JSONObject) result).put(name, newValue);
 				}
 				break;
 			}
@@ -399,20 +387,19 @@ public class JSONDataContainer implements TreeContainer {
 
 	@Override
 	public void set(String name, String value, Filter filter, boolean allOccurences) {
-		// TODO Auto-generated method stub
+		MLogger.getInstance().log(Level.INFO, "Method not used", getClass().getSimpleName(), "set");
 		
 	}
 
 	@Override
-	public void set(String name, String value, Filter filter, int[] occurences) {
-		// TODO Auto-generated method stub
+	public void set(String name, int[] occurences, String value, Filter filter) {
+		MLogger.getInstance().log(Level.INFO, "Method not used", getClass().getSimpleName(), "set");
 		
 	}
 
 	@Override
 	public void set(String name, String attr, String value, String oldValue, Filter filter) {
-		// TODO Auto-generated method stub
-		
+		MLogger.getInstance().log(Level.INFO, "Method not used", getClass().getSimpleName(), "set");
 	}
 
 	/**
