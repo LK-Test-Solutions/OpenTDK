@@ -170,8 +170,8 @@ public class JSONDataContainer implements TreeContainer {
 	}
 
 	@Override
-	public void createFile(String srcFile) throws IOException {
-		FileUtil.createFile(srcFile, true);	
+	public void createFile() throws IOException {
+		FileUtil.createFile(dc.getInputFile(), true);	
 	}
 
 	@Override

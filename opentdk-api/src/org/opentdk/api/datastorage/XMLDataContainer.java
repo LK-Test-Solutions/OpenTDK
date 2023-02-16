@@ -27,21 +27,16 @@
  */
 package org.opentdk.api.datastorage;
 
-import java.io.ByteArrayInputStream;
-import java.io.File;
 import java.io.IOException;
-import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.logging.Level;
 import java.util.stream.Collectors;
 
 import org.opentdk.api.filter.Filter;
 import org.opentdk.api.filter.FilterRule;
 import org.opentdk.api.io.FileUtil;
 import org.opentdk.api.io.XMLEditor;
-import org.opentdk.api.logger.MLogger;
 import org.w3c.dom.Element;
 
 /**
@@ -62,7 +57,7 @@ public class XMLDataContainer implements TreeContainer {
 	 */
 	private final DataContainer dc;
 	
-	private ArrayList<String[]> values = new ArrayList<String[]>();
+//	private ArrayList<String[]> values = new ArrayList<String[]>();
 
 	/**
 	 * Construct a new specific <code>DataContainer</code> for XML files.
@@ -120,16 +115,11 @@ public class XMLDataContainer implements TreeContainer {
 	}
 	
 	@Override
-	public void createFile(String srcFile) throws IOException {
-		FileUtil.createFile(srcFile);
-		xEdit = new XMLEditor(srcFile);
-		xEdit.save();
-	}
-
-	@Override
-	public void createFile(String srcFile, String rootNode) throws IOException {
-		FileUtil.createFile(srcFile);
-		xEdit = new XMLEditor(srcFile, rootNode);
+	public void createFile() throws IOException {
+		StringBuilder sb = new StringBuilder();
+		sb.append("<").append(dc.getRootNode()).append("/>");
+		FileUtil.writeOutputFile(sb.toString(), dc.getInputFile().getPath());
+		xEdit = new XMLEditor(dc.getInputFile());
 		xEdit.save();
 	}
 
@@ -157,7 +147,7 @@ public class XMLDataContainer implements TreeContainer {
 
 	@Override
 	public String[] get(String name) {		
-		return null;
+		return get(name, new Filter());
 	}
 	
 	@Override
@@ -286,15 +276,15 @@ public class XMLDataContainer implements TreeContainer {
 	 * @param index The index of the returning row.
 	 * @return an array with all translated references (values) of the row.
 	 */
-	public String[] getDecoded(int index) {
-		String[] xPathArr = values.listIterator(index).next();
-		String[] ret = new String[xPathArr.length];
-		index++;
-		for (int i = 0; i < xPathArr.length; i++) {
-			ret[i] = xEdit.readXPath(xPathArr[i]);
-		}
-		return ret;
-	}
+//	public String[] getDecoded(int index) {
+//		String[] xPathArr = values.listIterator(index).next();
+//		String[] ret = new String[xPathArr.length];
+//		index++;
+//		for (int i = 0; i < xPathArr.length; i++) {
+//			ret[i] = xEdit.readXPath(xPathArr[i]);
+//		}
+//		return ret;
+//	}
 
 	/**
 	 * This method is used to load data from an XML-File to the data container. As
@@ -309,21 +299,21 @@ public class XMLDataContainer implements TreeContainer {
 	@Override
 	public void readData(Filter filter) throws IOException {
 		if(dc.getInputFile().exists()) {
-			xEdit = new XMLEditor(dc.getInputFile());		
+			xEdit = new XMLEditor(dc.getInputFile());
+			dc.setRootNode(xEdit.getRootNodeName());
 		} else if(dc.getInputStream() != null) {
 			xEdit = new XMLEditor(dc.getInputStream());
+			dc.setRootNode(xEdit.getRootNodeName());
 		} else {
-			String rootTag = "<" + dc.getRootNode() + ">" + "</" + dc.getRootNode() + ">";
-			dc.setInputStream(new ByteArrayInputStream(rootTag.getBytes(StandardCharsets.UTF_8)));
-			xEdit = new XMLEditor(dc.getInputStream());
+			xEdit = new XMLEditor(dc.getRootNode());
 		}
-		values = new ArrayList<String[]>() {
-			private static final long serialVersionUID = 1L;	
-			@Override
-			public String[] get(int index) {
-				return getDecoded(index);
-			}
-		};
+//		values = new ArrayList<String[]>() {
+//			private static final long serialVersionUID = 1L;	
+//			@Override
+//			public String[] get(int index) {
+//				return getDecoded(index);
+//			}
+//		};
 //		dc.setHeaders(xEdit.getXmlTags());
 //		for (String header : dc.getHeaders().keySet()) {
 //			dc.setColumn(header, xEdit.getXPaths(header));

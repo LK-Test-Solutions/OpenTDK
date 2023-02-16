@@ -123,8 +123,8 @@ public class YAMLDataContainer implements TreeContainer {
 	}
 
 	@Override
-	public void createFile(String srcFile) throws IOException {	
-		json.createFile(srcFile);
+	public void createFile() throws IOException {	
+		json.createFile();
 	}
 
 	@Override

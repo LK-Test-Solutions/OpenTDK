@@ -103,7 +103,8 @@ public class DataContainer implements SpecificContainer {
 	 * This property is used to assign the data as an {@link java.lang.String} to the
 	 * {@link DataContainer} instance in case that no source file or stream exists.
 	 */
-	private String inputString = "";
+//	private String inputString = "";
+//	private List<String> lines = new ArrayList<>();
 
 	/**
 	 * Keeps the SQL result set of {@link org.opentdk.api.datastorage.RSDataContainer}.
@@ -141,8 +142,19 @@ public class DataContainer implements SpecificContainer {
 	 * @param type {@link org.opentdk.api.datastorage.EHeader}
 	 */
 	public DataContainer(EHeader type) {
-		if (type == EHeader.TREE) {
+		switch (type) {
+		case COLUMN:
+			containerFormat = EContainerFormat.CSV;
+			break;
+		case ROW:
+			containerFormat = EContainerFormat.PROPERTIES;
+			break;
+		case TREE:
 			containerFormat = EContainerFormat.XML;
+			break;
+		default:
+			containerFormat = EContainerFormat.TEXT;
+			break;	
 		}
 		adaptContainer();
 	}
@@ -219,35 +231,41 @@ public class DataContainer implements SpecificContainer {
 		adaptContainer();
 	}
 
-	public DataContainer(String sourceString) {
-		inputString = sourceString;
-		adaptContainer();
-	}
-	
-//	/**
-//	 * Constructor that is called, when a DataContainer shall be copied. The copy holds only the columns
-//	 * with the headers specified in headerIndices.
-//	 * 
-//	 * @param dc            Original DataContainer from which the columns shall be copied.
-//	 * @param headerIndices Headers which shall be copied to the new DataContainer
-//	 * 
-//	 */
-//	public DataContainer(DataContainer dc, int[] headerIndices) {
-//		instance = dc.instance;
-//		fileName = dc.getFileName();
-//		columnDelimiter = dc.getColumnDelimiter();
-//		headerNamesIndex = dc.getHeaderRowIndex();
-//		containerFormat = dc.getContainerFormat();
-//		filter = dc.filter;
-//		String[] headerNames = new String[headerIndices.length];
-//		for (int i = 0; i < headerIndices.length; i++) {
-//			headerNames[i] = dc.getHeaderName(headerIndices[i]);
-//		}
-//		setHeaders(headerNames);
-//		for (int i = 0; i < headerIndices.length; i++) {
-//			setColumn(headerNames[i], dc.getColumn(headerNames[i]));
-//		}
+//	public DataContainer(String sourceString) {
+//		inputString = sourceString;
+//		adaptContainer();
 //	}
+
+	/**
+	 * Constructor that is called when a DataContainer shall be copied. The copy holds only the columns
+	 * with the headers specified in headerIndices.
+	 * 
+	 * @param dc            Original DataContainer from which the columns shall be copied
+	 * @param headerIndices Headers which shall be copied to the new DataContainer
+	 * 
+	 */
+	public DataContainer(DataContainer dc, int[] headerIndices) {
+		if (dc.isTabular()) {
+			instance = dc.instance;
+			inputFile = dc.getInputFile();
+			containerFormat = dc.getContainerFormat();
+			filter = dc.getFilter();
+
+			tabInstance().setColumnDelimiter(dc.tabInstance().getColumnDelimiter());
+			tabInstance().setHeaderRowIndex(dc.tabInstance().getHeaderRowIndex());
+
+			String[] headerNames = new String[headerIndices.length];
+			for (int i = 0; i < headerIndices.length; i++) {
+				headerNames[i] = dc.tabInstance().getHeaderName(headerIndices[i]);
+			}
+			tabInstance().setHeaders(headerNames);
+			for (int i = 0; i < headerIndices.length; i++) {
+				tabInstance().setColumn(headerNames[i], dc.tabInstance().getColumn(headerNames[i]));
+			}
+		} else {
+			MLogger.getInstance().log(Level.WARNING, "Copy from other DataContainer only available for tabular formats");
+		}
+	}
 
 	/**
 	 * This method adapts the one {@link SpecificContainer} instance to a specific
@@ -299,8 +317,6 @@ public class DataContainer implements SpecificContainer {
 	 * @return enumeration of type {@link EContainerFormat}
 	 */
 	private final void detectDataFormat() {
-//		final Tika tika = new Tika();
-
 		if (resultSet != null) {
 			containerFormat = EContainerFormat.RESULTSET;
 		} else if (inputStream != null) {
@@ -341,8 +357,12 @@ public class DataContainer implements SpecificContainer {
 		} else if (inputFile != null) {
 			String fileName = inputFile.getName();
 			if (StringUtils.isNotBlank(fileName)) {
-				if (fileName.endsWith(".properties")) {
+				if (fileName.endsWith(".txt")) {
+					containerFormat = EContainerFormat.TEXT;
+				} else if (fileName.endsWith(".properties")) {
 					containerFormat = EContainerFormat.PROPERTIES;
+				} else if (fileName.endsWith(".csv")) {
+					containerFormat = EContainerFormat.CSV;
 				} else if (fileName.endsWith(".xml")) {
 					containerFormat = EContainerFormat.XML;
 				} else if (fileName.endsWith(".json")) {
@@ -351,10 +371,10 @@ public class DataContainer implements SpecificContainer {
 					containerFormat = EContainerFormat.YAML;
 				}
 			}
-//			System.out.println(tika.detect(fileName));
-		} else if (StringUtils.isNotBlank(inputString)) {
-//			tika.detect(inputString);
 		}
+//		else if (StringUtils.isNotBlank(inputString)) {
+//			
+//		}
 	}
 
 	/**
@@ -367,35 +387,45 @@ public class DataContainer implements SpecificContainer {
 		return containerFormat;
 	}
 
-	public TabularContainer getTabularContainer() {		
+	/**
+	 * @return the {@link #instance} if it was initialized as tabular format
+	 * @throws NullPointerException is there is no tabular format available
+	 */
+	public TabularContainer tabInstance() {
 		if (instance instanceof CSVDataContainer) {
 			return (CSVDataContainer) instance;
-		} 
-		else if (instance instanceof PropertiesDataContainer) {
+		} else if (instance instanceof PropertiesDataContainer) {
 			return (PropertiesDataContainer) instance;
-		} 
-		else if (instance instanceof RSDataContainer) {
+		} else if (instance instanceof RSDataContainer) {
 			return (RSDataContainer) instance;
-		} 
-		else {
+		} else {
 			throw new NullPointerException("TabularContainer not intialized");
 		}
 	}
-	
-	public TreeContainer getTreeContainer() {		
+
+	/**
+	 * @return the {@link #instance} if it was initialized as tree format
+	 * @throws NullPointerException is there is no tree format available
+	 */
+	public TreeContainer treeInstance() {
 		if (instance instanceof XMLDataContainer) {
 			return (XMLDataContainer) instance;
-		} 
-		else if (instance instanceof JSONDataContainer) {
+		} else if (instance instanceof JSONDataContainer) {
 			return (JSONDataContainer) instance;
-		} 
-		else if (instance instanceof YAMLDataContainer) {
+		} else if (instance instanceof YAMLDataContainer) {
 			return (YAMLDataContainer) instance;
 		} else {
 			throw new NullPointerException("TabularContainer not intialized");
 		}
 	}
-	
+
+	/**
+	 * Checks if the {@link #instance} was initialized as one of the tabular format e.g. CSV or
+	 * RESULSET. This can be done before calling {@link #tabInstance()} to be sure that a tabular format
+	 * is available.
+	 * 
+	 * @return true: is tree format, false otherwise
+	 */
 	public boolean isTabular() {
 		boolean ret = false;
 		if (instance instanceof CSVDataContainer) {
@@ -404,10 +434,17 @@ public class DataContainer implements SpecificContainer {
 			ret = true;
 		} else if (instance instanceof RSDataContainer) {
 			ret = true;
-		} 
+		}
 		return ret;
 	}
 
+	/**
+	 * Checks if the {@link #instance} was initialized as one of the tree format e.g. XML, JSON or YAML.
+	 * This can be done before calling {@link #treeInstance()} to be sure that a tree format is
+	 * available.
+	 * 
+	 * @return true: is tree format, false otherwise
+	 */
 	public boolean isTree() {
 		boolean ret = false;
 		if (instance instanceof XMLDataContainer) {
@@ -548,9 +585,11 @@ public class DataContainer implements SpecificContainer {
 	}
 
 	@Override
-	public void createFile(String srcFile) throws IOException {
-		instance.createFile(srcFile);
-		
+	public void createFile() throws IOException {
+		if(StringUtils.isNotBlank(inputFile.getPath())) {
+			instance.createFile();
+		}
+
 	}
 
 	@Override
@@ -561,5 +600,69 @@ public class DataContainer implements SpecificContainer {
 	@Override
 	public void writeData(String srcFile) throws IOException {
 		instance.writeData(srcFile);
+	}
+
+	// --------------------------------------------------------------------
+	// Facading methods that call either the tabular or tree format methods
+	// --------------------------------------------------------------------
+
+	public void add(String name, String value, Filter filter) {
+		if (isTabular()) {
+			tabInstance().addColumn(name);
+		} else if (isTree()) {
+			treeInstance().add(name, value, filter);
+		}
+	}
+
+	public void delete(String params, String attrName, String attrValue, Filter fltr) {
+		if (isTabular()) {
+			tabInstance().deleteValue(attrName);
+		} else if (isTree()) {
+			treeInstance().delete(attrName, attrName, attrValue, fltr);
+		}
+	}
+
+	public String[] get(String parameterName) {
+		String[] ret = new String[0];
+		if (isTabular()) {
+			ret = tabInstance().getColumn(parameterName);
+		} else if (isTree()) {
+			ret = treeInstance().get(parameterName);
+		}
+		return ret;
+	}
+
+	public String[] get(String parameterName, Filter fltr) {
+		String[] ret = new String[0];
+		if (isTabular()) {
+			ret = tabInstance().getColumn(parameterName, fltr);
+		} else if (isTree()) {
+			ret = treeInstance().get(parameterName, fltr);
+		}
+		return ret;
+	}
+
+	public void set(String parameterName, String value) {
+		if (isTabular()) {
+			tabInstance().setValue(parameterName, value);
+		} else if (isTree()) {
+			treeInstance().set(parameterName, value);
+		}
+	}
+
+	public void set(String parameterName, String value, Filter fltr) {
+		if (isTabular()) {
+			tabInstance().setValue(parameterName, value, fltr);
+		} else if (isTree()) {
+			treeInstance().set(parameterName, value, fltr);
+		}
+	}
+
+	public void set(String parameterName, String value, Filter fltr, boolean allOccurences) {
+		if (isTabular()) {
+			tabInstance().setValues(parameterName, value, fltr, allOccurences);
+		} else if (isTree()) {
+			treeInstance().set(parameterName, value, fltr, allOccurences);
+		}
 	}
 }

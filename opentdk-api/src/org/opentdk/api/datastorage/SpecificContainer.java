@@ -61,10 +61,9 @@ interface SpecificContainer {
 	 * Each specific <code>DataContainer</code> has to implement a method that checks if the connected
 	 * file exists and create it if required.
 	 * 
-	 * @param srcFile The name of the source file to write to
 	 * @throws IOException if the creation failed the user can handle the cause
 	 */
-	void createFile(String srcFile) throws IOException;
+	void createFile() throws IOException;
 
 	/**
 	 * Each specific <code>DataContainer</code> has to implement a method that checks if the connected
@@ -74,9 +73,9 @@ interface SpecificContainer {
 	 * @param rootNode if the format has a root node that has to be checked
 	 * @throws IOException if the creation failed the user can handle the cause
 	 */
-	default void createFile(String srcFile, String rootNode) throws IOException {
-		return;
-	}
+//	default void createFile(String srcFile, String rootNode) throws IOException {
+//		return;
+//	}
 
 	/**
 	 * Each specific <code>DataContainer</code> that implements the <code>CustomContainer</code>, needs
@@ -98,4 +97,5 @@ interface SpecificContainer {
 	 * @throws IOException Throws an exception if file is missing
 	 */
 	void writeData(String srcFile) throws IOException;
+	
 }

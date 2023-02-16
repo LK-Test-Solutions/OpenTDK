@@ -121,13 +121,13 @@ public class CSVDataContainer implements TabularContainer {
 	 * </pre>
 	 */
 	private final HashMap<String, String> metaData = new HashMap<String, String>();
-	
+
 	/**
 	 * An instance of the DataContainer that should be filled with the data from the connected source
 	 * file. Task of the specific data containers.
 	 */
 	protected final DataContainer dc;
-	
+
 	/**
 	 * Construct a new specific <code>DataContainer</code> for CSV files.
 	 *
@@ -243,7 +243,7 @@ public class CSVDataContainer implements TabularContainer {
 //		}
 		readData(dc.getFilter());
 	}
-	
+
 	@Override
 	public void appendDataContainer(DataContainer dc) {
 		if (checkHeader(getHeaders()) == 0) {
@@ -376,8 +376,8 @@ public class CSVDataContainer implements TabularContainer {
 	}
 
 	@Override
-	public void createFile(String srcFile) throws IOException {
-		FileUtil.createFile(srcFile, true);
+	public void createFile() throws IOException {
+		FileUtil.createFile(dc.getInputFile(), true);
 	}
 
 	@Override
@@ -421,7 +421,7 @@ public class CSVDataContainer implements TabularContainer {
 	public void exportContainer(String fileName) throws IOException {
 		exportContainer(fileName, ";");
 	}
-	
+
 	@Override
 	public void exportContainer(String fileName, String columnDelimiter) throws IOException {
 		HashMap<Integer, String> hm = getHeadersIndexed();
@@ -644,7 +644,7 @@ public class CSVDataContainer implements TabularContainer {
 	public String[] getRow(int rowIndex) {
 		return getRow(rowIndex, null, new Filter());
 	}
-	
+
 	@Override
 	public String[] getRow(int rowIndex, String columnHeaders) {
 		return getRow(rowIndex, columnHeaders, new Filter());
@@ -717,7 +717,7 @@ public class CSVDataContainer implements TabularContainer {
 	public List<String[]> getRowsList(Filter rowFilter) {
 		return getRowsList(new int[0], new String[0], rowFilter);
 	}
-	
+
 	@Override
 	public List<String[]> getRowsList(int[] rowIndexes, String[] columnHeaders, Filter rowFilter) {
 		List<String[]> outValues = new ArrayList<String[]>();
@@ -762,7 +762,7 @@ public class CSVDataContainer implements TabularContainer {
 		}
 		return outValues;
 	}
-	
+
 	@Override
 	public List<String[]> getRowsList(String columnHeader, Filter rowFilter) {
 		return getRowsList(new int[0], columnHeader.split(";"), rowFilter);
@@ -802,7 +802,7 @@ public class CSVDataContainer implements TabularContainer {
 		}
 		return null;
 	}
-	
+
 	@Override
 	public List<String[]> getValues() {
 		return values;
@@ -1024,13 +1024,13 @@ public class CSVDataContainer implements TabularContainer {
 
 	@Override
 	public void readData(Filter filter) throws IOException {
-		if(dc.getInputFile() != null && dc.getInputFile().exists()) {
+		if (dc.getInputFile() != null && dc.getInputFile().exists()) {
 			if (StringUtils.isNotBlank(dc.getInputFile().getPath())) {
 				putFile(dc.getInputFile().getPath(), getColumnDelimiter());
 			}
-		}		
+		}
 	}
-	
+
 	@Override
 	public void setColumn(String headerName, List<String> columnValues) {
 		setColumn(headerName, columnValues.toArray(new String[columnValues.size()]));
@@ -1146,7 +1146,7 @@ public class CSVDataContainer implements TabularContainer {
 				i++;
 			}
 		}
-	}	
+	}
 
 	@Override
 	public void setRow(int rowIndex, String[] rowValues) {
@@ -1201,12 +1201,12 @@ public class CSVDataContainer implements TabularContainer {
 			}
 		}
 	}
-	
+
 	@Override
 	public void setValues(String headerName, String value, Filter fltr) {
 		setValues(headerName, new int[0], value, fltr);
 	}
-	
+
 	@Override
 	public void setValues(String headerName, String value, Filter fltr, Boolean allOccurences) {
 		int indexes = 0;
@@ -1215,7 +1215,7 @@ public class CSVDataContainer implements TabularContainer {
 		}
 		setValues(headerName, new int[] { indexes }, value, fltr);
 	}
-	
+
 	/**
 	 * This method creates a HashMap, mapping the indexes of the passed header-array to the correct ones
 	 * from the underlying DataContainer. New headers will be mapped to the index -1.
@@ -1233,7 +1233,6 @@ public class CSVDataContainer implements TabularContainer {
 		}
 		return ret;
 	}
-	
 
 	/**
 	 * This method uses the from {@link #sortHeadersIndexes(String[])} created HashMap to bring an array
@@ -1255,7 +1254,7 @@ public class CSVDataContainer implements TabularContainer {
 		}
 		return ret;
 	}
-	
+
 	@Override
 	public void writeData(String srcFile) throws IOException {
 		List<String[]> writeable = new ArrayList<>();

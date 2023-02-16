@@ -19,7 +19,6 @@ import RegressionTest.Container.RT_Container_construct;
 import RegressionTest.Container.RT_Container_delete;
 import RegressionTest.Container.RT_Container_exportContainer;
 import RegressionTest.Container.RT_Container_getHeader;
-import RegressionTest.Container.RT_Container_unsupportedMethods;
 import RegressionTest.CryptoUtility.RT_CryptoUtil_encrypt;
 import RegressionTest.DateUtility.RT_DateUtil_compare;
 import RegressionTest.DateUtility.RT_DateUtil_diff;
@@ -44,7 +43,7 @@ import RegressionTest.ListUtility.RT_ListUtility_asString;
 import RegressionTest.Logging.RT_Logging_log;
 import RegressionTest.Meter.RT_Counter;
 import RegressionTest.Meter.RT_Transaction;
-import RegressionTest.XMLContainer.RT_XMLContainer_getValues;
+import RegressionTest.XMLContainer.RT_XMLContainer_readFile;
 import RegressionTest.YAMLContainer.RT_YAMLContainer_dispatchYAML;
 
 /**
@@ -76,7 +75,6 @@ public class RegressionTestRunner {
 			RT_Container_delete.main(args);
 			RT_Container_exportContainer.main(args);
 			RT_Container_getHeader.main(args);
-			RT_Container_unsupportedMethods.main(args);
 
 			// RegressionTest.CryptoUtility
 			RT_CryptoUtil_encrypt.main(args);
@@ -131,7 +129,7 @@ public class RegressionTestRunner {
 			RT_Transaction.main(args);
 
 			// RegressionTest.XMLContainer
-			RT_XMLContainer_getValues.main(args);
+			RT_XMLContainer_readFile.main(args);
 			
 			// RegressionTest.YAMLContainer
 			RT_YAMLContainer_dispatchYAML.main(args);

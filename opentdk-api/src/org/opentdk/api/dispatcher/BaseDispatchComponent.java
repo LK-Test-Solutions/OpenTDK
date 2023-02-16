@@ -293,12 +293,7 @@ public class BaseDispatchComponent {
 		if (noDuplicates && ListUtil.asList(getValues()).contains(value)) {
 			return;
 		}
-		DataContainer dc = BaseDispatcher.getDataContainer(settingsKey);
-		if (dc.isTabular()) {
-			dc.getTabularContainer().setValue(parameterName, value, fltr);
-		} else if (dc.isTree()) {
-			dc.getTreeContainer().add(parameterName, value, fltr);
-		}
+		BaseDispatcher.getDataContainer(settingsKey).add(parameterName, value, fltr);
 	}
 
 	/**
@@ -423,12 +418,7 @@ public class BaseDispatchComponent {
 		if (!parentXPath.isEmpty()) {
 			fltr.addFilterRule("XPath", xPath, EOperator.EQUALS);
 		}
-		DataContainer dc = BaseDispatcher.getDataContainer(settingsKey);
-		if (dc.isTabular()) {
-			dc.getTabularContainer().deleteValue(parameterName);
-		} else if (dc.isTree()) {
-			dc.getTreeContainer().delete(parameterName, attrName, attrValue, fltr);
-		}
+		BaseDispatcher.getDataContainer(settingsKey).delete(parameterName, attrName, attrValue, fltr);
 	}
 
 	/**
@@ -454,7 +444,7 @@ public class BaseDispatchComponent {
 		DataContainer dc = BaseDispatcher.getDataContainer(settingsKey);
 		String[] attributes = new String[0];
 		if (dc.isTree()) {
-			attributes = dc.getTreeContainer().get(expr, attrName);
+			attributes = dc.treeInstance().get(expr, attrName);
 		}
 		if (attributes.length == 0) {
 			return null;
@@ -490,7 +480,7 @@ public class BaseDispatchComponent {
 		DataContainer dc = BaseDispatcher.getDataContainer(settingsKey);
 		String[] attributes = new String[0];
 		if (dc.isTree()) {
-			attributes = dc.getTreeContainer().get(expr, attrName);
+			attributes = dc.treeInstance().get(expr, attrName);
 		}
 		if (attributes.length == 0) {
 			return null;
@@ -522,7 +512,7 @@ public class BaseDispatchComponent {
 		DataContainer dc = BaseDispatcher.getDataContainer(settingsKey);
 		String[] attributes = new String[0];
 		if (dc.isTree()) {
-			attributes = dc.getTreeContainer().get(expr, attrName);
+			attributes = dc.treeInstance().get(expr, attrName);
 		}
 		if (attributes.length == 0) {
 			return null;
@@ -558,7 +548,7 @@ public class BaseDispatchComponent {
 		DataContainer dc = BaseDispatcher.getDataContainer(settingsKey);
 		String[] attributes = new String[0];
 		if (dc.isTree()) {
-			attributes = dc.getTreeContainer().get(expr, attrName);
+			attributes = dc.treeInstance().get(expr, attrName);
 		}
 		if (attributes.length == 0) {
 			return null;
@@ -610,17 +600,10 @@ public class BaseDispatchComponent {
 		}
 		if (BaseDispatcher.dcMap.containsKey(settingsKey)) {
 			DataContainer dc = BaseDispatcher.getDataContainer(settingsKey);
-			if(dc.isTree()) {
-				if (dc.getTreeContainer().get(parameterName) != null) {
-					return dc.getTreeContainer().get(parameterName)[0];
-				}
-			} else if(dc.isTabular()) {
-				if((dc.getTabularContainer().getHeaderIndex(parameterName) >= 0) && (dc.getTabularContainer().getRowCount() > 0)) {
-					if (dc.getTabularContainer().getValue(parameterName) != null) {
-						return dc.getTabularContainer().getColumn(parameterName)[0];
-					}
-				}
-			}
+			String[] ret = dc.get(parameterName);
+			if(ret != null && ret.length > 0) {
+				return ret[0];
+			}						
 		}
 		return defaultValue;
 	}
@@ -687,14 +670,9 @@ public class BaseDispatchComponent {
 			fltr.addFilterRule("XPath", pxp, EOperator.EQUALS);
 		}
 		DataContainer dc = BaseDispatcher.getDataContainer(settingsKey);
-		if(dc.isTree()) {
-			if (dc.getTreeContainer().get(parameterName, fltr).length > 0) {
-				return dc.getTreeContainer().get(parameterName, fltr);
-			}
-		} else if(dc.isTabular()) {
-			if (dc.getTabularContainer().getColumn(parameterName, fltr).length > 0) {
-				return dc.getTabularContainer().getColumn(parameterName, fltr);
-			}
+		String[] ret = dc.get(parameterName, fltr);
+		if (ret.length > 0) {
+			return ret;
 		}
 		return new String[0];
 	}
@@ -819,7 +797,7 @@ public class BaseDispatchComponent {
 		fltr.addFilterRule("XPath", xPath, EOperator.EQUALS);
 		DataContainer dc = BaseDispatcher.getDataContainer(settingsKey);
 		if(dc.isTree()) {
-			dc.getTreeContainer().set(parameterName, attrName, oldValue, attrValue, fltr);
+			dc.treeInstance().set(parameterName, attrName, oldValue, attrValue, fltr);
 		}
 	}
 
@@ -841,12 +819,7 @@ public class BaseDispatchComponent {
 	 */
 	public void setValue(String value) {
 		if ((parentXPath == null) || (parentXPath.isEmpty())) {
-			DataContainer dc = BaseDispatcher.getDataContainer(settingsKey);
-			if(dc.isTree()) {
-				dc.getTreeContainer().set(parameterName, value);
-			} else if(dc.isTabular()) {
-				dc.getTabularContainer().setValue(parameterName, value);
-			}
+			BaseDispatcher.getDataContainer(settingsKey).set(parameterName, value);
 		} else {
 			setValue("", value);
 		}
@@ -902,12 +875,7 @@ public class BaseDispatchComponent {
 		if (StringUtils.isNotBlank(oldValue)) {
 			fltr.addFilterRule(parameterName, oldValue, EOperator.EQUALS);
 		}
-		DataContainer dc = BaseDispatcher.getDataContainer(settingsKey);
-		if(dc.isTabular()) {
-			dc.getTabularContainer().setValue(parameterName, newValue, fltr);
-		} else if(dc.isTree()) {
-			dc.getTreeContainer().set(parameterName, newValue, fltr);
-		}		
+		BaseDispatcher.getDataContainer(settingsKey).set(parameterName, newValue, fltr);		
 	}
 
 	/**
@@ -929,12 +897,7 @@ public class BaseDispatchComponent {
 			fltr.addFilterRule("XPath", xPath, EOperator.EQUALS);
 		}
 		fltr.addFilterRule(parameterName, oldValue, EOperator.EQUALS);
-		DataContainer dc = BaseDispatcher.getDataContainer(settingsKey);
-		if(dc.isTabular()) {
-			dc.getTabularContainer().setValues(parameterName, newValue, fltr, allOccurences);
-		} else if(dc.isTree()) {
-			dc.getTreeContainer().set(parameterName, newValue, fltr, allOccurences);
-		}	
+		BaseDispatcher.getDataContainer(settingsKey).set(parameterName, newValue, fltr, allOccurences);	
 	}
 
 }

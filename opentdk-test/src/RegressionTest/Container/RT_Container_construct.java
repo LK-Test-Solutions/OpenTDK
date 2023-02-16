@@ -29,11 +29,7 @@ public class RT_Container_construct extends BaseRegression {
 	protected void runTest() {
 		// EMPTY
 		testEmptyContainer(new DataContainer(), "", null, null);
-		
-		// STRING
-		testEmptyContainer(new DataContainer("Test"), "", null, null);
-//		testEmptyContainer(new DataContainer(new DataContainer(), new int[0]), "", null, null);
-		
+
 		// FILE
 		File testfile = new File("testdata/testfile.txt");
 		try {
@@ -63,16 +59,16 @@ public class RT_Container_construct extends BaseRegression {
 	private void testEmptyContainer(DataContainer dc, String filePath, InputStream stream, ResultSet rs) {
 		System.out.println();
 		BaseRegression.testResult(dc.getInputFile().getPath(), "File Path", filePath);
-		BaseRegression.testResult(dc.getTabContainer().getColumnDelimiter(), "Column Delimiter", ";");
-		BaseRegression.testResult(dc.getTabContainer().getHeaderRowIndex(), "Header Index", 0);
-		BaseRegression.testResult(dc.getContainerFormat().name(), "Container Format", "CSV");
-		BaseRegression.testResult(dc.getContainerFormat().getOrientation().name(), "Container Header Orientation", "COLUMN");
+		BaseRegression.testResult(dc.tabInstance().getColumnDelimiter(), "Column Delimiter", ";");
+		BaseRegression.testResult(dc.tabInstance().getHeaderRowIndex(), "Header Index", 0);
+		BaseRegression.testResult(dc.getContainerFormat().name(), "Container Format", "TEXT");
+		BaseRegression.testResult(dc.getContainerFormat().getOrientation().name(), "Container Header Orientation", "UNKNOWN");
 		BaseRegression.testResult(dc.getRootNode(), "Root Node", "");
 		BaseRegression.testResult(dc.getInputStream(), "Input Stream", stream);
 		BaseRegression.testResult(dc.getResultSet(), "Result Set", rs);
-		BaseRegression.testResult(dc.getTabContainer().getHeaders().isEmpty(), "Headers Empty", true);
+		BaseRegression.testResult(dc.tabInstance().getHeaders().isEmpty(), "Headers Empty", true);
 		BaseRegression.testResult(dc.getImplicitHeaders().isEmpty(), "Implicit Headers Empty", true);
-		BaseRegression.testResult(dc.getTabContainer().getValues().isEmpty(), "Values Empty", true);
-		BaseRegression.testResult(dc.getTabContainer().getMetaData().isEmpty(), "Values Empty", true);
+		BaseRegression.testResult(dc.tabInstance().getValues().isEmpty(), "Values Empty", true);
+		BaseRegression.testResult(dc.tabInstance().getMetaData().isEmpty(), "Values Empty", true);
 	}
 }

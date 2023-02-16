@@ -14,8 +14,8 @@ public abstract class BaseRegression {
 	 */
 	static final DataContainer resultContainer = new DataContainer();
 	static {
-		resultContainer.getTabContainer().setColumnDelimiter(" | ");
-		resultContainer.getTabContainer().setHeaders(new String[] { "TEST CLASS", "SUCCESS" });
+		resultContainer.tabInstance().setColumnDelimiter(" | ");
+		resultContainer.tabInstance().setHeaders(new String[] { "TEST CLASS", "SUCCESS" });
 	}
 	/**
 	 * Set to false if any error occurred during one test case execution. Set to true before running a
@@ -48,7 +48,7 @@ public abstract class BaseRegression {
 			success = false;
 			e.printStackTrace();			
 		} finally {
-			resultContainer.getTabContainer().addRow(new String[] { getClass().getSimpleName(), String.valueOf(success) });
+			resultContainer.tabInstance().addRow(new String[] { getClass().getSimpleName(), String.valueOf(success) });
 		}
 		System.out.println();
 		System.out.println("=================== >> Finished ");
@@ -78,16 +78,6 @@ public abstract class BaseRegression {
 		}
 	}
 
-	public static void testResult(int actual, String fieldName, int expected) {
-		if (actual == expected) {
-			System.out.println("Success: " + fieldName + " == " + actual);
-		} else {
-			System.err.println(fieldName + " is \"" + actual + "\" but should be \"" + expected + "\"");
-			success = false;
-		}
-
-	}
-	
 	public static void testResult(Object actual, String fieldName, Object expected) {
 		if (actual == expected) {
 			System.out.println("Success: " + fieldName + " == " + actual);
@@ -95,6 +85,5 @@ public abstract class BaseRegression {
 			System.err.println(fieldName + " is \"" + actual + "\" but should be \"" + expected + "\"");
 			success = false;
 		}
-
 	}
 }

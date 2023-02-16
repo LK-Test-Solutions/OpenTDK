@@ -94,59 +94,88 @@ public class XMLEditor {
 	private Element rootElement;
 
 	/**
-	 * Constructor that is used to create a new instance of this object with a given string object.
-	 * After initialization read and write access can be performed to the XML file, using the methods
-	 * provided by this class.
-	 * 
-	 * @param fullPath String with the relative or absolute path and filename of the XML file
-	 * @throws IOException allows the user to handle I/O errors
+	 * Constructor that is used to create a new empty instance. After initialization read and write
+	 * access can be performed to the XML file, using the methods provided by this class. The root tag
+	 * has its default value {@link #rootNodeName}.
 	 */
-	public XMLEditor(String fullPath) throws IOException {
-		this(fullPath, "");
+	public XMLEditor() {
+		this("");
 	}
+
+	/**
+	 * Constructor that is used to create a new empty instance. After initialization read and write
+	 * access can be performed to the XML file, using the methods provided by this class. The root tag
+	 * can be defined.
+	 * 
+	 * @param rootNode {@link #rootNodeName}
+	 */
+	public XMLEditor(String rootNode) {
+		if (StringUtils.isNotBlank(rootNode)) {
+			rootNodeName = rootNode;
+		}
+		createXMLEditor();
+	}
+
+//	/**
+//	 * Constructor that is used to create a new instance of this object with a given string object.
+//	 * After initialization read and write access can be performed to the XML file, using the methods
+//	 * provided by this class.
+//	 * 
+//	 * @param fullPath String with the relative or absolute path and filename of the XML file
+//	 * @throws IOException allows the user to handle I/O errors
+//	 */
+//	public XMLEditor(String fullPath) throws IOException {
+//		this(fullPath, "");
+//	}
 
 	/**
 	 * Constructor that is used to create a new instance of this object with a given file object. After
 	 * initialization read and write access can be performed to the XML file, using the methods provided
 	 * by this class.
 	 * 
-	 * @param fullPath {@link #xmlFile}
+	 * @param inputFile {@link #xmlFile}
 	 * @throws IOException allows the user to handle I/O errors
 	 */
-	public XMLEditor(File fullPath) throws IOException {
-		this(fullPath, "");
-	}
-
-	/**
-	 * Constructor that is used to create a new instance of this object with a given string object and a
-	 * root tag. After initialization read and write access can be performed to the XML file, using the
-	 * methods provided by this class.
-	 * 
-	 * @param fullPath String with the relative or absolute path and filename of the XML file
-	 * @param rootNode root tag of the XML file
-	 * @throws IOException allows the user to handle I/O errors
-	 */
-	public XMLEditor(String fullPath, String rootNode) throws IOException {
-		this(new File(fullPath), rootNode);
-	}
-
-	/**
-	 * Constructor that is used to create a new instance of this object with a given file object and a
-	 * root tag. After initialization read and write access can be performed to the XML file, using the
-	 * methods provided by this class.
-	 * 
-	 * @param sourceFile {@link #xmlFile}
-	 * @param rootNode   root tag of the XML file
-	 * @throws IOException allows the user to handle I/O errors
-	 */
-	public XMLEditor(File sourceFile, String rootNode) throws IOException {
-		xmlFile = sourceFile;
-		if (StringUtils.isNotBlank(rootNode)) {
-			rootNodeName = rootNode;
+	public XMLEditor(File inputFile) {
+		if(FileUtil.checkFile(inputFile.getPath())) {
+			xmlFile = inputFile;
+			FileUtil.checkDir(xmlFile.getParentFile(), true);
+			createXMLEditor();
+		} else {
+			throw new IllegalArgumentException("Input file does not exist");
 		}
-		FileUtil.checkDir(xmlFile.getParentFile(), true);
-		createXMLEditor();
 	}
+
+//	/**
+//	 * Constructor that is used to create a new instance of this object with a given string object and a
+//	 * root tag. After initialization read and write access can be performed to the XML file, using the
+//	 * methods provided by this class.
+//	 * 
+//	 * @param fullPath String with the relative or absolute path and filename of the XML file
+//	 * @param rootNode root tag of the XML file
+//	 * @throws IOException allows the user to handle I/O errors
+//	 */
+//	public XMLEditor(String fullPath, String rootNode) throws IOException {
+//		this(new File(fullPath), rootNode);
+//	}
+//
+//	/**
+//	 * Constructor that is used to create a new instance of this object with a given file object and a
+//	 * root tag. After initialization read and write access can be performed to the XML file, using the
+//	 * methods provided by this class.
+//	 * 
+//	 * @param sourceFile {@link #xmlFile}
+//	 * @param rootNode   root tag of the XML file
+//	 * @throws IOException allows the user to handle I/O errors
+//	 */
+//	public XMLEditor(File sourceFile, String rootNode) throws IOException {
+//		xmlFile = sourceFile;
+//		if (StringUtils.isNotBlank(rootNode)) {
+//			rootNodeName = rootNode;
+//		}
+//		FileUtil.checkDir(xmlFile.getParentFile(), true);
+//		createXMLEditor();
+//	}
 
 	/**
 	 * Possibility to initialize this class with an InputStream.
@@ -154,21 +183,12 @@ public class XMLEditor {
 	 * @param inStream {@link #xmlStream}
 	 */
 	public XMLEditor(InputStream inStream) {
-		this(inStream, "");
-	}
-
-	/**
-	 * Possibility to initialize this class with an InputStream.
-	 * 
-	 * @param inStream {@link #xmlStream}
-	 * @param rootNode root tag of the XML file
-	 */
-	public XMLEditor(InputStream inStream, String rootNode) {
-		xmlStream = inStream;
-		if (StringUtils.isNotBlank(rootNode)) {
-			rootNodeName = rootNode;
+		if(inStream == null) {
+			throw new IllegalArgumentException("Input stream is empty");
+		} else {
+			xmlStream = inStream;
+			createXMLEditor();
 		}
-		createXMLEditor();
 	}
 
 	private void createXMLEditor() {
@@ -194,11 +214,13 @@ public class XMLEditor {
 				doc = docBuilder.parse(xmlFile);
 				doc.getDocumentElement().normalize();
 				rootElement = doc.getDocumentElement();
+				rootNodeName = rootElement.getNodeName();
 			} else if (xmlStream != null) {
 				xmlStream.reset();
 				doc = docBuilder.parse(xmlStream);
 				doc.getDocumentElement().normalize();
 				rootElement = doc.getDocumentElement();
+				rootNodeName = rootElement.getNodeName();
 			} else {
 				doc = docBuilder.newDocument();
 				rootElement = doc.createElement(rootNodeName);
@@ -1049,6 +1071,13 @@ public class XMLEditor {
 		Element parent = this.getParent(oldEl);
 		this.delElement(oldEl);
 		this.addChildElement(parent, newEl);
+	}
+
+	/**
+	 * @return {@link #rootNodeName}
+	 */
+	public final String getRootNodeName() {
+		return rootNodeName;
 	}
 
 	/**

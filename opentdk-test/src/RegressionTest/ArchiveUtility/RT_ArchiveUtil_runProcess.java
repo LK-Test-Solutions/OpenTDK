@@ -1,6 +1,10 @@
 package RegressionTest.ArchiveUtility;
 
 import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.StandardCopyOption;
 
 import org.opentdk.api.util.ArchiveUtil;
 import org.opentdk.api.util.ArchiveUtil.ArchiveCommand;
@@ -27,6 +31,23 @@ public class RT_ArchiveUtil_runProcess extends BaseRegression {
 		success = archive.runProcess("testdata", "C:\\Program Files\\7-Zip\\7z.exe", "RegressionTestData.7z", ArchiveCommand.Extract, true);
 		BaseRegression.testResult(success, "Extraction state", 0);
 		BaseRegression.testResult(String.valueOf(new File("testdata/RegressionTestData_Extracted").exists()), "Extracted folder exists", "true");
+		
+		// Move the results to the output folder afterwards
+		Path source = new File("testdata/RegressionTestData.7z").toPath();
+		Path target = new File("output/RegressionTestData.7z").toPath();
+		try {
+			Files.move(source, target, StandardCopyOption.REPLACE_EXISTING);
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		
+		source = new File("testdata/RegressionTestData_Extracted").toPath();
+		target = new File("output/RegressionTestData_Extracted").toPath();
+		try {
+			Files.move(source, target, StandardCopyOption.REPLACE_EXISTING);
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
 	}
 
 }
