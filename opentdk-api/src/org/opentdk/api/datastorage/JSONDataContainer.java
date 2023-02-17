@@ -135,13 +135,11 @@ public class JSONDataContainer implements TreeContainer {
 	@Override
 	public void add(String name, String fieldName, String newValue, Filter filter) {
 		MLogger.getInstance().log(Level.INFO, "Method not used", getClass().getSimpleName(), "add");
-		return;
 	}
 
 	@Override
 	public void add(String headerName, String fieldName, String oldFieldValue, String newFieldValue, Filter filter) {
 		MLogger.getInstance().log(Level.INFO, "Method not used", getClass().getSimpleName(), "add");
-		return;
 	}
 	
 	@Override
@@ -182,6 +180,11 @@ public class JSONDataContainer implements TreeContainer {
 
 	@Override
 	public void delete(String name, String value, Filter filter) {
+		delete(name, "", "", new Filter());		
+	}
+
+	@Override
+	public void delete(String name, String fieldName, String fieldValue, Filter filter) {
 		if (filter.getFilterRules().isEmpty()) {
 			json.remove(name);
 		}
@@ -210,11 +213,6 @@ public class JSONDataContainer implements TreeContainer {
 				break;
 			}
 		}
-	}
-
-	@Override
-	public void delete(String headerName, String fieldName, String fieldValue, Filter fltr) {
-		MLogger.getInstance().log(Level.INFO, "Method not used", getClass().getSimpleName(), "delete");
 	}
 
 	@Override
@@ -338,9 +336,9 @@ public class JSONDataContainer implements TreeContainer {
 		}
 		if (content != null) {
 			json = new JSONObject(content);
-//			fillDc();
 		}
 	}
+	
 
 	@Override
 	public void set(String name, String value) {
@@ -349,6 +347,11 @@ public class JSONDataContainer implements TreeContainer {
 
 	@Override
 	public void set(String name, String value, Filter filter) {
+		set(name, value, filter, false); // No double occurrences possible in JSONObject
+	}
+	
+	@Override
+	public void set(String name, String value, Filter filter, boolean allOccurences) {
 		if (filter.getFilterRules().isEmpty()) {
 			Object newValue = this.getDataType(value);
 			json.put(name, newValue);
@@ -386,20 +389,8 @@ public class JSONDataContainer implements TreeContainer {
 	}
 
 	@Override
-	public void set(String name, String value, Filter filter, boolean allOccurences) {
-		MLogger.getInstance().log(Level.INFO, "Method not used", getClass().getSimpleName(), "set");
-		
-	}
-
-	@Override
-	public void set(String name, int[] occurences, String value, Filter filter) {
-		MLogger.getInstance().log(Level.INFO, "Method not used", getClass().getSimpleName(), "set");
-		
-	}
-
-	@Override
-	public void set(String name, String attr, String value, String oldValue, Filter filter) {
-		MLogger.getInstance().log(Level.INFO, "Method not used", getClass().getSimpleName(), "set");
+	public void set(String name, String attributeName, String oldAttributeValue, String attributeValue, Filter filter) {
+		MLogger.getInstance().log(Level.WARNING, "Method not used", getClass().getSimpleName(), "set");
 	}
 
 	/**
@@ -412,7 +403,6 @@ public class JSONDataContainer implements TreeContainer {
 			MLogger.getInstance().log(Level.WARNING, "Map object is not initialized ==> No JSON content to read", getClass().getSimpleName(), "setJsonWithMap");
 		} else {
 			json = new JSONObject(content);
-//			fillDc();
 		}
 	}
 

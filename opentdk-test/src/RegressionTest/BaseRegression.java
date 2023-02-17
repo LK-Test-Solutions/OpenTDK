@@ -43,6 +43,7 @@ public abstract class BaseRegression {
 		System.out.println();
 		try {
 			success = true;
+			Thread.sleep(100);
 			runTest(); // Sets success to false in case of an error
 		} catch (Exception e) {
 			success = false;

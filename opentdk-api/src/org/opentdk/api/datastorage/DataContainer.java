@@ -29,7 +29,6 @@ package org.opentdk.api.datastorage;
 
 import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -154,7 +153,7 @@ public class DataContainer implements SpecificContainer {
 			break;
 		default:
 			containerFormat = EContainerFormat.TEXT;
-			break;	
+			break;
 		}
 		adaptContainer();
 	}
@@ -214,7 +213,7 @@ public class DataContainer implements SpecificContainer {
 	 *                <code>DataContainer</code>
 	 */
 	public DataContainer(File srcFile) {
-		this(srcFile, new Filter());
+		this(srcFile, null);
 	}
 
 	/**
@@ -268,15 +267,12 @@ public class DataContainer implements SpecificContainer {
 	}
 
 	/**
-	 * This method adapts the one {@link SpecificContainer} instance to a specific
-	 * <code>DataContainer</code> depending on the source file ending. The needed objects like header or
-	 * filter will be initialized with default values if they were not explicitly set or the information
-	 * could not be read from the source file.
+	 * This method adapts the one {@link SpecificContainer} instance to a specific {@link DataContainer}
+	 * depending on the source file ending or existence of a stream. It calls {@link #readData(Filter)}
+	 * at the end if there is a source. In case of an empty container the read operation has to be
+	 * triggered separately.
 	 * 
-	 * @throws IOException
-	 * @throws TikaException
-	 * 
-	 * @throws FileNotFoundException If the file name is null or empty or the file does not exist.
+	 * @throws IOException to handle I/O methods when the {@link #readData(Filter)} method failed
 	 */
 	private final void adaptContainer() {
 		detectDataFormat();
@@ -303,10 +299,12 @@ public class DataContainer implements SpecificContainer {
 			instance = new CSVDataContainer(this);
 			return;
 		}
-		try {
-			instance.readData(filter);
-		} catch (IOException e) {
-			MLogger.getInstance().log(Level.SEVERE, e);
+		if ((inputFile != null && inputFile.exists()) || inputStream != null || resultSet != null) {
+			try {
+				instance.readData(filter);
+			} catch (IOException e) {
+				MLogger.getInstance().log(Level.SEVERE, e);
+			}
 		}
 	}
 
@@ -586,12 +584,12 @@ public class DataContainer implements SpecificContainer {
 
 	@Override
 	public void createFile() throws IOException {
-		if(StringUtils.isNotBlank(inputFile.getPath())) {
+		if (StringUtils.isNotBlank(inputFile.getPath())) {
 			instance.createFile();
 		}
 
 	}
-	
+
 	@Override
 	public void readData(File srcFile) throws IOException {
 		instance.readData(srcFile);
@@ -621,20 +619,14 @@ public class DataContainer implements SpecificContainer {
 
 	public void delete(String params, String attrName, String attrValue, Filter fltr) {
 		if (isTabular()) {
-			tabInstance().deleteValue(attrName);
+			tabInstance().deleteValue(params);
 		} else if (isTree()) {
-			treeInstance().delete(attrName, attrName, attrValue, fltr);
+			treeInstance().delete(params, attrName, attrValue, fltr);
 		}
 	}
 
 	public String[] get(String parameterName) {
-		String[] ret = new String[0];
-		if (isTabular()) {
-			ret = tabInstance().getColumn(parameterName);
-		} else if (isTree()) {
-			ret = treeInstance().get(parameterName);
-		}
-		return ret;
+		return get(parameterName, new Filter());
 	}
 
 	public String[] get(String parameterName, Filter fltr) {
@@ -648,19 +640,11 @@ public class DataContainer implements SpecificContainer {
 	}
 
 	public void set(String parameterName, String value) {
-		if (isTabular()) {
-			tabInstance().setValue(parameterName, value);
-		} else if (isTree()) {
-			treeInstance().set(parameterName, value);
-		}
+		set(parameterName, value, new Filter(), false);
 	}
 
-	public void set(String parameterName, String value, Filter fltr) {
-		if (isTabular()) {
-			tabInstance().setValue(parameterName, value, fltr);
-		} else if (isTree()) {
-			treeInstance().set(parameterName, value, fltr);
-		}
+	public void set(String parameterName, String value, Filter filter) {
+		set(parameterName, value, filter, false);
 	}
 
 	public void set(String parameterName, String value, Filter fltr, boolean allOccurences) {

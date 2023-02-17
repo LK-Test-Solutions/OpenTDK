@@ -325,8 +325,13 @@ public class XMLEditor {
 		addTag(tagName, hm);
 	}
 
-	public Element checkXPath(String XPath, boolean createMissingNodes) {
-		List<Element> eList = getElementsListFromXPath(XPath);
+	/**
+	 * @param xPath valid {@link javax.xml.xpath.XPath}
+	 * @param createMissingNodes true: missing elements along the path get created to be able to place an element, false otherwise
+	 * @return the detected or created element defined at the end of the xPath or null if there is no hiz
+	 */
+	public Element checkXPath(String xPath, boolean createMissingNodes) {
+		List<Element> eList = getElementsListFromXPath(xPath);
 		Element resolvedE = null;
 		for (Element searchE : eList) {
 			boolean eFound = false;
@@ -334,8 +339,6 @@ public class XMLEditor {
 				if (compareElements(searchE, doc.getDocumentElement())) {
 					resolvedE = doc.getDocumentElement();
 					eFound = true;
-//				} else {
-//					break;
 				}
 			} else {
 				NodeList cnl = resolvedE.getChildNodes();

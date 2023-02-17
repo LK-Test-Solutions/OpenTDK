@@ -6,6 +6,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
 
+import org.opentdk.api.io.FileUtil;
 import org.opentdk.api.util.ArchiveUtil;
 import org.opentdk.api.util.ArchiveUtil.ArchiveCommand;
 
@@ -19,6 +20,13 @@ public class RT_ArchiveUtil_runProcess extends BaseRegression {
 	
 	@Override
 	protected void runTest() {
+		// Empty output folder
+		try {
+			FileUtil.deleteFileOrFolder("output/RegressionTestData_Extracted");
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		
 		ArchiveUtil archive = ArchiveUtil.newInstance();
 		
 		archive.setFileNames("*.json *.yaml *.properties *.xml *.csv");

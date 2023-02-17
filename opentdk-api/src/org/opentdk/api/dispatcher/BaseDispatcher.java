@@ -207,7 +207,9 @@ public abstract class BaseDispatcher {
 				}
 			}
 			try {
-				dc.createFile();
+				if(dc.getInputFile().exists() == false) {
+					dc.createFile();
+				}
 			} catch (IOException e) {
 				MLogger.getInstance().log(Level.SEVERE, e);
 			}

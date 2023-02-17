@@ -101,17 +101,17 @@ public interface TreeContainer extends SpecificContainer {
 	/**
 	 * This method gets used to replace a value in the data source.
 	 * 
-	 * @param name  Name of the element that will be added into the data source
-	 * @param value Value that will be assigned to the name
+	 * @param name  name of the element that will be added into the data source
+	 * @param value value that will be assigned to the name
 	 */
 	void set(String name, String value);
 
 	/**
 	 * This method gets used to replace a value in the data source.
 	 * 
-	 * @param name   Name of the element that will be added into the data source
-	 * @param value  Value that will be assigned to the name
-	 * @param filter Filter condition for more precise localization of the element within the data
+	 * @param name   name of the element that will be added into the data source
+	 * @param value  value that will be assigned to the name
+	 * @param filter filter condition for more precise localization of the element within the data
 	 *               structure
 	 */
 	void set(String name, String value, Filter filter);
@@ -119,36 +119,35 @@ public interface TreeContainer extends SpecificContainer {
 	/**
 	 * This method gets used to replace a value in the data source.
 	 * 
-	 * @param name          Name of the element that will be added into the data source
-	 * @param value         Value that will be assigned to the name
-	 * @param filter        Filter condition for more precise localization of the element within the
+	 * @param name          name of the element that will be added into the data source
+	 * @param value         value that will be assigned to the name
+	 * @param filter        filter condition for more precise localization of the element within the
 	 *                      data structure
-	 * @param allOccurences If not only the first hit should be replaced
+	 * @param allOccurences true: replace all hits, false: replace first hit
 	 */
 	void set(String name, String value, Filter filter, boolean allOccurences);
 
 	/**
 	 * This method gets used to replace a value in the data source.
 	 * 
-	 * @param name       Name of the element that will be added into the data source
-	 * @param occurences if there are more hits this parameter allows to decide which ones get replaced
-	 * 
-	 * @param value      Value that will be assigned to the name
-	 * @param filter     Filter condition for more precise localization of the element within the data
+	 * @param name       name of the element that will be added into the data source
+	 * @param value      value that will be assigned to the name
+	 * @param filter     filter condition for more precise localization of the element within the data
 	 *                   structure
+	 * @param occurences if only part of the hits should be replaced
 	 */
-	void set(String name, int[] occurences, String value, Filter filter);
+//	void set(String name, String value, Filter filter, int[] occurences);
 
 	/**
 	 * This method gets used to replace a value in the data source.
 	 * 
-	 * @param name     Name of the element that will be added into the data source
-	 * @param attr     If the name has some attribute
-	 * @param value    Value that will be assigned to the name
-	 * @param oldValue To identify the value to replace
-	 * @param filter   Filter condition for more precise localization of the element within the data
+	 * @param name     name of the element that will be added into the data source
+	 * @param attr     if the name has some attribute
+	 * @param oldValue value that will be assigned to the name
+	 * @param newValue to identify the value to replace
+	 * @param filter   filter condition for more precise localization of the element within the data
 	 *                 structure
 	 */
-	void set(String name, String attr, String value, String oldValue, Filter filter);
+	void set(String name, String attr, String oldValue, String newValue, Filter filter);
 
 }

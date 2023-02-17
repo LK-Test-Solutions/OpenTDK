@@ -181,10 +181,10 @@ public class YAMLDataContainer implements TreeContainer {
 		json.set(name, value, filter, allOccurences);
 	}
 
-	@Override
-	public void set(String headerName, int[] occurences, String value, Filter fltr) {
-		json.set(headerName, occurences, value, fltr);
-	}
+//	@Override
+//	public void set(String headerName, int[] occurences, String value, Filter fltr) {
+//		json.set(headerName, occurences, value, fltr);
+//	}
 
 	@Override
 	public void set(String name, String attr, String value, String oldValue, Filter filter) {

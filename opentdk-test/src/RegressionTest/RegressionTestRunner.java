@@ -1,5 +1,9 @@
 package RegressionTest;
 
+import java.io.IOException;
+
+import org.opentdk.api.io.FileUtil;
+
 import RegressionTest.Application.RT_SampleCall_CommandlineArgs;
 import RegressionTest.Application.RT_SampleCall_SettingsFile;
 import RegressionTest.ArchiveUtility.RT_ArchiveUtil_runProcess;
@@ -58,6 +62,14 @@ public class RegressionTestRunner {
 
 	public static void main(String[] args) {
 		for (int i = 0; i < loops; i++) {
+			
+			// Empty output folder
+			try {
+				FileUtil.deleteFileOrFolder("output");
+				FileUtil.checkDir("output", true);
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
 			
 			// RegressionTest.Application
 			RT_SampleCall_CommandlineArgs.main(args);

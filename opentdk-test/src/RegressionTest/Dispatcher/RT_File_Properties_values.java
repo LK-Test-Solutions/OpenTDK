@@ -1,5 +1,10 @@
 package RegressionTest.Dispatcher;
 
+import java.io.IOException;
+
+import org.opentdk.api.dispatcher.BaseDispatcher;
+import org.opentdk.api.io.FileUtil;
+
 import RegressionTest.BaseRegression;
 
 public class RT_File_Properties_values extends BaseRegression {
@@ -10,11 +15,17 @@ public class RT_File_Properties_values extends BaseRegression {
 	
 	@Override
 	public void runTest() {
+		final String file = "output/File_Properties_values.properties";
+		try {
+			FileUtil.deleteFileOrFolder(file);
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
 		/**
 		 * Precondition: The loaded file needs to be empty!
 		 * Otherwise the first getValue methods will fail in case a value for Country, Language or CapitalCity exists within the file.
 		 */
-		E_PropertiesFile_Dispatcher_values.setDataContainer(E_PropertiesFile_Dispatcher_values.class, "testdata/RegressionTestData/File_Properties_values.properties");
+		BaseDispatcher.setDataContainer(E_PropertiesFile_Dispatcher_values.class, file, true);
 		
 		// Check default values defined in E_PropertiesFile_Dispatcher_values.java
 		testResult(E_PropertiesFile_Dispatcher_values.COUNTRY.getValue(), "Country", "Germany");
@@ -27,7 +38,7 @@ public class RT_File_Properties_values extends BaseRegression {
 		testResult(E_PropertiesFile_Dispatcher_values.LANGUAGE.getValue(), "Language", "german");
 		testResult(E_PropertiesFile_Dispatcher_values.CAPITAL_CITY.getValue(), "City", "Berlin");
 		
-		testResult(E_PropertiesFile_Dispatcher_values.getDataContainer(E_PropertiesFile_Dispatcher_values.class).asString(), "Current content as string", "Country = France\n");
+		testResult(BaseDispatcher.getDataContainer(E_PropertiesFile_Dispatcher_values.class).asString(), "Current content as string", "Country = France\n");
 
 		// Change the other values and check the values of E_PropertiesFile_Dispatcher_values
 		E_PropertiesFile_Dispatcher_values.LANGUAGE.setValue("french");
@@ -59,7 +70,6 @@ public class RT_File_Properties_values extends BaseRegression {
 		testResult(E_PropertiesFile_Dispatcher_values.COUNTRY.getValue(), "Country", "Germany");
 		testResult(E_PropertiesFile_Dispatcher_values.LANGUAGE.getValue(), "Language", "german");
 		testResult(E_PropertiesFile_Dispatcher_values.CAPITAL_CITY.getValue(), "CapitalCity", "Berlin");
-
 	}
 
 }

@@ -29,21 +29,18 @@ package org.opentdk.api.datastorage;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
-import java.util.logging.Level;
-import java.util.stream.Collectors;
 
+import org.apache.commons.lang3.StringUtils;
 import org.opentdk.api.filter.Filter;
 import org.opentdk.api.filter.FilterRule;
 import org.opentdk.api.io.FileUtil;
 import org.opentdk.api.io.XMLEditor;
-import org.opentdk.api.logger.MLogger;
 import org.w3c.dom.Element;
 
 /**
- * SubClass of {@link DataContainer} which provides all methods for reading and writing
- * from or to ASCII files in XML format, and store the data at runtime within the DataContainer.
+ * SubClass of {@link DataContainer} which provides all methods for reading and writing from or to
+ * ASCII files in XML format, and store the data at runtime within the DataContainer.
  * 
  * @author LK Test Solutions
  * @see org.opentdk.api.datastorage.DataContainer
@@ -52,20 +49,20 @@ public class XMLDataContainer implements TreeContainer {
 	/**
 	 * An instance of the class that handles XML files.
 	 */
-	private XMLEditor xEdit;	
+	private XMLEditor xEdit;
 	/**
-	 * An instance of the DataContainer that should be filled with the data from the
-	 * connected source file. -> Task of the specific data containers.
+	 * An instance of the DataContainer that should be filled with the data from the connected source
+	 * file. -> Task of the specific data containers.
 	 */
 	private final DataContainer dc;
-	
+
 //	private ArrayList<String[]> values = new ArrayList<String[]>();
 
 	/**
 	 * Construct a new specific <code>DataContainer</code> for XML files.
 	 *
-	 * @param dCont the <code>DataContainer</code> instance to use it in the read
-	 *              and write methods of this specific data container
+	 * @param dCont the <code>DataContainer</code> instance to use it in the read and write methods of
+	 *              this specific data container
 	 */
 	public XMLDataContainer(DataContainer dCont) {
 		dc = dCont;
@@ -74,47 +71,52 @@ public class XMLDataContainer implements TreeContainer {
 
 	@Override
 	public void add(String name, String value) {
-		add(name, value, new Filter());	
+		add(name, value, new Filter());
 	}
 
 	@Override
-	public void add(String headerName, String value, Filter fltr) {
-		setFieldValues(headerName, new int[0], value, fltr, true);
+	public void add(String name, String value, Filter filter) {
+		add(name, "", value, filter);
 	}
-	
+
 	@Override
-	public void add(String headerName, String attributeName, String attributeValue, Filter fltr) {
-		add(headerName, attributeName, "", attributeValue, fltr);
+	public void add(String name, String attr, String value, Filter filter) {
+		add(name, attr, "", value, filter);
 	}
-	
+
 	@Override
-	public void add(String headerName, String attributeName, String oldAttributeValue, String attributeValue, Filter fltr) {
-		for (FilterRule fltrRule : fltr.getFilterRules()) {
+	public void add(String name, String attr, String oldValue, String value, Filter filter) {
+		for (FilterRule fltrRule : filter.getFilterRules()) {
 			if (fltrRule.getHeaderName().equalsIgnoreCase("XPath")) {
-				Element oldEl = xEdit.getElement(headerName, attributeName, oldAttributeValue);
-				if(oldEl == null) {
-					Element newEl = xEdit.addElement(fltrRule.getValue(), headerName, attributeName, attributeValue);
-					newEl.getAttribute(attributeName);
+				Element oldElement = xEdit.getElement(name, attr, oldValue);
+				if (oldElement == null) {
+					if(StringUtils.isBlank(attr)) {
+						xEdit.addElement(fltrRule.getValue(), name, value); // Add tag
+					} else {
+						xEdit.addElement(fltrRule.getValue(), name, attr, value); // Add tag with attribute
+					}
 				} else {
-					Element newEl = oldEl;
-					newEl.setAttribute(attributeName, attributeValue);
-					xEdit.replaceElement(oldEl, newEl);
-					newEl.getAttribute(attributeName);
+					// Add in case of existing tag results to an attribute replacement
+					if(StringUtils.isNotBlank(attr)) {
+						Element newElement = oldElement;
+						newElement.setAttribute(attr, value);
+						xEdit.replaceElement(oldElement, newElement);
+					}
 				}
 				break;
 			}
 		}
 	}
-	
+
 	@Override
 	public String asString() {
 		String ret = "";
-		if(xEdit != null) {
+		if (xEdit != null) {
 			ret = xEdit.asString();
 		}
 		return ret;
 	}
-	
+
 	@Override
 	public void createFile() throws IOException {
 		StringBuilder sb = new StringBuilder();
@@ -125,7 +127,7 @@ public class XMLDataContainer implements TreeContainer {
 	}
 
 	@Override
-	public void delete(String name, String value) {	
+	public void delete(String name, String value) {
 		delete(name, value, new Filter());
 	}
 
@@ -145,24 +147,27 @@ public class XMLDataContainer implements TreeContainer {
 	}
 
 	@Override
-	public String[] get(String name) {		
+	public String[] get(String name) {
 		return get(name, new Filter());
 	}
-	
+
 	@Override
 	public String[] get(String headerName, Filter fltr) {
 		return (String[]) get(headerName, fltr, "values");
 	}
-	
+
 	/**
-	 * This method returns an array with all tag elements or values where headerName matches the tag name and 
-	 * the tag element matches with all defined filter rules. The method name getColumn is used also for tree
-	 * formats like XML to allow standardized access to all supported DataContainer formats (table, tree etc.).  
+	 * This method returns an array with all tag elements or values where headerName matches the tag
+	 * name and the tag element matches with all defined filter rules. The method name getColumn is used
+	 * also for tree formats like XML to allow standardized access to all supported DataContainer
+	 * formats (table, tree etc.).
 	 * 
-	 * @param headerName	The name of the tag that will be searched within an XML document.
-	 * @param fltr			Filter rules that will be applied as additional search criteria for the returning tags.
-	 * @param returnType	values = String Array with all values of the matching tags; elements = Element Array with all matching tag objects
-	 * @return				Array of the type, specified by returnType argument
+	 * @param headerName The name of the tag that will be searched within an XML document.
+	 * @param fltr       Filter rules that will be applied as additional search criteria for the
+	 *                   returning tags.
+	 * @param returnType values = String Array with all values of the matching tags; elements = Element
+	 *                   Array with all matching tag objects
+	 * @return Array of the type, specified by returnType argument
 	 */
 	private Object[] get(String headerName, Filter fltr, String returnType) {
 		List<FilterRule> implFilterRules = dc.getImplFilterRules(fltr);
@@ -170,12 +175,12 @@ public class XMLDataContainer implements TreeContainer {
 		List<String> filteredValues = new ArrayList<>();
 
 		/*
-		 *  Filter all tags and values that match an implicit XPath filter rule.
+		 * Filter all tags and values that match an implicit XPath filter rule.
 		 */
 		if (implFilterRules.size() > 0) {
 			for (FilterRule frImpl : implFilterRules) {
 				if (frImpl.getHeaderName().equalsIgnoreCase("XPath")) {
-					for(Element tagElement:xEdit.getElementsListByXPath(frImpl.getValue())) {
+					for (Element tagElement : xEdit.getElementsListByXPath(frImpl.getValue())) {
 						for (Element childE : xEdit.getChildren(tagElement)) {
 							if (childE.getTagName().equals(headerName)) {
 								filteredElements.add(childE);
@@ -187,7 +192,8 @@ public class XMLDataContainer implements TreeContainer {
 			}
 		} else {
 			/*
-			 *  If no implicit XPath filter rule exists, then all tags and values are added to the filteredElements and filteredValues list.
+			 * If no implicit XPath filter rule exists, then all tags and values are added to the
+			 * filteredElements and filteredValues list.
 			 */
 			for (Element e : xEdit.getElementsList(headerName)) {
 				filteredElements.add(e);
@@ -206,15 +212,15 @@ public class XMLDataContainer implements TreeContainer {
 						retValues.remove(fltrE.getTextContent());
 						retElements.remove(fltrE);
 					}
-					
+
 				}
-			} 
+			}
 		}
-		
+
 		filteredElements = null;
 		filteredValues = null;
-		
-		if (returnType.equalsIgnoreCase("elements")) {	
+
+		if (returnType.equalsIgnoreCase("elements")) {
 			filteredValues = null;
 			return retElements.toArray(new Element[retElements.size()]);
 		} else {
@@ -224,17 +230,15 @@ public class XMLDataContainer implements TreeContainer {
 	}
 
 	/**
-	 * Searches for all tags defined by parameter <code>expr</code> and retrieves
-	 * the values of their attributes defined by <code>attrName</code>.<br>
-	 * If expr includes the tag with full xPath, then the scope of the search will
-	 * be the parent xPath of the tag (e.g. /Rules/rule/regExpr only searches in
-	 * /Rules/rule).<br>
-	 * If expr only includes a tag name, the scope of the search will be the whole
-	 * document. In this case all tags that match to <code>expr</code> will be
-	 * searched.
+	 * Searches for all tags defined by parameter <code>expr</code> and retrieves the values of their
+	 * attributes defined by <code>attrName</code>.<br>
+	 * If expr includes the tag with full xPath, then the scope of the search will be the parent xPath
+	 * of the tag (e.g. /Rules/rule/regExpr only searches in /Rules/rule).<br>
+	 * If expr only includes a tag name, the scope of the search will be the whole document. In this
+	 * case all tags that match to <code>expr</code> will be searched.
 	 * 
-	 * @param expr 		Name or full XPath of XML tags
-	 * @param attrName 	Name of the XML tags attribute from which the values will be returned
+	 * @param expr     Name or full XPath of XML tags
+	 * @param attrName Name of the XML tags attribute from which the values will be returned
 	 */
 	@Override
 	public String[] get(String expr, String attrName) {
@@ -267,10 +271,9 @@ public class XMLDataContainer implements TreeContainer {
 	}
 
 	/**
-	 * This method is used to translate the XPath references to actual values from
-	 * the XML File. Using the specified index, the according row (element
-	 * Occurrence) will be read out and fed to a translator method. The output of
-	 * this method is the return value.
+	 * This method is used to translate the XPath references to actual values from the XML File. Using
+	 * the specified index, the according row (element Occurrence) will be read out and fed to a
+	 * translator method. The output of this method is the return value.
 	 *
 	 * @param index The index of the returning row.
 	 * @return an array with all translated references (values) of the row.
@@ -286,21 +289,20 @@ public class XMLDataContainer implements TreeContainer {
 //	}
 
 	/**
-	 * This method is used to load data from an XML-File to the data container. As
-	 * the structure of a XML is fundamentally different from the data container
-	 * instance, only references of the values are stored in the container as
-	 * "X-Paths". Every XML-Tag has its own column in the container. The references
-	 * alone are useless, they need to be read out by <code>getValue</code>.
+	 * This method is used to load data from an XML-File to the data container. As the structure of a
+	 * XML is fundamentally different from the data container instance, only references of the values
+	 * are stored in the container as "X-Paths". Every XML-Tag has its own column in the container. The
+	 * references alone are useless, they need to be read out by <code>getValue</code>.
 	 *
 	 * @param filter Has no effect here.
-	 * @throws IOException 
+	 * @throws IOException
 	 */
 	@Override
 	public void readData(Filter filter) throws IOException {
-		if(dc.getInputFile().exists()) {
+		if (dc.getInputFile().exists()) {
 			xEdit = new XMLEditor(dc.getInputFile());
 			dc.setRootNode(xEdit.getRootNodeName());
-		} else if(dc.getInputStream() != null) {
+		} else if (dc.getInputStream() != null) {
 			xEdit = new XMLEditor(dc.getInputStream());
 			dc.setRootNode(xEdit.getRootNodeName());
 		} else {
@@ -318,7 +320,7 @@ public class XMLDataContainer implements TreeContainer {
 //			dc.setColumn(header, xEdit.getXPaths(header));
 //		}
 	}
-
+	
 	@Override
 	public void set(String name, String value) {
 		set(name, value, new Filter());
@@ -330,38 +332,44 @@ public class XMLDataContainer implements TreeContainer {
 	}
 
 	@Override
-	public void set(String name, String value, Filter filter, boolean allOccurences) {
-		setFieldValues(name, new int[0], value, filter, false);
-	}
-
-	@Override
-	public void set(String name, String attr, String value, String oldValue, Filter filter) {
-		MLogger.getInstance().log(Level.INFO, "Method not used", getClass().getSimpleName(), "set");
+	public void set(String tagName, String tagValue, Filter filter, boolean allOccurences) {
+		// Initialize occurrences array with 0 item, in case it is empty
+//		if (occurences.length < 1) {
+//			occurences = new int[] { 0 };
+//		}
+		for (FilterRule fltrRule : filter.getFilterRules()) {
+			if (fltrRule.getHeaderName().equalsIgnoreCase("XPath")) {
+//				if (newField) {
+//					xEdit.addElement(fltrRule.getValue(), paramName, value);
+//				} 
+//				else {
+					xEdit.checkXPath(fltrRule.getValue() + "/" + tagName, true); // Creates the hierarchy if not present
+					Element[] elements = (Element[]) get(tagName, filter, "elements");								
+					for (int i = 0; i < elements.length; i++) {
+//						List<Integer> occList = Arrays.stream(occurences).boxed().collect(Collectors.toList());
+//						if ((occList.contains(i)) || (occurences[0] == -1)) {
+							xEdit.setElementValue(elements[i], tagValue);
+//						}
+					}
+//				}
+				break;
+			}
+		}
 	}
 	
 	@Override
-	public void set(String headerName, int[] occurences, String value, Filter fltr) {
-		setFieldValues(headerName, occurences, value, fltr, false);
-	}
-
-	private void setFieldValues(String headerName, int[] occurences, String value, Filter fltr, boolean newField) {
-		// Initialize occurrences array with 0 item, in case it is empty
-		if(occurences.length < 1) {
-			occurences = new int[] {0};
-		}
-		for (FilterRule fltrRule : fltr.getFilterRules()) {
+	public void set(String tagName, String attributeName, String oldAttributeValue, String attributeValue, Filter filter) {
+		for (FilterRule fltrRule : filter.getFilterRules()) {
 			if (fltrRule.getHeaderName().equalsIgnoreCase("XPath")) {
-				if (newField) {
-					xEdit.addElement(fltrRule.getValue(), headerName, value);
+				Element oldEl = xEdit.getElement(tagName, attributeName, oldAttributeValue);
+				if (oldEl == null) {
+					Element newEl = xEdit.addElement(fltrRule.getValue(), tagName, attributeName, attributeValue);
+					newEl.getAttribute(attributeName);
 				} else {
-					xEdit.checkXPath(fltrRule.getValue() + "/" + headerName, true);
-					Element[] elements = (Element[]) get(headerName, fltr, "elements");
-					for(int i=0; i<elements.length; i++) {
-						List<Integer> occList = Arrays.stream(occurences).boxed().collect(Collectors.toList());
-						if((occList.contains(i)) || (occurences[0] == -1)) {
-							xEdit.setElementValue(elements[i], value);
-						}
-					}
+					Element newEl = oldEl;
+					newEl.setAttribute(attributeName, attributeValue);
+					xEdit.replaceElement(oldEl, newEl);
+					newEl.getAttribute(attributeName);
 				}
 				break;
 			}
@@ -372,5 +380,4 @@ public class XMLDataContainer implements TreeContainer {
 	public void writeData(String srcFile) {
 		xEdit.save(srcFile);
 	}
-
 }

@@ -52,6 +52,7 @@ javadoc*
 **/bin/**
 **/classes/**
 **/RegressionTestData_Extracted/**
+**/output/**
 
 opentdk-test/output/private.key
 opentdk-test/output/public.key

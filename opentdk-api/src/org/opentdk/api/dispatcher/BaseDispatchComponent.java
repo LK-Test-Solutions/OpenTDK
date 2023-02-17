@@ -27,11 +27,15 @@
  */
 package org.opentdk.api.dispatcher;
 
+import java.io.IOException;
+import java.util.logging.Level;
+
 import org.apache.commons.lang3.StringUtils;
 import org.opentdk.api.application.EBaseSettings;
 import org.opentdk.api.datastorage.DataContainer;
 import org.opentdk.api.datastorage.EHeader;
 import org.opentdk.api.filter.Filter;
+import org.opentdk.api.logger.MLogger;
 import org.opentdk.api.mapping.EOperator;
 import org.opentdk.api.util.ListUtil;
 
@@ -174,9 +178,14 @@ public class BaseDispatchComponent {
 			DataContainer dc = null;
 			if (StringUtils.isNotBlank(parentXPath)) {
 				dc = new DataContainer(EHeader.TREE);
-				dc.setRootNode(getRootNode()); // TODO XMLEditor is already initialized here
+				dc.setRootNode(getRootNode()); 
 			} else {
 				dc = new DataContainer();
+			}
+			try {
+				dc.readData();
+			} catch (IOException e) {
+				MLogger.getInstance().log(Level.SEVERE, e);
 			}
 			BaseDispatcher.setDataContainer(parentClass, dc);
 		}
@@ -601,7 +610,7 @@ public class BaseDispatchComponent {
 		if (BaseDispatcher.dcMap.containsKey(settingsKey)) {
 			DataContainer dc = BaseDispatcher.getDataContainer(settingsKey);
 			String[] ret = dc.get(parameterName);
-			if(ret != null && ret.length > 0) {
+			if(ret != null && ret.length > 0 && ret[0] != null) {
 				return ret[0];
 			}						
 		}

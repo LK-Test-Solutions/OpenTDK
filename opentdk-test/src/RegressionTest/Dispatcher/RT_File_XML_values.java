@@ -1,10 +1,12 @@
 package RegressionTest.Dispatcher;
 
+import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
 
 import org.opentdk.api.application.EBaseSettings;
 import org.opentdk.api.dispatcher.BaseDispatcher;
+import org.opentdk.api.io.FileUtil;
 import org.opentdk.api.util.ListUtil;
 
 import RegressionTest.BaseRegression;
@@ -26,9 +28,15 @@ public class RT_File_XML_values extends BaseRegression {
 	}
 
 	@Override
-	public void runTest() {	
-		// File exists with XML header and root tag only
-		BaseDispatcher.setDataContainer(EBaseSettings.class, "testdata/RegressionTestData/File_XML_values.xml");
+	public void runTest() {
+		final String file = "output/File_XML_values.xml";
+		try {
+			FileUtil.deleteFileOrFolder(file);
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		
+		BaseDispatcher.setDataContainer(EBaseSettings.class, file, true);
 		
 		// Gets the default values of dispatcher components that are declared within EBaseSettings class
 		testResult(E_XMLFile_Dispatcher_values.LOGFILE.getValue(), "APP_LOGFILE", "./logs/Application.log");
@@ -69,6 +77,9 @@ public class RT_File_XML_values extends BaseRegression {
 		E_XMLFile_Dispatcher_values.BACKGROUND_IMAGE.addValue("Dark Theme", "Sunset.jpg", false);
 		E_XMLFile_Dispatcher_values.BACKGROUND_IMAGE.addValue("Nature Theme", "Trees.jpg", false);
 		E_XMLFile_Dispatcher_values.BACKGROUND_IMAGE.addValue("Cars Theme", "EQA.jpg", false);
+		
+		System.out.println(BaseDispatcher.getDataContainer(EBaseSettings.class).asString());
+		
 		testResult(E_XMLFile_Dispatcher_values.BACKGROUND_IMAGE.getValue("Dark Theme"), "BACKGROUND_IMAGE", "Sunset.jpg");
 		testResult(E_XMLFile_Dispatcher_values.BACKGROUND_IMAGE.getValue("Nature Theme"), "BACKGROUND_IMAGE", "Trees.jpg");
 		testResult(E_XMLFile_Dispatcher_values.BACKGROUND_IMAGE.getValue("Cars Theme"), "BACKGROUND_IMAGE", "EQA.jpg");
@@ -103,10 +114,12 @@ public class RT_File_XML_values extends BaseRegression {
 		testResult(E_XMLFile_Dispatcher_values.BACKGROUND_IMAGE.getValue("Nature Theme"), "BACKGROUND_IMAGE", "replaceAll.jpg");
 		testResult(E_XMLFile_Dispatcher_values.BACKGROUND_IMAGE.getValue("Cars Theme"), "BACKGROUND_IMAGE", "replaceAll.jpg");
 		
-		E_XMLFile_Dispatcher_values.THEMES.delete();
-		
-		// Reset
-//		BaseDispatcher.clearDataContainer();
+		try {
+			BaseDispatcher.getDataContainer(EBaseSettings.class).writeData(file);
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		E_XMLFile_Dispatcher_values.THEMES.delete(); // Prepare for RT_noFile_XML_values
 	}
 
 }

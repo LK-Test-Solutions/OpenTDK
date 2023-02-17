@@ -5,6 +5,7 @@ import java.nio.file.FileSystemException;
 import java.util.List;
 
 import org.opentdk.api.datastorage.DataContainer;
+import org.opentdk.api.datastorage.EHeader;
 import org.opentdk.api.io.FileUtil;
 
 import RegressionTest.BaseRegression;
@@ -87,7 +88,7 @@ public class RT_FileUtil extends BaseRegression {
 		} catch (IOException e) {
 			System.err.println(e.getMessage());
 		}
-		DataContainer dc = new DataContainer();
+		DataContainer dc = new DataContainer(EHeader.COLUMN);
 		dc.tabInstance().addRow(new String[] { "Row1" });
 		dc.tabInstance().addRow(new String[] { "Row2" });
 		dc.tabInstance().addRow(new String[] { "Row3" });

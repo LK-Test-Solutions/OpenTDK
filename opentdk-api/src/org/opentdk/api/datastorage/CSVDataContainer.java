@@ -504,7 +504,7 @@ public class CSVDataContainer implements TabularContainer {
 		if (outLst.size() > 0) {
 			return outLst.get(0);
 		}
-		return new String[] {};
+		return new String[0];
 	}
 
 	@Override
@@ -1152,25 +1152,25 @@ public class CSVDataContainer implements TabularContainer {
 	public void setRow(int rowIndex, String[] rowValues) {
 		values.set(rowIndex, addMetaValues(rowValues));
 	}
-
+	
+	@Override
+	public void setValue(String headerName, String value) {
+		setValue(headerName, 0, value, new Filter());
+	}
+	
 	@Override
 	public void setValue(String headerName, int index, String value) {
 		setValue(headerName, index, value, new Filter());
 	}
 
 	@Override
-	public void setValue(String headerName, int index, String value, Filter fltr) {
-		setValues(headerName, new int[] { index }, value, fltr);
-	}
-
-	@Override
-	public void setValue(String headerName, String value) {
-		setValue(headerName, 0, value, new Filter());
-	}
-
-	@Override
 	public void setValue(String headerName, String value, Filter fltr) {
 		setValue(headerName, 0, value, fltr);
+	}
+
+	@Override
+	public void setValue(String headerName, int index, String value, Filter fltr) {
+		setValues(headerName, new int[] { index }, value, fltr);
 	}
 
 	@Override
