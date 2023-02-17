@@ -7,7 +7,7 @@ import RegressionTest.BaseRegression;
  * when the Application class gets called as {@link org.opentdk.api.application.BaseApplication} via
  * settings XML.
  * 
- * @author HWA (LK Test Solutions)
+ * @author LK Test Solutions
  *
  */
 public class RT_SampleCall_SettingsFile extends BaseRegression {

@@ -407,14 +407,14 @@ public class JSONDataContainer implements TreeContainer {
 	}
 
 	@Override
-	public void writeData(String srcFile) {
+	public void writeData(String srcFile) throws IOException {
 		if (json == null || json.isEmpty()) {
 			MLogger.getInstance().log(Level.WARNING, "JSON object is not initialized or empty ==> No JSON content to write", getClass().getSimpleName(), "writeData");
 		} else {
 			try {
 				FileUtil.createFile(srcFile, true);
 				FileUtil.writeOutputFile(json.toString(1), srcFile);
-			} catch (JSONException | IOException e) {
+			} catch (JSONException e) {
 				MLogger.getInstance().log(Level.SEVERE, e);
 				throw new RuntimeException(e);
 			}

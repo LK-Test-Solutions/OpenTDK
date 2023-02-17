@@ -311,8 +311,12 @@ public abstract class BaseDispatcher {
 	/**
 	 * Removes all the mappings from the {@link #dcMap}.
 	 */
-	public static void clearDataContainer() {
-		dcMap.clear();
-	}
+//	public static void clearDataContainer() {
+//		dcMap.clear();
+//	}
+//
+//	public static Map<String, DataContainer> getDataContainers() {
+//		return dcMap;
+//	}
 
 }

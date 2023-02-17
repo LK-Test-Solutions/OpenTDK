@@ -1,7 +1,8 @@
 package RegressionTest;
 
-import java.io.IOException;
+import java.io.File;
 
+import org.apache.commons.io.FileUtils;
 import org.opentdk.api.io.FileUtil;
 
 import RegressionTest.Application.RT_SampleCall_CommandlineArgs;
@@ -58,26 +59,21 @@ import RegressionTest.YAMLContainer.RT_YAMLContainer_dispatchYAML;
  */
 public class RegressionTestRunner {
 	// To see effects that occur when static fields get accessed more often during runtime
-	private static final int loops = 1;
+	private static final int loops = 2;
 
 	public static void main(String[] args) {
 		for (int i = 0; i < loops; i++) {
-			
 			// Empty output folder
-			try {
-				FileUtil.deleteFileOrFolder("output");
-				FileUtil.checkDir("output", true);
-			} catch (IOException e) {
-				e.printStackTrace();
-			}
-			
+			FileUtils.deleteQuietly(new File("output"));
+			FileUtil.checkDir("output", true);
+
 			// RegressionTest.Application
 			RT_SampleCall_CommandlineArgs.main(args);
 			RT_SampleCall_SettingsFile.main(args);
-			
+
 			// RegressionTest.ArchiveUtility
 			RT_ArchiveUtil_runProcess.main(args);
-			
+
 			// RegressionTest.CommonUtility
 			RT_CommonUtil_get.main(args);
 
@@ -142,9 +138,11 @@ public class RegressionTestRunner {
 
 			// RegressionTest.XMLContainer
 			RT_XMLContainer_readFile.main(args);
-			
+
 			// RegressionTest.YAMLContainer
 			RT_YAMLContainer_dispatchYAML.main(args);
+
+			System.out.println();
 		}
 		System.out.println();
 		System.out.println("RUN OVERVIEW (NAME | SUCCESS)");

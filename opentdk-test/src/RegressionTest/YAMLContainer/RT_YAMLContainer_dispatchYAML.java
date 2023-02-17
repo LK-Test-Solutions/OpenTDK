@@ -96,8 +96,6 @@ public class RT_YAMLContainer_dispatchYAML extends BaseRegression {
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
-		
-		BaseDispatcher.clearDataContainer();
 	}
 
 }

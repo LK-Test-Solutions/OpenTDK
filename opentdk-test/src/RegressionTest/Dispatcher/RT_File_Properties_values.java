@@ -1,9 +1,9 @@
 package RegressionTest.Dispatcher;
 
-import java.io.IOException;
+import java.io.File;
 
+import org.apache.commons.io.FileUtils;
 import org.opentdk.api.dispatcher.BaseDispatcher;
-import org.opentdk.api.io.FileUtil;
 
 import RegressionTest.BaseRegression;
 
@@ -16,11 +16,7 @@ public class RT_File_Properties_values extends BaseRegression {
 	@Override
 	public void runTest() {
 		final String file = "output/File_Properties_values.properties";
-		try {
-			FileUtil.deleteFileOrFolder(file);
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
+		FileUtils.deleteQuietly(new File(file));
 		/**
 		 * Precondition: The loaded file needs to be empty!
 		 * Otherwise the first getValue methods will fail in case a value for Country, Language or CapitalCity exists within the file.

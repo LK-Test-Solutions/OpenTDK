@@ -96,8 +96,6 @@ public class RT_JSONContainer_dispatchJson extends BaseRegression {
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
-		
-		BaseDispatcher.clearDataContainer();
 	}
 
 }

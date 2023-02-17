@@ -1,6 +1,5 @@
 package RegressionTest.Logging;
 
-import java.io.IOException;
 import java.util.logging.Level;
 
 import org.opentdk.api.io.FileUtil;
@@ -20,13 +19,6 @@ public class RT_Logging_log extends BaseRegression {
 	@Override
 	public void runTest() {
 		boolean success = false;
-
-		try {
-			FileUtil.deleteFileOrFolder(defaultLogFile);
-			FileUtil.deleteFileOrFolder(logFile);
-		} catch (IOException e) {
-			throw new RuntimeException(e);
-		}
 
 		MLogger.getInstance().printExceptions(false);
 		MLogger.getInstance().setTraceLevel(Level.ALL);
@@ -107,11 +99,7 @@ public class RT_Logging_log extends BaseRegression {
 		// Reset
 		MLogger.getInstance().setLogSizeLimit(10000);
 		MLogger.getInstance().setLogKeepAge(30);
-		try {
-			FileUtil.deleteFileOrFolder(defaultLogFile);
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
+		MLogger.getInstance().setLogFile("");
 	}
 
 }
