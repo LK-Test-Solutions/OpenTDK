@@ -19,7 +19,8 @@ public class RT_SampleCall_SettingsFile extends BaseRegression {
 	@Override
 	protected void runTest() {
 		// File exists in this scenario
-		String[] args = new String[] {"-settingsfile=testdata/RegressionTestData/TemplateApplicationSettings.xml"};
+		String file = "-settingsfile=" + location + "testdata/RegressionTestData/TemplateApplicationSettings.xml";
+		String[] args = new String[] {file};
 		
 		Application.main(args);		
 	

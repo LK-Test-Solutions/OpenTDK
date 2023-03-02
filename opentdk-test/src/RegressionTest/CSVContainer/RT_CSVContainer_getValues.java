@@ -20,7 +20,7 @@ public class RT_CSVContainer_getValues extends BaseRegression {
 	
 	@Override
 	public void runTest() {
-		DataContainer dc = new DataContainer(new File("./testdata/RegressionTestData/CSVContainer_Contacts.csv"));
+		DataContainer dc = new DataContainer(new File(location + "testdata/RegressionTestData/CSVContainer_Contacts.csv"));
 		test1(dc);
 		test2(dc);
 		test3(dc);

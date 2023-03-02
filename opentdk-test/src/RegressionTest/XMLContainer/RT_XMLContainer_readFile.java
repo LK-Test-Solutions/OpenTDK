@@ -24,7 +24,7 @@ public class RT_XMLContainer_readFile extends BaseRegression {
 	@Override
 	public void runTest() {
 
-		DataContainer dc = new DataContainer(new File("./testdata/RegressionTestData/XMLContainer_Data.xml"));
+		DataContainer dc = new DataContainer(new File(location + "testdata/RegressionTestData/XMLContainer_Data.xml"));
 		// General checks
 		BaseRegression.testResult(dc.getRootNode(), "Root Node", "parserRules");
 		BaseRegression.testResult(dc.getContainerFormat().name(), "Container Format", "XML");

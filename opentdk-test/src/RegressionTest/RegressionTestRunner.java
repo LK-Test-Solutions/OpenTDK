@@ -64,8 +64,8 @@ public class RegressionTestRunner {
 	public static void main(String[] args) {
 		for (int i = 0; i < loops; i++) {
 			// Empty output folder
-			FileUtils.deleteQuietly(new File("output"));
-			FileUtil.checkDir("output", true);
+			FileUtils.deleteQuietly(new File(BaseRegression.location + "output"));
+			FileUtil.checkDir(BaseRegression.location + "output", true);
 
 			// RegressionTest.Application
 			RT_SampleCall_CommandlineArgs.main(args);

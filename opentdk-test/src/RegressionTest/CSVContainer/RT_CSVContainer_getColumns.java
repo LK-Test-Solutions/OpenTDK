@@ -19,7 +19,7 @@ public class RT_CSVContainer_getColumns extends BaseRegression {
 	
 	@Override
 	public void runTest() {
-		DataContainer dc = new DataContainer(new File("./testdata/RegressionTestData/CSVContainer_Contacts.csv"));
+		DataContainer dc = new DataContainer(new File(location + "testdata/RegressionTestData/CSVContainer_Contacts.csv"));
 		
 		List<String> expResults1 = new ArrayList<>();
 		expResults1.add("LK Test Solutions GmbH;Muster AG;LK Test Solutions GmbH;LK Test Solutions GmbH");

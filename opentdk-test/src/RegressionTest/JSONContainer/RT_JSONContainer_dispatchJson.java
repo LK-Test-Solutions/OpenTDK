@@ -16,7 +16,7 @@ public class RT_JSONContainer_dispatchJson extends BaseRegression {
 
 	@Override
 	protected void runTest() {
-		BaseDispatcher.setDataContainer(EJsonValues.class, "testdata/RegressionTestData/JsonExample.json");
+		BaseDispatcher.setDataContainer(EJsonValues.class, location + "testdata/RegressionTestData/JsonExample.json");
 
 		// GET
 		BaseRegression.testResult(EJsonValues.SIR.getValue(), "SIR", "true");
@@ -92,7 +92,7 @@ public class RT_JSONContainer_dispatchJson extends BaseRegression {
 		}
 		
 		try {
-			BaseDispatcher.getDataContainer(EJsonValues.class).writeData("output/JsonOutput.json");
+			BaseDispatcher.getDataContainer(EJsonValues.class).writeData(location + "output/JsonOutput.json");
 		} catch (IOException e) {
 			e.printStackTrace();
 		}

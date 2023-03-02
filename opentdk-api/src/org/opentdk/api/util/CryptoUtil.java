@@ -54,6 +54,7 @@ import javax.crypto.IllegalBlockSizeException;
 import javax.crypto.NoSuchPaddingException;
 
 import org.apache.commons.codec.binary.StringUtils;
+import org.apache.commons.io.FileUtils;
 import org.opentdk.api.logger.MLogger;
 
 /**
@@ -110,22 +111,16 @@ public class CryptoUtil {
 		PrivateKey privateKey = pair.getPrivate();
 		PublicKey publicKey = pair.getPublic();
 
-		try (FileOutputStream fosPrivate = new FileOutputStream(privateKeyFullName)) {
-			fosPrivate.write(privateKey.getEncoded());
-		} catch (FileNotFoundException e) {
-			MLogger.getInstance().log(Level.SEVERE, e);
+		try {
+			FileUtils.writeByteArrayToFile(new File(privateKeyFullName), privateKey.getEncoded());
 		} catch (IOException e) {
 			MLogger.getInstance().log(Level.SEVERE, e);
 		}
-
-		try (FileOutputStream fosPublic = new FileOutputStream(publicKeyFullName)) {
-			fosPublic.write(publicKey.getEncoded());
-		} catch (FileNotFoundException e) {
-			MLogger.getInstance().log(Level.SEVERE, e);
+		try {
+			FileUtils.writeByteArrayToFile(new File(publicKeyFullName), publicKey.getEncoded());
 		} catch (IOException e) {
 			MLogger.getInstance().log(Level.SEVERE, e);
 		}
-
 	}
 
 	/**

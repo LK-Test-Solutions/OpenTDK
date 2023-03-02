@@ -29,7 +29,7 @@ public class RT_File_XML_values extends BaseRegression {
 
 	@Override
 	public void runTest() {
-		final String file = "output/File_XML_values.xml";
+		final String file = location + "output/File_XML_values.xml";
 		try {
 			FileUtil.deleteFileOrFolder(file);
 		} catch (IOException e) {

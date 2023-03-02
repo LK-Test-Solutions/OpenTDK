@@ -16,7 +16,7 @@ public class RT_YAMLContainer_dispatchYAML extends BaseRegression {
 
 	@Override
 	protected void runTest() {
-		BaseDispatcher.setDataContainer(EYamlValues.class, "testdata/RegressionTestData/YamlExample.yaml");
+		BaseDispatcher.setDataContainer(EYamlValues.class, location + "testdata/RegressionTestData/YamlExample.yaml");
 
 		// GET
 		BaseRegression.testResult(EYamlValues.SIR.getValue(), "SIR", "true");
@@ -92,7 +92,7 @@ public class RT_YAMLContainer_dispatchYAML extends BaseRegression {
 		}
 		
 		try {
-			BaseDispatcher.getDataContainer(EYamlValues.class).writeData("output/YamlOutput.yaml");
+			BaseDispatcher.getDataContainer(EYamlValues.class).writeData(location + "output/YamlOutput.yaml");
 		} catch (IOException e) {
 			e.printStackTrace();
 		}

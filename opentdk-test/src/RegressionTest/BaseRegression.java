@@ -2,6 +2,8 @@ package RegressionTest;
 
 import org.opentdk.api.datastorage.DataContainer;
 
+import java.io.File;
+
 /**
  * Super class of all test classes with predefined assertion methods.
  * 
@@ -9,6 +11,10 @@ import org.opentdk.api.datastorage.DataContainer;
  *
  */
 public abstract class BaseRegression {
+	/**
+	 * 	To avoid folder creation in the parent directory.
+	 */
+	public static final String location = "opentdk-test/";
 	/**
 	 * Storage object to display the result overview at the end of the test(s).
 	 */

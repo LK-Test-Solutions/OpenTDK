@@ -43,7 +43,7 @@ public class RT_CSVContainer_putMetaData extends BaseRegression {
 		dc1.tabInstance().setColumnDelimiter(";");
 		dc1.tabInstance().putMetaData("Timestamp", DateUtil.get("2022-01-01", EFormat.TIMESTAMP_1.getDateFormat()));
 		try {
-			dc1.readData(new File("./testdata/RegressionTestData/CSVContainer_Contacts.csv"));
+			dc1.readData(new File(location + "testdata/RegressionTestData/CSVContainer_Contacts.csv"));
 		} catch (IOException e) {
 			e.printStackTrace();
 		}

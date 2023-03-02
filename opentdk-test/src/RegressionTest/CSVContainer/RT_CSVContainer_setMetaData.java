@@ -22,7 +22,7 @@ public class RT_CSVContainer_setMetaData extends BaseRegression {
 		
 		
 		// Instantiate DataContainer and populate with data from CSV
-		DataContainer dc = new DataContainer(new File("./testdata/RegressionTestData/CSVContainer_TestData.csv"));
+		DataContainer dc = new DataContainer(new File(location + "testdata/RegressionTestData/CSVContainer_TestData.csv"));
 		dc.tabInstance().setColumnDelimiter(";");
 		testResult(dc.tabInstance().getRowsList().size(), "# of rows in datacontainer", 4);
 		
@@ -63,7 +63,7 @@ public class RT_CSVContainer_setMetaData extends BaseRegression {
 		
 		// Read new data from CSV file. These records should also have the previously defined Metadata columns
 		try {
-			dc.readData(new File("./testdata/RegressionTestData/CSVContainer_TestData.csv"));
+			dc.readData(new File(location + "testdata/RegressionTestData/CSVContainer_TestData.csv"));
 		} catch (IOException e) {
 			e.printStackTrace();
 		}

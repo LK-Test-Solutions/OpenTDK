@@ -15,7 +15,7 @@ public class RT_File_Properties_values extends BaseRegression {
 	
 	@Override
 	public void runTest() {
-		final String file = "output/File_Properties_values.properties";
+		final String file = location + "output/File_Properties_values.properties";
 		FileUtils.deleteQuietly(new File(file));
 		/**
 		 * Precondition: The loaded file needs to be empty!

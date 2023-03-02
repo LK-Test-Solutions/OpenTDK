@@ -19,10 +19,10 @@ public class RT_FileUtil extends BaseRegression {
 	@Override
 	public void runTest() {
 		
-		String path = "conf/FileUtil.xml";
-		String path_copy = "conf/FileUtilCopy.xml";
-		String path_rename = "conf/FileUtilRenamed.xml";
-		String path_txt = "conf/FileUtil.txt";
+		String path = location + "conf/FileUtil.xml";
+		String path_copy = location + "conf/FileUtilCopy.xml";
+		String path_rename = location + "conf/FileUtilRenamed.xml";
+		String path_txt = location + "conf/FileUtil.txt";
 		
 		try {
 			FileUtil.deleteFileOrFolder(path);

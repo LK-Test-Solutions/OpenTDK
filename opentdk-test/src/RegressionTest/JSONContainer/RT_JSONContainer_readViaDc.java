@@ -14,7 +14,7 @@ public class RT_JSONContainer_readViaDc extends BaseRegression {
 
 	@Override
 	protected void runTest() {
-		DataContainer dc = new DataContainer(new File("testdata/RegressionTestData/JsonExample.json"));
+		DataContainer dc = new DataContainer(new File(location + "testdata/RegressionTestData/JsonExample.json"));
 		// Only possible at top level
 		BaseRegression.testResult(dc.get("id")[0], "ID", "1");
 		BaseRegression.testResult(dc.get("name")[0], "NAME", "LK");

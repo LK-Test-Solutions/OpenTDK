@@ -19,12 +19,12 @@ public class RT_CSVContainer_setValues extends BaseRegression {
 	@Override
 	public void runTest() {
 		try {
-			FileUtil.copyFile("./testdata/RegressionTestData/CSVContainer_Contacts.csv", "./testdata/RegressionTestData/CSVContainer_Contacts_temp.csv");
+			FileUtil.copyFile(location + "testdata/RegressionTestData/CSVContainer_Contacts.csv", location + "testdata/RegressionTestData/CSVContainer_Contacts_temp.csv");
 		} catch (IOException e) {
 			e.printStackTrace();
 		}	
 		
-		DataContainer dc = new DataContainer(new File("./testdata/RegressionTestData/CSVContainer_Contacts_temp.csv"));
+		DataContainer dc = new DataContainer(new File(location + "testdata/RegressionTestData/CSVContainer_Contacts_temp.csv"));
 
 		StringBuilder sb = new StringBuilder();
 		sb.append("LK Test Solutions AG;Walter;81675;Freiburg;Schneckenburgerstrasse;32;089/45709053;hwa@lk-test.com").append("\n");

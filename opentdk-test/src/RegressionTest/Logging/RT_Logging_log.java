@@ -9,8 +9,8 @@ import RegressionTest.BaseRegression;
 
 public class RT_Logging_log extends BaseRegression {
 
-	private static final String defaultLogFile = "logs/Application.log";
-	private static final String logFile = "logs/RT_Logging_log.log";
+	private static final String defaultLogFile = location + "logs/Application.log";
+	private static final String logFile = location + "logs/RT_Logging_log.log";
 
 	public static void main(String[] args) {
 		new RT_Logging_log();

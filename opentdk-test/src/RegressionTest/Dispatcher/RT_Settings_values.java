@@ -13,7 +13,7 @@ public class RT_Settings_values extends BaseRegression {
 	@Override
 	public void runTest() {
 		// File has to exist in this scenario
-		BaseDispatcher.setDataContainer(ESettings_values_Dispatcher.class, "testdata/RegressionTestData/Parameter_UFT.xml");
+		BaseDispatcher.setDataContainer(ESettings_values_Dispatcher.class, location + "testdata/RegressionTestData/Parameter_UFT.xml");
 		String[] result = ESettings_values_Dispatcher.NAME.getValues();
 		for (int i = 0; i < result.length; i++) {
 			String name = result[i];

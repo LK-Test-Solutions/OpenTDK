@@ -24,11 +24,11 @@ public class RT_Container_exportContainer extends BaseRegression {
 
 	@Override
 	public void runTest() {
-		DataContainer dc = new DataContainer(new File("./testdata/RegressionTestData/CSVContainer_Contacts.csv"));
-		String exportFile = "testdata/out.csv";
+		DataContainer dc = new DataContainer(new File(location + "testdata/RegressionTestData/CSVContainer_Contacts.csv"));
+		String exportFile = location + "testdata/out.csv";
 
 		try {
-			dc.tabInstance().exportContainer("output/out.csv");
+			dc.tabInstance().exportContainer(location + "output/out.csv");
 		} catch (IOException e) {
 			e.printStackTrace();
 		}

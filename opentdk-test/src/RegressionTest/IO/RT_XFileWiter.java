@@ -16,7 +16,7 @@ public class RT_XFileWiter extends BaseRegression {
 
 	@Override
 	public void runTest() {
-		String path = "testdata/RegressionTestData/XFileWriter.txt";
+		String path = location + "testdata/RegressionTestData/XFileWriter.txt";
 		XFileWriter writer = null;
 
 		try {

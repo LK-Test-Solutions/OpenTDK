@@ -8,8 +8,8 @@ import RegressionTest.BaseRegression;
 
 public class RT_CryptoUtil_encrypt extends BaseRegression {
 	
-	private static final String privateKey = "output/private.key";
-	private static final String publicKey = "output/public.key";
+	private static final String privateKey = location + "output/private.key";
+	private static final String publicKey = location + "output/public.key";
 
 	public static void main(String[] args) {
 		new RT_CryptoUtil_encrypt();

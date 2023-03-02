@@ -1,10 +1,8 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0"
-	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>org.opentdk</groupId>
 	<artifactId>opentdk-test</artifactId>
-	<version>1.6.1</version>
+	<version>1.6.1-SNAPSHOT</version>
 	<name>opentdk-test</name>
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -55,12 +53,12 @@
 		<dependency>
 			<groupId>org.opentdk</groupId>
 			<artifactId>opentdk-api</artifactId>
-			<version>1.6.1</version>
+			<version>1.6.1-SNAPSHOT</version>
 		</dependency>
 		<dependency>
 			<groupId>org.opentdk</groupId>
 			<artifactId>opentdk-gui</artifactId>
-			<version>1.6.1</version>
+			<version>1.6.1-SNAPSHOT</version>
 		</dependency>
 	</dependencies>
 </project>

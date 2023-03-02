@@ -31,7 +31,7 @@ public class RT_Container_construct extends BaseRegression {
 		testEmptyContainer(new DataContainer(), "", null, null);
 
 		// FILE
-		File testfile = new File("testdata/testfile.txt");
+		File testfile = new File(location + "testdata/testfile.txt");
 		try {
 			FileUtil.createFile(testfile);
 		} catch (IOException e) {
