@@ -4,7 +4,7 @@
 	<groupId>org.opentdk</groupId>
 	<artifactId>opentdk-parent</artifactId>
 	<version>1.6.1-SNAPSHOT</version>
-	<packaging>pom</packaging>
+    <packaging>pom</packaging>
 	<!-- Name, description and URL -->
 	<name>${project.groupId}:${project.artifactId}</name>
 	<description>The Open Tool Development Kit provides packages and classes for easy implementation of Java tools or applications.</description>
