@@ -28,8 +28,6 @@
 package org.opentdk.api.util;
 
 import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
@@ -125,7 +123,6 @@ public class CryptoUtil {
 
 	/**
 	 * Encodes a string with a given public key that can only be decoded with the belonging private key.
-	 * See {@link #CryptoUtil()} for more information.
 	 * 
 	 * @param toEncrypt     raw string that should be encrypted with the public key
 	 * @param publicKeyFile full name of the public key file
@@ -208,8 +205,6 @@ public class CryptoUtil {
 	 * @param keyFile full name (path + name) of the private or public key
 	 * @param keyType 1: Cipher.PUBLIC_KEY, 2: Cipher.PRIVATE_KEY
 	 * @return the key object or null if no key file could be detected
-	 * @throws NoSuchAlgorithmException if the used algorithm is not supported and
-	 *                                  InvalidKeySpecException if the key object generation fails
 	 */
 	private static Key getKey(File keyFile, int keyType) {
 		Key ret = null;

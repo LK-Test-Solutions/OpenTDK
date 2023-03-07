@@ -238,23 +238,19 @@ public class CSVDataContainer implements TabularContainer {
 		if (dc.getFilter() == null) {
 			dc.setFilter(new Filter());
 		}
-//		if (instance == null) {
-//			adaptContainer();
-//		}
 		readData(dc.getFilter());
 	}
 
-	@Override
 	public void appendDataContainer(DataContainer dc) {
-		if (checkHeader(getHeaders()) == 0) {
-			values.addAll(values);
-		} else if (checkHeader(getHeaders()) == 1) {
+		if (checkHeader(dc.tabInstance().getHeaders()) == 0) {
+			values.addAll(dc.tabInstance().getValues());
+		} else if (checkHeader(dc.tabInstance().getHeaders()) == 1) {
 			int i = 0;
-			while (i < getRowCount()) {
+			while (i < dc.tabInstance().getRowCount()) {
 				String[] row = new String[getColumnCount()];
 				for (int j = 0; j < getColumnCount(); j++) {
 					try {
-						row[j] = getValuesAsList(getHeadersIndexed().get(j)).get(i);
+						row[j] = dc.tabInstance().getValuesAsList(getHeadersIndexed().get(j)).get(i);
 					} catch (RuntimeException e) {
 						row[j] = null;
 					}
