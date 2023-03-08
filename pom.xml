@@ -88,7 +88,7 @@
 								</goals>
 								<configuration>
 									<!-- Prevent gpg from using pinentry programs. Fixes: gpg: signing 
-										failed: Inappropriate ioctl for device -->
+										failed: Inappropriate ioctl for device  -->
 									<gpgArguments>
 										<arg>--pinentry-mode</arg>
 										<arg>loopback</arg>
