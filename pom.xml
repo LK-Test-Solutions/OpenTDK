@@ -74,7 +74,7 @@
 		<url>https://github.com/LK-Test-Solutions/OpenTDK/tree/main</url>
 	</scm>
 	<!-- Sign artifact -->	
-	<!--<profiles>
+	<profiles>
 		<profile>
 			<id>ci-cd</id>
 			<build>
@@ -102,5 +102,5 @@
 				</plugins>
 			</build>
 		</profile>
-	</profiles>-->
+	</profiles>
 </project>
