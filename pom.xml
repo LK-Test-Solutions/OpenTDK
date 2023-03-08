@@ -70,7 +70,7 @@
 		<url>https://github.com/LK-Test-Solutions/OpenTDK/tree/main</url>
 	</scm>
 	<!-- Sign artifact -->	
-	<profiles>
+	<!--<profiles>
 		<profile>
 			<id>ci-cd</id>
 			<build>
@@ -87,8 +87,6 @@
 									<goal>sign</goal>
 								</goals>
 								<configuration>
-									<!-- Prevent gpg from using pinentry programs. Fixes: gpg: signing 
-										failed: Inappropriate ioctl for device  -->
 									<gpgArguments>
 										<arg>--pinentry-mode</arg>
 										<arg>loopback</arg>
@@ -100,5 +98,5 @@
 				</plugins>
 			</build>
 		</profile>
-	</profiles>
+	</profiles>-->
 </project>
