@@ -3,11 +3,11 @@
 	<!-- Coordinates -->
 	<groupId>org.opentdk</groupId>
 	<artifactId>opentdk-api</artifactId>
-	<version>1.6.0-SNAPSHOT</version>
+	<version>1.6.0</version>
 	<parent>
 		<groupId>org.opentdk</groupId>
 		<artifactId>opentdk-parent</artifactId>
-		<version>1.6.0-SNAPSHOT</version>
+		<version>1.6.0</version>
 	</parent>
 	<packaging>jar</packaging>
 	<!-- If the same properties are defined in parent and child, the child wins -->
@@ -15,17 +15,6 @@
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
 	</properties>
-	<!-- Distribution managment and authentication -->
-	<!--<distributionManagement>
-		<snapshotRepository>
-			<id>ossrh</id>
-			<url>https://s01.oss.sonatype.org/content/repositories/snapshots</url>
-		</snapshotRepository>
-		<repository>
-			<id>ossrh</id>
-			<url>https://s01.oss.sonatype.org/service/local/staging/deploy/maven2</url>
-		</repository>
-	</distributionManagement>-->
 	<!-- Build settings -->
 	<build>
 		<sourceDirectory>src</sourceDirectory>
