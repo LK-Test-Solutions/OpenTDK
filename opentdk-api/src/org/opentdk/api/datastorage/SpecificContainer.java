@@ -51,7 +51,7 @@ interface SpecificContainer {
 	 * Used to provide the content of the container in another container format as string. Default
 	 * method, because to every format is transformable.
 	 * 
-	 * @param exportAs see {@link org.opentdk.api.datastorage.BaseContainer.EContainerFormat}
+	 * @param exportAs see {@link org.opentdk.api.datastorage.EContainerFormat}
 	 * @return the container content as string for further operations in the chosen format
 	 */
 	default String asString(EContainerFormat exportAs) {
@@ -65,18 +65,6 @@ interface SpecificContainer {
 	 * @throws IOException if the creation failed the user can handle the cause
 	 */
 	void createFile() throws IOException;
-
-	/**
-	 * Each specific <code>DataContainer</code> has to implement a method that checks if the connected
-	 * file exists and create it if required.
-	 * 
-	 * @param srcFile  The name of the source file to write to
-	 * @param rootNode if the format has a root node that has to be checked
-	 * @throws IOException if the creation failed the user can handle the cause
-	 */
-//	default void createFile(String srcFile, String rootNode) throws IOException {
-//		return;
-//	}
 
 	/**
 	 * Each specific container needs to implement a method that reads data from the source.
@@ -96,7 +84,7 @@ interface SpecificContainer {
 	/**
 	 * Each specific container needs to implement a method that reads data from the source.
 	 * 
-	 * @param filter Possibility to filter some of the source data
+	 * @param filter Possibility to filter the source data
 	 */
 	void readData(Filter filter) throws IOException;
 

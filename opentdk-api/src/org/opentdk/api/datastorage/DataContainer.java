@@ -127,7 +127,7 @@ public class DataContainer implements SpecificContainer {
 	/**
 	 * The non argument constructor get used to have an empty container instance without a connected
 	 * file, stream or result set and without knowing the container format. In this case all the fields
-	 * in the {@link org.opentdk.api.datastorage.BaseContainer} super class keep their default value.
+	 * in the {@link org.opentdk.api.datastorage.DataContainer} class keep their default value.
 	 * The container gets initialized as <code>CSVDataContainer</code> that stores text formats as well.
 	 */
 	public DataContainer() {
@@ -413,7 +413,7 @@ public class DataContainer implements SpecificContainer {
 		} else if (instance instanceof YAMLDataContainer) {
 			return (YAMLDataContainer) instance;
 		} else {
-			throw new NullPointerException("TabularContainer not intialized");
+			throw new NullPointerException("TreeContainer not intialized");
 		}
 	}
 

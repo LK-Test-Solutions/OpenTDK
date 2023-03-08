@@ -6,10 +6,10 @@ import org.opentdk.api.datastorage.EHeader;
 
 import java.util.ArrayList;
 
-public class RT_CSVContainer_appendData extends BaseRegression {
+public class RT_CSVContainer_appendDataContainer extends BaseRegression {
 	
 	public static void main(String[] args) {
-		new RT_CSVContainer_appendData();
+		new RT_CSVContainer_appendDataContainer();
 	}
 
 	@Override

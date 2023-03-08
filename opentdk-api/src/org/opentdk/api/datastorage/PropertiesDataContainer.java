@@ -127,8 +127,7 @@ public class PropertiesDataContainer extends CSVDataContainer {
 	public void writeData(String srcFile) throws IOException {
 		File f = new File(srcFile);
 		FileUtil.checkDir(f.getParent(), true);
-		FileWriter fw = null;
-		fw = new FileWriter(dc.getInputFile());
+		FileWriter fw = new FileWriter(dc.getInputFile());
 		SortedProperties existingProps = readProps(dc.getInputFile().getPath());
 		SortedProperties outputProps = new SortedProperties();
 		if ((existingProps != null) && (!existingProps.isEmpty())) {

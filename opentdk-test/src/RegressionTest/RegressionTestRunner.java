@@ -2,22 +2,13 @@ package RegressionTest;
 
 import java.io.File;
 
+import RegressionTest.CSVContainer.*;
 import org.apache.commons.io.FileUtils;
 import org.opentdk.api.io.FileUtil;
 
 import RegressionTest.Application.RT_SampleCall_CommandlineArgs;
 import RegressionTest.Application.RT_SampleCall_SettingsFile;
 import RegressionTest.ArchiveUtility.RT_ArchiveUtil_runProcess;
-import RegressionTest.CSVContainer.RT_CSVContainer_addColumn;
-import RegressionTest.CSVContainer.RT_CSVContainer_addRow;
-import RegressionTest.CSVContainer.RT_CSVContainer_getColumns;
-import RegressionTest.CSVContainer.RT_CSVContainer_getRows;
-import RegressionTest.CSVContainer.RT_CSVContainer_getValues;
-import RegressionTest.CSVContainer.RT_CSVContainer_mergeRows;
-import RegressionTest.CSVContainer.RT_CSVContainer_putMetaData;
-import RegressionTest.CSVContainer.RT_CSVContainer_setMetaData;
-import RegressionTest.CSVContainer.RT_CSVContainer_setRow;
-import RegressionTest.CSVContainer.RT_CSVContainer_setValues;
 import RegressionTest.CommonUtility.RT_CommonUtil_get;
 import RegressionTest.Container.RT_Container_checkHeader;
 import RegressionTest.Container.RT_Container_construct;
@@ -90,6 +81,7 @@ public class RegressionTestRunner {
 			// RegressionTest.CSVContainer
 			RT_CSVContainer_addColumn.main(args);
 			RT_CSVContainer_addRow.main(args);
+			RT_CSVContainer_appendDataContainer.main(args);
 			RT_CSVContainer_getColumns.main(args);
 			RT_CSVContainer_getRows.main(args);
 			RT_CSVContainer_getValues.main(args);

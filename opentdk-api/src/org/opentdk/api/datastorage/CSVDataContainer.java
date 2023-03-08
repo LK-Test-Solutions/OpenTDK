@@ -51,7 +51,7 @@ import org.opentdk.api.logger.MLogger;
 import org.opentdk.api.util.StringUtil;
 
 /**
- * Sub class of {@link DataContainer} which provides all methods for reading and writing from or to
+ * Subclass of {@link DataContainer} which provides all methods for reading and writing from or to
  * ASCII files that are column separated, and store the data at runtime within the DataContainer.
  * 
  * @author LK Test Solutions
@@ -63,7 +63,7 @@ public class CSVDataContainer implements TabularContainer {
 	/**
 	 * The character(s) that define the delimiter of columns within tabular files. This delimiter is
 	 * used by the {@link DataContainer#readData()} methods to split the rows of the source file into a
-	 * String Array and by the {@link DataContainer#exportContainer(String)} methods to write the
+	 * String Array and by the {@link CSVDataContainer#exportContainer(String)} methods to write the
 	 * elements of the {@link #values} ArrayList into the target file.
 	 */
 	private String columnDelimiter = ";";
@@ -72,18 +72,18 @@ public class CSVDataContainer implements TabularContainer {
 	 * This property defines the record index of the source, where the header names are read from. All
 	 * values of this record will be put into the HashMap {@link #headerNames}.<br>
 	 * If the headerType of the {@link DataContainer} is {@link EHeader#COLUMN}, then
-	 * {@link #headerNamesIndex} defines the row index of the source that includes the header names.<br>
+	 * this index defines the row index of the source that includes the header names.<br>
 	 * If the headerType of the {@link DataContainer} is {@link EHeader#ROW}, then
-	 * {@link #headerNamesIndex} defines the column index of the source that includes the header names.
+	 * this index defines the column index of the source that includes the header names.
 	 */
 	private int headerNamesIndex = 0;
 
 	/**
-	 * The {@link #headerNames} property is used to assign header names to each index of the string
+	 * The headerNames property is used to assign header names to each index of the string
 	 * arrays, stored as elements of the ArrayList {@link #values}. This HashMap allows to locate values
 	 * within the string arrays by name instead of index.<br>
 	 * E.g. if the first row of a CSV file includes header names and all other rows include values, then
-	 * the names of the first row will be stored in the {@link #headerNames} HashMap with their original
+	 * the names of the first row will be stored in the headerNames HashMap with their original
 	 * index.
 	 */
 	private final HashMap<String, Integer> headerNames = new HashMap<>();
@@ -102,12 +102,12 @@ public class CSVDataContainer implements TabularContainer {
 	 * ArrayList. In this case the adapted DataContainer class needs to implement the logic how to store
 	 * the data at runtime e.g. {@link org.w3c.dom.Document} for HTML and XML files.
 	 */
-	private ArrayList<String[]> values = new ArrayList<String[]>();
+	private final ArrayList<String[]> values = new ArrayList<String[]>();
 
 	/**
-	 * The HashMap {@link #metaData} is used to define fields and values that will be appended to each
+	 * This HashMap is used to define fields and values that will be appended to each
 	 * record added to the {@link DataContainer} by the {@link DataContainer#readData()},
-	 * {@link DataContainer#addRow()} and the {@link DataContainer#appendData(String)} methods.<br>
+	 * {@link CSVDataContainer#addRow()} and the {@link CSVDataContainer#appendData(String)} methods.<br>
 	 * E.g. add the name of the source file to each record, when putting the content of multiple files
 	 * into one instance of the {@link DataContainer}.
 	 * 
@@ -995,9 +995,7 @@ public class CSVDataContainer implements TabularContainer {
 	 * orientation, the correct underlying method will be called.
 	 *
 	 * @param fileName        The filename of the file to read from
-	 * @param srcHeader       The source Header depending on the orientation of the data in the CSV file
 	 * @param columnDelimiter The column delimiter used to separate columns in the CSV file
-	 * 
 	 */
 	private void putFile(String fileName, String columnDelimiter) {
 		switch (dc.getContainerFormat().getOrientation()) {
@@ -1073,7 +1071,7 @@ public class CSVDataContainer implements TabularContainer {
 	 * 
 	 * @param headerName Name of the sequence header.
 	 * @param index      Index of the field within the DataSet.
-	 * @param value      Value as String that will be set to the field.
+	 * @param val      Value as String that will be set to the field.
 	 */
 	private void setFieldValue(String headerName, int index, String val) {
 		if (!getHeaders().containsKey(headerName)) {
@@ -1254,33 +1252,14 @@ public class CSVDataContainer implements TabularContainer {
 	@Override
 	public void writeData(String srcFile) throws IOException {
 		List<String[]> writeable = new ArrayList<>();
-		if (dc.getContainerFormat().getOrientation().equals(EHeader.COLUMN)) {
-			// for Column Header oriented output
-			writeable.add(getHeaderNamesIndexed());
-			for (String[] dataArr : getRowsList()) {
-				writeable.add(dataArr);
-			}
-		} else if (dc.getContainerFormat().getOrientation().equals(EHeader.ROW)) {
-			// for Row Header oriented output
-			HashMap<Integer, String> hm = getHeadersIndexed();
-			List<String[]> colList;
-			colList = getColumnsList();
-			for (int i = 0; i < colList.size(); i++) {
-				List<String> row = new ArrayList<>();
-				row.add(hm.get(i));
-				row.addAll(Arrays.asList(colList.get(i)));
-				writeable.add(row.toArray(new String[row.size()]));
-			}
+		writeable.add(getHeaderNamesIndexed());
+		for (String[] dataArr : getRowsList()) {
+			writeable.add(dataArr);
 		}
-		try {
-			File f = new File(srcFile);
-			FileUtil.checkDir(f.getParent(), true);
-			XFileWriter writer = new XFileWriter(f);
-			writer.writeLines(writeable);
-			writer.close();
-		} catch (IOException e) {
-			MLogger.getInstance().log(Level.SEVERE, e, "writeData");
-			throw new RuntimeException(e);
-		}
+		File f = new File(srcFile);
+		FileUtil.checkDir(f.getParent(), true);
+		XFileWriter writer = new XFileWriter(f);
+		writer.writeLines(writeable);
+		writer.close();
 	}
 }
