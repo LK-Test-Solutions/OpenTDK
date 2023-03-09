@@ -5,7 +5,7 @@
 	<parent>
 		<groupId>org.opentdk</groupId>
 		<artifactId>opentdk-parent</artifactId>
-		<version>1.6.1-SNAPSHOT</version>
+		<version>1.6.1</version>
 	</parent>
 	<packaging>jar</packaging>
 	<!-- If the same properties are defined in parent and child, the child wins -->
@@ -39,11 +39,16 @@
 				</executions>
 			</plugin>
 			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-compiler-plugin</artifactId>
 				<version>3.8.1</version>
-				<configuration>
-					<release>17</release>
-				</configuration>
+				<!--<configuration>
+					<source>${maven.compiler.source}</source>
+					<target>${maven.compiler.target}</target>
+					<excludes>
+						<exclude>**/module-info.java</exclude>
+					</excludes>
+				</configuration>-->
 			</plugin>
 			<!--<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
