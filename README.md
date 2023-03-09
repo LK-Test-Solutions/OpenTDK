@@ -16,9 +16,9 @@
 <b>Maven</b> 
 ```
 <dependency>
- <groupId>org.opentdk</groupId>
- <artifactId>opentdk-api</artifactId>
- <version>1.6.0</version>
+   <groupId>org.opentdk</groupId>
+   <artifactId>opentdk-api</artifactId>
+   <version>1.6.0</version>
 </dependency> 
 ```
 
