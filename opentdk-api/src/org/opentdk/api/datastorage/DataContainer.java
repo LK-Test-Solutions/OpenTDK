@@ -1,19 +1,19 @@
-/* 
+/*
  * BSD 2-Clause License
- * 
+ *
  * Copyright (c) 2022, LK Test Solutions GmbH
  * All rights reserved.
- * 
+ *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
- * 
+ *
  * 1. Redistributions of source code must retain the above copyright notice, this
  *    list of conditions and the following disclaimer.
- * 
+ *
  * 2. Redistributions in binary form must reproduce the above copyright notice,
  *    this list of conditions and the following disclaimer in the documentation
  *    and/or other materials provided with the distribution.
- * 
+ *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
  * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -23,7 +23,7 @@
  * SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
  * CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
  * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
- * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE. 
+ * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 package org.opentdk.api.datastorage;
 
@@ -137,7 +137,7 @@ public class DataContainer implements SpecificContainer {
 	/**
 	 * Gets used if only the orientation is known. Format TREE points to XML and TEXT gets used
 	 * otherwise.
-	 * 
+	 *
 	 * @param type {@link org.opentdk.api.datastorage.EHeader}
 	 */
 	public DataContainer(EHeader type) {
@@ -165,7 +165,7 @@ public class DataContainer implements SpecificContainer {
 	 * responses will be passed to the {@link org.opentdk.api.dispatcher.BaseDispatcher} that creates an
 	 * {@link XMLDataContainer} for parsing the XML response.<br>
 	 * <br>
-	 * 
+	 *
 	 * <pre>
 	 * InputStream stream = new ByteArrayInputStream(QCDesignStep_Response.getBytes(StandardCharsets.UTF_8));
 	 * EQCStepField.setDataContainer(EQCStepField.class, stream);
@@ -173,7 +173,7 @@ public class DataContainer implements SpecificContainer {
 	 * String[] stepDescriptions = EDesignSteps.STEP_DESCRIPTION.getValues();
 	 * String[] stepExpected = EDesignSteps.STEP_EXPECTED.getValues();
 	 * </pre>
-	 * 
+	 *
 	 * @param inStream Object of type {@link java.io.InputStream}
 	 */
 	public DataContainer(InputStream inStream) {
@@ -184,7 +184,7 @@ public class DataContainer implements SpecificContainer {
 	/**
 	 * Constructor that is called, when importing data from a database request to the container. No
 	 * filter will be used and the column delimiter for the imported data is the semicolon.
-	 * 
+	 *
 	 * @param rs The result of the database request.
 	 */
 	public DataContainer(ResultSet rs) {
@@ -195,7 +195,7 @@ public class DataContainer implements SpecificContainer {
 	 * Constructor that is called, when importing data from a database request to the container with the
 	 * possibility to filter the data before it gets imported. The column delimiter of the imported data
 	 * is the semicolon.
-	 * 
+	 *
 	 * @param rs   The result of the database request.
 	 * @param fltr A {@link org.opentdk.api.filter.Filter} object to define which data should be
 	 *             ignored. If it is null no filter gets used.
@@ -238,10 +238,10 @@ public class DataContainer implements SpecificContainer {
 	/**
 	 * Constructor that is called when a DataContainer shall be copied. The copy holds only the columns
 	 * with the headers specified in headerIndices.
-	 * 
+	 *
 	 * @param dc            Original DataContainer from which the columns shall be copied
 	 * @param headerIndices Headers which shall be copied to the new DataContainer
-	 * 
+	 *
 	 */
 	public DataContainer(DataContainer dc, int[] headerIndices) {
 		if (dc.isTabular()) {
@@ -271,7 +271,7 @@ public class DataContainer implements SpecificContainer {
 	 * depending on the source file ending or existence of a stream. It calls {@link #readData(Filter)}
 	 * at the end if there is a source. In case of an empty container the read operation has to be
 	 * triggered separately.
-	 * 
+	 *
 	 * @throws IOException to handle I/O methods when the {@link #readData(Filter)} method failed
 	 */
 	private final void adaptContainer() {
@@ -311,7 +311,7 @@ public class DataContainer implements SpecificContainer {
 	/**
 	 * Analyzes the file extension and/or structure of the data content and an enumeration of type
 	 * {@link EContainerFormat} which defines the type of DataContaner that needs to be adapted.
-	 * 
+	 *
 	 * @return enumeration of type {@link EContainerFormat}
 	 */
 	private final void detectDataFormat() {
@@ -421,7 +421,7 @@ public class DataContainer implements SpecificContainer {
 	 * Checks if the {@link #instance} was initialized as one of the tabular format e.g. CSV or
 	 * RESULSET. This can be done before calling {@link #tabInstance()} to be sure that a tabular format
 	 * is available.
-	 * 
+	 *
 	 * @return true: is tree format, false otherwise
 	 */
 	public boolean isTabular() {
@@ -440,7 +440,7 @@ public class DataContainer implements SpecificContainer {
 	 * Checks if the {@link #instance} was initialized as one of the tree format e.g. XML, JSON or YAML.
 	 * This can be done before calling {@link #treeInstance()} to be sure that a tree format is
 	 * available.
-	 * 
+	 *
 	 * @return true: is tree format, false otherwise
 	 */
 	public boolean isTree() {
@@ -473,9 +473,8 @@ public class DataContainer implements SpecificContainer {
 	 * Returns the filter rules which belong to an implicit header column. This allows to use same
 	 * column and row based getter and setter methods for tree formatted sources like XML, as they are
 	 * used for tabular formatted sources. e.g. the {@link #getImplFilterRules(Filter)} method is used
-	 * within {@link XMLDataContainer#getColumn} to limit the data records for the search to specified
-	 * xPath(s).
-	 * 
+	 * to limit the data records for the search to specified xPath(s).
+	 *
 	 * @param fltr Filter object with the complete filter rules for a data search
 	 * @return List object with all FilterRules that belong to implicit columns
 	 */
@@ -494,7 +493,7 @@ public class DataContainer implements SpecificContainer {
 	 * individual DataContainer. e.g. The implicitHeaders will be used by the {@link XMLDataContainer}
 	 * to add the column XPath, where the complete path of each tag will be inserted. This allows to
 	 * transpose data from tree format into tabular format.
-	 * 
+	 *
 	 * @return object of type java.util.set with column names
 	 */
 	public Set<String> getImplicitHeaders() {
@@ -511,7 +510,7 @@ public class DataContainer implements SpecificContainer {
 	/**
 	 * Returns the {@link #resultSet} property with SQL results of type {@link java.sql.ResultSet}. This
 	 * property is used to store the data of {@link RSDataContainer}.
-	 * 
+	 *
 	 * @return {@link #resultSet}
 	 */
 	public ResultSet getResultSet() {
@@ -553,7 +552,7 @@ public class DataContainer implements SpecificContainer {
 	 * used by DataContainers that have document type data connected like {@link XMLDataContainer} using
 	 * {@link org.w3c.dom.Document} for XML and HTML formats. The {@link #inputStream} property can be
 	 * used in case that the data source is not a file.
-	 * 
+	 *
 	 * @param inStream {@link #inputStream}
 	 */
 	public void setInputStream(InputStream inStream) {
@@ -563,7 +562,7 @@ public class DataContainer implements SpecificContainer {
 	/**
 	 * Assigns an object of type {@link java.sql.ResultSet} with SQL results to the property
 	 * {@link #resultSet}. This property is used by the {@link RSDataContainer}
-	 * 
+	 *
 	 * @param rs Object of type {@link java.sql.ResultSet}
 	 */
 	public void setResultSet(ResultSet rs) {

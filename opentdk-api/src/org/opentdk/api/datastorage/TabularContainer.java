@@ -14,7 +14,7 @@ public interface TabularContainer extends SpecificContainer {
 	 * <code>DataContainer</code>. In case the column name already exists, an suffix with the next
 	 * available index will be appended to the column name.
 	 * 
-	 * @param col Name of the column that will be added to the {@link BaseContainer#headerNames}
+	 * @param col Name of the column that will be added to the headerNames
 	 */
 	void addColumn(String col);
 
@@ -24,7 +24,7 @@ public interface TabularContainer extends SpecificContainer {
 	 * with the same name. Either use the existing column or create a new column by appending a unique
 	 * index to the name.
 	 * 
-	 * @param col         Name of the column that will be added to the {@link BaseContainer#headerNames}
+	 * @param col         Name of the column that will be added to the headerNames
 	 * @param useExisting Boolean value - true = if column name exist, then use the existing column;
 	 *                    false = if column name exists, then add column name with an index suffix
 	 */
@@ -36,7 +36,7 @@ public interface TabularContainer extends SpecificContainer {
 	void addRow();
 
 	/**
-	 * Inserts a string array with the row content into the {@link BaseContainer#values} ArrayList at a
+	 * Inserts a string array with the row content into the values ArrayList at a
 	 * specified position in this list. Shifts the row currently at that position (if any) and any
 	 * subsequent row.
 	 * 
@@ -46,14 +46,14 @@ public interface TabularContainer extends SpecificContainer {
 	void addRow(int rowIndex, String[] rowValues);
 
 	/**
-	 * Adds a string array with the row content into the {@link BaseContainer#values} ArrayList.
+	 * Adds a string array with the row content into the values ArrayList.
 	 *
 	 * @param row String array with the content of the row to be added
 	 */
 	void addRow(String[] row);
 
 	/**
-	 * Adds one or more string arrays with the row content into the {@link BaseContainer#values}
+	 * Adds one or more string arrays with the row content into the values
 	 * ArrayList.
 	 * 
 	 * @param rows List of string arrays with the content of the rows to be added
@@ -349,7 +349,7 @@ public interface TabularContainer extends SpecificContainer {
 	String getHeaderName(int headerIndex);
 
 	/**
-	 * Returns the header names from the {@link headerNames} HashMap as string array, ordered by their
+	 * Returns the header names from the headerNames HashMap as string array, ordered by their
 	 * index.
 	 * 
 	 * @return String array with header names
@@ -372,10 +372,10 @@ public interface TabularContainer extends SpecificContainer {
 	int getHeaderRowIndex();
 
 	/**
-	 * Gets the <code>HashMap</code> {@link #headerNames} that includes the names and indexes of column
+	 * Gets the <code>HashMap</code> headerNames that includes the names and indexes of column
 	 * headers within the instance of the DataContainer.
 	 *
-	 * @return {@link BaseContainer#headerNames} <code>HashMap</code>
+	 * @return headerNames <code>HashMap</code>
 	 */
 	HashMap<String, Integer> getHeaders();
 
@@ -760,7 +760,7 @@ public interface TabularContainer extends SpecificContainer {
 	void setHeaderRowIndex(int headerIndex);
 
 	/**
-	 * Adds header names into the <code>HashMap</code> {@link #headerNames}. It's proofed if the name
+	 * Adds header names into the <code>HashMap</code> headerNames. It's proofed if the name
 	 * already exists in the <code>HashMap</code>. In case of duplicated names, an index suffix will be
 	 * added to the name (i.e GF#,GF#_2 ...). Furthermore, the name of the header is added with an index
 	 * (<code>i</code>) as "helper" for the assignment of headers to the values.
@@ -770,7 +770,7 @@ public interface TabularContainer extends SpecificContainer {
 	void setHeaders(List<String> in_headers);
 
 	/**
-	 * Adds header names into the <code>HashMap</code> {@link #headerNames}. It's proofed if the name
+	 * Adds header names into the <code>HashMap</code> headerNames. It's proofed if the name
 	 * already exists in the <code>HashMap</code>. In case of duplicated names, an index suffix will be
 	 * added to the name (i.e GF#,GF#_2 ...). Furthermore, the name of the header is added with an index
 	 * (<code>i</code>) as "helper" for the assignment of headers to the values.

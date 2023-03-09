@@ -134,7 +134,6 @@ public class XMLEditor {
 	 * by this class.
 	 * 
 	 * @param inputFile {@link #xmlFile}
-	 * @throws IOException allows the user to handle I/O errors
 	 */
 	public XMLEditor(File inputFile) {
 		if(FileUtil.checkFile(inputFile.getPath())) {
