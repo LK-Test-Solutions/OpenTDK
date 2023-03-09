@@ -3,7 +3,11 @@
 name: Java CI with Maven
 on:
   push:
-    branches: [ main ]
+    branches: 
+     - main
+     - 'releases/**'
+    paths-ignore:
+      - '**.md'
 jobs:
   build:
     runs-on: self-hosted
