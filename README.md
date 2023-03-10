@@ -6,12 +6,7 @@
 | Author | LK Test Solutions GmbH |
 | License |	BSD 2-Clause "Simplified" |
 | Documentation, Tutorials, Samples | !! Under construction !!  GitHub Repsoitory [OpenTDK_Labs](https://github.com/LK-Test-Solutions/OpenTDK_Labs) |
-| Download Binaries	| [opentdk-api-1.6.0.jar](https://github.com/LK-Test-Solutions/OpenTDK/releases/download/opentdk-1.6.0/opentdk-api-1.6.0.jar) |
-| | [opentdk-api-1.6.0-sources.jar](https://github.com/LK-Test-Solutions/OpenTDK/releases/download/opentdk-1.6.0/opentdk-api-1.6.0-sources.jar) |
-| | [opentdk-api-1.6.0-javadoc.jar](https://github.com/LK-Test-Solutions/OpenTDK/releases/download/opentdk-1.6.0/opentdk-api-1.6.0-javadoc.jar) |
-| | [opentdk-gui-1.5.9.jar](https://github.com/LK-Test-Solutions/OpenTDK/releases/download/opentdk-1.5.9.8/opentdk-gui-1.5.9.jar) |
-| | [opentdk-gui-1.5.9-sources.jar](https://github.com/LK-Test-Solutions/OpenTDK/releases/download/opentdk-1.5.9.8/opentdk-gui-1.5.9-sources.jar) |
-| | [opentdk-1.6.0-dependencies.zip](https://github.com/LK-Test-Solutions/OpenTDK/files/10342436/opentdk-1.6.0-dependencies.zip)|
+| Download Binaries	| https://github.com/LK-Test-Solutions/OpenTDK/releases |
 
 <b>Maven</b> 
 ```
