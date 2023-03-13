@@ -43,5 +43,9 @@ public class RT_Container_checkHeader extends BaseRegression {
 		dc4.tabInstance().setHeaders(new String[] { "header1", "header3", "header2" });
 		String[] compareHeaders4 = new String[] { "header1", "header2", "header4" };
 		BaseRegression.testResult(String.valueOf(dc4.tabInstance().checkHeader(dc4.tabInstance().getHeaders(), compareHeaders4)), "Header Compare", "-1");
+
+		dc4.tabInstance().setHeaders(new String[] { "header1", "header2", "header4" }, true);
+		BaseRegression.testResult(String.valueOf(dc4.tabInstance().checkHeader(dc4.tabInstance().getHeaders(), compareHeaders4)), "Header Compare", "0");
+
 	}
 }

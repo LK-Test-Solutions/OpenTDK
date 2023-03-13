@@ -19,7 +19,8 @@ public class RT_Container_getHeader extends BaseRegression {
 	@Override
 	public void runTest() {
 		DataContainer dc = new DataContainer(EHeader.COLUMN);
-		dc.tabInstance().setHeaders(new String[] { "header1", "header2", "header3", "header3" });
+		dc.tabInstance().setHeaders(new String[] { "header1", "header2", "header3"});
+		dc.tabInstance().setHeaders(new String[] { "header1", "header2", "header3", "header3" }, true);
 
 		HashMap<String, Integer> compareHeaders = new HashMap<>();
 		compareHeaders.put("header1", 0);
@@ -53,7 +54,7 @@ public class RT_Container_getHeader extends BaseRegression {
 		BaseRegression.testResult(sameHeaders, "Header Compare - getHeaderNamesIndexed", true);
 		
 		int occurances = dc.tabInstance().getHeaderOccurances(".*3");
-		BaseRegression.testResult(occurances, "Header Compare - getHeaderOccurances", 1);
+		BaseRegression.testResult(occurances, "Header Compare - getHeaderOccurences", 1);
 		
 		BaseRegression.testResult(dc.getContainerFormat().getOrientation().name(), "Header Compare - getHeaderType", "COLUMN");
 		BaseRegression.testResult(dc.tabInstance().getHeaderRowIndex(), "Header Compare - getHeaderRowIndex", 0);

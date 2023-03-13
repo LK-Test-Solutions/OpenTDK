@@ -450,7 +450,7 @@ public class CSVDataContainer implements TabularContainer {
 	 *
 	 * @param inArray array of strings with all values from ArrayList {@link #values} or header names
 	 *                from HashMap {@link #headerNames}
-	 * @param target  valid values are "HEADER" and "VALUE" - this defines where to get the value value
+	 * @param target  valid values are "HEADER" and "VALUE" - this defines where to get the value
 	 *                from HashMap {@link #metaData} (HEADER=getKey(); VALUE=getValue();)
 	 * @return the extended array.
 	 */
@@ -1102,25 +1102,34 @@ public class CSVDataContainer implements TabularContainer {
 
 	@Override
 	public void setHeaders(List<String> in_headers) {
-		this.setHeaders(in_headers.toArray(new String[in_headers.size()]));
+		setHeaders(in_headers.toArray(new String[in_headers.size()]), false);
 	}
 
 	@Override
 	public void setHeaders(String[] in_headers) {
-		int i = this.headerNames.size();
-		for (String col : addMetaHeaders(in_headers)) {
-			if (!this.headerNames.containsKey(col)) {
-				this.headerNames.put(col, i);
+		setHeaders(in_headers, false);
+	}
+
+	@Override
+	public void setHeaders(String[] in_headers, boolean overwrite) {
+		if(overwrite) {
+			headerNames.clear();
+		}
+		int actualPos = headerNames.size(); // Last index of the old headers
+		for (String header : addMetaHeaders(in_headers)) {
+			if (!headerNames.containsKey(header)) {
+				headerNames.put(header, actualPos);
 			} else {
-				String col_tmp = col;
+				String headers_tmp = header; // To not change the origin header
 				int count = 2;
-				while (this.headerNames.containsKey(col_tmp)) {
-					col_tmp = col + "_" + count;
+				// Increase the index suffix until it is unique
+				while (headerNames.containsKey(headers_tmp)) {
+					headers_tmp = header + "_" + count;
 					count++;
 				}
-				this.headerNames.put(col_tmp, i);
+				headerNames.put(headers_tmp, actualPos);
 			}
-			i++;
+			actualPos++;
 		}
 	}
 

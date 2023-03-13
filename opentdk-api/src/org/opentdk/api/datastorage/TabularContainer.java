@@ -760,24 +760,29 @@ public interface TabularContainer extends SpecificContainer {
 	void setHeaderRowIndex(int headerIndex);
 
 	/**
-	 * Adds header names into the <code>HashMap</code> headerNames. It's proofed if the name
-	 * already exists in the <code>HashMap</code>. In case of duplicated names, an index suffix will be
-	 * added to the name (i.e GF#,GF#_2 ...). Furthermore, the name of the header is added with an index
-	 * (<code>i</code>) as "helper" for the assignment of headers to the values.
+	 * Sets header names to the tabular container instance.
+	 * If a header name does already exist or gets passed several times, a new one with the same name gets added with an index suffix (i.e GF#,GF#_2 ...).
 	 *
-	 * @param in_headers List with the name of the headers to be added
+	 * @param in_headers List with the header names to be added
 	 */
 	void setHeaders(List<String> in_headers);
 
 	/**
-	 * Adds header names into the <code>HashMap</code> headerNames. It's proofed if the name
-	 * already exists in the <code>HashMap</code>. In case of duplicated names, an index suffix will be
-	 * added to the name (i.e GF#,GF#_2 ...). Furthermore, the name of the header is added with an index
-	 * (<code>i</code>) as "helper" for the assignment of headers to the values.
+	 * Sets header names to the tabular container instance.
+	 * If a header name does already exist or gets passed several times, a new one with the same name gets added with an index suffix (i.e GF#,GF#_2 ...).
 	 *
-	 * @param in_headers Array with the name of the headers to be added
+	 * @param in_headers Array with the header names to be added
 	 */
 	void setHeaders(String[] in_headers);
+
+	/**
+	 * Sets header names to the tabular container instance.
+	 * If a header name does already exist or gets passed several times, a new one with the same name gets added with an index suffix (i.e GF#,GF#_2 ...).
+	 *
+	 * @param in_headers Array with the header names to be added
+	 * @param overwrite if true, the existing headers get cleared first {@literal -} the metadata headers stay the same
+	 */
+	void setHeaders(String[] in_headers, boolean overwrite);
 
 	/**
 	 * This method is similar to the {@link #putMetaData} method with the difference, that existing
