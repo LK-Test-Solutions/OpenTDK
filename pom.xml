@@ -13,7 +13,7 @@
 	<packaging>jar</packaging>
 	<!-- Name, description and URL -->
 	<name>${project.groupId}:${project.artifactId}</name>
-	<description>The Open Tool Development Kit provides packages and classes for easy implementation of Java tools or applications.</description>
+	<description>The Open Tool Development Kit provides packages and classes for easy implementation of Java tools or applications. Originally designed for test supporting software.</description>
 	<url>https://github.com/LK-Test-Solutions/OpenTDK</url>
 	<!-- License information -->
 	<licenses>
