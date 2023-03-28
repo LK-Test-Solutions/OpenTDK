@@ -29,6 +29,7 @@ package org.opentdk.api.dispatcher;
 
 import java.io.IOException;
 import java.util.logging.Level;
+import java.util.regex.Pattern;
 
 import org.apache.commons.lang3.StringUtils;
 import org.opentdk.api.application.EBaseSettings;
@@ -587,6 +588,9 @@ public class BaseDispatchComponent {
 			} else {
 				rootNode = nodeArray[0].replace("/", "");
 			}
+			if(rootNode.contains("[")) {
+				rootNode = rootNode.split("\\[")[0];
+			}
 		}
 		return rootNode;
 	}
@@ -744,10 +748,12 @@ public class BaseDispatchComponent {
 			// remove all attributes and parameter placeholder like "[@name='{param_1}']"
 			pxp = pxp.replaceAll("param_[0-9]*", "");
 			pxp = pxp.replaceAll("attribute_[0-9]*", "");
+			// Replace the brackets in two steps to avoid the replacement of the whole string in the xPath in case of multiple attributes
+			pxp = pxp.replaceAll("\\[@.*\\='\\{\\}'\\]/", "/");
 			pxp = pxp.replaceAll("\\[@.*\\='\\{\\}'\\]", "");
 		} else {
 			String[] paramsToSet = params.split(";");
-			// replace parameter place holders by parameter values
+			// replace parameter placeholders by parameter values
 			for (int i = 0; i < paramsToSet.length; i++) {
 				// syntax attribute=value allows variable attribute names
 				if (paramsToSet[i].contains("=")) {
