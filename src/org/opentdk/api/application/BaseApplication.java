@@ -200,13 +200,15 @@ public class BaseApplication {
 	 *                               -homedir=c:/applications/myApp)
 	 */
 	public final void parseArgs(Class<?> runtimePropertiesClass, String[] args) {
+		String value = "";
 		Map<String, BaseDispatchComponent> dispatchComponents = BaseDispatcher.getDeclaredComponents(runtimePropertiesClass);
 		for (String arg : args) {
 			String argKey = arg.split("=")[0];
 			if (argKey.startsWith("-")) {
+				value = arg.substring(argKey.length()+1);
 				argKey = argKey.replace("-", "");
 			}
-			String value = arg.split("=")[1];
+//			String value = arg.split("=")[1];
 			for (String mapKey : dispatchComponents.keySet()) {
 				if (mapKey.equalsIgnoreCase(argKey)) {
 					dispatchComponents.get(mapKey).setValue(value);
