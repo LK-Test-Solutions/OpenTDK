@@ -159,6 +159,24 @@ public interface TabularContainer extends SpecificContainer {
 	int checkHeader(String[] referenceHeaders, String[] compareHeaders);
 
 	/**
+	 * Creates and returns a <code>String</code> array with blank values and with a size, representing a row of the <code>CSVDataContainer</code>.
+	 * The returned array is valid for adding new rows into the DataContainer using the {@link #addRow(String[])} method.
+	 *
+	 * @return String Array with predefined blank values
+	 */
+	String[] createPreparedRow();
+
+	/**
+	 * Creates and returns a <code>String</code> array with prefilled values for named columns and blank values for all array items that
+	 * have no predefined values assigned.
+	 * The returned array is valid for adding new rows into the DataContainer using the {@link #addRow(String[])} method.
+	 *
+	 * @param valueSets String array that defines column names and values, used to prefill the array
+	 * @return String Array with predefined values and blank Strings for items without predefined values
+	 */
+	String[] createPreparedRow(String[] valueSets);
+
+	/**
 	 * Removes the row of the container instance at the specified index.
 	 * 
 	 * @param index integer that has to be in the range of the values size.
