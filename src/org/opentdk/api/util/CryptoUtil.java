@@ -122,16 +122,29 @@ public class CryptoUtil {
 	}
 
 	/**
-	 * Encodes a string with a given public key that can only be decoded with the belonging private key.
+	 * Encodes a string with a given public key file that can only be decoded with the belonging private key.
 	 * 
 	 * @param toEncrypt     raw string that should be encrypted with the public key
-	 * @param publicKeyFile full name of the public key file
+	 * @param publicKeyFile File object with the public key file
 	 * @return the encoded string in Base64 encoding to store it properly (the encryption itself only
-	 *         generates a binary format)
+	 *         generates a binary format) or null in case of a wrong block size or padding
+	 * @throws IOException If reading the key bytes from the file fails
 	 */
-	public static String encrypt(String toEncrypt, File publicKeyFile) {
+	public static String encrypt(String toEncrypt, File publicKeyFile) throws IOException {
+		return encrypt(toEncrypt, Files.readAllBytes(publicKeyFile.toPath()));
+	}
+
+	/**
+	 * Encodes a string with given public key bytes that can only be decoded with the belonging private key.
+	 *
+	 * @param toEncrypt     raw string that should be encrypted with the public key
+	 * @param publicKeyBytes public key file as byte array
+	 * @return the encoded string in Base64 encoding to store it properly (the encryption itself only
+	 *         generates a binary format) or null in case of a wrong block size or padding
+	 */
+	public static String encrypt(String toEncrypt, byte[] publicKeyBytes) {
 		String ret = null;
-		Key publicKey = CryptoUtil.getKey(publicKeyFile, Cipher.PUBLIC_KEY);
+		Key publicKey = CryptoUtil.getKey(publicKeyBytes, Cipher.PUBLIC_KEY);
 		if (publicKey != null) {
 			Cipher encryptCipher = null;
 			try {
@@ -152,6 +165,7 @@ public class CryptoUtil {
 				encryptedMessageBytes = encryptCipher.doFinal(secretMessageBytes);
 			} catch (IllegalBlockSizeException | BadPaddingException e) {
 				MLogger.getInstance().log(Level.SEVERE, e);
+				throw new RuntimeException(e);
 			}
 			if (encryptedMessageBytes != null) {
 				ret = Base64.getEncoder().encodeToString(encryptedMessageBytes);
@@ -164,12 +178,24 @@ public class CryptoUtil {
 	 * Decodes a string that was encoded with the {@link #encrypt(String, File)} method.
 	 * 
 	 * @param toDecrypt      Base64 encoded string that should be decoded with the private key
-	 * @param privateKeyFile full name of the private key file
-	 * @return the decoded string in raw format again
+	 * @param privateKeyFile private key file object
+	 * @return the decoded string in raw format or the raw string if it could not be decoded
+	 * @throws IOException If reading the key bytes from the file fails
 	 */
-	public static String decrypt(String toDecrypt, File privateKeyFile) {
+	public static String decrypt(String toDecrypt, File privateKeyFile) throws IOException {
+		return decrypt(toDecrypt, Files.readAllBytes(privateKeyFile.toPath()));
+	}
+
+	/**
+	 * Decodes a string that was encoded with the {@link #encrypt(String, byte[])} method.
+	 *
+	 * @param toDecrypt      Base64 encoded string that should be decoded with the private key
+	 * @param privateKeyBytes private key as byte array
+	 * @return the decoded string in raw format or the raw string if it could not be decoded
+	 */
+	public static String decrypt(String toDecrypt, byte[] privateKeyBytes) {
 		String ret = null;
-		Key privateKey = CryptoUtil.getKey(privateKeyFile, Cipher.PRIVATE_KEY);
+		Key privateKey = CryptoUtil.getKey(privateKeyBytes, Cipher.PRIVATE_KEY);
 		if (privateKey != null) {
 			Cipher decryptCipher = null;
 			try {
@@ -189,7 +215,8 @@ public class CryptoUtil {
 			try {
 				decryptedMessageBytes = decryptCipher.doFinal(secretMessageBytes);
 			} catch (IllegalBlockSizeException | BadPaddingException e) {
-				MLogger.getInstance().log(Level.SEVERE, e);
+				ret = toDecrypt;
+				MLogger.getInstance().log(Level.INFO, e);
 			}
 			if (decryptedMessageBytes != null) {
 				ret = StringUtils.newStringUtf8(decryptedMessageBytes);
@@ -199,22 +226,15 @@ public class CryptoUtil {
 	}
 
 	/**
-	 * Generates a key object with a key file to use it for encryption in {@link #encrypt(String, File)}
+	 * Generates a {@link java.security.Key} object with the bytes of the key to use it in {@link #encrypt(String, File)}
 	 * or {@link #decrypt(String, File)}.
 	 * 
-	 * @param keyFile full name (path + name) of the private or public key
+	 * @param keyBytes byte array with the private or public key
 	 * @param keyType 1: Cipher.PUBLIC_KEY, 2: Cipher.PRIVATE_KEY
-	 * @return the key object or null if no key file could be detected
+	 * @return the key object or null if no key object could be created
 	 */
-	private static Key getKey(File keyFile, int keyType) {
+	private static Key getKey(byte[] keyBytes, int keyType) {
 		Key ret = null;
-
-		byte[] keyBytes = null;
-		try {
-			keyBytes = Files.readAllBytes(keyFile.toPath());
-		} catch (IOException e) {
-			MLogger.getInstance().log(Level.SEVERE, e);
-		}
 		if (keyBytes != null) {
 			KeyFactory keyFactory = null;
 			try {
