@@ -377,6 +377,24 @@ public class CSVDataContainer implements TabularContainer {
 	}
 
 	@Override
+	public String[] createPreparedRow(){
+		return createPreparedRow(new String[0]);
+	}
+
+	@Override
+	public String[] createPreparedRow(String[] valueSets){
+		String[] preparedRow = new String[getHeaderNamesIndexed().length];
+		for(int i=0; i< preparedRow.length; i++){
+			preparedRow[i] = "";
+		}
+		for(String valueSet:valueSets){
+			String[] setItems = valueSet.split("=");
+			preparedRow[getHeaderIndex(setItems[0])] = setItems[1];
+		}
+		return preparedRow;
+	}
+
+	@Override
 	public void deleteValue(String headerName) {
 		int headerIndex = getHeaderIndex(headerName);
 		values.get(0)[headerIndex] = null;
