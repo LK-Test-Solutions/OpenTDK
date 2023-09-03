@@ -579,8 +579,16 @@ public class FilterRule {
 			if (Integer.valueOf(val) > Integer.valueOf(filterValue)) {
 				return true;
 			}
+		} else if(filterOperator.equals(EOperator.GREATER_OR_EQUAL_THAN)) {
+			if (Integer.valueOf(val) >= Integer.valueOf(filterValue)) {
+				return true;
+			}
 		} else if(filterOperator.equals(EOperator.LESS_THAN)) {
 			if (Integer.valueOf(val) < Integer.valueOf(filterValue)) {
+				return true;
+			}
+		} else if(filterOperator.equals(EOperator.LESS_OR_EQUAL_THAN)) {
+			if (Integer.valueOf(val) <= Integer.valueOf(filterValue)) {
 				return true;
 			}
 		} else if(filterOperator.equals(EOperator.NOT_EQUALS)) {
