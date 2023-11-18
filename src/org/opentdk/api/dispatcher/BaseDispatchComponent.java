@@ -454,10 +454,14 @@ public class BaseDispatchComponent {
 		DataContainer dc = BaseDispatcher.getDataContainer(settingsKey);
 		String[] attributes = new String[0];
 		if (dc.isTree()) {
-			attributes = dc.treeInstance().get(expr, attrName);
+			try{
+				attributes = dc.treeInstance().get(expr, attrName);
+			}catch(NullPointerException e){
+				return "";
+			}
 		}
 		if (attributes.length == 0) {
-			return null;
+			return "";
 		}
 		return attributes[0];
 	}
@@ -490,10 +494,14 @@ public class BaseDispatchComponent {
 		DataContainer dc = BaseDispatcher.getDataContainer(settingsKey);
 		String[] attributes = new String[0];
 		if (dc.isTree()) {
-			attributes = dc.treeInstance().get(expr, attrName);
+			try{
+				attributes = dc.treeInstance().get(expr, attrName);
+			}catch(NullPointerException e){
+				return "";
+			}
 		}
 		if (attributes.length == 0) {
-			return null;
+			return "";
 		}
 		return attributes[0];
 	}
@@ -522,10 +530,14 @@ public class BaseDispatchComponent {
 		DataContainer dc = BaseDispatcher.getDataContainer(settingsKey);
 		String[] attributes = new String[0];
 		if (dc.isTree()) {
-			attributes = dc.treeInstance().get(expr, attrName);
+			try{
+				attributes = dc.treeInstance().get(expr, attrName);
+			}catch(NullPointerException e){
+				return new String[0];
+			}
 		}
 		if (attributes.length == 0) {
-			return null;
+			return new String[0];
 		}
 		return attributes;
 	}
@@ -558,10 +570,14 @@ public class BaseDispatchComponent {
 		DataContainer dc = BaseDispatcher.getDataContainer(settingsKey);
 		String[] attributes = new String[0];
 		if (dc.isTree()) {
-			attributes = dc.treeInstance().get(expr, attrName);
+			try{
+				attributes = dc.treeInstance().get(expr, attrName);
+			}catch(NullPointerException e){
+				return new String[0];
+			}
 		}
 		if (attributes.length == 0) {
-			return null;
+			return new String[0];
 		}
 		return attributes;
 	}
