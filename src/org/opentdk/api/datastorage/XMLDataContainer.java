@@ -241,7 +241,7 @@ public class XMLDataContainer implements TreeContainer {
 	 * @param attrName Name of the XML tags attribute from which the values will be returned
 	 */
 	@Override
-	public String[] get(String expr, String attrName) {
+	public String[] get(String expr, String attrName) throws NullPointerException{
 		List<String> lst = new ArrayList<String>();
 		// leading "/" indicates a tag name with full xPath
 		if (expr.startsWith("/")) {
