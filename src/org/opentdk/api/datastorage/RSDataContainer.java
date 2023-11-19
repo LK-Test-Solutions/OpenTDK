@@ -65,7 +65,9 @@ public class RSDataContainer extends CSVDataContainer {
 				// transfer all column names from the colums list to the HashMap columns
 				setHeaders(columns.toArray(new String[]{}));
 				// transfer all data rows of the ResultSet to the ArrayList of this class
-				dc.getResultSet().first();
+				if(dc.getResultSet().isBeforeFirst()) {
+					dc.getResultSet().first();
+				}
                 do {
                     String[] row = new String[cols];
                     for (int i = 0; i < cols; i++) {
