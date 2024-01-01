@@ -5,7 +5,7 @@
 | Maturity | moderate stable |
 | Author | LK Test Solutions GmbH |
 | License |	BSD 2-Clause "Simplified" |
-| Documentation, Tutorials, Samples | !! Under construction !!  GitHub Repsoitory [OpenTDK_Labs](https://github.com/LK-Test-Solutions/OpenTDK_Labs) |
+| Documentation, Tutorials, Samples | GitHub Repsoitory [OpenTDK_Labs](https://github.com/LK-Test-Solutions/OpenTDK_Labs) |
 | Download Binaries	| [Releases](https://github.com/LK-Test-Solutions/OpenTDK/releases) |
 
 <b>Maven</b> 
