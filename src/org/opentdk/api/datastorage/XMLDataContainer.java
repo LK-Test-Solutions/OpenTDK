@@ -40,7 +40,15 @@ import org.w3c.dom.Element;
 
 /**
  * SubClass of {@link DataContainer} which provides all methods for reading and writing from or to
- * ASCII files in XML format, and store the data at runtime within the DataContainer.
+ * ASCII files in XML format, and store the data at runtime within the DataContainer. If the DataContainer
+ * is linked to a file, then all write operations will immediately save the changes within the file.
+ * In case that file changes are not wanted, then the DataContainer should be initialized with the content of the
+ * XML file as InputStream.
+ * <pre>
+ * e.g.:
+ * InputStream stream = new ByteArrayInputStream(xmlContent.getBytes(StandardCharsets.UTF_8));
+ * DataContainer notationRulesDC = new DataContainer(stream);
+ * </pre>
  * 
  * @author LK Test Solutions
  * @see org.opentdk.api.datastorage.DataContainer
@@ -56,19 +64,23 @@ public class XMLDataContainer implements TreeContainer {
 	 */
 	private final DataContainer dc;
 
-//	private ArrayList<String[]> values = new ArrayList<String[]>();
-
 	/**
-	 * Construct a new specific <code>DataContainer</code> for XML files.
+	 * This constructor is used to pass the DataContainer when the specific XML Container will be adapted
+	 * from the base DataContainer class.
 	 *
-	 * @param dCont the <code>DataContainer</code> instance to use it in the read and write methods of
-	 *              this specific data container
+	 * @param dataContainer the <code>DataContainer</code> instance to use for read and write methods of
+	 *              		this specific data container
 	 */
-	public XMLDataContainer(DataContainer dCont) {
-		dc = dCont;
+	public XMLDataContainer(DataContainer dataContainer) {
+		dc = dataContainer;
 		dc.getImplicitHeaders().add("XPath");
 	}
 
+	/**
+	 *
+	 * @param name  Name of the element that will be added into the data source
+	 * @param value Value that will be assigned to the name
+	 */
 	@Override
 	public void add(String name, String value) {
 		add(name, value, new Filter());
@@ -146,14 +158,40 @@ public class XMLDataContainer implements TreeContainer {
 		}
 	}
 
+	/**
+	 * Retrieve a string array with the text content of all tags specified by the tag name.
+	 * This method will search on all levels of the XML tree hierarchy.
+	 *
+	 * @param tagName Name of the tag(s) to search for
+	 * @return String-Array with the text-content of all found tags
+	 */
 	@Override
-	public String[] get(String name) {
-		return get(name, new Filter());
+	public String[] get(String tagName) {
+		return get(tagName, new Filter());
+	}
+
+	/**
+	 * Retrieve a string array with the text content of all tags specified by the tag name.
+	 * This method will search only within the XPath, defined by the Filter.<br>
+	 * Sample usage:
+	 * <pre>
+	 *     Filter fltr = new Filter();
+	 *     fltr.addFilterRule("XPath", "/Contacts/Business/Management", EOperator.EQUALS);
+	 *     dataContainer.treeInstance.get("firstname", fltr);
+	 * </pre>
+	 *
+	 * @param tagName Name of the tag(s) to search for
+	 * @param filter Filter condition for more precise localization of the element within the data structure
+	 * @return String array with the text-content of all found tags
+	 */
+	@Override
+	public String[] get(String tagName, Filter filter) {
+		return (String[]) get(tagName, filter, "values");
 	}
 
 	@Override
-	public String[] get(String headerName, Filter fltr) {
-		return (String[]) get(headerName, fltr, "values");
+	public Object get(String tagName, String attributName, String attributValue){
+		return xEdit.getElement(tagName, attributName, attributValue);
 	}
 
 	/**
@@ -169,7 +207,8 @@ public class XMLDataContainer implements TreeContainer {
 	 *                   Array with all matching tag objects
 	 * @return Array of the type, specified by returnType argument
 	 */
-	private Object[] get(String headerName, Filter fltr, String returnType) {
+	@Override
+	public Object[] get(String headerName, Filter fltr, String returnType) {
 		List<FilterRule> implFilterRules = dc.getImplFilterRules(fltr);
 		List<Element> filteredElements = new ArrayList<>();
 		List<String> filteredValues = new ArrayList<>();
@@ -268,6 +307,11 @@ public class XMLDataContainer implements TreeContainer {
 			}
 		}
 		return lst.toArray(new String[lst.size()]);
+	}
+
+	@Override
+	public Object getRootElement(){
+		return xEdit.getRoot();
 	}
 
 	/**

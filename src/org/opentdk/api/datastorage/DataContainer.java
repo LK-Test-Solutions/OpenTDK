@@ -634,6 +634,9 @@ public class DataContainer implements SpecificContainer {
 			ret = tabInstance().getColumn(parameterName, fltr);
 		} else if (isTree()) {
 			ret = treeInstance().get(parameterName, fltr);
+			for(int i=0; i<ret.length; i++){
+				ret[i] = ret[i].trim();
+			}
 		}
 		return ret;
 	}

@@ -1,6 +1,7 @@
 package org.opentdk.api.datastorage;
 
 import org.opentdk.api.filter.Filter;
+import org.w3c.dom.Element;
 
 public interface TreeContainer extends SpecificContainer {
 
@@ -75,28 +76,47 @@ public interface TreeContainer extends SpecificContainer {
 	void delete(String name, String attr, String value, Filter filter);
 
 	/**
-	 * This method gets used to retrieve values from the data source.
-	 * 
-	 * @param name Name of the element that will be added into the data source
+	 * Method used to retrieve a string array with the text content of all tree nodes specified by their name.
+	 * This method will search on all levels of the tree hierarchy. The get method needs to be implemented for
+	 * any tree container to support the functionality for the specific node types.<br>
+	 * For {@link XMLDataContainer} a node is a tag-element and the retrieved value will be the content of the
+	 * tag. <br>
+	 * e.g. <code>get("Birthdate")</code> will retrieve the value <code>01.01.1970</code> from the following tag:<br>
+	 * <code>&lt;Birthdate&gt;01.01.1970&lt;/Birthdate&gt;</code>
+	 *
+	 * @param nodeName Name of the tree node that the value will be read from
 	 */
-	String[] get(String name);
+	String[] get(String nodeName);
+
+	/**
+	 * Method used to retrieve a string array with the text content of all tree nodes specified by their name.
+	 * This method will search only within the path, defined by the filter.<br>
+	 * Sample usage for XML-format:
+	 * <pre>
+	 *     Filter fltr = new Filter();
+	 *     fltr.addFilterRule("XPath", "/Contacts/Business/Management", EOperator.EQUALS);
+	 *     dataContainer.treeInstance.get("firstname", fltr);
+	 * </pre>
+	 *
+	 * @param nodeName Name of the tag(s) to search for
+	 * @param filter Filter condition for more precise localization of the element within the data structure
+	 * @return String array with the text content of all found tags
+	 */
+	String[] get(String nodeName, Filter filter);
 
 	/**
 	 * This method gets used to retrieve values from the data source.
 	 * 
-	 * @param name   Name of the element that will be added into the data source
-	 * @param filter Filter condition for more precise localization of the element within the data
-	 *               structure
+	 * @param nodeName Name of the element that will be added into the data source
+	 * @param attributeName If the name has some attribute
 	 */
-	String[] get(String name, Filter filter);
+	String[] get(String nodeName, String attributeName);
 
-	/**
-	 * This method gets used to retrieve values from the data source.
-	 * 
-	 * @param name Name of the element that will be added into the data source
-	 * @param attr If the name has some attribute
-	 */
-	String[] get(String name, String attr);
+	Object get(String nodeName, String attributeName, String attributeValue);
+
+	Object[] get(String nodeName, Filter filter, String returnType);
+
+	Object getRootElement();
 
 	/**
 	 * This method gets used to replace a value in the data source.

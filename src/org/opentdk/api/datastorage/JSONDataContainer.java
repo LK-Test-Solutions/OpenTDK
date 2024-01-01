@@ -46,6 +46,7 @@ import org.opentdk.api.filter.FilterRule;
 import org.opentdk.api.io.FileUtil;
 import org.opentdk.api.logger.MLogger;
 import org.opentdk.api.util.ListUtil;
+import org.w3c.dom.Element;
 import org.yaml.snakeyaml.Yaml;
 
 /**
@@ -273,6 +274,16 @@ public class JSONDataContainer implements TreeContainer {
 		return ret;
 	}
 
+	@Override
+	public Object get(String tagName, String attributName, String attributValue){
+		return null;
+	}
+
+	@Override
+	public Object[] get(String headerName, Filter fltr, String returnType) {
+		return null;
+	}
+
 	/**
 	 * Retrieves the data type out of the committed value. This can be a JSONObject, JSONArray or any
 	 * other primitive data type like string, integer or boolean. E.g. if the input string has leading
@@ -308,6 +319,16 @@ public class JSONDataContainer implements TreeContainer {
 			}
 		}
 		return ret;
+	}
+
+	/**
+	 * Not required for JSON Container
+	 *
+	 * @return
+	 */
+	@Override
+	public Object getRootElement(){
+		return new Object();
 	}
 
 	/**

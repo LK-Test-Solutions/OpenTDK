@@ -171,7 +171,7 @@ public interface TabularContainer extends SpecificContainer {
 	 * have no predefined values assigned.
 	 * The returned array is valid for adding new rows into the DataContainer using the {@link #addRow(String[])} method.
 	 *
-	 * @param valueSets String array that defines column names and values, used to prefill the array
+	 * @param valueSets String array that defines column names and values delimited by = (e.g. CITY=Munich), used to prefill the array
 	 * @return String Array with predefined values and blank Strings for items without predefined values
 	 */
 	String[] createPreparedRow(String[] valueSets);

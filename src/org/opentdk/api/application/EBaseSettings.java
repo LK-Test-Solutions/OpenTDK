@@ -76,6 +76,6 @@ public class EBaseSettings {
 	 * 3 = log all messages
 	 * </pre>
 	 */
-	public static final BaseDispatchComponent TRACE_LEVEL = new BaseDispatchComponent(EBaseSettings.class, "TraceLevel", "/AppSettings", "1");
+	public static final BaseDispatchComponent TRACELEVEL = new BaseDispatchComponent(EBaseSettings.class, "TraceLevel", "/AppSettings", "1");
 
 }

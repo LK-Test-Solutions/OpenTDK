@@ -50,7 +50,11 @@ public class RSDataContainer extends CSVDataContainer {
 	 *               use here)	
      */
 	@Override
-	public void readData(Filter filter) throws IOException {
+	public void readData(Filter filter) throws IOException{
+		readData(filter, "Label");
+	}
+
+	public void readData(Filter filter, String headerOrigin) throws IOException {
 		if (dc.getResultSet() != null) {
 			try {
 				// read description of the ResultSet columns
@@ -59,7 +63,12 @@ public class RSDataContainer extends CSVDataContainer {
 				List<String> columns = new ArrayList<String>();
 				// fill columns List with the column names of the result set
 				for (int i = 1; i <= cols; i++) {
-					String col = rsmd.getColumnName(i);
+					String col;
+					if(headerOrigin.equalsIgnoreCase("LABEL")) {
+						col = rsmd.getColumnLabel(i);
+					}else {
+						col = rsmd.getColumnName(i);
+					}
 					columns.add(col);
 				}
 				// transfer all column names from the colums list to the HashMap columns
@@ -68,14 +77,14 @@ public class RSDataContainer extends CSVDataContainer {
 				if(dc.getResultSet().isBeforeFirst()) {
 					dc.getResultSet().first();
 				}
-                do {
-                    String[] row = new String[cols];
-                    for (int i = 0; i < cols; i++) {
-                    	row[i] = String.valueOf(dc.getResultSet().getObject(i + 1));
-                    }
-                   addRow(row);
-                } while (dc.getResultSet().next());
-                dc.getResultSet().close();
+				do {
+					String[] row = new String[cols];
+					for (int i = 0; i < cols; i++) {
+						row[i] = String.valueOf(dc.getResultSet().getObject(i + 1));
+					}
+					addRow(row);
+				} while (dc.getResultSet().next());
+				dc.getResultSet().close();
 			} catch (SQLException e) {
 				MLogger.getInstance().log(Level.SEVERE, e, "putResultSet");
 				throw new RuntimeException(e);

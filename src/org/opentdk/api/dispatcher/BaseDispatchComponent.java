@@ -624,15 +624,19 @@ public class BaseDispatchComponent {
 	 *         variable as String
 	 */
 	public String getValue() {
+		return getValue(0);
+	}
+
+	public String getValue(int valueIndex) {
 		if ((parentXPath != null) && (!parentXPath.isEmpty())) {
 			return getValue("");
 		}
 		if (BaseDispatcher.dcMap.containsKey(settingsKey)) {
 			DataContainer dc = BaseDispatcher.getDataContainer(settingsKey);
 			String[] ret = dc.get(parameterName);
-			if(ret != null && ret.length > 0 && ret[0] != null) {
-				return ret[0];
-			}						
+			if(ret != null && ret.length > 0 && ret[valueIndex] != null) {
+				return ret[valueIndex];
+			}
 		}
 		return defaultValue;
 	}
@@ -853,6 +857,17 @@ public class BaseDispatchComponent {
 			BaseDispatcher.getDataContainer(settingsKey).set(parameterName, value);
 		} else {
 			setValue("", value);
+		}
+	}
+
+	public void setValue(int valueIndex, String value) {
+		if ((parentXPath == null) || (parentXPath.isEmpty())) {
+			if(valueIndex >= BaseDispatcher.getDataContainer(settingsKey).tabInstance().getRowCount()) {
+				BaseDispatcher.getDataContainer(settingsKey).tabInstance().addRow(BaseDispatcher.getDataContainer(settingsKey).tabInstance().createPreparedRow());
+			}
+			BaseDispatcher.getDataContainer(settingsKey).tabInstance().setValue(parameterName, valueIndex, value);
+		} else {
+			// ToDo: implementation for tree format, if required
 		}
 	}
 

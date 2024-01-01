@@ -35,6 +35,7 @@ import java.util.logging.Level;
 import org.opentdk.api.filter.Filter;
 import org.opentdk.api.io.FileUtil;
 import org.opentdk.api.logger.MLogger;
+import org.w3c.dom.Element;
 import org.yaml.snakeyaml.Yaml;
 
 /**
@@ -158,12 +159,32 @@ public class YAMLDataContainer implements TreeContainer {
 	}
 
 	@Override
+	public Object get(String tagName, String attributName, String attributValue){
+		return null;
+	}
+
+	@Override
+	public Object[] get(String headerName, Filter fltr, String returnType){
+		return null;
+	}
+
+	@Override
 	public void readData(Filter filter) {
 		if (content == null) {
 			MLogger.getInstance().log(Level.WARNING, "YAML object is not initialized or empty ==> No YAML content to read", getClass().getSimpleName(), "readData");
 		} else {
 			json.setJsonWithMap(content);
 		}
+	}
+
+	/**
+	 * Not required for YAML Container
+	 *
+	 * @return
+	 */
+	@Override
+	public Object getRootElement(){
+		return new Object();
 	}
 
 	@Override
