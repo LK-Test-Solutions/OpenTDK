@@ -35,7 +35,6 @@ import java.util.logging.Level;
 import org.opentdk.api.filter.Filter;
 import org.opentdk.api.io.FileUtil;
 import org.opentdk.api.logger.MLogger;
-import org.w3c.dom.Element;
 import org.yaml.snakeyaml.Yaml;
 
 /**
@@ -45,7 +44,7 @@ import org.yaml.snakeyaml.Yaml;
  * {@link org.yaml.snakeyaml.Yaml} and the {@link org.json.JSONObject} support a method to provide
  * the content as map.
  * 
- * @author LK Test Solutions
+ * @author FME (LK Test Solutions)
  * @see org.opentdk.api.datastorage.DataContainer
  */
 public class YAMLDataContainer implements TreeContainer {
@@ -179,8 +178,6 @@ public class YAMLDataContainer implements TreeContainer {
 
 	/**
 	 * Not required for YAML Container
-	 *
-	 * @return
 	 */
 	@Override
 	public Object getRootElement(){
@@ -201,11 +198,6 @@ public class YAMLDataContainer implements TreeContainer {
 	public void set(String name, String value, Filter filter, boolean allOccurences) {
 		json.set(name, value, filter, allOccurences);
 	}
-
-//	@Override
-//	public void set(String headerName, int[] occurences, String value, Filter fltr) {
-//		json.set(headerName, occurences, value, fltr);
-//	}
 
 	@Override
 	public void set(String name, String attr, String value, String oldValue, Filter filter) {

@@ -37,7 +37,7 @@ import java.util.logging.Level;
 import org.opentdk.api.filter.Filter;
 import org.opentdk.api.logger.MLogger;
 
-public class RSDataContainer extends CSVDataContainer {
+public class RSDataContainer extends TabularContainer {
 
 	RSDataContainer(DataContainer dCont) {
 		super(dCont);

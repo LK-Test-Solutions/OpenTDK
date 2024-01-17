@@ -1,900 +1,1248 @@
 package org.opentdk.api.datastorage;
 
+import java.io.File;
 import java.io.IOException;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
+import java.util.logging.Level;
+import java.util.stream.Collectors;
 
+import org.apache.commons.lang3.StringUtils;
 import org.opentdk.api.filter.Filter;
+import org.opentdk.api.filter.FilterRule;
+import org.opentdk.api.io.FileUtil;
+import org.opentdk.api.io.XFileWriter;
+import org.opentdk.api.logger.MLogger;
+import org.opentdk.api.util.StringUtil;
 
-public interface TabularContainer extends SpecificContainer {
-	
-	/**
-	 * This method is designed for tabular data formats to add column names to existing
-	 * <code>DataContainer</code>. In case the column name already exists, an suffix with the next
-	 * available index will be appended to the column name.
-	 * 
-	 * @param col Name of the column that will be added to the headerNames
-	 */
-	void addColumn(String col);
+public class TabularContainer implements SpecificContainer {
 
 	/**
-	 * This method is designed for tabular data formats to add column names to existing
-	 * <code>DataContainer</code>. The useExisting argument specifies the behavior for existing columns
-	 * with the same name. Either use the existing column or create a new column by appending a unique
-	 * index to the name.
-	 * 
-	 * @param col         Name of the column that will be added to the headerNames
-	 * @param useExisting Boolean value - true = if column name exist, then use the existing column;
-	 *                    false = if column name exists, then add column name with an index suffix
+	 * The character(s) that define the delimiter of columns within tabular files. This delimiter is
+	 * used by the {@link DataContainer#readData()} methods to split the rows of the source file into a
+	 * String Array and by the {@link TabularContainer#exportContainer(String)} methods to write the
+	 * elements of the {@link #values} ArrayList into the target file.
 	 */
-	void addColumn(String col, boolean useExisting);
-	
-	/**
-	 * Adds an empty row to the values ArrayList that is used for tabular data formats.
-	 */
-	void addRow();
+	private String columnDelimiter = ";";
 
 	/**
-	 * Inserts a string array with the row content into the values ArrayList at a
-	 * specified position in this list. Shifts the row currently at that position (if any) and any
-	 * subsequent row.
-	 * 
-	 * @param rowIndex  index at which the specified row is to be inserted
-	 * @param rowValues String array with all row values to be inserted
+	 * This property defines the record index of the source, where the header names are read from. All
+	 * values of this record will be put into the HashMap {@link #headerNames}.<br>
+	 * If the headerType of the {@link DataContainer} is {@link EHeader#COLUMN}, then
+	 * this index defines the row index of the source that includes the header names.<br>
+	 * If the headerType of the {@link DataContainer} is {@link EHeader#ROW}, then
+	 * this index defines the column index of the source that includes the header names.
 	 */
-	void addRow(int rowIndex, String[] rowValues);
+	private int headerNamesIndex = 0;
 
 	/**
-	 * Adds a string array with the row content into the values ArrayList.
-	 *
-	 * @param row String array with the content of the row to be added
-	 */
-	void addRow(String[] row);
-
-	/**
-	 * Adds one or more string arrays with the row content into the values
-	 * ArrayList.
-	 * 
-	 * @param rows List of string arrays with the content of the rows to be added
-	 */
-	void addRows(List<String[]> rows);
-
-	/**
-	 * This method reads data from a specified source file and appends it to the existing data within
-	 * the container.
-	 * 
-	 * @param fileName Full path and name of the source file, from which the data will be added to the
-	 *                 <code>DataContainer</code>
-	 * @throws IOException
-	 */
-	void appendData(String fileName) throws IOException;
-
-	/**
-	 * This method reads data from a specified source file and appends it to the existing data within
-	 * the container.
-	 * 
-	 * @param fileName        Full path and name of the source file, from which the data will be added
-	 *                        to the <code>DataContainer</code>
-	 * @param columnDelimiter The column separator to structure the data.
-	 * @throws IOException
-	 */
-	void appendData(String fileName, String columnDelimiter) throws IOException;
-	
-	/**
-	 * This method checks if the headers-of the assigned <code>DataContainer</code> match with the
-	 * headers of the current instance and appends all data of the assigned <code>DataContainer</code>
-	 * to the values List of the DataContaner instance which is calling the method, in case the headers
-	 * of both <code>DataContainer</code> are the same.
-	 *
-	 * @param dc The DataContanier which content will be appended to the current DataContainer instance.
-	 */
-	void appendDataContainer(DataContainer dc);
-
-	/**
-	 * Compares the assigned <code>HashMap</code> with header names and indexes with the headers of the
-	 * current <code>DataContainer</code> instance.
-	 *
-	 * @param compareHeaders <code>HashMap</code> with header names and indexes which will be compared
-	 *                       against the headers of the current object instance.
-	 * @return
-	 * 
-	 *         <pre>
-	 * {@literal -}1 = mismatching headers
-	 * 0 = header names and indexes are identical
-	 * 1 = header names match, but with different index order
-	 *         </pre>
-	 */
-	int checkHeader(HashMap<String, Integer> compareHeaders);
-
-	/**
-	 * Compares the header names and order of a <code>HashMap</code> with header names and order of an
-	 * Arrays of type <code>String</code>.
-	 *
-	 * @param referenceHeaders Array of type <code>String</code> with header names and indexes which
-	 *                         include reference values for comparison.
-	 * @param compareHeaders   Array of type <code>String</code> with header names and indexes which
-	 *                         include comparison values.
-	 * @return
-	 * 
-	 *         <pre>
-	 * -1 = mismatching headers
-	 * 0 = header names and indexes are identical
-	 * 1 = header names match, but with different index order
-	 *         </pre>
-	 */
-	int checkHeader(HashMap<String, Integer> referenceHeaders, String[] compareHeaders);
-
-	/**
-	 * Compares an array of type <code>String</code> with defined header names with the header names and
-	 * indexes of the current <code>DataContainer</code>.
-	 *
-	 * @param compareHeaders Array of type <code>String</code> with header names and indexes which will
-	 *                       be compared against the headers of the current object instance.
-	 * @return
-	 * 
-	 *         <pre>
-	 * {@literal -}1 = mismatching headers
-	 * 0 = header names and indexes are identical
-	 * 1 = header names match, but with different index order
-	 *         </pre>
-	 */
-	int checkHeader(String[] compareHeaders);
-
-	/**
-	 * Compares the names and order of two Arrays of type <code>String</code>.
-	 *
-	 * @param referenceHeaders Array of type <code>String</code> with header names and indexes which
-	 *                         include reference values for comparison.
-	 * @param compareHeaders   Array of type <code>String</code> with header names and indexes which
-	 *                         include comparison values.
-	 * @return
-	 * 
-	 *         <pre>
-	 * -1 = mismatching headers
-	 * 0 = header names and indexes are identical
-	 * 1 = header names match, but with different index order
-	 *         </pre>
-	 */
-	int checkHeader(String[] referenceHeaders, String[] compareHeaders);
-
-	/**
-	 * Creates and returns a <code>String</code> array with blank values and with a size, representing a row of the <code>CSVDataContainer</code>.
-	 * The returned array is valid for adding new rows into the DataContainer using the {@link #addRow(String[])} method.
-	 *
-	 * @return String Array with predefined blank values
-	 */
-	String[] createPreparedRow();
-
-	/**
-	 * Creates and returns a <code>String</code> array with prefilled values for named columns and blank values for all array items that
-	 * have no predefined values assigned.
-	 * The returned array is valid for adding new rows into the DataContainer using the {@link #addRow(String[])} method.
-	 *
-	 * @param valueSets String array that defines column names and values delimited by = (e.g. CITY=Munich), used to prefill the array
-	 * @return String Array with predefined values and blank Strings for items without predefined values
-	 */
-	String[] createPreparedRow(String[] valueSets);
-
-	/**
-	 * Removes the row of the container instance at the specified index.
-	 * 
-	 * @param index integer that has to be in the range of the values size.
-	 */
-	void deleteRow(int index);
-	/**
-	 * Deletes all rows of the container instance that match the defined filter criteria. If no rows
-	 * could be detected the method returns. If there is a file defined for the container the changes
-	 * get written to it afterwards.
-	 * 
-	 * @param fltr {@link org.opentdk.api.filter.Filter} object with the set filter rules.
-	 */
-	void deleteRows(Filter fltr);
-	
-	/**
-	 * @param name column name
-	 */
-	void deleteValue(String name);
-
-	/**
-	 * This method writes data to a existing or newly created CSV file. Useful if the current state of
-	 * the container should be saved. The semicolon gets used as column separator.
-	 * 
-	 * @param fileName Full path and name of the source file, from which the data will be loaded into
-	 *                 DataContainer
-	 * @throws IOException If any error occurred when writing to the file.
-	 */
-	void exportContainer(String fileName) throws IOException;
-	
-	/**
-	 * This method writes data to a existing or newly created CSV file. Useful if the current state of
-	 * the container should be saved. The column separator can be set.
-	 *
-	 * @param fileName        The file path of the file to write to or to create.
-	 * @param columnDelimiter The column separator to structure the data.
-	 * @throws IOException If any error occurred when writing to the file.
-	 * 
-	 */
-	void exportContainer(String fileName, String columnDelimiter) throws IOException;
-
-	/**
-	 * Gets the content of a column from the <code>DataContainer</code> instance. In order to get the
-	 * columns content, it is iterated through each row saved. The column is specified with index and
-	 * the content is returned as <code>Array</code> of type String
-	 *
-	 * @param index The column's index, which content is searched.
-	 * @return The content of the specified column as <code>Array</code> of type String.
-	 */
-	
-	String[] getColumn(int index);
-	/**
-	 * Gets filtered content of a column from the <code>DataContainer</code> instance. Only values of a
-	 * column that match to one or more conditions. In order to get the columns content, it is iterated
-	 * through each row saved. The column is specified with index and the content is returned as
-	 * <code>Array</code> of type <code>String</code>.
-	 *
-	 * @param index The column's index, which content is searched.
-	 * @param fltr  A {@link org.opentdk.api.filter.Filter} object to define which data should be
-	 *              ignored. If it is null no filter gets used.
-	 * @return the content of the specified column as <code>Array</code> of type <code>String</code>.
-	 */
-	
-	String[] getColumn(int index, Filter fltr);
-	/**
-	 * Gets the content of a column from the <code>DataContainer</code> instance. In order to get the
-	 * columns content, it is iterated through each row saved. The column is specified with header name
-	 * and the content is returned as <code>Array</code> of type String
-	 *
-	 * @param colName The header name of the column.
-	 * @return The content of the specified column as <code>Array</code> of type String.
-	 */
-	String[] getColumn(String colName);
-
-	/**
-	 * Gets filtered content of a column from the <code>DataContainer</code> instance. Only values of a
-	 * column, that match to one or more conditions. In order to get the columns content, it is iterated
-	 * through each row saved. The column is specified with column header name and the content is
-	 * returned as <code>Array</code> of type <code>String</code>.
-	 * 
-	 * @param colName The header name of the column.
-	 * @param fltr    A {@link org.opentdk.api.filter.Filter} object to define which data should be
-	 *                ignored. If it is null no filter gets used.
-	 * @return the content of the specified column as <code>Array</code> of type <code>String</code>.
-	 */
-	String[] getColumn(String colName, Filter fltr);
-
-	/**
-	 * Gets filtered content of a column from the <code>DataContainer</code> instance. Only values of a
-	 * column, that match to one or more conditions. In order to get the columns content, it is iterated
-	 * through each row saved. The column is specified with column header name and the content is
-	 * returned as <code>Array</code> of type <code>String</code>, but only if the detected rows in the
-	 * column match the committed row indexes.
-	 * 
-	 * @param colName    The header name of the column.
-	 * @param rowIndexes An array of type integer that contains all row indexes that should be taken
-	 *                   into account when searching in the column.
-	 * @param fltr       A {@link org.opentdk.api.filter.Filter} object to define which data should be
-	 *                   ignored. If it is null no filter gets used.
-	 * @return the content of the specified column as <code>Array</code> of type <code>String</code>.
-	 */
-	String[] getColumn(String colName, int[] rowIndexes, Filter fltr);
-
-	/**
-	 * Returns the number of columns defined within the current instance of the
-	 * <code>DataContainer</code>.
-	 *
-	 * @return number of columns
-	 */
-	int getColumnCount();
-
-	/**
-	 * Get the delimiter character(s) that separates the columns in the source file. The delimiter will
-	 * be used for splitting the data rows and transfer them into a String Array.
-	 *
-	 * @return The character(s) used for column separation in the source file.
-	 */
-	String getColumnDelimiter();
-
-	/**
-	 * Gets a <code>List</code> of string arrays with all column values of the
-	 * <code>DataContainer</code> instance.
-	 *
-	 * @return Object of type <code>List</code> with string arrays, including all matching values of a
-	 *         column.
-	 */
-	List<String[]> getColumnsList();
-	
-	/**
-	 * Gets a <code>List</code> of string arrays with all column values that match to the defined
-	 * filter. The Filter defines the rules for matching rows. <br>
-	 * <br>
-	 * e.g. get string arrays for each column of table 'Customer' where the value of 'City' equals to
-	 * 'Munich'.
-	 *
-	 * @param rowFilter Object of type {@link org.opentdk.api.filter.Filter} which defines rules for
-	 *                  matching rows
-	 * @return Object of type <code>List</code> with string arrays, including all matching values of a
-	 *         column.
-	 */
-	List<String[]> getColumnsList(Filter rowFilter);
-
-	/**
-	 * Gets a <code>List</code> of string arrays with all column values that match to the defined
-	 * filter. The Filter defines the rules for matching rows. <br>
-	 * <br>
-	 * e.g. get string arrays for each column of table 'Customer' where the value of 'City' equals to
-	 * 'Munich'.
-	 *
-	 * @param columnHeaders Semicolon separated string with the column names of which the values will be
-	 *                      returned.
-	 * @param rowFilter     Object of type {@link org.opentdk.api.filter.Filter} which defines rules for
-	 *                      matching rows.
-	 * @return Object of type <code>List</code> with string arrays, including all matching values of a
-	 *         column.
-	 */
-	List<String[]> getColumnsList(String columnHeaders, Filter rowFilter);
-
-	/**
-	 * Gets a <code>List</code> of string arrays with all column values that match to the defined
-	 * filter. The Filter defines the rules for matching rows. Additionally it is possible to define the
-	 * row indices that should be taken into account. <br>
-	 * <br>
-	 * e.g. get string arrays for each column of table 'Customer' where the value of 'City' equals to
-	 * 'Munich'.
-	 *
-	 * @param columnHeaders Semicolon separated string with the column names of which the values will be
-	 *                      returned.
-	 * @param rowFilter     Object of type {@link org.opentdk.api.filter.Filter} which defines rules for
-	 *                      matching rows.
-	 * @param rowIndexes    The row numbers that should be used as search criteria.
-	 * @return Object of type <code>List</code> with string arrays, including all matching values of a
-	 *         column.
-	 */
-	List<String[]> getColumnsList(String[] columnHeaders, int[] rowIndexes, Filter rowFilter);
-
-	/**
-	 * Gets the index value of a defined headerName.
-	 *
-	 * @param headerName Name of the header for which to retrieve the index.
-	 * @return Index value of type integer.
-	 */
-	int getHeaderIndex(String headerName);
-
-	/**
-	 * @param headerIndex The key of the header in the headers map.
-	 * @return The header name at the committed position as string value.
-	 */
-	String getHeaderName(int headerIndex);
-
-	/**
-	 * Returns the header names from the headerNames HashMap as string array, ordered by their
+	 * The headerNames property is used to assign header names to each index of the string
+	 * arrays, stored as elements of the ArrayList {@link #values}. This HashMap allows to locate values
+	 * within the string arrays by name instead of index.<br>
+	 * E.g. if the first row of a CSV file includes header names and all other rows include values, then
+	 * the names of the first row will be stored in the headerNames HashMap with their original
 	 * index.
-	 * 
-	 * @return String array with header names
 	 */
-	String[] getHeaderNamesIndexed();
+	private final HashMap<String, Integer> headerNames = new HashMap<>();
 
 	/**
-	 * Gets the number of headers that match a given regular expression.
-	 *
-	 * @param toMatch regular expression to search for in header names
-	 * @return number of header-names that match the regex
+	 * ArrayList with an array of strings where content of tabular sources is stored at runtime of an
+	 * application. <br>
+	 * If the associated source includes row based records and column based fields like SQL result sets,
+	 * CSV files etc., then each element of the ArrayList represents a row of the source and the header
+	 * names are column headers of the source. <br>
+	 * If the associated source includes column based records and row based fields like Properties
+	 * files, then the data will be transposed while writing into the ArrayList. In this case each
+	 * element of the ArrayList represents a column of the source and the header names are row headers
+	 * of the source.<br>
+	 * If the associated source is not in tabular format, then the data will not be stored within the
+	 * ArrayList. In this case the adapted DataContainer class needs to implement the logic how to store
+	 * the data at runtime e.g. {@link org.w3c.dom.Document} for HTML and XML files.
 	 */
-	int getHeaderOccurances(String toMatch);
+	private final ArrayList<String[]> values = new ArrayList<String[]>();
 
 	/**
-	 * Gets the index of the header row within the source file.
-	 * 
-	 * @return row index
-	 */
-	int getHeaderRowIndex();
-
-	/**
-	 * Gets the <code>HashMap</code> headerNames that includes the names and indexes of column
-	 * headers within the instance of the DataContainer.
-	 *
-	 * @return headerNames <code>HashMap</code>
-	 */
-	HashMap<String, Integer> getHeaders();
-
-	/**
-	 * Gets the HashMap columnHeaders with reversed key/value assignment. Whereas the original
-	 * columnHeaders # HashMap uses the header names as key and their index as value, this method
-	 * returns a HashMap with the index as key and the header name as value.
-	 *
-	 * @return HashMap with indexes and names of the columnHeaders HashMap
-	 */
-	HashMap<Integer, String> getHeadersIndexed();
-
-	/**
-	 * This method returns an array of type integer with the indexes of defined header names. This can
-	 * either be a single header, a semicolon separated string with multiple headers, or an empty string
-	 * that returns the indexes of all headers.
-	 *
-	 * @param headerName
-	 * 
-	 *                   <pre>
-	 *                   - single headername (e.g.
-	 *                   getColumnHeadersIndexes("Firstname");) - semicolon
-	 *                   separated value with multiple headernames (e.g.
-	 *                   getColumnHeadersIndexes("Firstname;Surname;Email;Phone");)
-	 *                   - empty string for all available headernames
-	 *                   (getColumnHeadersIndexes("");)
-	 *
-	 *                   </pre>
-	 *
-	 * @return Array of type integer with header indexes in the order as defined by the headerName
-	 *         parameter
-	 */
-	int[] getHeadersIndexes(String headerName);
-
-	/**
-	 * Gets the maximum length of the values corresponding to the headerName.
-	 *
-	 * @param headerName The name of the header, which can be column or row, depending on the
-	 *                   orientation
-	 * @return Length of the longest String corresponding to headerName
-	 */
-	int getMaxLen(String headerName);
-
-	/**
-	 * Gets the HashMap with MetaData
-	 *
-	 * @return the metaData HashMap of this object instance
-	 */
-	HashMap<String, String> getMetaData();
-
-	/**
-	 * Gets the content of a row of the container instance. The row is specified by index. If the given
-	 * index is bigger than the list's size, it will return <code>null</code>.
-	 *
-	 * @param rowIndex The row's index, which content is searched.
-	 * @return The content of the specified row.
-	 */
-	String[] getRow(int rowIndex);
-
-	/**
-	 * Gets the content of a row of the container instance. The row is specified by index. If the given
-	 * index is bigger than the list's size, it will return <code>null</code>.
-	 *
-	 * @param rowIndex      The row's index, which content is searched.
-	 * @param columnHeaders The column headers that should be taken into account, separated by
-	 *                      semicolon. If only one header should be specified, no separation is needed
-	 *                      of course.
-	 * @return The content of the specified row.
-	 */
-	String[] getRow(int rowIndex, String columnHeaders);
-
-	/**
-	 * Gets the content of a row of the container instance. The row is specified by index. If the given
-	 * index is bigger than the list's size, it will return <code>null</code>.
-	 *
-	 * @param rowIndex      The row's index, which content is searched.
-	 * @param columnHeaders The column headers that should be taken into account, separated by
-	 *                      semicolon. If only one header should be specified, no separation is needed
-	 *                      of course.
-	 * @param fltr          Object of type {@link org.opentdk.api.filter.Filter} which defines rules for
-	 *                      matching rows.
-	 * @return The content of the specified row.
-	 */
-	String[] getRow(int rowIndex, String columnHeaders, Filter fltr);
-
-	/**
-	 * Gets the content of a row of the container instance. The row is specified by index. If the given
-	 * index is bigger than the list's size, it will return <code>null</code>.
-	 *
-	 * @param rowIndex      The row's index, which content is searched.
-	 * @param columnHeaders The column headers that should be taken into account, separated by
-	 *                      semicolon. If only one header should be specified, no separation is needed
-	 *                      of course.
-	 * @return The content of the specified row.
-	 */
-	String[] getRow(int rowIndex, String[] columnHeaders);
-
-	/**
-	 * @param rowIndex
-	 * @return map with the column index as key and the row value as value
-	 */
-	Map<String, String> getRowAsMap(int rowIndex);
-
-	/**
-	 * Returns the number of rows of the current <code>DataContainer</code> instance.
-	 *
-	 * @return Number of rows e.g number of lines in case of a CSV format or number of key value pairs
-	 *         in case of a properties file.
-	 */
-	int getRowCount();
-
-	/**
-	 * Possibility to search for integer values of the <code>DataContainer</code> rows.
-	 * 
-	 * @param filter Object of type {@link org.opentdk.api.filter.Filter} which defines rules for
-	 *               matching rows.
-	 * @return The numbers of the matching rows as integer array.
-	 */
-	int[] getRowsIndexes(Filter filter);
-
-	/**
-	 * Returns a list with all rows stored in the <code>DataContainer</code> instance.
-	 *
-	 * @return list object with stored data rows.
-	 */
-	List<String[]> getRowsList();
-
-	/**
-	 * Returns a list with all rows, that match to the defined rowFilter.
-	 *
-	 * @param rowFilter Object of type {@link org.opentdk.api.filter.Filter} which defines rules for
-	 *                  matching rows.
-	 * @return A list with all rows. Each row is stored in one string array.
-	 */
-	List<String[]> getRowsList(Filter rowFilter);
-
-	/**
-	 * Returns a list of row values for defined columns that match to a defined rowFilter.
-	 *
-	 * @param rowIndexes    The numbers of the rows that should be taken into account.
-	 * @param columnHeaders The header name of the column to search in.
-	 * @param rowFilter     Object of type {@link org.opentdk.api.filter.Filter} which defines rules for
-	 *                      matching rows.
-	 * 
-	 * @return A list with all rows. Each row is stored in one string array.
-	 */
-	List<String[]> getRowsList(int[] rowIndexes, String[] columnHeaders, Filter rowFilter);
-	
-	/**
-	 * Returns a list of row values for defined columns that match to a defined rowFilter.
-	 *
-	 * @param columnHeader The header name of the column to search in.
-	 * @param rowFilter    Object of type {@link org.opentdk.api.filter.Filter} which defines rules for
-	 *                     matching rows.
-	 * @return A list with all rows. Each row is stored in one string array.
-	 */
-	List<String[]> getRowsList(String columnHeader, Filter rowFilter);
-
-	/**
-	 * Use the <code>getValue</code> method to return a value from a field addressed by headerName of
-	 * the column and index of the row.
-	 *
-	 * @param headerIndex The name of the column header
-	 * @param rowIndex    row-index of the field
-	 * @return the value as String
-	 */
-	String getValue(int headerIndex, int rowIndex);
-
-	/**
-	 * Use the <code>getValue</code> method to return the first value in column addressed by headerName.
-	 *
-	 * @param headerName The name of the column header
-	 * @return the first value in column addressed by headerName.
-	 */
-	String getValue(String headerName);
-
-	/**
-	 * Use the <code>getValue</code> method to return a value from a field addressed by headerName of
-	 * the column and prepared filter.
-	 *
-	 * @param headerName The name of the column header
-	 * @param fltr       A prepared Filter instance to categorize the result
-	 * @return the value as String
-	 */
-	String getValue(String headerName, Filter fltr);
-
-	/**
-	 * Use the <code>getValue</code> method to return a value from a field addressed by headerName of
-	 * the column and index of the row.
-	 *
-	 * @param headerName The name of the column header
-	 * @param rowIndex   row index of the field
-	 * @return the value as String
-	 */
-	String getValue(String headerName, int rowIndex);
-
-	/**
-	 * Use the getValuesAsList() method to search for a value by header name, row index and prepared
-	 * filter.
-	 * 
-	 * @param headerName The name of the column header
-	 * @param rowIndex   The row index. If it is unknown or not used, commit -1 to search for header
-	 *                   name and filter
-	 * @param fltr       A prepared Filter instance to categorize the result.
-	 * @return the value as String or an empty string if no result could be found
-	 */
-	String getValue(String headerName, int rowIndex, Filter fltr);
-	
-	/**
-	 * Gets all values from the DataContainer instance directly.
-	 *
-	 * @return List of type String with all values
-	 */
-	List<String[]> getValues();
-
-	/**
-	 * Gets a sequence of distincted values from the DataContainer instance. Depending on the header
-	 * orientation, this method will retrieve the values of one row, or one column, which is defined by
-	 * headerName.
-	 *
-	 * @param headerName The name of the header, which can be column or row, depending on the
-	 *                   orientation
-	 * @return distincted list of type String with the selected values
-	 */
-	List<String> getValuesAsDistinctedList(String headerName);
-
-	/**
-	 * Gets a sequence of numeric values from the DataContainer instance and returns them as List of
-	 * Double. Depending on the header orientation, this method will retrieve the values of one row, or
-	 * one column, which is defined by headerName.
-	 *
-	 * @param headerName The name of the header, which can be column or row, depending on the
-	 *                   orientation
-	 * @return List of type Double with all selected values
-	 */
-	List<Double> getValuesAsDoubleList(String headerName);
-
-	/**
-	 * Gets a sequence of numeric values from the current DataContainer instance, that matches to a
-	 * defined filter and returns them as a List of Double. Depending on the header orientation, this
-	 * method will retrieve the values of one row, or one column, which is defined by headerName.
-	 *
-	 * @param headerName The name of the header
-	 * @param rowFilter  Object of type {@link org.opentdk.api.filter.Filter} which defines rules for
-	 *                   matching rows
-	 * @return List of type Double with all selected values
-	 */
-	List<Double> getValuesAsDoubleList(String headerName, Filter rowFilter);
-
-	/**
-	 * Gets a sequence of numeric values from the DataContainer instance and returns them as List of
-	 * integer. Depending on the header orientation, this method will retrieve the values of one row, or
-	 * one column, which is defined by headerName.
-	 *
-	 * @param headerName The name of the header, which can be column or row, depending on the
-	 *                   orientation
-	 * @return List of type Integer with all selected values
-	 */
-	List<Integer> getValuesAsIntList(String headerName);
-
-	/**
-	 * Gets a sequence of numeric values from the current DataContainer instance, that matches to a
-	 * defined filter and returns them as a List of Integer. Depending on the header orientation, this
-	 * method will retrieve the values of one row, or one column, which is defined by headerName.
-	 *
-	 * @param headerName The name of the header
-	 * @param rowFilter  Object of type {@link org.opentdk.api.filter.Filter} which defines rules for
-	 *                   matching rows
-	 * @return List of type integer with all selected values
-	 */
-	List<Integer> getValuesAsIntList(String headerName, Filter rowFilter);
-
-	/**
-	 * Gets a sequence of values from the DataContainer instance. Depending on the header orientation,
-	 * this method will retrieve the values of one row, or one column, which is defined by headerName.
-	 *
-	 * @param headerName The name of the header, which can be column or row, depending on the
-	 *                   orientation
-	 * @return List of type String with all selected values
-	 */
-	List<String> getValuesAsList(String headerName);
-
-	/**
-	 * Gets a sequence of values from the current DataContainer instance, that matches to a defined
-	 * filter. Depending on the header orientation, this method will retrieve the values of one row, or
-	 * one column, which is defined by headerName.
-	 *
-	 * @param headerName The name of the header
-	 * @param rowFilter  Object of type {@link org.opentdk.api.filter.Filter} which defines rules for
-	 *                   matching rows
-	 * @return List of type String with all selected values
-	 */
-	List<String> getValuesAsList(String headerName, Filter rowFilter);
-
-	/**
-	 * Gets a sequence of values from the current DataContainer instance, that matches to a defined
-	 * filter and defined row indexes. Depending on the header orientation, this method will retrieve
-	 * the values of one row, or one column, which is defined by headerName.
-	 *
-	 * @param headerName The name of the header
-	 * @param rowIndexes int array with index numbers of the rows that will be retrieved
-	 * @param fltr       Object of type {@link org.opentdk.api.filter.Filter} which defines rules for
-	 *                   matching rows
-	 * @return List of type String with all selected values
-	 */
-	List<String> getValuesAsList(String headerName, int[] rowIndexes, Filter fltr);
-
-	/**
-	 * Gets a representation of all values within the DataContainer. Columns will be separated by the
-	 * associated or default column delimiter, rows by a new line.
-	 *
-	 * @return String with the complete content of the DataContainer
-	 */
-	String getValuesAsString();
-
-	/**
-	 * Compares the row at committed index with the committed string array. If one of the still existing
-	 * row values is null or empty, it gets replaced by the value from the new array.
-	 * 
-	 * @param rowIndex  row number to identify the row that should be merged
-	 * @param newValues the new data as string array
-	 */
-	void mergeRows(int rowIndex, String[] newValues);
-
-	/**
-	 * Inserts additional headers and values into the DataContanier that will added to the DataSets,
-	 * transmitted from the sources. e.g. If you create an instance of {@link CSVDataContainer} with a
-	 * csv.file as source, you can put the file content into the {@link CSVDataContainer} and add the
-	 * filename to each DataSet.<br>
-	 * The following sample reads contact data from CSV file and adds the column Company with the
-	 * company name for each data set while putting the data into the {@link CSVDataContainer}.
+	 * This HashMap is used to define fields and values that will be appended to each
+	 * record added to the {@link DataContainer} by the {@link DataContainer#readData()},
+	 * {@link TabularContainer#addRow()} and the {@link TabularContainer#appendData(String)} methods.<br>
+	 * E.g. add the name of the source file to each record, when putting the content of multiple files
+	 * into one instance of the {@link DataContainer}.
 	 *
 	 * <pre>
-	 * DataContainer dc = new DataContainer(";", EHeader.COLUMN); // creates a {@link CSVDataContainer}
-	 * dc.putMetaData("Company", "happy inc.");
-	 * dc.readData("c:\\data\\happy-inc.csv");
+	 * <b>Code sample:</b>
+	 * DataContainer dc = new DataContainer(";", EHeader.COLUMN);
+	 * dc.putMetaData("Filename", "Attendees_FirstAid_Course_Q4-2020.csv"));
+	 * dc.readData("./data/Attendees_FirstAid_Course_Q4-2020.csv");
+	 * dc.putMetaData("Filename", "Attendees_FirstAid_Course_Q1-2021.csv"));
+	 * dc.readData("./data/Attendees_FirstAid_Course_Q1-2021.csv");
 	 * </pre>
-	 * <p>
-	 * The readData method of the appropriate DataContainer instance will automatically extend all
-	 * DataSets with all headers and values, added to the metaData HashMap.<br>
+	 */
+	private final HashMap<String, String> metaData = new HashMap<String, String>();
+
+	/**
+	 * An instance of the DataContainer that should be filled with the data from the connected source
+	 * file. Task of the specific data containers.
+	 */
+	protected final DataContainer dc;
+
+	/**
+	 * Construct a new specific <code>DataContainer</code> for CSV files.
+	 *
+	 * @param dCont the <code>DataContainer</code> instance to use it in the read and write methods of
+	 *              this specific data container
+	 */
+	TabularContainer(DataContainer dCont) {
+		dc = dCont;
+	}
+
+	
+	public void addColumn(String col) {
+		addColumn(col, false);
+	}
+
+	
+	public void addColumn(String col, boolean useExisting) {
+		if (!this.headerNames.containsKey(col)) {
+			this.headerNames.put(col, headerNames.size());
+		} else if (!useExisting) {
+			String col_tmp = col;
+			int count = 2;
+			while (this.headerNames.containsKey(col_tmp)) {
+				col_tmp = col + "_" + count;
+				count++;
+			}
+			this.headerNames.put(col_tmp, headerNames.size());
+		} else {
+			return;
+		}
+		for (int i = 0; i < values.size(); i++) {
+			String[] newArr = Arrays.copyOf(values.get(i), values.get(i).length + 1);
+			newArr[newArr.length - 1] = "";
+			values.set(i, newArr);
+		}
+	}
+
+	/**
+	 * Adds the header names from HashMap {@link #metaData} to an array of strings. Header names are
+	 * read from the key names of the entrySets of HashMap {@link #metaData}.
+	 *
+	 * @param inArray Array of strings with header names from HashMap {@link #headerNames}
+	 * @return concatenated array of strings with all key names of HashMap {@link #metaData} and values
+	 *         of the array <b>inArray</b>
+	 */
+	protected String[] addMetaHeaders(String[] inArray) {
+		return extendDataSet(inArray, "HEADER");
+	}
+
+	/**
+	 * Adds the values from HashMap {@link #metaData} to an array of strings. Values are read from the
+	 * values of the entrySets of HashMap {@link #metaData}.
+	 *
+	 * @param inArray Array of strings with values from ArrayList {@link #values}
+	 * @return concatenated array of strings with all values of HashMap {@link #metaData} and the array
+	 *         <b>inArray</b>
+	 */
+	protected String[] addMetaValues(String[] inArray) {
+		return extendDataSet(inArray, "VALUE");
+	}
+
+	
+	public void addRow() {
+		int rowSize = values.size() - getMetaData().size();
+		addRow(new String[rowSize]);
+	}
+
+	
+	public void addRow(int rowIndex, String[] rowValues) {
+		values.add(rowIndex, addMetaValues(rowValues));
+	}
+
+	
+	public void addRow(String[] row) {
+		if ((dc.getFilter() != null) && (!dc.getFilter().getFilterRules().isEmpty())) {
+			try {
+				if (!checkValuesFilter(row, dc.getFilter())) {
+					return;
+				}
+			} catch (NoSuchHeaderException e) {
+				MLogger.getInstance().log(Level.SEVERE, e);
+				throw new RuntimeException(e);
+			}
+		}
+		values.add(addMetaValues(row));
+	}
+
+	
+	public void addRows(List<String[]> rows) {
+		for (String[] row : rows) {
+			addRow(row);
+		}
+	}
+
+	
+	public void appendData(String fileName) throws IOException {
+		if (getColumnDelimiter() == null) {
+			setColumnDelimiter(";");
+		}
+		appendData(fileName, getColumnDelimiter());
+	}
+
+	
+	public void appendData(String fileName, String columnDelimiter) throws IOException {
+		dc.setInputFile(new File(fileName));
+		setColumnDelimiter(columnDelimiter);
+
+		if (dc.getFilter() == null) {
+			dc.setFilter(new Filter());
+		}
+		readData(dc.getFilter());
+	}
+
+	public void appendDataContainer(DataContainer dc) {
+		if (checkHeader(dc.tabInstance().getHeaders()) == 0) {
+			values.addAll(dc.tabInstance().getValues());
+		} else if (checkHeader(dc.tabInstance().getHeaders()) == 1) {
+			int i = 0;
+			while (i < dc.tabInstance().getRowCount()) {
+				String[] row = new String[getColumnCount()];
+				for (int j = 0; j < getColumnCount(); j++) {
+					try {
+						row[j] = dc.tabInstance().getValuesAsList(getHeadersIndexed().get(j)).get(i);
+					} catch (RuntimeException e) {
+						row[j] = null;
+					}
+				}
+				i++;
+				values.add(row);
+			}
+		} else {
+			MLogger.getInstance().log(Level.WARNING, "Headers of appending DataContainer don't match to the headers of the current instance. DataContainer will not be appended!", getClass().getSimpleName(), getClass().getName(), "appendDataContainer");
+		}
+	}
+
+	
+	public String asString() {
+		return getValuesAsString();
+	}
+
+	
+	public int checkHeader(HashMap<String, Integer> compareHeaders) {
+		// transfer compareHeaders HashMap into String Array
+		String[] hd = new String[compareHeaders.size()];
+		for (Map.Entry<String, Integer> e : compareHeaders.entrySet()) {
+			if (e.getValue() >= hd.length) {
+				return -1;
+			} else {
+				hd[e.getValue()] = e.getKey();
+			}
+		}
+		// check if headers match with existing instance headers and return the check result
+		return checkHeader(getHeaders(), hd);
+	}
+
+	
+	public int checkHeader(HashMap<String, Integer> referenceHeaders, String[] compareHeaders) {
+		int rc = 0;
+		for (int i = 0; i < compareHeaders.length; i++) {
+			if (referenceHeaders.containsKey(compareHeaders[i])) {
+				if (referenceHeaders.get(compareHeaders[i]) != i) {
+					rc = 1;
+				}
+			} else {
+				return -1;
+			}
+		}
+		return rc;
+	}
+
+	
+	public int checkHeader(String[] compareHeaders) {
+		return checkHeader(getHeaders(), addMetaHeaders(compareHeaders));
+	}
+
+	
+	public int checkHeader(String[] referenceHeaders, String[] compareHeaders) {
+		HashMap<String, Integer> refH = new HashMap<String, Integer>();
+		for (int i = 0; i < referenceHeaders.length; i++) {
+			refH.put(referenceHeaders[i], i);
+		}
+		return checkHeader(refH, compareHeaders);
+	}
+
+	/**
+	 * Checks, if the filter rules match to the values of the given data set.
+	 *
+	 * @param values String Array with all values of a defined data set (row).
+	 * @param fltr   Object of type Filter, which includes one or more filter rules
+	 * @return true = values match to the filter; false = values don't match to the
+	 * @throws NoSuchHeaderException If the container does not have a header that is defined in the
+	 *                               filter
+	 */
+	private boolean checkValuesFilter(String[] values, Filter fltr) throws NoSuchHeaderException {
+		boolean returnCode = false;
+		for (FilterRule rule : fltr.getFilterRules()) {
+			if ((!this.headerNames.containsKey(rule.getHeaderName())) && (!dc.getImplicitHeaders().contains(rule.getHeaderName()))) {
+				throw new NoSuchHeaderException("Header " + rule.getHeaderName() + " doesn't comply to DataContainer!");
+			}
+		}
+		// return true, if no filter rule is defined
+		if (fltr.getFilterRules().isEmpty()) {
+			returnCode = true;
+		} else {
+			for (FilterRule fr : fltr.getFilterRules()) {
+				// Wild cards * and % will accept any value
+				if (fr.getValue() != null) {
+					if ((fr.getValue().equals("*")) || (fr.getValue().equals("%"))) {
+						returnCode = true;
+						break;
+					}
+				}
+				// check values against the filter rules
+				returnCode = fr.checkValue(values[headerNames.get(fr.getHeaderName())]);
+				if (!returnCode) {
+					// skip check and return false, in case that one of the rules fails
+					break;
+				}
+			}
+		}
+		return returnCode;
+	}
+
+	/**
+	 * This method is used to prepare an Array of strings before inserting the values into the ArrayList
+	 * {@link #values}. <br>
 	 * <br>
+	 * e.g. remove enclosing quotes for each value in the array<br>
+	 * inArray = "val1", "val2", "val3", "val4"<br>
+	 * return = val1, val2, val3, val4
 	 *
-	 * @param headerName Header name of DataSet within the DataContainer
-	 * @param value      Value as String that will be added to each DataSet into the column of
-	 *                   headerName
+	 * @param inArray an Array of strings whose values are cleaned up
+	 * @return an Array of strings with cleaned values
 	 */
-	void putMetaData(String headerName, String value);
+	private String[] cleanValues(String[] inArray) {
+		ArrayList<String> valList = new ArrayList<String>(Arrays.asList(inArray));
+		String[] outArray = new String[inArray.length];
+		for (int i = 0; i < inArray.length; i++) {
+			outArray[i] = StringUtil.removeEnclosingQuotes(valList.get(i));
+		}
+		return outArray;
+	}
+
 	
-	/**
-	 * Sets a column in the <code>DataContainer</code> instance with the specified new content. If the
-	 * new column is bigger than the old one, new rows with empty values will be added.
-	 *
-	 * @param headerName   The name of the column. Existing column will be overwritten and non-existing
-	 *                     column will be created.
-	 * @param columnValues The values for the column as List of strings.
-	 */
-	void setColumn(String headerName, List<String> columnValues);
+	public void createFile() throws IOException {
+		FileUtil.createFile(dc.getInputFile(), true);
+	}
 
-	/**
-	 * Sets a column in the <code>DataContainer</code> instance with the specified new content. If the
-	 * new column is bigger than the old one, new rows with empty values will be added.
-	 *
-	 * @param headerName   The name of the column. Existing column will be overwritten and non-existing
-	 *                     column will be created.
-	 * @param columnValues The values for the column as string array.
-	 */
-	void setColumn(String headerName, String[] columnValues);
-
-	/**
-	 * Sets the <code>columnDelimiter</code> property which is used for splitting the data rows of the
-	 * source file into a String Array.
-	 *
-	 * @param cDel The character(s) used for column separation in the source file.
-	 */
-	void setColumnDelimiter(String cDel);
-
-	/**
-	 * Sets the index of the header row within the source file.
-	 * 
-	 * @param headerIndex Zero based index where the names of header are placed.
-	 */
-	void setHeaderRowIndex(int headerIndex);
-
-	/**
-	 * Sets header names to the tabular container instance.
-	 * If a header name does already exist or gets passed several times, a new one with the same name gets added with an index suffix (i.e GF#,GF#_2 ...).
-	 *
-	 * @param in_headers List with the header names to be added
-	 */
-	void setHeaders(List<String> in_headers);
-
-	/**
-	 * Sets header names to the tabular container instance.
-	 * If a header name does already exist or gets passed several times, a new one with the same name gets added with an index suffix (i.e GF#,GF#_2 ...).
-	 *
-	 * @param in_headers Array with the header names to be added
-	 */
-	void setHeaders(String[] in_headers);
-
-	/**
-	 * Sets header names to the tabular container instance.
-	 * If a header name does already exist or gets passed several times, a new one with the same name gets added with an index suffix (i.e GF#,GF#_2 ...).
-	 *
-	 * @param in_headers Array with the header names to be added
-	 * @param overwrite if true, the existing headers get cleared first {@literal -} the metadata headers stay the same
-	 */
-	void setHeaders(String[] in_headers, boolean overwrite);
-
-	/**
-	 * This method is similar to the {@link #putMetaData} method with the difference, that existing
-	 * metadata with the same headerName will be overwritten. This method should be used preferably to
-	 * avoid duplicated column headers.
-	 * 
-	 * In case a new header/value set is added to the DataContainer an empty string will be added as an
-	 * additional element to the existing data arrays.
-	 * 
-	 * @param headerName Header name of DataSet within the DataContainer
-	 * @param value      Value as String that will be added to each DataSet into the column of
-	 *                   headerName
-	 */
-	void setMetaData(String headerName, String value);	
-
-	/**
-	 * Replaces the row at the committed index with the data of the committed string array.
-	 * 
-	 * @param rowIndex  row number to identify the row that should be replaced
-	 * @param rowValues the new data as string array
-	 */
-	void setRow(int rowIndex, String[] rowValues);
-
-	/**
-	 * Sets content of a defined field by header name and index with a specified value. The existing
-	 * content of that field will be overwritten. If a header does not exist, it will be created by
-	 * shifting all existing values one position backward and setting the new one at the first position.
-	 *
-	 * @param headerName Name of the sequence header
-	 * @param index      Index of the field within the DataSet
-	 * @param value      Value as String that will be set to the field
-	 */
-	void setValue(String headerName, int index, String value);
-
-	/**
-	 * Sets content of a defined field by header name, index and filter with a specified value. The
-	 * existing content of the field within the dataset will be overwritten. If a header does not exist,
-	 * it will be created by shifting all existing values one position backward and setting the new one
-	 * at the first position.
-	 *
-	 * @param headerName Name of the sequence header
-	 * @param index      zero based index that defines the position of the field in case that multiple
-	 *                   fields were found
-	 * @param value      Value as String that will be set to the field
-	 * @param fltr       Filter for selection of the target dataset (row or column)
-	 */
-	void setValue(String headerName, int index, String value, Filter fltr);
-
-	/**
-	 * Sets content to the first field of a sequence defined by header name with a specified value. The
-	 * existing content of that field will be overwritten.
-	 *
-	 * @param headerName Name of the sequence header
-	 * @param value      Value as String that will be set to the field
-	 */
-	void setValue(String headerName, String value);
-
-	/**
-	 * Sets content of a defined field by header name and filter with a specified value. The existing
-	 * content of the field within the first matching dataset will be overwritten. If a header does not
-	 * exist, it will be created by shifting all existing values one position backward and setting the
-	 * new one at the first position.
-	 *
-	 * @param headerName Name of the sequence header
-	 * @param value      Value as String that will be set to the field
-	 * @param fltr       Filter for selection of the target dataset (row or column)
-	 */
-	void setValue(String headerName, String value, Filter fltr);
-
-	/**
-	 * Sets content of multiple fields by header name, index and filter with a specified value. The
-	 * existing content of the fields within the dataset will be overwritten. If a header does not
-	 * exist, it will be created by shifting all existing values one position backward and setting the
-	 * new one at the first position.
-	 *
-	 * @param headerName Name of the sequence header
-	 * @param indexes    Array with indexes, defining the position of all fields which will be
-	 *                   overwritten
-	 * @param value      Value as String that will be set to the field
-	 * @param fltr       Filter for selection of the target dataset (row or column)
-	 */
-	void setValues(String headerName, int[] indexes, String value, Filter fltr);
 	
-	/**
-	 * Sets content of the first matching field defined by header name and filter with a specified
-	 * value. The existing content of the field within the dataset will be overwritten. If a header does
-	 * not exist, it will be created by shifting all existing values one position backward and setting
-	 * the new one at the first position.
-	 *
-	 * @param headerName Name of the sequence header
-	 * @param value      Value as String that will be set to the field
-	 * @param fltr       Filter for selection of the target dataset (row or column)
-	 */
-	void setValues(String headerName, String value, Filter fltr);
+	public String[] createPreparedRow(){
+		return createPreparedRow(new String[0]);
+	}
+
 	
-	void setValues(String headerName, String value, Filter fltr, Boolean allOccurences);
+	public String[] createPreparedRow(String[] valueSets){
+		String[] preparedRow = new String[getHeaderNamesIndexed().length];
+		for(int i=0; i< preparedRow.length; i++){
+			preparedRow[i] = "";
+		}
+		for(String valueSet:valueSets){
+			String[] setItems = valueSet.split("=");
+			preparedRow[getHeaderIndex(setItems[0])] = setItems[1];
+		}
+		return preparedRow;
+	}
+
+	
+	public void deleteValue(String headerName) {
+		int headerIndex = getHeaderIndex(headerName);
+		values.get(0)[headerIndex] = null;
+		if (!dc.getInputFile().getPath().isEmpty()) {
+			try {
+				writeData(dc.getInputFile().getPath());
+			} catch (IOException e) {
+				MLogger.getInstance().log(Level.SEVERE, e);
+			}
+		}
+	}
+
+	
+	public void deleteRow(int index) {
+		values.remove(index);
+	}
+
+	
+	public void deleteRows(Filter fltr) {
+		int[] indexes = getRowsIndexes(fltr);
+		if (indexes.length == 0) {
+			MLogger.getInstance().log(Level.WARNING, "No row indexes detected for the filter criteria", getClass().getSimpleName(), "deleteRows");
+		} else {
+			for (int index : indexes) {
+				getValues().remove(index);
+			}
+			if (!dc.getInputFile().getName().isEmpty()) {
+				try {
+					writeData(dc.getInputFile().getPath());
+				} catch (IOException e) {
+					MLogger.getInstance().log(Level.SEVERE, e);
+				}
+			}
+		}
+	}
+
+	
+	public void exportContainer(String fileName) throws IOException {
+		exportContainer(fileName, ";");
+	}
+
+	
+	public void exportContainer(String fileName, String columnDelimiter) throws IOException {
+		HashMap<Integer, String> hm = getHeadersIndexed();
+		XFileWriter writer = new XFileWriter(new File(fileName));
+		if (writer != null) {
+			switch (dc.getContainerFormat().getOrientation()) {
+				case COLUMN:
+					writer.writeLine(hm.values().toArray(new String[hm.values().size()]), columnDelimiter);
+					for (String[] row : getRowsList()) {
+						writer.writeLine(row, columnDelimiter);
+					}
+					break;
+				case ROW:
+					List<String[]> colList = getColumnsList();
+					for (int i = 0; i < colList.size(); i++) {
+						writer.writeLine(hm.get(i) + columnDelimiter + (String.join(columnDelimiter, colList.get(i))));
+					}
+					break;
+				default:
+					MLogger.getInstance().log(Level.WARNING, "Header Type '" + dc.getContainerFormat().getOrientation().toString() + "' not supported by for export!", getClass().getSimpleName(), getClass().getName(), "exportContainer");
+					return;
+			}
+			writer.close();
+		}
+	}
+
+	/**
+	 * This method is used to add the values stored in HashMap {@link #metaData} to an array of strings
+	 * and returns the extended array.
+	 *
+	 * @param inArray array of strings with all values from ArrayList {@link #values} or header names
+	 *                from HashMap {@link #headerNames}
+	 * @param target  valid values are "HEADER" and "VALUE" - this defines where to get the value
+	 *                from HashMap {@link #metaData} (HEADER=getKey(); VALUE=getValue();)
+	 * @return the extended array.
+	 */
+	private String[] extendDataSet(String[] inArray, String target) {
+		// copy array of strings into ArrayList
+		ArrayList<String> valList = new ArrayList<String>(Arrays.asList(inArray));
+		// check if metaData is defined for this instance of DataContainer
+		if (!getMetaData().isEmpty()) {
+			// if metaData is defined, loop through each entrySet of the HashMap "metaData"
+			for (Map.Entry<String, String> entry : getMetaData().entrySet()) {
+				if (target.equals("HEADER")) {
+					// if inArray includes headerNames from the HashMap "columnHeaders", then extend
+					// the ArrayList with the key name of the entrySet
+					valList.add(entry.getKey());
+				} else {
+					// else extend the ArrayList with the value of the entrySet
+					valList.add(entry.getValue());
+				}
+			}
+		}
+		return valList.toArray(new String[valList.size()]);
+	}
+
+	
+	public String[] getColumn(int index) {
+		return getColumn(getHeaderName(index), new int[0], new Filter());
+	}
+
+	
+	public String[] getColumn(int index, Filter fltr) {
+		return getColumn(getHeaderName(index), new int[0], fltr);
+	}
+
+	
+	public String[] getColumn(String colName) {
+		return getColumn(colName, new int[0], new Filter());
+	}
+
+	
+	public String[] getColumn(String colName, Filter fltr) {
+		return getColumn(colName, new int[0], fltr);
+	}
+
+	
+	public String[] getColumn(String colName, int[] rowIndexes, Filter fltr) {
+		List<String[]> outLst = getColumnsList(colName.split(";"), rowIndexes, fltr);
+		if (outLst.size() > 0) {
+			return outLst.get(0);
+		}
+		return new String[0];
+	}
+
+	
+	public int getColumnCount() {
+		return getHeaders().size();
+	}
+
+	
+	public String getColumnDelimiter() {
+		return columnDelimiter;
+	}
+
+	
+	public List<String[]> getColumnsList() {
+		return getColumnsList(new String[0], new int[0], new Filter());
+	}
+
+	
+	public List<String[]> getColumnsList(Filter rowFilter) {
+		return getColumnsList(new String[0], new int[0], rowFilter);
+	}
+
+	
+	public List<String[]> getColumnsList(String columnHeaders, Filter rowFilter) {
+		return getColumnsList(columnHeaders.split(";"), new int[0], rowFilter);
+	}
+
+	
+	public List<String[]> getColumnsList(String[] columnHeaders, int[] rowIndexes, Filter rowFilter) {
+		List<String[]> colList = new ArrayList<String[]>();
+		List<String[]> rowValues = getRowsList(rowIndexes, columnHeaders, rowFilter);
+		List<List<String>> colsTmp = new ArrayList<List<String>>();
+		for (String[] rowArray : rowValues) {
+			for (int i = 0; i < rowArray.length; i++) {
+				if (colsTmp.size() <= i) {
+					colsTmp.add(new ArrayList<String>());
+				}
+				colsTmp.get(i).add(rowArray[i]);
+			}
+		}
+		for (List<String> col : colsTmp) {
+			colList.add(col.toArray(new String[col.size()]));
+		}
+		return colList;
+	}
+
+	
+	public int getHeaderIndex(String headerName) {
+		int retVal = -1;
+		if (headerNames.containsKey(headerName)) {
+			retVal = headerNames.get(headerName);
+		}
+		return retVal;
+	}
+
+	
+	public String getHeaderName(int headerIndex) {
+		return getHeadersIndexed().get(headerIndex);
+	}
+
+	
+	public String[] getHeaderNamesIndexed() {
+		HashMap<Integer, String> hm = getHeadersIndexed();
+		List<String> headerNamesIndexed = new ArrayList<String>();
+		for (int i = 0; i < hm.size(); i++) {
+			if (hm.containsKey(i))
+				headerNamesIndexed.add(hm.get(i));
+		}
+		return (headerNamesIndexed.toArray(new String[headerNamesIndexed.size()]));
+	}
+
+	
+	public int getHeaderOccurances(String toMatch) {
+		int retVal = 0;
+		for (String value : headerNames.keySet()) {
+			if (value.matches(toMatch)) {
+				retVal++;
+			}
+		}
+		return retVal;
+	}
+
+	
+	public int getHeaderRowIndex() {
+		return headerNamesIndex;
+	}
+
+	
+	public HashMap<String, Integer> getHeaders() {
+		return headerNames;
+	}
+
+	
+	public HashMap<Integer, String> getHeadersIndexed() {
+		HashMap<Integer, String> indexedHeaders = new HashMap<>();
+		for (String k : headerNames.keySet()) {
+			indexedHeaders.put(headerNames.get(k), k);
+		}
+		return indexedHeaders;
+	}
+
+	
+	public int[] getHeadersIndexes(String headerName) {
+		String[] hArray = new String[0];
+		if (headerName != null && headerName.length() > 0) {
+			hArray = new String[headerName.split(";").length];
+			hArray = headerName.split(";");
+		} else {
+			hArray = new String[getHeaders().size()];
+			hArray = getHeaders().keySet().toArray(new String[getHeaders().size()]);
+		}
+
+		int[] hi = new int[hArray.length];
+		for (int i = 0; i < hArray.length; i++) {
+			hi[i] = getHeaderIndex(hArray[i]);
+		}
+		return hi;
+	}
+
+	
+	public int getMaxLen(String headerName) {
+		int ret = 0;
+		List<String> valList = getValuesAsList(headerName);
+		for (String s : valList) {
+			if (s.length() > ret)
+				ret = s.length();
+		}
+		return ret;
+	}
+
+	
+	public HashMap<String, String> getMetaData() {
+		return metaData;
+	}
+
+	
+	public String[] getRow(int rowIndex) {
+		return getRow(rowIndex, null, new Filter());
+	}
+
+	
+	public String[] getRow(int rowIndex, String columnHeaders) {
+		return getRow(rowIndex, columnHeaders, new Filter());
+	}
+
+	
+	public String[] getRow(int rowIndex, String columnHeaders, Filter fltr) {
+		String[] colHeaders = null;
+		if (columnHeaders == null) {
+			colHeaders = new String[0];
+		} else {
+			colHeaders = columnHeaders.split(";");
+		}
+		List<String[]> outLst = getRowsList(new int[] { rowIndex }, colHeaders, fltr);
+		if (outLst.size() > 0) {
+			return outLst.get(0);
+		}
+		return new String[] {};
+	}
+
+	
+	public String[] getRow(int rowIndex, String[] columnHeaders) {
+		return getRow(rowIndex, String.join(";", columnHeaders), new Filter());
+	}
+
+	
+	public Map<String, String> getRowAsMap(int rowIndex) {
+		Map<String, String> outRow = new HashMap<String, String>();
+		String[] columnHeaders = getHeaderNamesIndexed();
+		for (String header : columnHeaders) {
+			outRow.put(header, this.getValue(header, rowIndex));
+		}
+		return outRow;
+	}
+
+	
+	public int getRowCount() {
+		return values.size();
+	}
+
+	
+	public int[] getRowsIndexes(Filter filter) {
+		StringBuilder indexBuffer = new StringBuilder();
+		for (int i = 0; i < values.size(); i++) {
+			try {
+				if (checkValuesFilter(values.get(i), filter)) {
+					if (indexBuffer.length() > 0) {
+						indexBuffer.append(";");
+					}
+					indexBuffer.append(String.valueOf(i));
+				}
+			} catch (NoSuchHeaderException e) {
+				MLogger.getInstance().log(Level.SEVERE, e, "getRowsIndexes");
+				throw new RuntimeException(e);
+			}
+		}
+		if (indexBuffer.length() > 0) {
+			return Arrays.stream(indexBuffer.toString().split(";")).mapToInt(Integer::parseInt).toArray();
+		} else {
+			return new int[] {};
+		}
+	}
+
+	
+	public List<String[]> getRowsList() {
+		return getRowsList(new int[0], new String[0], new Filter());
+	}
+
+	
+	public List<String[]> getRowsList(Filter rowFilter) {
+		return getRowsList(new int[0], new String[0], rowFilter);
+	}
+
+	
+	public List<String[]> getRowsList(int[] rowIndexes, String[] columnHeaders, Filter rowFilter) {
+		List<String[]> outValues = new ArrayList<String[]>();
+		if (rowIndexes.length == 0) {
+			rowIndexes = new int[values.size()];
+			if (values.size() > 0) {
+				int i = 0;
+				do {
+					rowIndexes[i] = i++;
+				} while (i < values.size());
+			}
+		}
+		for (int i = 0; i < rowIndexes.length; i++) {
+			if (rowIndexes[i] >= values.size()) {
+				MLogger.getInstance().log(Level.INFO, "Row-index " + rowIndexes[i] + " is out of range. Maximum number of rows in container is " + values.size(), this.getClass().getSimpleName(), this.getClass().getName(), "getRowsList");
+				break;
+			}
+			String[] row = values.get(rowIndexes[i]);
+			if (row.length > 0) {
+				try {
+					if (checkValuesFilter(row, rowFilter)) {
+						if (columnHeaders.length == 0) {
+							// if no headerNames are defined, return the complete row
+							outValues.add(row);
+						} else {
+							// else return the values of all defined columns
+							String[] rowArray = new String[columnHeaders.length];
+							for (int j = 0; j < columnHeaders.length; j++) {
+								int headerIndex = getHeaderIndex(columnHeaders[j]);
+								if (headerIndex > -1) {
+									rowArray[j] = row[headerIndex];
+								}
+							}
+							outValues.add(rowArray);
+						}
+					}
+				} catch (NoSuchHeaderException e) {
+					MLogger.getInstance().log(Level.SEVERE, e, "getRowsList");
+					throw new RuntimeException(e);
+				}
+			}
+		}
+		return outValues;
+	}
+
+	
+	public List<String[]> getRowsList(String columnHeader, Filter rowFilter) {
+		return getRowsList(new int[0], columnHeader.split(";"), rowFilter);
+	}
+
+	
+	public String getValue(int headerIndex, int rowIndex) {
+		return getValue(getHeaderName(headerIndex), rowIndex, new Filter());
+	}
+
+	
+	public String getValue(String headerName) {
+		return getValue(headerName, -1, new Filter());
+	}
+
+	
+	public String getValue(String headerName, Filter fltr) {
+		return getValue(headerName, -1, fltr);
+	}
+
+	
+	public String getValue(String headerName, int rowIndex) {
+		return getValue(headerName, rowIndex, new Filter());
+	}
+
+	
+	public String getValue(String headerName, int rowIndex, Filter fltr) {
+		int[] ri = null;
+		if (rowIndex < 0) {
+			ri = new int[0];
+		} else {
+			ri = new int[] { rowIndex };
+		}
+		List<String> outLst = this.getValuesAsList(headerName, ri, fltr);
+		if (outLst.size() > 0) {
+			return outLst.get(0);
+		}
+		return null;
+	}
+
+	
+	public List<String[]> getValues() {
+		return values;
+	}
+
+	
+	public List<String> getValuesAsDistinctedList(String headerName) {
+		List<String> values = getValuesAsList(headerName, new int[0], new Filter());
+		Set<String> uniqueValues = new HashSet<>(values);
+		return Arrays.asList(uniqueValues.toArray(new String[uniqueValues.size()]));
+	}
+
+	
+	public List<Double> getValuesAsDoubleList(String headerName) {
+		return this.getValuesAsDoubleList(headerName, new Filter());
+	}
+
+	
+	public List<Double> getValuesAsDoubleList(String headerName, Filter rowFilter) {
+		List<Double> doubleList = new ArrayList<Double>();
+		List<String> valList = getValuesAsList(headerName, rowFilter);
+		for (String val : valList) {
+			if (!val.isEmpty()) {
+				doubleList.add(Double.valueOf(val));
+			}
+		}
+		return doubleList;
+	}
+
+	
+	public List<Integer> getValuesAsIntList(String headerName) {
+		return this.getValuesAsIntList(headerName, new Filter());
+	}
+
+	
+	public List<Integer> getValuesAsIntList(String headerName, Filter rowFilter) {
+		List<Integer> intList = new ArrayList<Integer>();
+		List<String> valList = getValuesAsList(headerName, rowFilter);
+		for (String val : valList) {
+			intList.add(Integer.valueOf(val));
+		}
+		return intList;
+	}
+
+	
+	public List<String> getValuesAsList(String headerName) {
+		return getValuesAsList(headerName, new int[0], new Filter());
+	}
+
+	
+	public List<String> getValuesAsList(String headerName, Filter rowFilter) {
+		return getValuesAsList(headerName, new int[0], rowFilter);
+	}
+
+	
+	public List<String> getValuesAsList(String headerName, int[] rowIndexes, Filter fltr) {
+		List<String[]> colLst = getColumnsList(headerName.split(";"), rowIndexes, fltr);
+		List<String> outList = new ArrayList<String>();
+		if (colLst.size() > 0) {
+			outList = Arrays.asList(colLst.get(0));
+		}
+		return outList;
+	}
+
+	
+	public String getValuesAsString() {
+		StringBuilder ret = new StringBuilder();
+		for (String[] row : values) {
+			ret.append(String.join(columnDelimiter, row));
+			ret.append("\n");
+		}
+		return ret.toString();
+	}
+
+	
+	public void mergeRows(int rowIndex, String[] newValues) {
+		String[] valArr = this.getRow(rowIndex);
+		for (int i = 0; i < newValues.length; i++) {
+			if (newValues[i] != null) {
+				if ((getValue(i, rowIndex) == null) || (getValue(i, rowIndex).isEmpty())) {
+					valArr[i] = newValues[i];
+				}
+			}
+		}
+		values.set(rowIndex, valArr);
+	}
+
+	/**
+	 * This method reads data from a CSV file, converts it to a row orientation and puts it row by row
+	 * in the DataContainer's value property. Every column corresponds to one data set, so the header
+	 * orientation has to be row wise.
+	 *
+	 * @param fileName        The filename of the file to read from
+	 * @param columnDelimiter The column delimiter used to separate columns in the CSV file
+	 */
+	private void putDatasetColumns(String fileName, String columnDelimiter) {
+		List<List<String>> tmpRowsList = new ArrayList<>();
+		int rowIndex = -1;
+
+		List<String> rows = FileUtil.getRowsAsList(fileName);
+		for (String row : rows) {
+			rowIndex++;
+			String[] valArray = cleanValues(row.split(columnDelimiter));
+			int firstValueIndex = 0;
+			for (int i = 0; i < valArray.length; i++) {
+				// if withHeaders = true, add values in the first column to the headers HashMap,
+				// and start values at index 1
+				if (i == 0) {
+					if (!getHeaders().containsValue(rowIndex)) {
+						getHeaders().put(valArray[0], rowIndex);
+					}
+					firstValueIndex = 1;
+				}
+				// initialize one tmpRowsList for each value in valArray
+				while (tmpRowsList.size() < valArray.length - firstValueIndex) {
+					tmpRowsList.add(new ArrayList<>());
+				}
+				// write all values into temporary lists
+				if (i >= firstValueIndex) {
+					tmpRowsList.get(i - firstValueIndex).add(valArray[i]);
+				}
+			}
+		}
+
+		for (int i = 0; i < tmpRowsList.size(); i++) {
+			// get existing values from 'values' List Object
+			String[] currentValues = new String[0];
+			if ((!values.isEmpty()) && (rowIndex <= values.size() - 1)) {
+				currentValues = Arrays.copyOf(values.get(rowIndex), values.get(rowIndex).length);
+			}
+			String[] newValues = tmpRowsList.get(i).toArray(new String[tmpRowsList.get(i).size()]);
+			List<String> both = new ArrayList<>(currentValues.length + newValues.length);
+			Collections.addAll(both, currentValues);
+			Collections.addAll(both, newValues);
+			if (rowIndex <= values.size() - 1) {
+				setRow(rowIndex, both.toArray(new String[both.size()]));
+			} else {
+				addRow(both.toArray(new String[both.size()]));
+			}
+		}
+	}
+
+	/**
+	 * This method reads data from a CSV file and puts it row by row in the DataContainer's value
+	 * property. Every row corresponds to one data set, so the header orientation has to be column wise.
+	 *
+	 * @param fileName        The filename of the file to read from
+	 * @param columnDelimiter The column delimiter used to separate columns in the CSV file
+	 */
+	private void putDatasetRows(String fileName, String columnDelimiter) {
+		int rowIndex = -1;
+		int headerState = 0;
+		HashMap<Integer, Integer> sortMap = null;
+
+		List<String> rows = FileUtil.getRowsAsList(fileName);
+		for (String row : rows) {
+			rowIndex++;
+			String[] valArray = row.split(columnDelimiter, -1);
+
+//			String[] valArray = dc.cleanValues(row.split(columnDelimiter, -1));
+			if (rowIndex < getHeaderRowIndex()) {
+				MLogger.getInstance().log(Level.INFO, "Skipping row with index " + rowIndex + "! Just rows after the headerRowIndex will be loaded into DataContainer.", this.getClass().getSimpleName(), "putDataSetRows");
+			} else if (rowIndex == getHeaderRowIndex()) {
+				if (getHeaders().isEmpty()) {
+					setHeaders(valArray);
+				}
+				headerState = checkHeader(valArray);
+				if (headerState < 0) {
+					for (String h : valArray) {
+						if (!getHeaders().containsKey(h)) {
+							addColumn(h);
+						}
+					}
+				}
+				if (headerState != 0)
+					sortMap = sortHeadersIndexes(valArray);
+			} else {
+				// FIXME This condition fails when metadata columns get added to the dataset
+				if (addMetaValues(valArray).length == (getHeaders().size() + metaData.size())) {
+					if (headerState == 0) {
+						addRow(valArray);
+					} else {
+						addRow(sortValues(sortMap, valArray));
+					}
+				} else {
+					MLogger.getInstance().log(Level.WARNING, "The number of values doesn't match to the number of headers! Values will not be added to DataContainer.", this.getClass().getSimpleName(), "putDataSetRows");
+				}
+			}
+		}
+	}
+
+	/**
+	 * This method is used to put data from a CSV file to the DataContainer. Depending on the header
+	 * orientation, the correct underlying method will be called.
+	 *
+	 * @param fileName        The filename of the file to read from
+	 * @param columnDelimiter The column delimiter used to separate columns in the CSV file
+	 */
+	private void putFile(String fileName, String columnDelimiter) {
+		switch (dc.getContainerFormat().getOrientation()) {
+			case COLUMN:
+				putDatasetRows(fileName, columnDelimiter);
+				break;
+			case ROW:
+				putDatasetColumns(fileName, columnDelimiter);
+				break;
+			default:
+				MLogger.getInstance().log(Level.WARNING, "Source header '" + dc.getContainerFormat().getOrientation().toString() + "' is not valid for this method. Please set the property sourceHeader with a valid option of EHeader.COLUMN or EHeader.ROW.", this.getClass().getSimpleName(), "putFile");
+				break;
+		}
+	}
+
+	
+	public void putMetaData(String headerName, String value) {
+		metaData.put(headerName, value);
+	}
+
+	
+	public void readData(Filter filter) throws IOException {
+		if (dc.getInputFile() != null && dc.getInputFile().exists()) {
+			if (StringUtils.isNotBlank(dc.getInputFile().getPath())) {
+				putFile(dc.getInputFile().getPath(), getColumnDelimiter());
+			}
+		}
+	}
+
+	
+	public void setColumn(String headerName, List<String> columnValues) {
+		setColumn(headerName, columnValues.toArray(new String[columnValues.size()]));
+	}
+
+	
+	public void setColumn(String headerName, String[] columnValues) {
+		String[] oldCol = new String[values.size()];
+		int j = 0;
+		int headerIndex = getHeaderIndex(headerName);
+		Iterator<String[]> it = values.iterator();
+		while (it.hasNext() && j < values.size()) {
+			oldCol[j] = it.next()[headerIndex];
+		}
+		if (oldCol.length < columnValues.length) {
+			for (int i = 0; i < this.getRowCount(); i++) {
+				String[] newRow = values.listIterator(i).next();
+				newRow[headerIndex] = columnValues[i];
+				this.setRow(i, newRow);
+			}
+			for (int i = this.getRowCount(); i < columnValues.length; i++) {
+				String[] newRow = new String[this.getColumnCount()];
+				newRow[headerIndex] = columnValues[i];
+				this.addRow(newRow);
+			}
+		} else {
+			if (oldCol.length > columnValues.length)
+				columnValues = Arrays.copyOf(columnValues, oldCol.length);
+			for (int i = 0; i < this.getRowCount(); i++) {
+				String[] newRow = values.listIterator(i).next();
+				newRow[headerIndex] = columnValues[i];
+				this.setRow(i, newRow);
+			}
+		}
+	}
+
+	
+	public void setColumnDelimiter(String cDel) {
+		columnDelimiter = cDel;
+	}
+
+	/**
+	 * Sub method that finally edits the values object e.g. when a setValue call occurs.
+	 *
+	 * @param headerName Name of the sequence header.
+	 * @param index      Index of the field within the DataSet.
+	 * @param val      Value as String that will be set to the field.
+	 */
+	private void setFieldValue(String headerName, int index, String val) {
+		if (!getHeaders().containsKey(headerName)) {
+			setHeaders(new String[] { headerName });
+			for (int i = 0; i < values.size(); i++) {
+				values.set(i, Arrays.copyOf(values.get(i), values.get(i).length + 1));
+			}
+		}
+		String[] valArr = null;
+		if (values.size() > 0) {
+			valArr = this.getRow(index);
+		}
+		if (valArr == null) {
+			valArr = new String[this.getHeaders().size()];
+		}
+		valArr[this.getHeaderIndex(headerName)] = val;
+		if (values.size() <= 0) {
+			values.add(index, valArr);
+		} else {
+			values.set(index, valArr);
+		}
+	}
+
+	
+	public void setHeaderRowIndex(int headerIndex) {
+		headerNamesIndex = headerIndex;
+	}
+
+	
+	public void setHeaders(List<String> in_headers) {
+		setHeaders(in_headers.toArray(new String[in_headers.size()]), false);
+	}
+
+	
+	public void setHeaders(String[] in_headers) {
+		setHeaders(in_headers, false);
+	}
+
+	
+	public void setHeaders(String[] in_headers, boolean overwrite) {
+		if(overwrite) {
+			headerNames.clear();
+		}
+		int actualPos = headerNames.size(); // Last index of the old headers
+		for (String header : addMetaHeaders(in_headers)) {
+			if (!headerNames.containsKey(header)) {
+				headerNames.put(header, actualPos);
+			} else {
+				String headers_tmp = header; // To not change the origin header
+				int count = 2;
+				// Increase the index suffix until it is unique
+				while (headerNames.containsKey(headers_tmp)) {
+					headers_tmp = header + "_" + count;
+					count++;
+				}
+				headerNames.put(headers_tmp, actualPos);
+			}
+			actualPos++;
+		}
+	}
+
+	
+	public void setMetaData(String headerName, String value) {
+		int i = 0;
+		if (metaData.containsValue(headerName)) {
+			metaData.replace(headerName, value);
+		} else {
+			metaData.put(headerName, value);
+
+			// Add a new array element to each existing array in ArrayList values with an empty string as value
+			for (String[] element : values) {
+				ArrayList<String> valList = new ArrayList<String>(Arrays.asList(element));
+				valList.add("");
+				values.set(i, valList.toArray(new String[valList.size()]));
+				i++;
+			}
+		}
+	}
+
+	
+	public void setRow(int rowIndex, String[] rowValues) {
+		values.set(rowIndex, addMetaValues(rowValues));
+	}
+
+	
+	public void setValue(String headerName, String value) {
+		setValue(headerName, 0, value, new Filter());
+	}
+
+	
+	public void setValue(String headerName, int index, String value) {
+		setValue(headerName, index, value, new Filter());
+	}
+
+	
+	public void setValue(String headerName, String value, Filter fltr) {
+		setValue(headerName, 0, value, fltr);
+	}
+
+	
+	public void setValue(String headerName, int index, String value, Filter fltr) {
+		setValues(headerName, new int[] { index }, value, fltr);
+	}
+
+	
+	public void setValues(String headerName, int[] indexes, String value, Filter fltr) {
+		if (values.isEmpty()) {
+			setFieldValue(headerName, 0, value);
+		} else {
+			List<Integer> occ = new ArrayList<>();
+			int[] rowIDs = getRowsIndexes(fltr);
+			if (indexes.length != 0 && indexes[0] == -1) {
+				occ = Arrays.stream(rowIDs).boxed().collect(Collectors.toList());
+			} else {
+				occ = Arrays.stream(indexes).boxed().collect(Collectors.toList());
+			}
+			for (int i = 0; i < rowIDs.length; i++) {
+				if ((occ.size() > 0) && (!occ.contains(i))) {
+					continue;
+				} else {
+					setFieldValue(headerName, rowIDs[i], value);
+				}
+			}
+		}
+		if (!dc.getInputFile().getName().isEmpty()) {
+			try {
+				writeData(dc.getInputFile().getPath());
+			} catch (IOException e) {
+				MLogger.getInstance().log(Level.SEVERE, e);
+			}
+		}
+	}
+
+	
+	public void setValues(String headerName, String value, Filter fltr) {
+		setValues(headerName, new int[0], value, fltr);
+	}
+
+	
+	public void setValues(String headerName, String value, Filter fltr, Boolean allOccurences) {
+		int indexes = 0;
+		if (allOccurences) {
+			indexes = -1;
+		}
+		setValues(headerName, new int[] { indexes }, value, fltr);
+	}
+
+	/**
+	 * This method creates a HashMap, mapping the indexes of the passed header-array to the correct ones
+	 * from the underlying DataContainer. New headers will be mapped to the index -1.
+	 *
+	 * @param sortableHeaders String array with headers of the new DataContainer in a wrong order.
+	 *
+	 * @return HashMap<Integer, Integer> with index in the original DataContainer mapped to index from
+	 *         the passed String array.
+	 *
+	 */
+	private HashMap<Integer, Integer> sortHeadersIndexes(String[] sortableHeaders) {
+		HashMap<Integer, Integer> ret = new HashMap<>();
+		for (int i = 0; i < sortableHeaders.length; i++) {
+			ret.put(getHeaderIndex(sortableHeaders[i]), i);
+		}
+		return ret;
+	}
+
+	/**
+	 * This method uses the {@link #sortHeadersIndexes(String[])} created HashMap to bring an array
+	 * of String values to the right order of the current DataContainer's headers.
+	 *
+	 * @param sortMap  HashMap created by {@link #sortHeadersIndexes(String[])} with the corresponding
+	 *                 header array.
+	 * @param sortable String array with the String values to sort. It's header array must have been
+	 *                 used to create the sortMap with {@link #sortHeadersIndexes(String[])}.
+	 *
+	 * @return String[] with values in the right order corresponding to the current DataContainer's
+	 *         headers.
+	 *
+	 */
+	private String[] sortValues(HashMap<Integer, Integer> sortMap, String[] sortable) {
+		String[] ret = new String[sortable.length];
+		for (int i = 0; i < sortable.length; i++) {
+			ret[i] = sortable[sortMap.get(i)];
+		}
+		return ret;
+	}
+
+	
+	public void writeData(String srcFile) throws IOException {
+		List<String[]> writeable = new ArrayList<>();
+		writeable.add(getHeaderNamesIndexed());
+		for (String[] dataArr : getRowsList()) {
+			writeable.add(dataArr);
+		}
+		File f = new File(srcFile);
+		FileUtil.checkDir(f.getParent(), true);
+		XFileWriter writer = new XFileWriter(f);
+		writer.writeLines(writeable);
+		writer.close();
+	}
 }

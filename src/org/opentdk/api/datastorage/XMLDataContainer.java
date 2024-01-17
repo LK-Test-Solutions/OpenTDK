@@ -76,11 +76,6 @@ public class XMLDataContainer implements TreeContainer {
 		dc.getImplicitHeaders().add("XPath");
 	}
 
-	/**
-	 *
-	 * @param name  Name of the element that will be added into the data source
-	 * @param value Value that will be assigned to the name
-	 */
 	@Override
 	public void add(String name, String value) {
 		add(name, value, new Filter());
@@ -315,24 +310,6 @@ public class XMLDataContainer implements TreeContainer {
 	}
 
 	/**
-	 * This method is used to translate the XPath references to actual values from the XML File. Using
-	 * the specified index, the according row (element Occurrence) will be read out and fed to a
-	 * translator method. The output of this method is the return value.
-	 *
-	 * @param index The index of the returning row.
-	 * @return an array with all translated references (values) of the row.
-	 */
-//	public String[] getDecoded(int index) {
-//		String[] xPathArr = values.listIterator(index).next();
-//		String[] ret = new String[xPathArr.length];
-//		index++;
-//		for (int i = 0; i < xPathArr.length; i++) {
-//			ret[i] = xEdit.readXPath(xPathArr[i]);
-//		}
-//		return ret;
-//	}
-
-	/**
 	 * This method is used to load data from an XML-File to the data container. As the structure of a
 	 * XML is fundamentally different from the data container instance, only references of the values
 	 * are stored in the container as "X-Paths". Every XML-Tag has its own column in the container. The
@@ -352,17 +329,6 @@ public class XMLDataContainer implements TreeContainer {
 		} else {
 			xEdit = new XMLEditor(dc.getRootNode());
 		}
-//		values = new ArrayList<String[]>() {
-//			private static final long serialVersionUID = 1L;	
-//			@Override
-//			public String[] get(int index) {
-//				return getDecoded(index);
-//			}
-//		};
-//		dc.setHeaders(xEdit.getXmlTags());
-//		for (String header : dc.getHeaders().keySet()) {
-//			dc.setColumn(header, xEdit.getXPaths(header));
-//		}
 	}
 	
 	@Override
@@ -377,25 +343,13 @@ public class XMLDataContainer implements TreeContainer {
 
 	@Override
 	public void set(String tagName, String tagValue, Filter filter, boolean allOccurences) {
-		// Initialize occurrences array with 0 item, in case it is empty
-//		if (occurences.length < 1) {
-//			occurences = new int[] { 0 };
-//		}
 		for (FilterRule fltrRule : filter.getFilterRules()) {
 			if (fltrRule.getHeaderName().equalsIgnoreCase("XPath")) {
-//				if (newField) {
-//					xEdit.addElement(fltrRule.getValue(), paramName, value);
-//				} 
-//				else {
 					xEdit.checkXPath(fltrRule.getValue() + "/" + tagName, true); // Creates the hierarchy if not present
 					Element[] elements = (Element[]) get(tagName, filter, "elements");								
 					for (int i = 0; i < elements.length; i++) {
-//						List<Integer> occList = Arrays.stream(occurences).boxed().collect(Collectors.toList());
-//						if ((occList.contains(i)) || (occurences[0] == -1)) {
-							xEdit.setElementValue(elements[i], tagValue);
-//						}
+						xEdit.setElementValue(elements[i], tagValue);
 					}
-//				}
 				break;
 			}
 		}
