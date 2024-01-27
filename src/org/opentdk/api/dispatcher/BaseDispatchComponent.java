@@ -29,7 +29,6 @@ package org.opentdk.api.dispatcher;
 
 import java.io.IOException;
 import java.util.logging.Level;
-import java.util.regex.Pattern;
 
 import org.apache.commons.lang3.StringUtils;
 import org.opentdk.api.application.EBaseSettings;

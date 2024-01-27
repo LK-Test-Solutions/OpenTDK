@@ -521,6 +521,16 @@ public class TabularContainer implements SpecificContainer {
 		return colList;
 	}
 
+	public List<?> getColumnsList(Filter rowFilter, Class<?> storageObject) {
+		List<?> ret = new ArrayList<>();
+		List<String[]> rows = getColumnsList(new String[0], new int[0], rowFilter);
+		for(String[] row : rows) {
+			for(int i = 0; i < row.length; i++) {
+				// .. TODO
+			}
+		}
+		return ret;
+	}
 	
 	public int getHeaderIndex(String headerName) {
 		int retVal = -1;

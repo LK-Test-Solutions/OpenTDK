@@ -1,7 +1,6 @@
 package org.opentdk.api.datastorage;
 
 import org.opentdk.api.filter.Filter;
-import org.w3c.dom.Element;
 
 public interface TreeContainer extends SpecificContainer {
 
