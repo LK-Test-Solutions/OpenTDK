@@ -44,12 +44,7 @@ import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 
-/**
- * 
- * @author LK Test Solutions
- *
- */
-public class PropertiesDataContainer extends CSVDataContainer {
+public class PropertiesDataContainer extends TabularContainer {
 
 	PropertiesDataContainer(DataContainer dCont) {
 		super(dCont);	

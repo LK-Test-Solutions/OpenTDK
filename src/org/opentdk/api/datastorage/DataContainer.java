@@ -74,7 +74,7 @@ public class DataContainer implements SpecificContainer {
 
 	/**
 	 * Full path and name of the file for DataContainers with file based sources like
-	 * {@link CSVDataContainer}, {@link PropertiesDataContainer} or {@link XMLDataContainer}. This file
+	 * {@link TabularContainer}, {@link PropertiesDataContainer} or {@link XMLDataContainer}. This file
 	 * will be used as default for all read and write methods that are called without an explicit file
 	 * attribute.
 	 */
@@ -97,13 +97,6 @@ public class DataContainer implements SpecificContainer {
 	 * {@link DataContainer} instance in case that no source file exists.
 	 */
 	private InputStream inputStream;
-
-	/**
-	 * This property is used to assign the data as an {@link java.lang.String} to the
-	 * {@link DataContainer} instance in case that no source file or stream exists.
-	 */
-//	private String inputString = "";
-//	private List<String> lines = new ArrayList<>();
 
 	/**
 	 * Keeps the SQL result set of {@link org.opentdk.api.datastorage.RSDataContainer}.
@@ -230,11 +223,6 @@ public class DataContainer implements SpecificContainer {
 		adaptContainer();
 	}
 
-//	public DataContainer(String sourceString) {
-//		inputString = sourceString;
-//		adaptContainer();
-//	}
-
 	/**
 	 * Constructor that is called when a DataContainer shall be copied. The copy holds only the columns
 	 * with the headers specified in headerIndices.
@@ -274,11 +262,11 @@ public class DataContainer implements SpecificContainer {
 	 *
 	 * @throws IOException to handle I/O methods when the {@link #readData(Filter)} method failed
 	 */
-	private final void adaptContainer() {
+	private void adaptContainer() {
 		detectDataFormat();
 		switch (containerFormat) {
 		case CSV:
-			instance = new CSVDataContainer(this);
+			instance = new TabularContainer(this);
 			break;
 		case PROPERTIES:
 			instance = new PropertiesDataContainer(this);
@@ -296,7 +284,7 @@ public class DataContainer implements SpecificContainer {
 			instance = new YAMLDataContainer(this);
 			break;
 		default:
-			instance = new CSVDataContainer(this);
+			instance = new TabularContainer(this);
 			return;
 		}
 		if ((inputFile != null && inputFile.exists()) || inputStream != null || resultSet != null) {
@@ -314,7 +302,7 @@ public class DataContainer implements SpecificContainer {
 	 *
 	 * @return enumeration of type {@link EContainerFormat}
 	 */
-	private final void detectDataFormat() {
+	private void detectDataFormat() {
 		if (resultSet != null) {
 			containerFormat = EContainerFormat.RESULTSET;
 		} else if (inputStream != null) {
@@ -370,9 +358,6 @@ public class DataContainer implements SpecificContainer {
 				}
 			}
 		}
-//		else if (StringUtils.isNotBlank(inputString)) {
-//			
-//		}
 	}
 
 	/**
@@ -390,12 +375,12 @@ public class DataContainer implements SpecificContainer {
 	 * @throws NullPointerException is there is no tabular format available
 	 */
 	public TabularContainer tabInstance() {
-		if (instance instanceof CSVDataContainer) {
-			return (CSVDataContainer) instance;
-		} else if (instance instanceof PropertiesDataContainer) {
+		if (instance instanceof PropertiesDataContainer) {
 			return (PropertiesDataContainer) instance;
 		} else if (instance instanceof RSDataContainer) {
 			return (RSDataContainer) instance;
+		} else if (instance instanceof TabularContainer) {
+			return (TabularContainer) instance; // default CSV (has to be checked at the end)
 		} else {
 			throw new NullPointerException("TabularContainer not intialized");
 		}
@@ -420,17 +405,17 @@ public class DataContainer implements SpecificContainer {
 	/**
 	 * Checks if the {@link #instance} was initialized as one of the tabular format e.g. CSV or
 	 * RESULSET. This can be done before calling {@link #tabInstance()} to be sure that a tabular format
-	 * is available.
+	 * is available. CSV format is default for TabularContainer and gets checked at the end.
 	 *
 	 * @return true: is tree format, false otherwise
 	 */
 	public boolean isTabular() {
 		boolean ret = false;
-		if (instance instanceof CSVDataContainer) {
-			ret = true;
-		} else if (instance instanceof PropertiesDataContainer) {
+		if (instance instanceof PropertiesDataContainer) {
 			ret = true;
 		} else if (instance instanceof RSDataContainer) {
+			ret = true;
+		} else if (instance instanceof TabularContainer) {
 			ret = true;
 		}
 		return ret;
@@ -605,7 +590,7 @@ public class DataContainer implements SpecificContainer {
 	}
 
 	// --------------------------------------------------------------------
-	// Facading methods that call either the tabular or tree format methods
+	// Facade methods that call either the tabular or tree format methods
 	// --------------------------------------------------------------------
 
 	public void add(String name, String value, Filter filter) {
@@ -634,6 +619,9 @@ public class DataContainer implements SpecificContainer {
 			ret = tabInstance().getColumn(parameterName, fltr);
 		} else if (isTree()) {
 			ret = treeInstance().get(parameterName, fltr);
+			for(int i=0; i<ret.length; i++){
+				ret[i] = ret[i].trim();
+			}
 		}
 		return ret;
 	}

@@ -29,7 +29,6 @@ package org.opentdk.api.dispatcher;
 
 import java.io.IOException;
 import java.util.logging.Level;
-import java.util.regex.Pattern;
 
 import org.apache.commons.lang3.StringUtils;
 import org.opentdk.api.application.EBaseSettings;
@@ -454,10 +453,14 @@ public class BaseDispatchComponent {
 		DataContainer dc = BaseDispatcher.getDataContainer(settingsKey);
 		String[] attributes = new String[0];
 		if (dc.isTree()) {
-			attributes = dc.treeInstance().get(expr, attrName);
+			try{
+				attributes = dc.treeInstance().get(expr, attrName);
+			}catch(NullPointerException e){
+				return "";
+			}
 		}
 		if (attributes.length == 0) {
-			return null;
+			return "";
 		}
 		return attributes[0];
 	}
@@ -490,10 +493,14 @@ public class BaseDispatchComponent {
 		DataContainer dc = BaseDispatcher.getDataContainer(settingsKey);
 		String[] attributes = new String[0];
 		if (dc.isTree()) {
-			attributes = dc.treeInstance().get(expr, attrName);
+			try{
+				attributes = dc.treeInstance().get(expr, attrName);
+			}catch(NullPointerException e){
+				return "";
+			}
 		}
 		if (attributes.length == 0) {
-			return null;
+			return "";
 		}
 		return attributes[0];
 	}
@@ -522,10 +529,14 @@ public class BaseDispatchComponent {
 		DataContainer dc = BaseDispatcher.getDataContainer(settingsKey);
 		String[] attributes = new String[0];
 		if (dc.isTree()) {
-			attributes = dc.treeInstance().get(expr, attrName);
+			try{
+				attributes = dc.treeInstance().get(expr, attrName);
+			}catch(NullPointerException e){
+				return new String[0];
+			}
 		}
 		if (attributes.length == 0) {
-			return null;
+			return new String[0];
 		}
 		return attributes;
 	}
@@ -558,10 +569,14 @@ public class BaseDispatchComponent {
 		DataContainer dc = BaseDispatcher.getDataContainer(settingsKey);
 		String[] attributes = new String[0];
 		if (dc.isTree()) {
-			attributes = dc.treeInstance().get(expr, attrName);
+			try{
+				attributes = dc.treeInstance().get(expr, attrName);
+			}catch(NullPointerException e){
+				return new String[0];
+			}
 		}
 		if (attributes.length == 0) {
-			return null;
+			return new String[0];
 		}
 		return attributes;
 	}
@@ -608,15 +623,19 @@ public class BaseDispatchComponent {
 	 *         variable as String
 	 */
 	public String getValue() {
+		return getValue(0);
+	}
+
+	public String getValue(int valueIndex) {
 		if ((parentXPath != null) && (!parentXPath.isEmpty())) {
 			return getValue("");
 		}
 		if (BaseDispatcher.dcMap.containsKey(settingsKey)) {
 			DataContainer dc = BaseDispatcher.getDataContainer(settingsKey);
 			String[] ret = dc.get(parameterName);
-			if(ret != null && ret.length > 0 && ret[0] != null) {
-				return ret[0];
-			}						
+			if(ret != null && ret.length > 0 && ret[valueIndex] != null) {
+				return ret[valueIndex];
+			}
 		}
 		return defaultValue;
 	}
@@ -837,6 +856,17 @@ public class BaseDispatchComponent {
 			BaseDispatcher.getDataContainer(settingsKey).set(parameterName, value);
 		} else {
 			setValue("", value);
+		}
+	}
+
+	public void setValue(int valueIndex, String value) {
+		if ((parentXPath == null) || (parentXPath.isEmpty())) {
+			if(valueIndex >= BaseDispatcher.getDataContainer(settingsKey).tabInstance().getRowCount()) {
+				BaseDispatcher.getDataContainer(settingsKey).tabInstance().addRow(BaseDispatcher.getDataContainer(settingsKey).tabInstance().createPreparedRow());
+			}
+			BaseDispatcher.getDataContainer(settingsKey).tabInstance().setValue(parameterName, valueIndex, value);
+		} else {
+			// ToDo: implementation for tree format, if required
 		}
 	}
 

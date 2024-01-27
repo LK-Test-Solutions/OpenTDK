@@ -46,6 +46,7 @@ import org.opentdk.api.filter.FilterRule;
 import org.opentdk.api.io.FileUtil;
 import org.opentdk.api.logger.MLogger;
 import org.opentdk.api.util.ListUtil;
+
 import org.yaml.snakeyaml.Yaml;
 
 /**
@@ -53,7 +54,7 @@ import org.yaml.snakeyaml.Yaml;
  * {@link org.json.JSONObject} class gets used to handle sources from an {@link java.io.InputStream}
  * or a JSON file.
  * 
- * @author LK Test Solutions
+ * @author FME (LK Test Solutions)
  * @see org.opentdk.api.datastorage.DataContainer
  */
 public class JSONDataContainer implements TreeContainer {
@@ -79,19 +80,6 @@ public class JSONDataContainer implements TreeContainer {
 		dc = dCont;
 		dc.getImplicitHeaders().add("XPath");
 	}
-
-
-//	private void fillDc() {
-//		if (!json.isEmpty()) {
-//			String[] names = JSONObject.getNames(json);
-//			if (names.length > 0) {
-//				dc.setHeaders(names);
-//				for (String header : names) {
-//					dc.setColumn(header, new String[] { json.get(header).toString() });
-//				}
-//			}
-//		}
-//	}
 
 	@Override
 	public void add(String name, String value) {
@@ -273,6 +261,16 @@ public class JSONDataContainer implements TreeContainer {
 		return ret;
 	}
 
+	@Override
+	public Object get(String tagName, String attributName, String attributValue){
+		return null;
+	}
+
+	@Override
+	public Object[] get(String headerName, Filter fltr, String returnType) {
+		return null;
+	}
+
 	/**
 	 * Retrieves the data type out of the committed value. This can be a JSONObject, JSONArray or any
 	 * other primitive data type like string, integer or boolean. E.g. if the input string has leading
@@ -308,6 +306,16 @@ public class JSONDataContainer implements TreeContainer {
 			}
 		}
 		return ret;
+	}
+
+	/**
+	 * Not required for JSON Container
+	 *
+	 * @return
+	 */
+	@Override
+	public Object getRootElement(){
+		return new Object();
 	}
 
 	/**

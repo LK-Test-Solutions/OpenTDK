@@ -248,7 +248,7 @@ public class BaseApplication {
 				if (!propertiesKey.equalsIgnoreCase("SETTINGSFILE")) {
 					for (String appSettingsKey : appSettings.keySet()) {
 						if (appSettingsKey.equalsIgnoreCase(propertiesKey)) {
-							runtimeProperties.get(propertiesKey).setValue(appSettings.get(appSettingsKey).getValue());
+							runtimeProperties.get(propertiesKey).setValue(appSettings.get(appSettingsKey).getValue().trim());
 						}
 					}
 				}

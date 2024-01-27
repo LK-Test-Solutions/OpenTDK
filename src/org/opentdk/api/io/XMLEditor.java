@@ -116,18 +116,6 @@ public class XMLEditor {
 		createXMLEditor();
 	}
 
-//	/**
-//	 * Constructor that is used to create a new instance of this object with a given string object.
-//	 * After initialization read and write access can be performed to the XML file, using the methods
-//	 * provided by this class.
-//	 * 
-//	 * @param fullPath String with the relative or absolute path and filename of the XML file
-//	 * @throws IOException allows the user to handle I/O errors
-//	 */
-//	public XMLEditor(String fullPath) throws IOException {
-//		this(fullPath, "");
-//	}
-
 	/**
 	 * Constructor that is used to create a new instance of this object with a given file object. After
 	 * initialization read and write access can be performed to the XML file, using the methods provided
@@ -144,37 +132,6 @@ public class XMLEditor {
 			throw new IllegalArgumentException("Input file does not exist");
 		}
 	}
-
-//	/**
-//	 * Constructor that is used to create a new instance of this object with a given string object and a
-//	 * root tag. After initialization read and write access can be performed to the XML file, using the
-//	 * methods provided by this class.
-//	 * 
-//	 * @param fullPath String with the relative or absolute path and filename of the XML file
-//	 * @param rootNode root tag of the XML file
-//	 * @throws IOException allows the user to handle I/O errors
-//	 */
-//	public XMLEditor(String fullPath, String rootNode) throws IOException {
-//		this(new File(fullPath), rootNode);
-//	}
-//
-//	/**
-//	 * Constructor that is used to create a new instance of this object with a given file object and a
-//	 * root tag. After initialization read and write access can be performed to the XML file, using the
-//	 * methods provided by this class.
-//	 * 
-//	 * @param sourceFile {@link #xmlFile}
-//	 * @param rootNode   root tag of the XML file
-//	 * @throws IOException allows the user to handle I/O errors
-//	 */
-//	public XMLEditor(File sourceFile, String rootNode) throws IOException {
-//		xmlFile = sourceFile;
-//		if (StringUtils.isNotBlank(rootNode)) {
-//			rootNodeName = rootNode;
-//		}
-//		FileUtil.checkDir(xmlFile.getParentFile(), true);
-//		createXMLEditor();
-//	}
 
 	/**
 	 * Possibility to initialize this class with an InputStream.
@@ -367,42 +324,6 @@ public class XMLEditor {
 		return resolvedE;
 	}
 
-//	public Element checkXPath(String XPath, boolean createMissingNodes) {
-//		List<Element> eList = getElementsListFromXPath(XPath);
-//		Element resolvedE = null;
-//		for (Element searchE : eList) {
-//			boolean eFound = false;
-//			if (resolvedE == null) {
-//				if (compareElements(searchE, doc.getDocumentElement())) {
-//					resolvedE = doc.getDocumentElement();
-//					eFound = true;
-//				} else {
-//					break;
-//				}
-//			} else {
-//				NodeList cnl = resolvedE.getChildNodes();
-//				for (int i = 0; i < cnl.getLength(); i++) {
-//					if (cnl.item(i).getNodeType() == 1) {
-//						if (compareElements(searchE, (Element) cnl.item(i))) {
-//							resolvedE = (Element) cnl.item(i);
-//							eFound = true;
-//							break;
-//						}
-//					}
-//				}
-//			}
-//			if ((!eFound) && (createMissingNodes)) {
-//				resolvedE = addChildElement(resolvedE, searchE);
-//				eFound = compareElements(searchE, resolvedE);
-//			}
-//			if (!eFound) {
-//				return null;
-//			}
-//
-//		}
-//		return resolvedE;
-//	}
-
 	public boolean compareElements(Element eSearch, Element eCompareWith) {
 		if (eSearch.getNodeName().equals(eCompareWith.getNodeName())) {
 			if (eSearch.getNodeValue() != null) {
@@ -574,8 +495,10 @@ public class XMLEditor {
 			} else {
 				oldChild = getElement(elementName, attributeName, attributeValue);
 			}
-			pathE.removeChild(oldChild);
-			save();
+			if(oldChild != null) {
+				pathE.removeChild(oldChild);
+				save();
+			}
 		}
 	}
 
@@ -644,7 +567,15 @@ public class XMLEditor {
 	 */
 	public ArrayList<Element> getChildren(Element parent) {
 		ArrayList<Element> children = new ArrayList<Element>();
-		NodeList nlChildren = parent.getChildNodes();
+		NodeList nlChildren = null;
+
+		try {
+			nlChildren = parent.getChildNodes();
+		} catch (NullPointerException e) {
+			// return an empty array
+			return children;
+		}
+
 		for (int i = 0; i < nlChildren.getLength(); i++) {
 			if (nlChildren.item(i).getNodeType() == 1) {
 				children.add((Element) nlChildren.item(i));
@@ -1194,10 +1125,8 @@ public class XMLEditor {
 
 	public static Boolean validateXMLString(String inString) {
 		try {
-
 			InputStream inStream = new ByteArrayInputStream(inString.getBytes(StandardCharsets.UTF_8));
 			SAXParserFactory.newInstance().newSAXParser().getXMLReader().parse(new InputSource(inStream));
-//			SAXParserFactory.newInstance().newSAXParser().getXMLReader().parse(new InputSource(inStream));
 		} catch (IOException e) {
 			MLogger.getInstance().log(Level.WARNING, "Invalid input used for XML parser", "XMLEditor", "validateXMLString");
 			return false;

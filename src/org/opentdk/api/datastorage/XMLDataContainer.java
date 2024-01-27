@@ -40,7 +40,15 @@ import org.w3c.dom.Element;
 
 /**
  * SubClass of {@link DataContainer} which provides all methods for reading and writing from or to
- * ASCII files in XML format, and store the data at runtime within the DataContainer.
+ * ASCII files in XML format, and store the data at runtime within the DataContainer. If the DataContainer
+ * is linked to a file, then all write operations will immediately save the changes within the file.
+ * In case that file changes are not wanted, then the DataContainer should be initialized with the content of the
+ * XML file as InputStream.
+ * <pre>
+ * e.g.:
+ * InputStream stream = new ByteArrayInputStream(xmlContent.getBytes(StandardCharsets.UTF_8));
+ * DataContainer notationRulesDC = new DataContainer(stream);
+ * </pre>
  * 
  * @author LK Test Solutions
  * @see org.opentdk.api.datastorage.DataContainer
@@ -56,16 +64,15 @@ public class XMLDataContainer implements TreeContainer {
 	 */
 	private final DataContainer dc;
 
-//	private ArrayList<String[]> values = new ArrayList<String[]>();
-
 	/**
-	 * Construct a new specific <code>DataContainer</code> for XML files.
+	 * This constructor is used to pass the DataContainer when the specific XML Container will be adapted
+	 * from the base DataContainer class.
 	 *
-	 * @param dCont the <code>DataContainer</code> instance to use it in the read and write methods of
-	 *              this specific data container
+	 * @param dataContainer the <code>DataContainer</code> instance to use for read and write methods of
+	 *              		this specific data container
 	 */
-	public XMLDataContainer(DataContainer dCont) {
-		dc = dCont;
+	public XMLDataContainer(DataContainer dataContainer) {
+		dc = dataContainer;
 		dc.getImplicitHeaders().add("XPath");
 	}
 
@@ -146,14 +153,40 @@ public class XMLDataContainer implements TreeContainer {
 		}
 	}
 
+	/**
+	 * Retrieve a string array with the text content of all tags specified by the tag name.
+	 * This method will search on all levels of the XML tree hierarchy.
+	 *
+	 * @param tagName Name of the tag(s) to search for
+	 * @return String-Array with the text-content of all found tags
+	 */
 	@Override
-	public String[] get(String name) {
-		return get(name, new Filter());
+	public String[] get(String tagName) {
+		return get(tagName, new Filter());
+	}
+
+	/**
+	 * Retrieve a string array with the text content of all tags specified by the tag name.
+	 * This method will search only within the XPath, defined by the Filter.<br>
+	 * Sample usage:
+	 * <pre>
+	 *     Filter fltr = new Filter();
+	 *     fltr.addFilterRule("XPath", "/Contacts/Business/Management", EOperator.EQUALS);
+	 *     dataContainer.treeInstance.get("firstname", fltr);
+	 * </pre>
+	 *
+	 * @param tagName Name of the tag(s) to search for
+	 * @param filter Filter condition for more precise localization of the element within the data structure
+	 * @return String array with the text-content of all found tags
+	 */
+	@Override
+	public String[] get(String tagName, Filter filter) {
+		return (String[]) get(tagName, filter, "values");
 	}
 
 	@Override
-	public String[] get(String headerName, Filter fltr) {
-		return (String[]) get(headerName, fltr, "values");
+	public Object get(String tagName, String attributName, String attributValue){
+		return xEdit.getElement(tagName, attributName, attributValue);
 	}
 
 	/**
@@ -169,7 +202,8 @@ public class XMLDataContainer implements TreeContainer {
 	 *                   Array with all matching tag objects
 	 * @return Array of the type, specified by returnType argument
 	 */
-	private Object[] get(String headerName, Filter fltr, String returnType) {
+	@Override
+	public Object[] get(String headerName, Filter fltr, String returnType) {
 		List<FilterRule> implFilterRules = dc.getImplFilterRules(fltr);
 		List<Element> filteredElements = new ArrayList<>();
 		List<String> filteredValues = new ArrayList<>();
@@ -241,7 +275,7 @@ public class XMLDataContainer implements TreeContainer {
 	 * @param attrName Name of the XML tags attribute from which the values will be returned
 	 */
 	@Override
-	public String[] get(String expr, String attrName) {
+	public String[] get(String expr, String attrName) throws NullPointerException{
 		List<String> lst = new ArrayList<String>();
 		// leading "/" indicates a tag name with full xPath
 		if (expr.startsWith("/")) {
@@ -270,23 +304,10 @@ public class XMLDataContainer implements TreeContainer {
 		return lst.toArray(new String[lst.size()]);
 	}
 
-	/**
-	 * This method is used to translate the XPath references to actual values from the XML File. Using
-	 * the specified index, the according row (element Occurrence) will be read out and fed to a
-	 * translator method. The output of this method is the return value.
-	 *
-	 * @param index The index of the returning row.
-	 * @return an array with all translated references (values) of the row.
-	 */
-//	public String[] getDecoded(int index) {
-//		String[] xPathArr = values.listIterator(index).next();
-//		String[] ret = new String[xPathArr.length];
-//		index++;
-//		for (int i = 0; i < xPathArr.length; i++) {
-//			ret[i] = xEdit.readXPath(xPathArr[i]);
-//		}
-//		return ret;
-//	}
+	@Override
+	public Object getRootElement(){
+		return xEdit.getRoot();
+	}
 
 	/**
 	 * This method is used to load data from an XML-File to the data container. As the structure of a
@@ -308,17 +329,6 @@ public class XMLDataContainer implements TreeContainer {
 		} else {
 			xEdit = new XMLEditor(dc.getRootNode());
 		}
-//		values = new ArrayList<String[]>() {
-//			private static final long serialVersionUID = 1L;	
-//			@Override
-//			public String[] get(int index) {
-//				return getDecoded(index);
-//			}
-//		};
-//		dc.setHeaders(xEdit.getXmlTags());
-//		for (String header : dc.getHeaders().keySet()) {
-//			dc.setColumn(header, xEdit.getXPaths(header));
-//		}
 	}
 	
 	@Override
@@ -333,25 +343,13 @@ public class XMLDataContainer implements TreeContainer {
 
 	@Override
 	public void set(String tagName, String tagValue, Filter filter, boolean allOccurences) {
-		// Initialize occurrences array with 0 item, in case it is empty
-//		if (occurences.length < 1) {
-//			occurences = new int[] { 0 };
-//		}
 		for (FilterRule fltrRule : filter.getFilterRules()) {
 			if (fltrRule.getHeaderName().equalsIgnoreCase("XPath")) {
-//				if (newField) {
-//					xEdit.addElement(fltrRule.getValue(), paramName, value);
-//				} 
-//				else {
 					xEdit.checkXPath(fltrRule.getValue() + "/" + tagName, true); // Creates the hierarchy if not present
 					Element[] elements = (Element[]) get(tagName, filter, "elements");								
 					for (int i = 0; i < elements.length; i++) {
-//						List<Integer> occList = Arrays.stream(occurences).boxed().collect(Collectors.toList());
-//						if ((occList.contains(i)) || (occurences[0] == -1)) {
-							xEdit.setElementValue(elements[i], tagValue);
-//						}
+						xEdit.setElementValue(elements[i], tagValue);
 					}
-//				}
 				break;
 			}
 		}

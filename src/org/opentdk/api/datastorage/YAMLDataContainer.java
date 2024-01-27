@@ -44,7 +44,7 @@ import org.yaml.snakeyaml.Yaml;
  * {@link org.yaml.snakeyaml.Yaml} and the {@link org.json.JSONObject} support a method to provide
  * the content as map.
  * 
- * @author LK Test Solutions
+ * @author FME (LK Test Solutions)
  * @see org.opentdk.api.datastorage.DataContainer
  */
 public class YAMLDataContainer implements TreeContainer {
@@ -158,12 +158,30 @@ public class YAMLDataContainer implements TreeContainer {
 	}
 
 	@Override
+	public Object get(String tagName, String attributName, String attributValue){
+		return null;
+	}
+
+	@Override
+	public Object[] get(String headerName, Filter fltr, String returnType){
+		return null;
+	}
+
+	@Override
 	public void readData(Filter filter) {
 		if (content == null) {
 			MLogger.getInstance().log(Level.WARNING, "YAML object is not initialized or empty ==> No YAML content to read", getClass().getSimpleName(), "readData");
 		} else {
 			json.setJsonWithMap(content);
 		}
+	}
+
+	/**
+	 * Not required for YAML Container
+	 */
+	@Override
+	public Object getRootElement(){
+		return new Object();
 	}
 
 	@Override
@@ -180,11 +198,6 @@ public class YAMLDataContainer implements TreeContainer {
 	public void set(String name, String value, Filter filter, boolean allOccurences) {
 		json.set(name, value, filter, allOccurences);
 	}
-
-//	@Override
-//	public void set(String headerName, int[] occurences, String value, Filter fltr) {
-//		json.set(headerName, occurences, value, fltr);
-//	}
 
 	@Override
 	public void set(String name, String attr, String value, String oldValue, Filter filter) {

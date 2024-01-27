@@ -470,21 +470,33 @@ public class FileUtil {
 	public static String getRowsAsString(String path) {
 		return getRowsAsString(path, -1);
 	}
+	
+	/**
+	 * Read the lines of a ASCII file to a String by using the {@link java.io.BufferedReader}. This is a
+	 * very fast type of reading. Especially for large files. Line breaks (\n) are included, too.
+	 * 
+	 * @param path      Full name (path + name) of the file to work with.
+	 * @param lineCount Possibility to determine the number of iterations/lines. Use {@literal -} 1 to switch off.
+	 * @return A list of type string with all lines of the file as elements.
+	 */
+	public static String getRowsAsString(String path, int lineCount) {
+		return getRowsAsString(path, lineCount, StandardCharsets.UTF_8);
+	}
 
 	/**
 	 * Read the lines of a ASCII file to a String by using the {@link java.io.BufferedReader}. This is a
 	 * very fast type of reading. Especially for large files. Line breaks (\n) are included, too.
 	 * 
 	 * @param path      Full name (path + name) of the file to work with.
-	 * @param lineCount Possibility to determine the number of iterations/lines. Use {@literal -} 1 to
-	 *                  switch off.
+	 * @param lineCount Possibility to determine the number of iterations/lines. Use {@literal -} 1 to switch off.
+	 * @param encoding Character encoding, see {@link java.nio.charset.StandardCharsets}
 	 * @return A list of type string with all lines of the file as elements.
 	 */
-	public static String getRowsAsString(String path, int lineCount) {
+	public static String getRowsAsString(String path, int lineCount, Charset encoding) {
 		BufferedReader br = null;
 		StringBuilder sb = new StringBuilder();
 		try {
-			br = new BufferedReader(new FileReader(path));
+			br = new BufferedReader(new FileReader(path, encoding));
 
 			String line = null;
 			int i = 0;
@@ -524,15 +536,28 @@ public class FileUtil {
 	/**
 	 * Read the lines of a ASCII file to a {@link java.util.List} by using the
 	 * {@link java.io.BufferedReader}. This is a very fast type of reading. Especially for large files.
+	 * Default character encoding is UTF8.
 	 * 
 	 * @param path Full name (path + name) of the file to work with.
 	 * @return A list of type string with all lines of the file as elements.
 	 */
-	public static List<String> getRowsAsList(String path) {
+	public static List<String> getRowsAsList(String path) {		
+		return getRowsAsList(path, StandardCharsets.UTF_8);
+	}
+	
+	/**
+	 * Read the lines of a ASCII file to a {@link java.util.List} by using the
+	 * {@link java.io.BufferedReader}. This is a very fast type of reading. Especially for large files.
+	 * 
+	 * @param path Full name (path + name) of the file to work with.
+	 * @param encoding Character encoding, see {@link java.nio.charset.StandardCharsets}
+	 * @return A list of type string with all lines of the file as elements.
+	 */
+	public static List<String> getRowsAsList(String path, Charset encoding) {
 		BufferedReader br = null;
 		List<String> rows = new ArrayList<>();
 		try {
-			br = new BufferedReader(new FileReader(path));
+			br = new BufferedReader(new FileReader(path, encoding));
 
 			String line = null;
 			while ((line = br.readLine()) != null) {
@@ -581,7 +606,7 @@ public class FileUtil {
 			MLogger.getInstance().log(Level.SEVERE, e);
 			throw new RuntimeException(e);
 		}
-		return FileUtil.getContent(stream, cs);
+		return getContent(stream, cs);
 	}
 
 	/**
