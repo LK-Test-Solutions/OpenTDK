@@ -27,8 +27,10 @@
  */
 package org.opentdk.api.datastorage;
 
+import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.Map;
 import java.util.logging.Level;
 
@@ -47,7 +49,7 @@ import org.yaml.snakeyaml.Yaml;
  * @author FME (LK Test Solutions)
  * @see org.opentdk.api.datastorage.DataContainer
  */
-public class YAMLDataContainer implements TreeContainer {
+public class YAMLDataContainer implements SpecificContainer {
 	/**
 	 * Container object for the YAML data. Supports several read and write methods. Gets initialized in
 	 * the constructor.
@@ -61,7 +63,7 @@ public class YAMLDataContainer implements TreeContainer {
 	/**
 	 * Stores the content of the YAML source. Gets used to initialize the {@link JSONDataContainer}.
 	 */
-	private final Map<String, Object> content;
+	private Map<String, Object> content;
 
 	/**
 	 * Construct a new specific container for YAML files. This gets done by the {@link DataContainer}
@@ -70,17 +72,26 @@ public class YAMLDataContainer implements TreeContainer {
 	 *
 	 * @param dCont gets used to initialize the {@link JSONDataContainer}
 	 */
-	YAMLDataContainer(DataContainer dCont) {
+//	YAMLDataContainer(DataContainer dCont) {
+//		yaml = new Yaml();
+//		json = new JSONDataContainer(dCont);
+//
+//		if (dCont.getInputFile().exists()) {
+//			content = yaml.load(FileUtil.getRowsAsString(dCont.getInputFile())); // TODO part of the read operation
+//		} else if (dCont.getInputStream() != null) {
+//			content = yaml.load(dCont.getInputStream());
+//		} else {
+//			content = null;
+//		}
+//	}
+	
+	public static YAMLDataContainer newInstance() {		
+		return new YAMLDataContainer();
+	}
+	
+	private YAMLDataContainer() {
 		yaml = new Yaml();
-		json = new JSONDataContainer(dCont);
-
-		if (dCont.getInputFile().exists()) {
-			content = yaml.load(FileUtil.getRowsAsString(dCont.getInputFile()));
-		} else if (dCont.getInputStream() != null) {
-			content = yaml.load(dCont.getInputStream());
-		} else {
-			content = null;
-		}
+		json = JSONDataContainer.newInstance();
 	}
 
 	@Override
@@ -208,6 +219,24 @@ public class YAMLDataContainer implements TreeContainer {
 	@Override
 	public void writeData(String srcFileName) throws IOException {
 		yaml.dump(yaml.dumpAsMap(json.getJsonAsMap()), new FileWriter(srcFileName));
+	}
+
+	@Override
+	public void readData(File sourceFile) throws IOException {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void readData(InputStream stream) throws IOException {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void writeData(File outputFile) throws IOException {
+		// TODO Auto-generated method stub
+		
 	}
 	
 }

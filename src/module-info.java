@@ -23,4 +23,6 @@ module opentdk.api {
 	requires transitive org.apache.commons.codec;
 //	requires transitive org.apache.tika.core;
 	requires transitive org.yaml.snakeyaml;
+	requires java.validation;
+	requires commons.csv;
 }

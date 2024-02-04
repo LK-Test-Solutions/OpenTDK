@@ -28,8 +28,11 @@
 package org.opentdk.api.datastorage;
 
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.sql.ResultSet;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -44,7 +47,9 @@ import org.json.JSONObject;
 import org.opentdk.api.filter.Filter;
 import org.opentdk.api.filter.FilterRule;
 import org.opentdk.api.io.FileUtil;
+import org.opentdk.api.io.XMLEditor;
 import org.opentdk.api.logger.MLogger;
+import org.opentdk.api.mapping.EOperator;
 import org.opentdk.api.util.ListUtil;
 
 import org.yaml.snakeyaml.Yaml;
@@ -57,28 +62,20 @@ import org.yaml.snakeyaml.Yaml;
  * @author FME (LK Test Solutions)
  * @see org.opentdk.api.datastorage.DataContainer
  */
-public class JSONDataContainer implements TreeContainer {
-
-	/**
-	 * The instance of the {@link DataContainer} that the JSONDataContainer works with.
-	 */
-	private final DataContainer dc;
+public class JSONDataContainer implements SpecificContainer {
 
 	/**
 	 * Container object for the JSON data. Supports several read and write methods. Gets initialized in
 	 * {@link #readData(Filter)}.
 	 */
 	private JSONObject json;
-
-	/**
-	 * Construct a new specific container for JSON files. This gets done by the {@link DataContainer}
-	 * class in its adaptContainer method. After initialization, it gets passed to this class.
-	 *
-	 * @param dCont {@link #dc}
-	 */
-	JSONDataContainer(DataContainer dCont) {
-		dc = dCont;
-		dc.getImplicitHeaders().add("XPath");
+	
+	public static JSONDataContainer newInstance() {		
+		return new JSONDataContainer();
+	}
+	
+	private JSONDataContainer() {
+		
 	}
 
 	@Override
@@ -157,11 +154,6 @@ public class JSONDataContainer implements TreeContainer {
 	}
 
 	@Override
-	public void createFile() throws IOException {
-		FileUtil.createFile(dc.getInputFile(), true);	
-	}
-
-	@Override
 	public void delete(String name, String value) {
 		delete(name, value, new Filter());		
 	}
@@ -217,7 +209,8 @@ public class JSONDataContainer implements TreeContainer {
 	@Override
 	public String[] get(String headerName, Filter fltr) {
 		String[] ret = null;
-		List<FilterRule> implFilterRules = dc.getImplFilterRules(fltr);
+		List<FilterRule> implFilterRules = new ArrayList<>(); // TODO sense
+		implFilterRules.add(new FilterRule("XPath", "", EOperator.EQUALS));
 		List<String> filteredValues = new ArrayList<>();
 
 		if (implFilterRules.size() > 0) {
@@ -326,12 +319,10 @@ public class JSONDataContainer implements TreeContainer {
 	}
 
 	@Override
-	public void readData(Filter filter) {
+	public void readData(InputStream stream) {
 		String content = null;
-		if (!dc.getInputFile().getName().isEmpty()) {
-			content = FileUtil.getContent(dc.getInputFile().getPath());
-		} else if (dc.getInputStream() != null) {
-			InputStreamReader inputStreamReader = new InputStreamReader(dc.getInputStream());
+		if (stream != null) {
+			InputStreamReader inputStreamReader = new InputStreamReader(stream);
 			Stream<String> streamOfString = new BufferedReader(inputStreamReader).lines();
 			content = streamOfString.collect(Collectors.joining());
 
@@ -347,7 +338,16 @@ public class JSONDataContainer implements TreeContainer {
 		}
 	}
 	
-
+	@Override
+	public void readData(File srcFile) throws IOException {
+		if (!srcFile.getName().isEmpty()) {
+			String content = FileUtil.getContent(srcFile.getPath());
+			if (content != null) {
+				json = new JSONObject(content);
+			}
+		} 	
+	}
+	
 	@Override
 	public void set(String name, String value) {
 		set(name, value, new Filter());
@@ -415,18 +415,33 @@ public class JSONDataContainer implements TreeContainer {
 	}
 
 	@Override
-	public void writeData(String srcFile) throws IOException {
+	public void writeData(File srcFile) throws IOException {
 		if (json == null || json.isEmpty()) {
 			MLogger.getInstance().log(Level.WARNING, "JSON object is not initialized or empty ==> No JSON content to write", getClass().getSimpleName(), "writeData");
 		} else {
 			try {
 				FileUtil.createFile(srcFile, true);
-				FileUtil.writeOutputFile(json.toString(1), srcFile);
+				FileUtil.writeOutputFile(json.toString(1), srcFile.getPath());
 			} catch (JSONException e) {
 				MLogger.getInstance().log(Level.SEVERE, e);
 				throw new RuntimeException(e);
 			}
 		}
+	}
+
+	@Override
+	public void readData(ResultSet rs) throws IOException {
+		// TODO Log
+	}
+
+	@Override
+	public String getRootNode() {
+		return null;
+	}
+
+	@Override
+	public void setRootNode(String rootNode) {
+		// TODO Log	
 	}
 
 }

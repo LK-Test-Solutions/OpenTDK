@@ -37,11 +37,7 @@ import java.util.logging.Level;
 import org.opentdk.api.filter.Filter;
 import org.opentdk.api.logger.MLogger;
 
-public class RSDataContainer extends TabularContainer {
-
-	RSDataContainer(DataContainer dCont) {
-		super(dCont);
-	}
+public class RSDataContainer extends CSVDataContainer {
 
 	/**
      * Reads data from a {@link java.sql.ResultSet} and puts it into the DataContainer.
@@ -52,6 +48,14 @@ public class RSDataContainer extends TabularContainer {
 	@Override
 	public void readData(Filter filter) throws IOException{
 		readData(filter, "Label");
+	}
+	
+	public static RSDataContainer newInstance() {		
+		return new RSDataContainer();
+	}
+	
+	private RSDataContainer() {
+		super();
 	}
 
 	public void readData(Filter filter, String headerOrigin) throws IOException {

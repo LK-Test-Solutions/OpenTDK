@@ -44,10 +44,14 @@ import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 
-public class PropertiesDataContainer extends TabularContainer {
+public class PropertiesDataContainer extends CSVDataContainer {
 
-	PropertiesDataContainer(DataContainer dCont) {
-		super(dCont);	
+	public static PropertiesDataContainer newInstance() {		
+		return new PropertiesDataContainer();
+	}
+	
+	private PropertiesDataContainer() {
+		super();
 	}
 
 	@Override

@@ -133,7 +133,7 @@ public abstract class BaseDispatcher {
 	 *                        {@link BaseDispatchComponent} variables
 	 */
 	public static void setDataContainer(Class<?> dispatcherClass, InputStream inStream) {
-		setDataContainer(dispatcherClass, new DataContainer(inStream), false);
+		setDataContainer(dispatcherClass, DataContainer.newContainer(inStream), false);
 	}
 
 	/**
@@ -150,7 +150,7 @@ public abstract class BaseDispatcher {
 	 *                        dispatcher class
 	 */
 	public static void setDataContainer(Class<?> dispatcherClass, String dispatcherFile) {
-		setDataContainer(dispatcherClass, new DataContainer(new File(dispatcherFile)), false);
+		setDataContainer(dispatcherClass, DataContainer.newContainer(new File(dispatcherFile)), false);
 	}
 
 	/**
@@ -170,7 +170,7 @@ public abstract class BaseDispatcher {
 	 * @param createFile      defines if the non existent dispatcherFile gets created
 	 */
 	public static void setDataContainer(Class<?> dispatcherClass, String dispatcherFile, boolean createFile) {
-		setDataContainer(dispatcherClass, new DataContainer(new File(dispatcherFile)), createFile);
+		setDataContainer(dispatcherClass, DataContainer.newContainer(new File(dispatcherFile)), createFile);
 	}	
 
 	/**
@@ -198,10 +198,10 @@ public abstract class BaseDispatcher {
 		}
 		if (createFile) {
 			if (dc.isTree()) {
-				if (StringUtils.isBlank(dc.getRootNode())) {
-					dc.setRootNode(rn);
+				if (StringUtils.isBlank(dc.treeInstance().getRootNode())) {
+					dc.treeInstance().setRootNode(rn);
 				} else {
-					if (!dc.getRootNode().contentEquals(rn)) {
+					if (!dc.treeInstance().getRootNode().contentEquals(rn)) {
 						throw new IllegalArgumentException("Root node of dispatcher class and data container are not equal");
 					}
 				}
