@@ -174,15 +174,12 @@ public class BaseDispatchComponent {
 			DataContainer dc = null;
 			if (StringUtils.isNotBlank(parentXPath)) {
 				dc = DataContainer.newContainer(EHeader.TREE);
-				dc.treeInstance().xmlInstance().setRootNode(getRootNode()); 
+				if(dc.isXML()) {
+					dc.xmlInstance().setRootNode(getRootNode()); 
+				}				
 			} else {
 				dc = DataContainer.newContainer();
 			}
-//			try {
-//				dc.readData(); // TODO gets used now to initialize empty XML container with root node
-//			} catch (IOException e) {
-//				MLogger.getInstance().log(Level.SEVERE, e);
-//			}
 			BaseDispatcher.setDataContainer(parentClass, dc);
 		}
 	}

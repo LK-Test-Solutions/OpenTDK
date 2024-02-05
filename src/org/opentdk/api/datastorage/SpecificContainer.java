@@ -30,7 +30,6 @@ package org.opentdk.api.datastorage;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
-import java.sql.ResultSet;
 
 import org.opentdk.api.filter.Filter;
 
@@ -70,7 +69,9 @@ public interface SpecificContainer {
 	 * @throws IOException if the reading failed the user can handle the cause
 	 */
 	void readData(File sourceFile) throws IOException;
+	void readData(File sourceFile, Filter filter) throws IOException;
 	void readData(InputStream stream) throws IOException;
+	void readData(InputStream stream, Filter filter) throws IOException;
 
 	/**
 	 * Each specific container has to implement a method that writes the

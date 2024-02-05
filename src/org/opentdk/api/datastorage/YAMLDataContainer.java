@@ -65,26 +65,6 @@ public class YAMLDataContainer implements SpecificContainer {
 	 */
 	private Map<String, Object> content;
 
-	/**
-	 * Construct a new specific container for YAML files. This gets done by the {@link DataContainer}
-	 * class in its adaptContainer method. After initialization, it gets passed to this class. 
-	 * This class has no {@link DataContainer} field because it points to the {@link JSONDataContainer}.
-	 *
-	 * @param dCont gets used to initialize the {@link JSONDataContainer}
-	 */
-//	YAMLDataContainer(DataContainer dCont) {
-//		yaml = new Yaml();
-//		json = new JSONDataContainer(dCont);
-//
-//		if (dCont.getInputFile().exists()) {
-//			content = yaml.load(FileUtil.getRowsAsString(dCont.getInputFile())); // TODO part of the read operation
-//		} else if (dCont.getInputStream() != null) {
-//			content = yaml.load(dCont.getInputStream());
-//		} else {
-//			content = null;
-//		}
-//	}
-	
 	public static YAMLDataContainer newInstance() {		
 		return new YAMLDataContainer();
 	}
@@ -92,26 +72,11 @@ public class YAMLDataContainer implements SpecificContainer {
 	private YAMLDataContainer() {
 		yaml = new Yaml();
 		json = JSONDataContainer.newInstance();
-	}
-
-	@Override
-	public void add(String name, String value) {
-		json.add(name, value);
-	}
-
-	@Override
-	public void add(String name, String value, Filter filter) {
-		json.add(name, value, filter);
-	}
-	
-	@Override
-	public void add(String name, String fieldName, String newFieldValue, Filter filter) {
-		json.add(name, fieldName, newFieldValue, filter);
-	}
-
-	@Override
-	public void add(String name, String fieldName, String oldFieldValue, String newFieldValue, Filter filter) {
-		json.add(name, fieldName, oldFieldValue, newFieldValue, filter);
+		if (content == null) {
+			MLogger.getInstance().log(Level.WARNING, "YAML object is not initialized or empty ==> No YAML content to read", getClass().getSimpleName(), "constructor");
+		} else {
+			json.setJsonWithMap(content);
+		}
 	}
 
 	@Override
@@ -134,109 +99,84 @@ public class YAMLDataContainer implements SpecificContainer {
 	}
 
 	@Override
-	public void createFile() throws IOException {	
-		json.createFile();
+	public void readData(File sourceFile) throws IOException {
+		content = yaml.load(FileUtil.getRowsAsString(sourceFile));		
 	}
 
 	@Override
-	public void delete(String name, String value) {
-		json.set(name, value);
-	}
-
-	@Override
-	public void delete(String name, String value, Filter filter) {
-		json.delete(name, value, filter);
-	}
-
-	@Override
-	public void delete(String headerName, String fieldName, String fieldValue, Filter filter) {
-		json.delete(headerName, fieldName, fieldValue, filter);
+	public void readData(InputStream stream) throws IOException {
+		content = yaml.load(stream);		
 	}
 	
-	@Override
-	public String[] get(String name) {
-		return json.get(name);
-	}
 
 	@Override
-	public String[] get(String headerName, Filter fltr) {
-		return json.get(headerName, fltr);
-	}
-
-	@Override
-	public String[] get(String name, String attr) {
-		return json.get(name, attr);
-	}
-
-	@Override
-	public Object get(String tagName, String attributName, String attributValue){
-		return null;
-	}
-
-	@Override
-	public Object[] get(String headerName, Filter fltr, String returnType){
-		return null;
-	}
-
-	@Override
-	public void readData(Filter filter) {
-		if (content == null) {
-			MLogger.getInstance().log(Level.WARNING, "YAML object is not initialized or empty ==> No YAML content to read", getClass().getSimpleName(), "readData");
-		} else {
-			json.setJsonWithMap(content);
-		}
-	}
-
-	/**
-	 * Not required for YAML Container
-	 */
-	@Override
-	public Object getRootElement(){
-		return new Object();
-	}
-
-	@Override
-	public void set(String name, String value) {
-		json.set(name, value);
-	}
-
-	@Override
-	public void set(String name, String value, Filter filter) {
-		json.set(name, value, filter);
-	}
-
-	@Override
-	public void set(String name, String value, Filter filter, boolean allOccurences) {
-		json.set(name, value, filter, allOccurences);
-	}
-
-	@Override
-	public void set(String name, String attr, String value, String oldValue, Filter filter) {
-		json.set(name, attr, value, oldValue, filter);
-		
-	}
-
-	@Override
-	public void writeData(String srcFileName) throws IOException {
-		yaml.dump(yaml.dumpAsMap(json.getJsonAsMap()), new FileWriter(srcFileName));
-	}
-
-	@Override
-	public void readData(File sourceFile) throws IOException {
+	public void readData(File sourceFile, Filter filter) throws IOException {
 		// TODO Auto-generated method stub
 		
 	}
 
 	@Override
-	public void readData(InputStream stream) throws IOException {
+	public void readData(InputStream stream, Filter filter) throws IOException {
 		// TODO Auto-generated method stub
 		
 	}
 
 	@Override
 	public void writeData(File outputFile) throws IOException {
-		// TODO Auto-generated method stub
-		
+		yaml.dump(yaml.dumpAsMap(json.getJsonAsMap()), new FileWriter(outputFile.getPath()));	
+	}
+
+	public void add(String name, String value) {
+		json.add(name, value);
+	}
+
+	public void add(String name, String value, Filter filter) {
+		json.add(name, value, filter);
 	}
 	
+	public void add(String name, String fieldName, String newFieldValue, Filter filter) {
+		json.add(name, fieldName, newFieldValue, filter);
+	}
+
+	public void add(String name, String fieldName, String oldFieldValue, String newFieldValue, Filter filter) {
+		json.add(name, fieldName, oldFieldValue, newFieldValue, filter);
+	}
+
+	public void delete(String name, String value) {
+		json.set(name, value);
+	}
+
+	public void delete(String name, String value, Filter filter) {
+		json.delete(name, value, filter);
+	}
+
+	public void delete(String headerName, String fieldName, String fieldValue, Filter filter) {
+		json.delete(headerName, fieldName, fieldValue, filter);
+	}
+	
+	public String[] get(String name) {
+		return json.get(name);
+	}
+
+	public String[] get(String headerName, Filter fltr) {
+		return json.get(headerName, fltr);
+	}
+
+	public void set(String name, String value) {
+		json.set(name, value);
+	}
+
+	public void set(String name, String value, Filter filter) {
+		json.set(name, value, filter);
+	}
+
+	public void set(String name, String value, Filter filter, boolean allOccurences) {
+		json.set(name, value, filter, allOccurences);
+	}
+
+	public void set(String name, String attr, String value, String oldValue, Filter filter) {
+		json.set(name, attr, value, oldValue, filter);
+		
+	}
+
 }

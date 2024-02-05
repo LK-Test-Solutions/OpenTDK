@@ -28,70 +28,62 @@
 package org.opentdk.api.datastorage;
 
 import java.io.IOException;
+import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;
 
-import org.opentdk.api.filter.Filter;
 import org.opentdk.api.logger.MLogger;
 
 public class RSDataContainer extends CSVDataContainer {
 
-	/**
-     * Reads data from a {@link java.sql.ResultSet} and puts it into the DataContainer.
-     * 
-     * @param filter Filter parameter to accomplish interface requirement (has no
-	 *               use here)	
-     */
-	@Override
-	public void readData(Filter filter) throws IOException{
-		readData(filter, "Label");
-	}
-	
-	public static RSDataContainer newInstance() {		
+	public static RSDataContainer newInstance() {
 		return new RSDataContainer();
 	}
-	
+
 	private RSDataContainer() {
 		super();
 	}
 
-	public void readData(Filter filter, String headerOrigin) throws IOException {
-		if (dc.getResultSet() != null) {
+	public void readData(ResultSet rs) throws IOException {
+		readData(rs, "Label");
+	}
+
+	public void readData(ResultSet rs, String headerOrigin) throws IOException {
+		if (rs != null) {
 			try {
 				// read description of the ResultSet columns
-				ResultSetMetaData rsmd = dc.getResultSet().getMetaData();
+				ResultSetMetaData rsmd = rs.getMetaData();
 				int cols = rsmd.getColumnCount();
 				List<String> columns = new ArrayList<String>();
 				// fill columns List with the column names of the result set
 				for (int i = 1; i <= cols; i++) {
 					String col;
-					if(headerOrigin.equalsIgnoreCase("LABEL")) {
+					if (headerOrigin.equalsIgnoreCase("LABEL")) {
 						col = rsmd.getColumnLabel(i);
-					}else {
+					} else {
 						col = rsmd.getColumnName(i);
 					}
 					columns.add(col);
 				}
-				// transfer all column names from the colums list to the HashMap columns
-				setHeaders(columns.toArray(new String[]{}));
+				// transfer all column names from the columns list to the HashMap columns
+				setHeaders(columns.toArray(new String[] {}));
 				// transfer all data rows of the ResultSet to the ArrayList of this class
-				if(dc.getResultSet().isBeforeFirst()) {
-					dc.getResultSet().first();
+				if (rs.isBeforeFirst()) {
+					rs.first();
 				}
 				do {
 					String[] row = new String[cols];
 					for (int i = 0; i < cols; i++) {
-						row[i] = String.valueOf(dc.getResultSet().getObject(i + 1));
+						row[i] = String.valueOf(rs.getObject(i + 1));
 					}
 					addRow(row);
-				} while (dc.getResultSet().next());
-				dc.getResultSet().close();
+				} while (rs.next());
+				rs.close();
 			} catch (SQLException e) {
-				MLogger.getInstance().log(Level.SEVERE, e, "putResultSet");
-				throw new RuntimeException(e);
+				MLogger.getInstance().log(Level.SEVERE, e, "readData");
 			}
 		}
 	}

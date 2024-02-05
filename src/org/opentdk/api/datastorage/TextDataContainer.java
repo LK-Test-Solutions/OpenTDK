@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 
+import org.opentdk.api.filter.Filter;
 import org.opentdk.api.io.FileUtil;
 
 public class TextDataContainer implements SpecificContainer {
@@ -32,9 +33,23 @@ public class TextDataContainer implements SpecificContainer {
 	public void readData(InputStream stream) throws IOException {
 		content.append(FileUtil.getContent(stream));
 	}
+	
+
+	@Override
+	public void readData(File sourceFile, Filter filter) throws IOException {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void readData(InputStream stream, Filter filter) throws IOException {
+		// TODO Auto-generated method stub
+		
+	}
 
 	@Override
 	public void writeData(File outputFile) throws IOException {
 		FileUtil.writeOutputFile(content.toString(), outputFile.getPath());		
 	}
+
 }

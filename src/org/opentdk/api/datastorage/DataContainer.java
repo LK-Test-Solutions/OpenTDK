@@ -33,11 +33,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.sql.ResultSet;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
+
 import java.util.Map;
-import java.util.Set;
 import java.util.logging.Level;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -45,7 +42,6 @@ import java.util.stream.Stream;
 import org.apache.commons.lang3.StringUtils;
 import org.json.JSONObject;
 import org.opentdk.api.filter.Filter;
-import org.opentdk.api.filter.FilterRule;
 import org.opentdk.api.io.FileUtil;
 import org.opentdk.api.io.XMLEditor;
 import org.opentdk.api.logger.MLogger;
@@ -219,29 +215,11 @@ public class DataContainer implements SpecificContainer {
 		return new DataContainer(rs);
 	}
 
-	/**
-	 * Constructor that is called, when importing data from a database request to
-	 * the container with the possibility to filter the data before it gets
-	 * imported. The column delimiter of the imported data is the semicolon.
-	 *
-	 * @param rs   The result of the database request.
-	 * @param fltr A {@link org.opentdk.api.filter.Filter} object to define which
-	 *             data should be ignored. If it is null no filter gets used.
-	 */
-	public static DataContainer newContainer(ResultSet rs, Filter filter) {
-		return new DataContainer(rs, filter);
-	}
-
 	private DataContainer(ResultSet rs) {
-		this(rs, null);
-	}
-
-	private DataContainer(ResultSet rs, Filter fltr) {
 		resultSet = rs;
-		filter = fltr;
 		instance = adaptContainer();
 		try {
-			instance.readData(rs, fltr);
+			rsInstance().readData(rs);
 		} catch (IOException e) {
 			MLogger.getInstance().log(Level.SEVERE, e);
 		}
@@ -354,6 +332,14 @@ public class DataContainer implements SpecificContainer {
 		}
 	}
 	
+	public RSDataContainer rsInstance() {
+		if (instance instanceof RSDataContainer) {
+			return (RSDataContainer) instance;
+		} else {
+			throw new NullPointerException("RSDataContainer not intialized");
+		}
+	} 
+	
 	public XMLDataContainer xmlInstance() {
 		if (instance instanceof TextDataContainer) {
 			return (XMLDataContainer) instance;
@@ -456,6 +442,12 @@ public class DataContainer implements SpecificContainer {
 		return ret;
 	}
 	
+	private void checkInstance() {
+		if(!isTree() && !isTabular()) {
+			throw new RuntimeException("DataContainer#instance not initialized");
+		} 
+	}
+	
 	public void createFile() throws IOException {
 		if (inputFile != null && StringUtils.isNotBlank(inputFile.getPath())) {
 			if(instance instanceof XMLDataContainer) {
@@ -555,6 +547,16 @@ public class DataContainer implements SpecificContainer {
 	public void readData(InputStream stream) throws IOException {
 		instance.readData(stream);
 	}
+	
+	@Override
+	public void readData(File sourceFile, Filter filter) throws IOException {
+		instance.readData(sourceFile, filter);
+	}
+
+	@Override
+	public void readData(InputStream stream, Filter filter) throws IOException {
+		instance.readData(stream, filter);	
+	}
 
 	@Override
 	public void writeData(File outputFile) throws IOException {
@@ -566,6 +568,7 @@ public class DataContainer implements SpecificContainer {
 	// --------------------------------------------------------------------
 
 	public void add(String name, String value, Filter filter) {
+		checkInstance();
 		if (isTabular()) {
 			tabInstance().addColumn(name);
 		} else if (isTree()) {
@@ -575,58 +578,60 @@ public class DataContainer implements SpecificContainer {
 				jsonInstance().add(name, value, filter);
 			} else if(isYAML()) {
 				yamlInstance().add(name, value, filter);
-			} else {
-				throw new RuntimeException("DataContainer#add tree instance is set but no sub instance initialized.");
 			}
-		} else {
-			throw new RuntimeException("DataContainer#instance is neither initialized as tabular nore tree.");
-		}
+		} 
 	}
+//
+//	public void delete(String params, String attrName, String attrValue, Filter fltr) {
+//		checkInstance();
+//		if (isTabular()) {
+//			tabInstance().deleteValue(params);
+//		} else if (isTree()) {
+//			if(isXML()) {
+//				xmlInstance().delete(params, attrName, attrValue, fltr);
+//			} else if (isJSON()) {
+//				jsonInstance().delete(params, attrName, attrValue, fltr);
+//			} else if(isYAML()) {
+//				yamlInstance().delete(params, attrName, attrValue, fltr);
+//			}
+//		} 
+//	}
+//
+//	public String[] get(String parameterName) {
+//		return get(parameterName, new Filter());
+//	}
+//
+//	public String[] get(String parameterName, Filter fltr) {
+//		String[] ret = new String[0];
+//		if (isTabular()) {
+//			ret = tabInstance().getColumn(parameterName, fltr);
+//		} else if (isTree()) {
+//			ret = treeInstance().get(parameterName, fltr);
+//			for (int i = 0; i < ret.length; i++) {
+//				ret[i] = ret[i].trim();
+//			}
+//		}
+//		return ret;
+//	}
+//
+//	public void set(String parameterName, String value) {
+//		set(parameterName, value, new Filter(), false);
+//	}
+//
+//	public void set(String parameterName, String value, Filter filter) {
+//		set(parameterName, value, filter, false);
+//	}
+//
+//	public void set(String parameterName, String value, Filter fltr, boolean allOccurences) {
+//		if (isTabular()) {
+//			tabInstance().setValues(parameterName, value, fltr, allOccurences);
+//		} else if (isTree()) {
+//			if(isXML()) {
+//				treeInstance().xmlInstance().set(parameterName, value, fltr, allOccurences);
+//			} else if (instance instanceof JSONDataContainer || instance instanceof YAMLDataContainer) {
+//				treeInstance().jsonInstance().set(parameterName, value, fltr, allOccurences);
+//			}
+//		}
+//	}
 
-	public void delete(String params, String attrName, String attrValue, Filter fltr) {
-		if (isTabular()) {
-			tabInstance().deleteValue(params);
-		} else if (isTree()) {
-			treeInstance().delete(params, attrName, attrValue, fltr);
-		} else {
-			throw new RuntimeException("DataContainer#instance is neither initialized as tabular nore tree.");
-		}
-	}
-
-	public String[] get(String parameterName) {
-		return get(parameterName, new Filter());
-	}
-
-	public String[] get(String parameterName, Filter fltr) {
-		String[] ret = new String[0];
-		if (isTabular()) {
-			ret = tabInstance().getColumn(parameterName, fltr);
-		} else if (isTree()) {
-			ret = treeInstance().get(parameterName, fltr);
-			for (int i = 0; i < ret.length; i++) {
-				ret[i] = ret[i].trim();
-			}
-		}
-		return ret;
-	}
-
-	public void set(String parameterName, String value) {
-		set(parameterName, value, new Filter(), false);
-	}
-
-	public void set(String parameterName, String value, Filter filter) {
-		set(parameterName, value, filter, false);
-	}
-
-	public void set(String parameterName, String value, Filter fltr, boolean allOccurences) {
-		if (isTabular()) {
-			tabInstance().setValues(parameterName, value, fltr, allOccurences);
-		} else if (isTree()) {
-			if(isXML()) {
-				treeInstance().xmlInstance().set(parameterName, value, fltr, allOccurences);
-			} else if (instance instanceof JSONDataContainer || instance instanceof YAMLDataContainer) {
-				treeInstance().jsonInstance().set(parameterName, value, fltr, allOccurences);
-			}
-		}
-	}
 }

@@ -31,12 +31,10 @@ import java.io.Reader;
 import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.List;
-import java.util.logging.Level;
 
 import org.apache.commons.lang3.StringUtils;
 import org.opentdk.api.filter.Filter;
 import org.opentdk.api.io.FileUtil;
-import org.opentdk.api.logger.MLogger;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -70,19 +68,19 @@ public class PropertiesDataContainer extends CSVDataContainer {
 	public void deleteField(String headerName, String attributeName, String attributeValue, Filter fltr) {
 		int headerIndex = getHeaderIndex(headerName);
 		getValues().get(0)[headerIndex] = null;
-		if(!dc.getInputFile().getPath().isEmpty()) {
-			try {
-				writeData(dc.getInputFile().getPath());
-			} catch (IOException e) {
-				MLogger.getInstance().log(Level.SEVERE, e, "getRowsIndexes");
-				throw new RuntimeException(e);
-			}
-		}
+//		if(!dc.getInputFile().getPath().isEmpty()) {
+//			try {
+//				writeData(dc.getInputFile().getPath());
+//			} catch (IOException e) {
+//				MLogger.getInstance().log(Level.SEVERE, e, "getRowsIndexes");
+//				throw new RuntimeException(e);
+//			}
+//		}
 	}
 
 	@Override
-	public void readData(Filter filter) {
-		SortedProperties props = readProps(dc.getInputFile().getPath());
+	public void readData(File inputFile) {
+		SortedProperties props = readProps(inputFile.getPath());
 		// get all property names and add them to a List
 		if ((props != null) && (!props.isEmpty())) {
 			Enumeration<?> e = props.propertyNames();
@@ -123,14 +121,13 @@ public class PropertiesDataContainer extends CSVDataContainer {
 	 * @throws IOException If any I/O error occurred
 	 */
 	@Override
-	public void writeData(String srcFile) throws IOException {
-		File f = new File(srcFile);
-		FileUtil.checkDir(f.getParent(), true);
-		FileWriter fw = new FileWriter(dc.getInputFile());
-		SortedProperties existingProps = readProps(dc.getInputFile().getPath());
+	public void writeData(File srcFile) throws IOException {
+		FileUtil.checkDir(srcFile.getParent(), true);
+		FileWriter fw = new FileWriter(srcFile);
+		SortedProperties existingProps = readProps(srcFile.getPath());
 		SortedProperties outputProps = new SortedProperties();
 		if ((existingProps != null) && (!existingProps.isEmpty())) {
-			List<String> doc = FileUtil.getRowsAsList(dc.getInputFile());
+			List<String> doc = FileUtil.getRowsAsList(srcFile);
 
 			List<String> usedKeys = new ArrayList<String>();
 			for (String line : doc) {
@@ -155,7 +152,7 @@ public class PropertiesDataContainer extends CSVDataContainer {
 					outputProps.put(s, ds[getHeaders().get(s)]);
 				}
 			}
-			FileOutputStream fos = new FileOutputStream(dc.getInputFile());
+			FileOutputStream fos = new FileOutputStream(srcFile);
 			outputProps.store(fos, "Store properties");
 			
 		}

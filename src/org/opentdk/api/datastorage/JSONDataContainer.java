@@ -32,7 +32,6 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.sql.ResultSet;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -47,9 +46,7 @@ import org.json.JSONObject;
 import org.opentdk.api.filter.Filter;
 import org.opentdk.api.filter.FilterRule;
 import org.opentdk.api.io.FileUtil;
-import org.opentdk.api.io.XMLEditor;
 import org.opentdk.api.logger.MLogger;
-import org.opentdk.api.mapping.EOperator;
 import org.opentdk.api.util.ListUtil;
 
 import org.yaml.snakeyaml.Yaml;
@@ -77,13 +74,95 @@ public class JSONDataContainer implements SpecificContainer {
 	private JSONDataContainer() {
 		
 	}
+	
+	@Override
+	public String asString() {
+		String ret = "";
+		if (json == null || json.isEmpty()) {
+			MLogger.getInstance().log(Level.WARNING, "JSON object is not initialized or empty ==> No JSON content to return", getClass().getSimpleName(), "asString");
+		} else {
+			ret = json.toString(1);
+		}
+		return ret;
+	}
 
 	@Override
+	public String asString(EContainerFormat format) {
+		switch(format) {
+		case JSON:
+			MLogger.getInstance().log(Level.INFO, "Format already is JSON. Call asString", getClass().getSimpleName(), "asString(format)");
+			return asString();
+		case YAML:
+			Yaml yaml = new Yaml();
+			return yaml.dump(yaml.dumpAsMap(getJsonAsMap()));
+		default:
+			MLogger.getInstance().log(Level.WARNING, "Format not supported to export from YAML", getClass().getSimpleName(), "asString(format)");
+			return "";
+		}
+	}
+	
+	@Override
+	public void readData(InputStream stream) {
+		String content = null;
+		if (stream != null) {
+			InputStreamReader inputStreamReader = new InputStreamReader(stream);
+			Stream<String> streamOfString = new BufferedReader(inputStreamReader).lines();
+			content = streamOfString.collect(Collectors.joining());
+
+			streamOfString.close();
+			try {
+				inputStreamReader.close();
+			} catch (IOException e) {
+				MLogger.getInstance().log(Level.SEVERE, e);
+			}
+		}
+		if (content != null) {
+			json = new JSONObject(content);
+		}
+	}
+	
+	@Override
+	public void readData(File srcFile) throws IOException {
+		if (!srcFile.getName().isEmpty()) {
+			String content = FileUtil.getContent(srcFile.getPath());
+			if (content != null) {
+				json = new JSONObject(content);
+			}
+		} 	
+	}
+	
+
+	@Override
+	public void readData(File sourceFile, Filter filter) throws IOException {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void readData(InputStream stream, Filter filter) throws IOException {
+		// TODO Auto-generated method stub
+		
+	}
+	
+	@Override
+	public void writeData(File srcFile) throws IOException {
+		if (json == null || json.isEmpty()) {
+			MLogger.getInstance().log(Level.WARNING, "JSON object is not initialized or empty ==> No JSON content to write", getClass().getSimpleName(), "writeData");
+		} else {
+			try {
+				FileUtil.createFile(srcFile, true);
+				FileUtil.writeOutputFile(json.toString(1), srcFile.getPath());
+			} catch (JSONException e) {
+				MLogger.getInstance().log(Level.SEVERE, e);
+				throw new RuntimeException(e);
+			}
+		}
+	}
+	
 	public void add(String name, String value) {
 		add(name, value, new Filter());
 	}
 	
-	@Override
 	public void add(String name, String value, Filter filter) {
 		if (filter.getFilterRules().isEmpty()) {
 			Object newValue = this.getDataType(value);
@@ -117,53 +196,22 @@ public class JSONDataContainer implements SpecificContainer {
 		}
 	}
 	
-	@Override
 	public void add(String name, String fieldName, String newValue, Filter filter) {
 		MLogger.getInstance().log(Level.INFO, "Method not used", getClass().getSimpleName(), "add");
 	}
 
-	@Override
 	public void add(String headerName, String fieldName, String oldFieldValue, String newFieldValue, Filter filter) {
 		MLogger.getInstance().log(Level.INFO, "Method not used", getClass().getSimpleName(), "add");
 	}
-	
-	@Override
-	public String asString() {
-		String ret = "";
-		if (json == null || json.isEmpty()) {
-			MLogger.getInstance().log(Level.WARNING, "JSON object is not initialized or empty ==> No JSON content to return", getClass().getSimpleName(), "asString");
-		} else {
-			ret = json.toString(1);
-		}
-		return ret;
-	}
 
-	@Override
-	public String asString(EContainerFormat format) {
-		switch(format) {
-		case JSON:
-			MLogger.getInstance().log(Level.INFO, "Format already is JSON. Call asString", getClass().getSimpleName(), "asString(format)");
-			return asString();
-		case YAML:
-			Yaml yaml = new Yaml();
-			return yaml.dump(yaml.dumpAsMap(getJsonAsMap()));
-		default:
-			MLogger.getInstance().log(Level.WARNING, "Format not supported to export from YAML", getClass().getSimpleName(), "asString(format)");
-			return "";
-		}
-	}
-
-	@Override
 	public void delete(String name, String value) {
 		delete(name, value, new Filter());		
 	}
 
-	@Override
 	public void delete(String name, String value, Filter filter) {
 		delete(name, "", "", new Filter());		
 	}
 
-	@Override
 	public void delete(String name, String fieldName, String fieldValue, Filter filter) {
 		if (filter.getFilterRules().isEmpty()) {
 			json.remove(name);
@@ -195,25 +243,15 @@ public class JSONDataContainer implements SpecificContainer {
 		}
 	}
 
-	@Override
 	public String[] get(String name) {
 		return get(name, new Filter());
 	}
-	
-	@Override
-	public String[] get(String name, String attr) {
-		MLogger.getInstance().log(Level.INFO, "Method not used", getClass().getSimpleName(), "get");
-		return new String[0];
-	}
 
-	@Override
 	public String[] get(String headerName, Filter fltr) {
 		String[] ret = null;
-		List<FilterRule> implFilterRules = new ArrayList<>(); // TODO sense
-		implFilterRules.add(new FilterRule("XPath", "", EOperator.EQUALS));
 		List<String> filteredValues = new ArrayList<>();
 
-		if (implFilterRules.size() > 0) {
+		if (fltr.getFilterRules().size() > 0) {
 			for (FilterRule frImpl : fltr.getFilterRules()) {
 				if (frImpl.getHeaderName().equalsIgnoreCase("XPath")) {
 
@@ -254,16 +292,6 @@ public class JSONDataContainer implements SpecificContainer {
 		return ret;
 	}
 
-	@Override
-	public Object get(String tagName, String attributName, String attributValue){
-		return null;
-	}
-
-	@Override
-	public Object[] get(String headerName, Filter fltr, String returnType) {
-		return null;
-	}
-
 	/**
 	 * Retrieves the data type out of the committed value. This can be a JSONObject, JSONArray or any
 	 * other primitive data type like string, integer or boolean. E.g. if the input string has leading
@@ -302,63 +330,20 @@ public class JSONDataContainer implements SpecificContainer {
 	}
 
 	/**
-	 * Not required for JSON Container
-	 *
-	 * @return
-	 */
-	@Override
-	public Object getRootElement(){
-		return new Object();
-	}
-
-	/**
 	 * @return {@link #json} object as map to access from other containers.
 	 */
 	Map<String, Object> getJsonAsMap() {
 		return json.toMap();
 	}
-
-	@Override
-	public void readData(InputStream stream) {
-		String content = null;
-		if (stream != null) {
-			InputStreamReader inputStreamReader = new InputStreamReader(stream);
-			Stream<String> streamOfString = new BufferedReader(inputStreamReader).lines();
-			content = streamOfString.collect(Collectors.joining());
-
-			streamOfString.close();
-			try {
-				inputStreamReader.close();
-			} catch (IOException e) {
-				MLogger.getInstance().log(Level.SEVERE, e);
-			}
-		}
-		if (content != null) {
-			json = new JSONObject(content);
-		}
-	}
 	
-	@Override
-	public void readData(File srcFile) throws IOException {
-		if (!srcFile.getName().isEmpty()) {
-			String content = FileUtil.getContent(srcFile.getPath());
-			if (content != null) {
-				json = new JSONObject(content);
-			}
-		} 	
-	}
-	
-	@Override
 	public void set(String name, String value) {
 		set(name, value, new Filter());
 	}
 
-	@Override
 	public void set(String name, String value, Filter filter) {
 		set(name, value, filter, false); // No double occurrences possible in JSONObject
 	}
 	
-	@Override
 	public void set(String name, String value, Filter filter, boolean allOccurences) {
 		if (filter.getFilterRules().isEmpty()) {
 			Object newValue = this.getDataType(value);
@@ -396,7 +381,6 @@ public class JSONDataContainer implements SpecificContainer {
 		}
 	}
 
-	@Override
 	public void set(String name, String attributeName, String oldAttributeValue, String attributeValue, Filter filter) {
 		MLogger.getInstance().log(Level.WARNING, "Method not used", getClass().getSimpleName(), "set");
 	}
@@ -414,34 +398,5 @@ public class JSONDataContainer implements SpecificContainer {
 		}
 	}
 
-	@Override
-	public void writeData(File srcFile) throws IOException {
-		if (json == null || json.isEmpty()) {
-			MLogger.getInstance().log(Level.WARNING, "JSON object is not initialized or empty ==> No JSON content to write", getClass().getSimpleName(), "writeData");
-		} else {
-			try {
-				FileUtil.createFile(srcFile, true);
-				FileUtil.writeOutputFile(json.toString(1), srcFile.getPath());
-			} catch (JSONException e) {
-				MLogger.getInstance().log(Level.SEVERE, e);
-				throw new RuntimeException(e);
-			}
-		}
-	}
-
-	@Override
-	public void readData(ResultSet rs) throws IOException {
-		// TODO Log
-	}
-
-	@Override
-	public String getRootNode() {
-		return null;
-	}
-
-	@Override
-	public void setRootNode(String rootNode) {
-		// TODO Log	
-	}
 
 }

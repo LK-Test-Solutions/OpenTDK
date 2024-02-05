@@ -37,7 +37,6 @@ import java.util.List;
 import org.apache.commons.lang3.StringUtils;
 import org.opentdk.api.filter.Filter;
 import org.opentdk.api.filter.FilterRule;
-import org.opentdk.api.io.FileUtil;
 import org.opentdk.api.io.XMLEditor;
 import org.w3c.dom.Element;
 
@@ -69,7 +68,9 @@ public class XMLDataContainer implements SpecificContainer {
 	}
 	
 	private XMLDataContainer() {
-		xEdit = new XMLEditor(rootNode);
+		StringBuilder sb = new StringBuilder();
+		sb.append("<").append(rootNode).append("/>");
+		xEdit = new XMLEditor(sb.toString());
 	}
 
 	@Override
@@ -83,11 +84,40 @@ public class XMLDataContainer implements SpecificContainer {
 		xEdit = new XMLEditor(stream);
 		setRootNode(xEdit.getRootNodeName());		
 	}
+	
+
+	@Override
+	public void readData(File sourceFile, Filter filter) throws IOException {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void readData(InputStream stream, Filter filter) throws IOException {
+		// TODO Auto-generated method stub
+		
+	}
 
 	@Override
 	public void writeData(File outputFile) {
 		xEdit.save(outputFile);
 	}
+	
+	public String getRootNode() {
+		return rootNode;
+	}
+	
+	public void setRootNode(String root) {
+		rootNode = root;
+	}
+	
+//	public void readXMLData(File inputFile) {
+//		StringBuilder sb = new StringBuilder();
+//		sb.append("<").append(getRootNode()).append("/>");
+//		FileUtil.writeOutputFile(sb.toString(), inputFile.getPath());
+//		xEdit = new XMLEditor(inputFile);
+//		xEdit.save();
+//	}
 	
 //	/**
 //	 * An instance of the DataContainer that should be filled with the data from the connected source
@@ -318,22 +348,6 @@ public class XMLDataContainer implements SpecificContainer {
 		return xEdit.getRoot();
 	}
 	
-	public String getRootNode() {
-		return rootNode;
-	}
-	
-	public void setRootNode(String root) {
-		rootNode = root;
-	}
-	
-	public void readXMLData(File inputFile) {
-		StringBuilder sb = new StringBuilder();
-		sb.append("<").append(getRootNode()).append("/>");
-		FileUtil.writeOutputFile(sb.toString(), inputFile.getPath());
-		xEdit = new XMLEditor(inputFile);
-		xEdit.save();
-	}
-	
 	public void set(String name, String value) {
 		set(name, value, new Filter());
 	}
@@ -372,6 +386,7 @@ public class XMLDataContainer implements SpecificContainer {
 			}
 		}
 	}
+
 
 
 }
