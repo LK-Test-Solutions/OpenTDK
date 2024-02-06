@@ -30,7 +30,7 @@ package org.opentdk.api.dispatcher;
 import org.apache.commons.lang3.StringUtils;
 import org.opentdk.api.application.EBaseSettings;
 import org.opentdk.api.datastorage.DataContainer;
-import org.opentdk.api.datastorage.EHeader;
+import org.opentdk.api.datastorage.EContainerFormat;
 import org.opentdk.api.filter.Filter;
 import org.opentdk.api.mapping.EOperator;
 import org.opentdk.api.util.ListUtil;
@@ -171,15 +171,11 @@ public class BaseDispatchComponent {
 		defaultValue = dVal;
 
 		if (!BaseDispatcher.dcMap.containsKey(settingsKey)) {
-			DataContainer dc = null;
-			if (StringUtils.isNotBlank(parentXPath)) {
-				dc = DataContainer.newContainer(EHeader.TREE);
-				if(dc.isXML()) {
-					dc.xmlInstance().setRootNode(getRootNode()); 
-				}				
-			} else {
-				dc = DataContainer.newContainer();
-			}
+			DataContainer dc = DataContainer.newContainer(EContainerFormat.CSV);
+			if (StringUtils.isNotBlank(parentXPath)) {	
+				dc = DataContainer.newContainer(EContainerFormat.XML);
+				dc.xmlInstance().setRootNode(getRootNode()); 			
+			} 
 			BaseDispatcher.setDataContainer(parentClass, dc);
 		}
 	}
@@ -446,7 +442,7 @@ public class BaseDispatchComponent {
 		DataContainer dc = BaseDispatcher.getDataContainer(settingsKey);
 		String[] attributes = new String[0];
 		if (dc.isTree() && dc.isXML()) {
-			attributes = dc.treeInstance().xmlInstance().get(expr, attrName);
+			attributes = dc.xmlInstance().get(expr, attrName);
 		}
 		if (attributes.length == 0) {
 			return "";
@@ -482,7 +478,7 @@ public class BaseDispatchComponent {
 		DataContainer dc = BaseDispatcher.getDataContainer(settingsKey);
 		String[] attributes = new String[0];
 		if (dc.isTree() && dc.isXML()) {
-			attributes = dc.treeInstance().xmlInstance().get(expr, attrName);
+			attributes = dc.xmlInstance().get(expr, attrName);
 		}
 		if (attributes.length == 0) {
 			return "";
@@ -514,7 +510,7 @@ public class BaseDispatchComponent {
 		DataContainer dc = BaseDispatcher.getDataContainer(settingsKey);
 		String[] attributes = new String[0];
 		if (dc.isTree() && dc.isXML()) {
-			attributes = dc.treeInstance().xmlInstance().get(expr, attrName);
+			attributes = dc.xmlInstance().get(expr, attrName);
 		}
 		if (attributes.length == 0) {
 			return new String[0];
@@ -550,7 +546,7 @@ public class BaseDispatchComponent {
 		DataContainer dc = BaseDispatcher.getDataContainer(settingsKey);
 		String[] attributes = new String[0];
 		if (dc.isTree() && dc.isXML()) {
-			attributes = dc.treeInstance().xmlInstance().get(expr, attrName);
+			attributes = dc.xmlInstance().get(expr, attrName);
 		}
 		if (attributes.length == 0) {
 			return new String[0];
@@ -808,7 +804,7 @@ public class BaseDispatchComponent {
 		fltr.addFilterRule("XPath", xPath, EOperator.EQUALS);
 		DataContainer dc = BaseDispatcher.getDataContainer(settingsKey);
 		if(dc.isTree() && dc.isXML()) {
-			dc.treeInstance().xmlInstance().set(parameterName, attrName, oldValue, attrValue, fltr);
+			dc.xmlInstance().set(parameterName, attrName, oldValue, attrValue, fltr);
 		}
 	}
 

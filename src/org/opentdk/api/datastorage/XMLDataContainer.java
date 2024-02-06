@@ -61,16 +61,16 @@ public class XMLDataContainer implements SpecificContainer {
 	 */
 	private XMLEditor xEdit;
 	
-	private String rootNode = "<root>";
+	private String rootNode = "root";
 		
 	public static XMLDataContainer newInstance() {		
 		return new XMLDataContainer();
 	}
 	
 	private XMLDataContainer() {
-		StringBuilder sb = new StringBuilder();
-		sb.append("<").append(rootNode).append("/>");
-		xEdit = new XMLEditor(sb.toString());
+//		StringBuilder sb = new StringBuilder();
+//		sb.append("<").append(rootNode).append("/>");
+		xEdit = new XMLEditor(rootNode);
 	}
 
 	@Override
@@ -352,18 +352,14 @@ public class XMLDataContainer implements SpecificContainer {
 		set(name, value, new Filter());
 	}
 
-	public void set(String name, String value, Filter filter) {
-		set(name, value, filter, false);
-	}
-
-	public void set(String tagName, String tagValue, Filter filter, boolean allOccurences) {
+	public void set(String tagName, String tagValue, Filter filter) {
 		for (FilterRule fltrRule : filter.getFilterRules()) {
 			if (fltrRule.getHeaderName().equalsIgnoreCase("XPath")) {
-					xEdit.checkXPath(fltrRule.getValue() + "/" + tagName, true); // Creates the hierarchy if not present
-					Element[] elements = (Element[]) get(tagName, filter, "elements");								
-					for (int i = 0; i < elements.length; i++) {
-						xEdit.setElementValue(elements[i], tagValue);
-					}
+				xEdit.checkXPath(fltrRule.getValue() + "/" + tagName, true); // Creates the hierarchy if not present
+				Element[] elements = (Element[]) get(tagName, filter, "elements");								
+				for (int i = 0; i < elements.length; i++) {
+					xEdit.setElementValue(elements[i], tagValue);
+				}
 				break;
 			}
 		}

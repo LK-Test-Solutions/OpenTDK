@@ -204,15 +204,7 @@ public class JSONDataContainer implements SpecificContainer {
 		MLogger.getInstance().log(Level.INFO, "Method not used", getClass().getSimpleName(), "add");
 	}
 
-	public void delete(String name, String value) {
-		delete(name, value, new Filter());		
-	}
-
-	public void delete(String name, String value, Filter filter) {
-		delete(name, "", "", new Filter());		
-	}
-
-	public void delete(String name, String fieldName, String fieldValue, Filter filter) {
+	public void delete(String name, Filter filter) {
 		if (filter.getFilterRules().isEmpty()) {
 			json.remove(name);
 		}
@@ -339,12 +331,8 @@ public class JSONDataContainer implements SpecificContainer {
 	public void set(String name, String value) {
 		set(name, value, new Filter());
 	}
-
-	public void set(String name, String value, Filter filter) {
-		set(name, value, filter, false); // No double occurrences possible in JSONObject
-	}
 	
-	public void set(String name, String value, Filter filter, boolean allOccurences) {
+	public void set(String name, String value, Filter filter) {
 		if (filter.getFilterRules().isEmpty()) {
 			Object newValue = this.getDataType(value);
 			json.put(name, newValue);
@@ -379,10 +367,6 @@ public class JSONDataContainer implements SpecificContainer {
 				break;
 			}
 		}
-	}
-
-	public void set(String name, String attributeName, String oldAttributeValue, String attributeValue, Filter filter) {
-		MLogger.getInstance().log(Level.WARNING, "Method not used", getClass().getSimpleName(), "set");
 	}
 
 	/**

@@ -197,11 +197,11 @@ public abstract class BaseDispatcher {
 			}
 		}
 		if (createFile) {
-			if (dc.isTree()) {
-				if (StringUtils.isBlank(dc.treeInstance().getRootNode())) {
-					dc.treeInstance().setRootNode(rn);
+			if (dc.isTree() && dc.isXML()) {
+				if (StringUtils.isBlank(dc.xmlInstance().getRootNode())) {
+					dc.xmlInstance().setRootNode(rn);
 				} else {
-					if (!dc.treeInstance().getRootNode().contentEquals(rn)) {
+					if (!dc.xmlInstance().getRootNode().contentEquals(rn)) {
 						throw new IllegalArgumentException("Root node of dispatcher class and data container are not equal");
 					}
 				}

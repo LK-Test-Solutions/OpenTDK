@@ -142,18 +142,10 @@ public class YAMLDataContainer implements SpecificContainer {
 		json.add(name, fieldName, oldFieldValue, newFieldValue, filter);
 	}
 
-	public void delete(String name, String value) {
-		json.set(name, value);
+	public void delete(String name, Filter filter) {
+		json.delete(name, filter);
 	}
 
-	public void delete(String name, String value, Filter filter) {
-		json.delete(name, value, filter);
-	}
-
-	public void delete(String headerName, String fieldName, String fieldValue, Filter filter) {
-		json.delete(headerName, fieldName, fieldValue, filter);
-	}
-	
 	public String[] get(String name) {
 		return json.get(name);
 	}
@@ -168,15 +160,6 @@ public class YAMLDataContainer implements SpecificContainer {
 
 	public void set(String name, String value, Filter filter) {
 		json.set(name, value, filter);
-	}
-
-	public void set(String name, String value, Filter filter, boolean allOccurences) {
-		json.set(name, value, filter, allOccurences);
-	}
-
-	public void set(String name, String attr, String value, String oldValue, Filter filter) {
-		json.set(name, attr, value, oldValue, filter);
-		
 	}
 
 }

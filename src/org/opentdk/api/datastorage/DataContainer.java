@@ -98,34 +98,6 @@ public class DataContainer implements SpecificContainer {
 	private EContainerFormat containerFormat = EContainerFormat.TEXT;
 
 	/**
-	 * Gets used if only the orientation is known without any present data. E.g.
-	 * Format TREE points to XML and COLUMN to CSV. TEXT gets used by default.
-	 *
-	 * @param type {@link org.opentdk.api.datastorage.EHeader}
-	 */
-	public static DataContainer newContainer(EHeader type) {
-		return new DataContainer(type);
-	}
-
-	private DataContainer(EHeader type) {
-		switch (type) {
-		case COLUMN:
-			containerFormat = EContainerFormat.CSV;
-			break;
-		case ROW:
-			containerFormat = EContainerFormat.PROPERTIES;
-			break;
-		case TREE:
-			containerFormat = EContainerFormat.XML;
-			break;
-		default:
-			containerFormat = EContainerFormat.TEXT;
-			break;
-		}
-		instance = adaptContainer();
-	}
-
-	/**
 	 * The non argument constructor get used to have an empty container instance
 	 * without a connected file, stream or result set and without knowing the
 	 * container format. In this case all the fields keep their default value and
@@ -137,6 +109,42 @@ public class DataContainer implements SpecificContainer {
 
 	private DataContainer() {
 		instance = adaptContainer();
+	}
+	
+	/**
+	 * Gets used if the exact type is known but without any present data. 
+	 * In this case no adaption process is necessary, because the format gets explicitly set.
+	 *
+	 * @param type {@link org.opentdk.api.datastorage.EHeader}
+	 */
+	public static DataContainer newContainer(EContainerFormat type) {
+		return new DataContainer(type);
+	}
+
+	private DataContainer(EContainerFormat type) {
+		containerFormat = type;
+		switch (type) {
+		case CSV:
+			instance = CSVDataContainer.newInstance();
+			break;
+		case PROPERTIES:
+			instance = PropertiesDataContainer.newInstance();
+			break;
+		case RESULTSET:
+			instance = RSDataContainer.newInstance();
+			break;
+		case XML:
+			instance = XMLDataContainer.newInstance();
+			break;
+		case JSON:
+			instance = JSONDataContainer.newInstance();
+			break;
+		case YAML:
+			instance = YAMLDataContainer.newInstance();
+			break;
+		default:
+			instance = TextDataContainer.newInstance();	
+		}		
 	}
 
 	/**
@@ -326,7 +334,7 @@ public class DataContainer implements SpecificContainer {
 		} else if (instance instanceof RSDataContainer) {
 			return (RSDataContainer) instance;
 		} else if (instance instanceof CSVDataContainer) {
-			return (CSVDataContainer) instance; // default CSV (has to be checked at the end)
+			return (CSVDataContainer) instance;
 		} else {
 			throw new NullPointerException("TabularContainer not intialized");
 		}
@@ -341,7 +349,7 @@ public class DataContainer implements SpecificContainer {
 	} 
 	
 	public XMLDataContainer xmlInstance() {
-		if (instance instanceof TextDataContainer) {
+		if (instance instanceof XMLDataContainer) {
 			return (XMLDataContainer) instance;
 		} else {
 			throw new NullPointerException("XMLContainer not intialized");
@@ -529,6 +537,13 @@ public class DataContainer implements SpecificContainer {
 		resultSet = rs;
 	}
 	
+	/**
+	 * @return {@link #containerFormat}
+	 */
+	public EContainerFormat getContainerFormat() {
+		return containerFormat;
+	}
+	
 	// --------------------------------------------------------------------
 	// Inherited methods that just link to the instance
 	// --------------------------------------------------------------------
@@ -581,57 +596,67 @@ public class DataContainer implements SpecificContainer {
 			}
 		} 
 	}
-//
-//	public void delete(String params, String attrName, String attrValue, Filter fltr) {
-//		checkInstance();
-//		if (isTabular()) {
-//			tabInstance().deleteValue(params);
-//		} else if (isTree()) {
-//			if(isXML()) {
-//				xmlInstance().delete(params, attrName, attrValue, fltr);
-//			} else if (isJSON()) {
-//				jsonInstance().delete(params, attrName, attrValue, fltr);
-//			} else if(isYAML()) {
-//				yamlInstance().delete(params, attrName, attrValue, fltr);
-//			}
-//		} 
-//	}
-//
-//	public String[] get(String parameterName) {
-//		return get(parameterName, new Filter());
-//	}
-//
-//	public String[] get(String parameterName, Filter fltr) {
-//		String[] ret = new String[0];
-//		if (isTabular()) {
-//			ret = tabInstance().getColumn(parameterName, fltr);
-//		} else if (isTree()) {
-//			ret = treeInstance().get(parameterName, fltr);
-//			for (int i = 0; i < ret.length; i++) {
-//				ret[i] = ret[i].trim();
-//			}
-//		}
-//		return ret;
-//	}
-//
-//	public void set(String parameterName, String value) {
-//		set(parameterName, value, new Filter(), false);
-//	}
-//
-//	public void set(String parameterName, String value, Filter filter) {
-//		set(parameterName, value, filter, false);
-//	}
-//
-//	public void set(String parameterName, String value, Filter fltr, boolean allOccurences) {
-//		if (isTabular()) {
-//			tabInstance().setValues(parameterName, value, fltr, allOccurences);
-//		} else if (isTree()) {
-//			if(isXML()) {
-//				treeInstance().xmlInstance().set(parameterName, value, fltr, allOccurences);
-//			} else if (instance instanceof JSONDataContainer || instance instanceof YAMLDataContainer) {
-//				treeInstance().jsonInstance().set(parameterName, value, fltr, allOccurences);
-//			}
-//		}
-//	}
+
+	public void delete(String params, String attrName, String attrValue, Filter fltr) {
+		checkInstance();
+		if (isTabular()) {
+			tabInstance().deleteValue(params);
+		} else if (isTree()) {
+			if(isXML()) {
+				xmlInstance().delete(params, attrName, attrValue, fltr);
+			} else if (isJSON()) {
+				jsonInstance().delete(params, fltr);
+			} else if(isYAML()) {
+				yamlInstance().delete(params, fltr);
+			}
+		} 
+	}
+
+	public String[] get(String parameterName) {
+		return get(parameterName, new Filter());
+	}
+
+	public String[] get(String parameterName, Filter fltr) {
+		String[] ret = new String[0];
+		checkInstance();
+		if (isTabular()) {
+			ret = tabInstance().getColumn(parameterName, fltr);
+		} else if (isTree()) {
+			if(isXML()) {
+				ret = xmlInstance().get(parameterName, fltr);
+			} else if (isJSON()) {
+				ret = jsonInstance().get(parameterName, fltr);
+			} else if(isYAML()) {
+				ret = yamlInstance().get(parameterName, fltr);
+			}		
+			for (int i = 0; i < ret.length; i++) {
+				ret[i] = ret[i].trim();
+			}
+		}
+		return ret;
+	}
+
+	public void set(String parameterName, String value) {
+		set(parameterName, value, new Filter(), false);
+	}
+
+	public void set(String parameterName, String value, Filter filter) {
+		set(parameterName, value, filter, false);
+	}
+
+	public void set(String parameterName, String value, Filter fltr, boolean allOccurences) {
+		checkInstance();
+		if (isTabular()) {
+			tabInstance().setValues(parameterName, value, fltr, allOccurences);
+		} else if (isTree()) {
+			if(isXML()) {
+				xmlInstance().set(parameterName, value, fltr);
+			} else if (isJSON()) {
+				jsonInstance().set(parameterName, value, fltr);
+			} else if(isYAML()) {
+				yamlInstance().set(parameterName, value, fltr);
+			}	
+		}
+	}
 
 }
