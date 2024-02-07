@@ -37,7 +37,6 @@ import java.util.Map;
 import java.util.logging.Level;
 import java.lang.reflect.Field;
 
-import org.apache.commons.lang3.StringUtils;
 import org.opentdk.api.datastorage.DataContainer;
 import org.opentdk.api.logger.MLogger;
 
@@ -189,21 +188,18 @@ public abstract class BaseDispatcher {
 	 */
 	public static void setDataContainer(Class<?> dispatcherClass, DataContainer dc, boolean createFile) {
 		Map<String, BaseDispatchComponent> dcomp = BaseDispatcher.getDeclaredComponents(dispatcherClass);
-		String rn = "";
-		for (String key : dcomp.keySet()) {
-			rn = dcomp.get(key).getRootNode();
-			if (!rn.isEmpty()) {
-				break;
-			}
-		}
+			
 		if (createFile) {
 			if (dc.isTree() && dc.isXML()) {
-				if (StringUtils.isBlank(dc.xmlInstance().getRootNode())) {
-					dc.xmlInstance().setRootNode(rn);
-				} else {
-					if (!dc.xmlInstance().getRootNode().contentEquals(rn)) {
-						throw new IllegalArgumentException("Root node of dispatcher class and data container are not equal");
+				String rn = "";
+				for (String key : dcomp.keySet()) {
+					rn = dcomp.get(key).retrieveRootNode();
+					if (!rn.isEmpty()) {
+						break;
 					}
+				}
+				if (!dc.xmlInstance().getRootNode().contentEquals(rn)) {
+					dc.xmlInstance().initXmlEditor(rn);
 				}
 			}
 			try {

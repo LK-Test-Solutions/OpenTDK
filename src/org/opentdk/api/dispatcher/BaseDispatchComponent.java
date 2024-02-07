@@ -174,7 +174,7 @@ public class BaseDispatchComponent {
 			DataContainer dc = DataContainer.newContainer(EContainerFormat.CSV);
 			if (StringUtils.isNotBlank(parentXPath)) {	
 				dc = DataContainer.newContainer(EContainerFormat.XML);
-				dc.xmlInstance().setRootNode(getRootNode()); 			
+				dc.xmlInstance().initXmlEditor(retrieveRootNode()); 			
 			} 
 			BaseDispatcher.setDataContainer(parentClass, dc);
 		}
@@ -565,7 +565,7 @@ public class BaseDispatchComponent {
 		return parameterName;
 	}
 
-	public String getRootNode() {
+	public String retrieveRootNode() {
 		String rootNode = "";
 		String[] nodeArray = parentXPath.split("/");
 		if (nodeArray.length > 0) {

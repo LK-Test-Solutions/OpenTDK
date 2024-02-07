@@ -71,12 +71,7 @@ public class YAMLDataContainer implements SpecificContainer {
 	
 	private YAMLDataContainer() {
 		yaml = new Yaml();
-		json = JSONDataContainer.newInstance();
-		if (content == null) {
-			MLogger.getInstance().log(Level.WARNING, "YAML object is not initialized or empty ==> No YAML content to read", getClass().getSimpleName(), "constructor");
-		} else {
-			json.setJsonWithMap(content);
-		}
+		json = JSONDataContainer.newInstance();		
 	}
 
 	@Override
@@ -101,11 +96,21 @@ public class YAMLDataContainer implements SpecificContainer {
 	@Override
 	public void readData(File sourceFile) throws IOException {
 		content = yaml.load(FileUtil.getRowsAsString(sourceFile));		
+		if (content == null) {
+			MLogger.getInstance().log(Level.WARNING, "YAML object is not initialized or empty ==> No YAML content to read", getClass().getSimpleName(), "constructor");
+		} else {
+			json.setJsonWithMap(content);
+		}
 	}
 
 	@Override
 	public void readData(InputStream stream) throws IOException {
-		content = yaml.load(stream);		
+		content = yaml.load(stream);
+		if (content == null) {
+			MLogger.getInstance().log(Level.WARNING, "YAML object is not initialized or empty ==> No YAML content to read", getClass().getSimpleName(), "constructor");
+		} else {
+			json.setJsonWithMap(content);
+		}
 	}
 	
 

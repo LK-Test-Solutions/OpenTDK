@@ -197,7 +197,7 @@ public class BaseApplication {
 	 * @param runtimePropertiesClass The class of type {@link BaseDispatcher} which includes the
 	 *                               declaration of all runtime properties
 	 * @param args                   String array with keys and values passed by the commandline (e.g.
-	 *                               -homedir=c:/applications/myApp)
+	 *                               {@literal -homedir=c:/applications/myApp)}
 	 */
 	public final void parseArgs(Class<?> runtimePropertiesClass, String[] args) {
 		String value = "";

@@ -32,6 +32,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.nio.file.Files;
 import java.sql.ResultSet;
 
 import java.util.Map;
@@ -172,7 +173,9 @@ public class DataContainer implements SpecificContainer {
 		inputFile = sourceFile;
 		instance = adaptContainer();
 		try {
-			instance.readData(sourceFile);
+			if(sourceFile.exists() && sourceFile.isFile() && Files.size(sourceFile.toPath()) > 0) {
+				instance.readData(sourceFile);
+			}
 		} catch (IOException e) {
 			MLogger.getInstance().log(Level.SEVERE, e);
 		}
@@ -650,7 +653,7 @@ public class DataContainer implements SpecificContainer {
 			tabInstance().setValues(parameterName, value, fltr, allOccurences);
 		} else if (isTree()) {
 			if(isXML()) {
-				xmlInstance().set(parameterName, value, fltr);
+				xmlInstance().set(parameterName, value, fltr, allOccurences);
 			} else if (isJSON()) {
 				jsonInstance().set(parameterName, value, fltr);
 			} else if(isYAML()) {
