@@ -28,7 +28,9 @@
 package org.opentdk.api.datastorage;
 
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.List;
@@ -57,36 +59,110 @@ import org.yaml.snakeyaml.Yaml;
  * @author FME (LK Test Solutions)
  * @see org.opentdk.api.datastorage.DataContainer
  */
-public class JSONDataContainer implements TreeContainer {
-
-	/**
-	 * The instance of the {@link DataContainer} that the JSONDataContainer works with.
-	 */
-	private final DataContainer dc;
+public class JSONDataContainer implements SpecificContainer {
 
 	/**
 	 * Container object for the JSON data. Supports several read and write methods. Gets initialized in
 	 * {@link #readData(Filter)}.
 	 */
 	private JSONObject json;
-
-	/**
-	 * Construct a new specific container for JSON files. This gets done by the {@link DataContainer}
-	 * class in its adaptContainer method. After initialization, it gets passed to this class.
-	 *
-	 * @param dCont {@link #dc}
-	 */
-	JSONDataContainer(DataContainer dCont) {
-		dc = dCont;
-		dc.getImplicitHeaders().add("XPath");
+	
+	public static JSONDataContainer newInstance() {		
+		return new JSONDataContainer();
+	}
+	
+	private JSONDataContainer() {
+		
+	}
+	
+	@Override
+	public String asString() {
+		String ret = "";
+		if (json == null || json.isEmpty()) {
+			MLogger.getInstance().log(Level.WARNING, "JSON object is not initialized or empty ==> No JSON content to return", getClass().getSimpleName(), "asString");
+		} else {
+			ret = json.toString(1);
+		}
+		return ret;
 	}
 
 	@Override
+	public String asString(EContainerFormat format) {
+		switch(format) {
+		case JSON:
+			MLogger.getInstance().log(Level.INFO, "Format already is JSON. Call asString", getClass().getSimpleName(), "asString(format)");
+			return asString();
+		case YAML:
+			Yaml yaml = new Yaml();
+			return yaml.dump(yaml.dumpAsMap(getJsonAsMap()));
+		default:
+			MLogger.getInstance().log(Level.WARNING, "Format not supported to export from YAML", getClass().getSimpleName(), "asString(format)");
+			return "";
+		}
+	}
+	
+	@Override
+	public void readData(InputStream stream) {
+		String content = null;
+		if (stream != null) {
+			InputStreamReader inputStreamReader = new InputStreamReader(stream);
+			Stream<String> streamOfString = new BufferedReader(inputStreamReader).lines();
+			content = streamOfString.collect(Collectors.joining());
+
+			streamOfString.close();
+			try {
+				inputStreamReader.close();
+			} catch (IOException e) {
+				MLogger.getInstance().log(Level.SEVERE, e);
+			}
+		}
+		if (content != null) {
+			json = new JSONObject(content);
+		}
+	}
+	
+	@Override
+	public void readData(File srcFile) throws IOException {
+		if (!srcFile.getName().isEmpty()) {
+			String content = FileUtil.getContent(srcFile.getPath());
+			if (content != null) {
+				json = new JSONObject(content);
+			}
+		} 	
+	}
+	
+
+	@Override
+	public void readData(File sourceFile, Filter filter) throws IOException {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void readData(InputStream stream, Filter filter) throws IOException {
+		// TODO Auto-generated method stub
+		
+	}
+	
+	@Override
+	public void writeData(File srcFile) throws IOException {
+		if (json == null || json.isEmpty()) {
+			MLogger.getInstance().log(Level.WARNING, "JSON object is not initialized or empty ==> No JSON content to write", getClass().getSimpleName(), "writeData");
+		} else {
+			try {
+				FileUtil.createFile(srcFile, true);
+				FileUtil.writeOutputFile(json.toString(1), srcFile.getPath());
+			} catch (JSONException e) {
+				MLogger.getInstance().log(Level.SEVERE, e);
+				throw new RuntimeException(e);
+			}
+		}
+	}
+	
 	public void add(String name, String value) {
 		add(name, value, new Filter());
 	}
 	
-	@Override
 	public void add(String name, String value, Filter filter) {
 		if (filter.getFilterRules().isEmpty()) {
 			Object newValue = this.getDataType(value);
@@ -120,59 +196,15 @@ public class JSONDataContainer implements TreeContainer {
 		}
 	}
 	
-	@Override
 	public void add(String name, String fieldName, String newValue, Filter filter) {
 		MLogger.getInstance().log(Level.INFO, "Method not used", getClass().getSimpleName(), "add");
 	}
 
-	@Override
 	public void add(String headerName, String fieldName, String oldFieldValue, String newFieldValue, Filter filter) {
 		MLogger.getInstance().log(Level.INFO, "Method not used", getClass().getSimpleName(), "add");
 	}
-	
-	@Override
-	public String asString() {
-		String ret = "";
-		if (json == null || json.isEmpty()) {
-			MLogger.getInstance().log(Level.WARNING, "JSON object is not initialized or empty ==> No JSON content to return", getClass().getSimpleName(), "asString");
-		} else {
-			ret = json.toString(1);
-		}
-		return ret;
-	}
 
-	@Override
-	public String asString(EContainerFormat format) {
-		switch(format) {
-		case JSON:
-			MLogger.getInstance().log(Level.INFO, "Format already is JSON. Call asString", getClass().getSimpleName(), "asString(format)");
-			return asString();
-		case YAML:
-			Yaml yaml = new Yaml();
-			return yaml.dump(yaml.dumpAsMap(getJsonAsMap()));
-		default:
-			MLogger.getInstance().log(Level.WARNING, "Format not supported to export from YAML", getClass().getSimpleName(), "asString(format)");
-			return "";
-		}
-	}
-
-	@Override
-	public void createFile() throws IOException {
-		FileUtil.createFile(dc.getInputFile(), true);	
-	}
-
-	@Override
-	public void delete(String name, String value) {
-		delete(name, value, new Filter());		
-	}
-
-	@Override
-	public void delete(String name, String value, Filter filter) {
-		delete(name, "", "", new Filter());		
-	}
-
-	@Override
-	public void delete(String name, String fieldName, String fieldValue, Filter filter) {
+	public void delete(String name, Filter filter) {
 		if (filter.getFilterRules().isEmpty()) {
 			json.remove(name);
 		}
@@ -203,24 +235,15 @@ public class JSONDataContainer implements TreeContainer {
 		}
 	}
 
-	@Override
 	public String[] get(String name) {
 		return get(name, new Filter());
 	}
-	
-	@Override
-	public String[] get(String name, String attr) {
-		MLogger.getInstance().log(Level.INFO, "Method not used", getClass().getSimpleName(), "get");
-		return new String[0];
-	}
 
-	@Override
 	public String[] get(String headerName, Filter fltr) {
 		String[] ret = null;
-		List<FilterRule> implFilterRules = dc.getImplFilterRules(fltr);
 		List<String> filteredValues = new ArrayList<>();
 
-		if (implFilterRules.size() > 0) {
+		if (fltr.getFilterRules().size() > 0) {
 			for (FilterRule frImpl : fltr.getFilterRules()) {
 				if (frImpl.getHeaderName().equalsIgnoreCase("XPath")) {
 
@@ -261,16 +284,6 @@ public class JSONDataContainer implements TreeContainer {
 		return ret;
 	}
 
-	@Override
-	public Object get(String tagName, String attributName, String attributValue){
-		return null;
-	}
-
-	@Override
-	public Object[] get(String headerName, Filter fltr, String returnType) {
-		return null;
-	}
-
 	/**
 	 * Retrieves the data type out of the committed value. This can be a JSONObject, JSONArray or any
 	 * other primitive data type like string, integer or boolean. E.g. if the input string has leading
@@ -309,57 +322,17 @@ public class JSONDataContainer implements TreeContainer {
 	}
 
 	/**
-	 * Not required for JSON Container
-	 *
-	 * @return
-	 */
-	@Override
-	public Object getRootElement(){
-		return new Object();
-	}
-
-	/**
 	 * @return {@link #json} object as map to access from other containers.
 	 */
 	Map<String, Object> getJsonAsMap() {
 		return json.toMap();
 	}
-
-	@Override
-	public void readData(Filter filter) {
-		String content = null;
-		if (!dc.getInputFile().getName().isEmpty()) {
-			content = FileUtil.getContent(dc.getInputFile().getPath());
-		} else if (dc.getInputStream() != null) {
-			InputStreamReader inputStreamReader = new InputStreamReader(dc.getInputStream());
-			Stream<String> streamOfString = new BufferedReader(inputStreamReader).lines();
-			content = streamOfString.collect(Collectors.joining());
-
-			streamOfString.close();
-			try {
-				inputStreamReader.close();
-			} catch (IOException e) {
-				MLogger.getInstance().log(Level.SEVERE, e);
-			}
-		}
-		if (content != null) {
-			json = new JSONObject(content);
-		}
-	}
 	
-
-	@Override
 	public void set(String name, String value) {
 		set(name, value, new Filter());
 	}
-
-	@Override
-	public void set(String name, String value, Filter filter) {
-		set(name, value, filter, false); // No double occurrences possible in JSONObject
-	}
 	
-	@Override
-	public void set(String name, String value, Filter filter, boolean allOccurences) {
+	public void set(String name, String value, Filter filter) {
 		if (filter.getFilterRules().isEmpty()) {
 			Object newValue = this.getDataType(value);
 			json.put(name, newValue);
@@ -396,11 +369,6 @@ public class JSONDataContainer implements TreeContainer {
 		}
 	}
 
-	@Override
-	public void set(String name, String attributeName, String oldAttributeValue, String attributeValue, Filter filter) {
-		MLogger.getInstance().log(Level.WARNING, "Method not used", getClass().getSimpleName(), "set");
-	}
-
 	/**
 	 * Possibility to set the content of the {@link #json} object from other containers.
 	 * 
@@ -414,19 +382,5 @@ public class JSONDataContainer implements TreeContainer {
 		}
 	}
 
-	@Override
-	public void writeData(String srcFile) throws IOException {
-		if (json == null || json.isEmpty()) {
-			MLogger.getInstance().log(Level.WARNING, "JSON object is not initialized or empty ==> No JSON content to write", getClass().getSimpleName(), "writeData");
-		} else {
-			try {
-				FileUtil.createFile(srcFile, true);
-				FileUtil.writeOutputFile(json.toString(1), srcFile);
-			} catch (JSONException e) {
-				MLogger.getInstance().log(Level.SEVERE, e);
-				throw new RuntimeException(e);
-			}
-		}
-	}
 
 }

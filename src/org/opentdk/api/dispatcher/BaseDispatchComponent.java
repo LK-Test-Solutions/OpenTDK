@@ -27,15 +27,11 @@
  */
 package org.opentdk.api.dispatcher;
 
-import java.io.IOException;
-import java.util.logging.Level;
-
 import org.apache.commons.lang3.StringUtils;
 import org.opentdk.api.application.EBaseSettings;
 import org.opentdk.api.datastorage.DataContainer;
-import org.opentdk.api.datastorage.EHeader;
+import org.opentdk.api.datastorage.EContainerFormat;
 import org.opentdk.api.filter.Filter;
-import org.opentdk.api.logger.MLogger;
 import org.opentdk.api.mapping.EOperator;
 import org.opentdk.api.util.ListUtil;
 
@@ -175,18 +171,11 @@ public class BaseDispatchComponent {
 		defaultValue = dVal;
 
 		if (!BaseDispatcher.dcMap.containsKey(settingsKey)) {
-			DataContainer dc = null;
-			if (StringUtils.isNotBlank(parentXPath)) {
-				dc = new DataContainer(EHeader.TREE);
-				dc.setRootNode(getRootNode()); 
-			} else {
-				dc = new DataContainer();
-			}
-			try {
-				dc.readData();
-			} catch (IOException e) {
-				MLogger.getInstance().log(Level.SEVERE, e);
-			}
+			DataContainer dc = DataContainer.newContainer(EContainerFormat.CSV);
+			if (StringUtils.isNotBlank(parentXPath)) {	
+				dc = DataContainer.newContainer(EContainerFormat.XML);
+				dc.xmlInstance().initXmlEditor(retrieveRootNode()); 			
+			} 
 			BaseDispatcher.setDataContainer(parentClass, dc);
 		}
 	}
@@ -452,12 +441,8 @@ public class BaseDispatchComponent {
 		}
 		DataContainer dc = BaseDispatcher.getDataContainer(settingsKey);
 		String[] attributes = new String[0];
-		if (dc.isTree()) {
-			try{
-				attributes = dc.treeInstance().get(expr, attrName);
-			}catch(NullPointerException e){
-				return "";
-			}
+		if (dc.isTree() && dc.isXML()) {
+			attributes = dc.xmlInstance().get(expr, attrName);
 		}
 		if (attributes.length == 0) {
 			return "";
@@ -492,12 +477,8 @@ public class BaseDispatchComponent {
 		}
 		DataContainer dc = BaseDispatcher.getDataContainer(settingsKey);
 		String[] attributes = new String[0];
-		if (dc.isTree()) {
-			try{
-				attributes = dc.treeInstance().get(expr, attrName);
-			}catch(NullPointerException e){
-				return "";
-			}
+		if (dc.isTree() && dc.isXML()) {
+			attributes = dc.xmlInstance().get(expr, attrName);
 		}
 		if (attributes.length == 0) {
 			return "";
@@ -528,12 +509,8 @@ public class BaseDispatchComponent {
 		}
 		DataContainer dc = BaseDispatcher.getDataContainer(settingsKey);
 		String[] attributes = new String[0];
-		if (dc.isTree()) {
-			try{
-				attributes = dc.treeInstance().get(expr, attrName);
-			}catch(NullPointerException e){
-				return new String[0];
-			}
+		if (dc.isTree() && dc.isXML()) {
+			attributes = dc.xmlInstance().get(expr, attrName);
 		}
 		if (attributes.length == 0) {
 			return new String[0];
@@ -568,12 +545,8 @@ public class BaseDispatchComponent {
 		}
 		DataContainer dc = BaseDispatcher.getDataContainer(settingsKey);
 		String[] attributes = new String[0];
-		if (dc.isTree()) {
-			try{
-				attributes = dc.treeInstance().get(expr, attrName);
-			}catch(NullPointerException e){
-				return new String[0];
-			}
+		if (dc.isTree() && dc.isXML()) {
+			attributes = dc.xmlInstance().get(expr, attrName);
 		}
 		if (attributes.length == 0) {
 			return new String[0];
@@ -592,7 +565,7 @@ public class BaseDispatchComponent {
 		return parameterName;
 	}
 
-	public String getRootNode() {
+	public String retrieveRootNode() {
 		String rootNode = "";
 		String[] nodeArray = parentXPath.split("/");
 		if (nodeArray.length > 0) {
@@ -830,8 +803,8 @@ public class BaseDispatchComponent {
 		Filter fltr = new Filter();
 		fltr.addFilterRule("XPath", xPath, EOperator.EQUALS);
 		DataContainer dc = BaseDispatcher.getDataContainer(settingsKey);
-		if(dc.isTree()) {
-			dc.treeInstance().set(parameterName, attrName, oldValue, attrValue, fltr);
+		if(dc.isTree() && dc.isXML()) {
+			dc.xmlInstance().set(parameterName, attrName, oldValue, attrValue, fltr);
 		}
 	}
 
@@ -862,7 +835,7 @@ public class BaseDispatchComponent {
 	public void setValue(int valueIndex, String value) {
 		if ((parentXPath == null) || (parentXPath.isEmpty())) {
 			if(valueIndex >= BaseDispatcher.getDataContainer(settingsKey).tabInstance().getRowCount()) {
-				BaseDispatcher.getDataContainer(settingsKey).tabInstance().addRow(BaseDispatcher.getDataContainer(settingsKey).tabInstance().createPreparedRow());
+				BaseDispatcher.getDataContainer(settingsKey).tabInstance().addRow();
 			}
 			BaseDispatcher.getDataContainer(settingsKey).tabInstance().setValue(parameterName, valueIndex, value);
 		} else {

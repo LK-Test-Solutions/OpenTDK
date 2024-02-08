@@ -110,7 +110,7 @@ public class XMLEditor {
 	 * @param rootNode {@link #rootNodeName}
 	 */
 	public XMLEditor(String rootNode) {
-		if (StringUtils.isNotBlank(rootNode)) {
+		if (rootNode != null && StringUtils.isNotBlank(rootNode)) {
 			rootNodeName = rootNode;
 		}
 		createXMLEditor();
@@ -185,9 +185,9 @@ public class XMLEditor {
 		} catch (ParserConfigurationException e) {
 			MLogger.getInstance().log(Level.SEVERE, "The feature '" + feature + "' is probably not supported the XML processor.", getClass().getSimpleName(), "createXMLEditor");
 		} catch (SAXException e) {
-			MLogger.getInstance().log(Level.SEVERE, "A DOCTYPE was passed into the XML document.", getClass().getSimpleName(), "createXMLEditor");
+			MLogger.getInstance().log(Level.SEVERE, e.getMessage(), getClass().getSimpleName(), "createXMLEditor");
 		} catch (IOException e) {
-			MLogger.getInstance().log(Level.SEVERE, "Exception occured: XXE may still possible ==> XML will not be read.", getClass().getSimpleName(), "createXMLEditor");
+			MLogger.getInstance().log(Level.SEVERE, e.getMessage(), getClass().getSimpleName(), "createXMLEditor");
 		}
 	}
 

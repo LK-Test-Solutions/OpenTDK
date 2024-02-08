@@ -37,7 +37,6 @@ import java.util.Map;
 import java.util.logging.Level;
 import java.lang.reflect.Field;
 
-import org.apache.commons.lang3.StringUtils;
 import org.opentdk.api.datastorage.DataContainer;
 import org.opentdk.api.logger.MLogger;
 
@@ -133,7 +132,7 @@ public abstract class BaseDispatcher {
 	 *                        {@link BaseDispatchComponent} variables
 	 */
 	public static void setDataContainer(Class<?> dispatcherClass, InputStream inStream) {
-		setDataContainer(dispatcherClass, new DataContainer(inStream), false);
+		setDataContainer(dispatcherClass, DataContainer.newContainer(inStream), false);
 	}
 
 	/**
@@ -150,7 +149,7 @@ public abstract class BaseDispatcher {
 	 *                        dispatcher class
 	 */
 	public static void setDataContainer(Class<?> dispatcherClass, String dispatcherFile) {
-		setDataContainer(dispatcherClass, new DataContainer(new File(dispatcherFile)), false);
+		setDataContainer(dispatcherClass, DataContainer.newContainer(new File(dispatcherFile)), false);
 	}
 
 	/**
@@ -170,7 +169,7 @@ public abstract class BaseDispatcher {
 	 * @param createFile      defines if the non existent dispatcherFile gets created
 	 */
 	public static void setDataContainer(Class<?> dispatcherClass, String dispatcherFile, boolean createFile) {
-		setDataContainer(dispatcherClass, new DataContainer(new File(dispatcherFile)), createFile);
+		setDataContainer(dispatcherClass, DataContainer.newContainer(new File(dispatcherFile)), createFile);
 	}	
 
 	/**
@@ -189,21 +188,18 @@ public abstract class BaseDispatcher {
 	 */
 	public static void setDataContainer(Class<?> dispatcherClass, DataContainer dc, boolean createFile) {
 		Map<String, BaseDispatchComponent> dcomp = BaseDispatcher.getDeclaredComponents(dispatcherClass);
-		String rn = "";
-		for (String key : dcomp.keySet()) {
-			rn = dcomp.get(key).getRootNode();
-			if (!rn.isEmpty()) {
-				break;
-			}
-		}
+			
 		if (createFile) {
-			if (dc.isTree()) {
-				if (StringUtils.isBlank(dc.getRootNode())) {
-					dc.setRootNode(rn);
-				} else {
-					if (!dc.getRootNode().contentEquals(rn)) {
-						throw new IllegalArgumentException("Root node of dispatcher class and data container are not equal");
+			if (dc.isTree() && dc.isXML()) {
+				String rn = "";
+				for (String key : dcomp.keySet()) {
+					rn = dcomp.get(key).retrieveRootNode();
+					if (!rn.isEmpty()) {
+						break;
 					}
+				}
+				if (!dc.xmlInstance().getRootNode().contentEquals(rn)) {
+					dc.xmlInstance().initXmlEditor(rn);
 				}
 			}
 			try {

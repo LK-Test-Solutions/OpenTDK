@@ -27,8 +27,10 @@
  */
 package org.opentdk.api.datastorage;
 
+import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.Map;
 import java.util.logging.Level;
 
@@ -47,7 +49,7 @@ import org.yaml.snakeyaml.Yaml;
  * @author FME (LK Test Solutions)
  * @see org.opentdk.api.datastorage.DataContainer
  */
-public class YAMLDataContainer implements TreeContainer {
+public class YAMLDataContainer implements SpecificContainer {
 	/**
 	 * Container object for the YAML data. Supports several read and write methods. Gets initialized in
 	 * the constructor.
@@ -61,46 +63,15 @@ public class YAMLDataContainer implements TreeContainer {
 	/**
 	 * Stores the content of the YAML source. Gets used to initialize the {@link JSONDataContainer}.
 	 */
-	private final Map<String, Object> content;
+	private Map<String, Object> content;
 
-	/**
-	 * Construct a new specific container for YAML files. This gets done by the {@link DataContainer}
-	 * class in its adaptContainer method. After initialization, it gets passed to this class. 
-	 * This class has no {@link DataContainer} field because it points to the {@link JSONDataContainer}.
-	 *
-	 * @param dCont gets used to initialize the {@link JSONDataContainer}
-	 */
-	YAMLDataContainer(DataContainer dCont) {
-		yaml = new Yaml();
-		json = new JSONDataContainer(dCont);
-
-		if (dCont.getInputFile().exists()) {
-			content = yaml.load(FileUtil.getRowsAsString(dCont.getInputFile()));
-		} else if (dCont.getInputStream() != null) {
-			content = yaml.load(dCont.getInputStream());
-		} else {
-			content = null;
-		}
-	}
-
-	@Override
-	public void add(String name, String value) {
-		json.add(name, value);
-	}
-
-	@Override
-	public void add(String name, String value, Filter filter) {
-		json.add(name, value, filter);
+	public static YAMLDataContainer newInstance() {		
+		return new YAMLDataContainer();
 	}
 	
-	@Override
-	public void add(String name, String fieldName, String newFieldValue, Filter filter) {
-		json.add(name, fieldName, newFieldValue, filter);
-	}
-
-	@Override
-	public void add(String name, String fieldName, String oldFieldValue, String newFieldValue, Filter filter) {
-		json.add(name, fieldName, oldFieldValue, newFieldValue, filter);
+	private YAMLDataContainer() {
+		yaml = new Yaml();
+		json = JSONDataContainer.newInstance();		
 	}
 
 	@Override
@@ -123,91 +94,77 @@ public class YAMLDataContainer implements TreeContainer {
 	}
 
 	@Override
-	public void createFile() throws IOException {	
-		json.createFile();
-	}
-
-	@Override
-	public void delete(String name, String value) {
-		json.set(name, value);
-	}
-
-	@Override
-	public void delete(String name, String value, Filter filter) {
-		json.delete(name, value, filter);
-	}
-
-	@Override
-	public void delete(String headerName, String fieldName, String fieldValue, Filter filter) {
-		json.delete(headerName, fieldName, fieldValue, filter);
-	}
-	
-	@Override
-	public String[] get(String name) {
-		return json.get(name);
-	}
-
-	@Override
-	public String[] get(String headerName, Filter fltr) {
-		return json.get(headerName, fltr);
-	}
-
-	@Override
-	public String[] get(String name, String attr) {
-		return json.get(name, attr);
-	}
-
-	@Override
-	public Object get(String tagName, String attributName, String attributValue){
-		return null;
-	}
-
-	@Override
-	public Object[] get(String headerName, Filter fltr, String returnType){
-		return null;
-	}
-
-	@Override
-	public void readData(Filter filter) {
+	public void readData(File sourceFile) throws IOException {
+		content = yaml.load(FileUtil.getRowsAsString(sourceFile));		
 		if (content == null) {
-			MLogger.getInstance().log(Level.WARNING, "YAML object is not initialized or empty ==> No YAML content to read", getClass().getSimpleName(), "readData");
+			MLogger.getInstance().log(Level.WARNING, "YAML object is not initialized or empty ==> No YAML content to read", getClass().getSimpleName(), "constructor");
 		} else {
 			json.setJsonWithMap(content);
 		}
 	}
 
-	/**
-	 * Not required for YAML Container
-	 */
 	@Override
-	public Object getRootElement(){
-		return new Object();
+	public void readData(InputStream stream) throws IOException {
+		content = yaml.load(stream);
+		if (content == null) {
+			MLogger.getInstance().log(Level.WARNING, "YAML object is not initialized or empty ==> No YAML content to read", getClass().getSimpleName(), "constructor");
+		} else {
+			json.setJsonWithMap(content);
+		}
 	}
+	
 
 	@Override
-	public void set(String name, String value) {
-		json.set(name, value);
-	}
-
-	@Override
-	public void set(String name, String value, Filter filter) {
-		json.set(name, value, filter);
-	}
-
-	@Override
-	public void set(String name, String value, Filter filter, boolean allOccurences) {
-		json.set(name, value, filter, allOccurences);
-	}
-
-	@Override
-	public void set(String name, String attr, String value, String oldValue, Filter filter) {
-		json.set(name, attr, value, oldValue, filter);
+	public void readData(File sourceFile, Filter filter) throws IOException {
+		// TODO Auto-generated method stub
 		
 	}
 
 	@Override
-	public void writeData(String srcFileName) throws IOException {
-		yaml.dump(yaml.dumpAsMap(json.getJsonAsMap()), new FileWriter(srcFileName));
+	public void readData(InputStream stream, Filter filter) throws IOException {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void writeData(File outputFile) throws IOException {
+		yaml.dump(yaml.dumpAsMap(json.getJsonAsMap()), new FileWriter(outputFile.getPath()));	
+	}
+
+	public void add(String name, String value) {
+		json.add(name, value);
+	}
+
+	public void add(String name, String value, Filter filter) {
+		json.add(name, value, filter);
 	}
 	
+	public void add(String name, String fieldName, String newFieldValue, Filter filter) {
+		json.add(name, fieldName, newFieldValue, filter);
+	}
+
+	public void add(String name, String fieldName, String oldFieldValue, String newFieldValue, Filter filter) {
+		json.add(name, fieldName, oldFieldValue, newFieldValue, filter);
+	}
+
+	public void delete(String name, Filter filter) {
+		json.delete(name, filter);
+	}
+
+	public String[] get(String name) {
+		return json.get(name);
+	}
+
+	public String[] get(String headerName, Filter fltr) {
+		return json.get(headerName, fltr);
+	}
+
+	public void set(String name, String value) {
+		json.set(name, value);
+	}
+
+	public void set(String name, String value, Filter filter) {
+		json.set(name, value, filter);
+	}
+
 }
