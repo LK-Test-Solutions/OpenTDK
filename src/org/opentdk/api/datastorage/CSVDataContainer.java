@@ -8,6 +8,8 @@ import java.util.logging.Level;
 import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
+import org.json.JSONArray;
+import org.json.JSONObject;
 import org.opentdk.api.filter.Filter;
 import org.opentdk.api.filter.FilterRule;
 import org.opentdk.api.io.FileUtil;
@@ -94,6 +96,75 @@ public class CSVDataContainer implements SpecificContainer {
 	@Override
 	public String asString() {
 		return getValuesAsString();
+	}
+
+	@Override
+	public String asString(EContainerFormat format) {
+		return asString(format, 0, false);
+	}
+
+	public String asString(EContainerFormat format, int depth) {
+		return asString(format, depth, false);
+	}
+
+	public String asString(EContainerFormat format, int depth, boolean skipParent) {
+		switch (format) {
+			case CSV:
+				MLogger.getInstance().log(Level.INFO, "Format already is CSV. Call asString instead.", getClass().getSimpleName(), "asString(format)");
+				return asString();
+			case JSON:
+				if(skipParent) {
+					StringBuilder ret = new StringBuilder();
+					ArrayList<String> jsonObjectList = new ArrayList<>();
+					for (String[] row : values) {
+						JSONObject rowObject = new JSONObject();
+						for (int i = 0; i < row.length; i++) {
+							rowObject.put(getHeaderName(i), row[i]);
+						}
+						jsonObjectList.add(rowObject.toString(depth));
+					}
+					int rowIndex = 0;
+					for (String obj : jsonObjectList) {
+						ret.append(obj);
+						if(rowIndex < jsonObjectList.size() - 1) {
+							ret.append(",\n");
+						}
+						rowIndex++;
+					}
+					return ret.toString();
+				} else {
+					JSONArray jsonArray = new JSONArray();
+					for (String[] row : values) {
+						JSONObject rowObject = new JSONObject();
+						for (int i = 0; i < row.length; i++) {
+							rowObject.put(getHeaderName(i), row[i]);
+						}
+						jsonArray.put(rowObject);
+					}
+					return jsonArray.toString(depth);
+				}
+			default:
+				MLogger.getInstance().log(Level.WARNING, "Format not supported to export from CSV", getClass().getSimpleName(), "asString(format)");
+				return "";
+		}
+	}
+
+	/**
+	 * @return CSV content as JSONObject with leading and trailing '{}' and as array of objects, where one object has the column headers
+	 * as keys and the values of the row as values.
+	 */
+	public JSONObject toJson() {
+		JSONObject jsonObject = new JSONObject();
+		JSONArray jsonArray = new JSONArray();
+		for (String[] row : values) {
+			JSONObject rowObject = new JSONObject();
+			for (int i = 0; i < row.length; i++) {
+				rowObject.put(getHeaderName(i), row[i]);
+			}
+			jsonArray.put(rowObject);
+		}
+		jsonObject.put("data", jsonArray);
+		return jsonObject;
 	}
 
 	@Override

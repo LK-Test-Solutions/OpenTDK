@@ -555,6 +555,11 @@ public class DataContainer implements SpecificContainer {
 	public String asString() {
 		return instance.asString();
 	}
+	
+	@Override
+	public String asString(EContainerFormat format) {
+		return instance.asString(format);
+	}
 
 	@Override
 	public void readData(File srcFile) throws IOException {
