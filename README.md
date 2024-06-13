@@ -13,7 +13,7 @@
 <dependency>
    <groupId>org.opentdk</groupId>
    <artifactId>opentdk-api</artifactId>
-   <version>1.6.1</version>
+   <version>1.6.4</version>
 </dependency> 
 ```
 
