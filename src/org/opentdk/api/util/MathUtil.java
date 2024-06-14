@@ -27,13 +27,13 @@
  */
 package org.opentdk.api.util;
 
+import org.opentdk.api.logger.MLogger;
+import org.apache.commons.math3.stat.StatUtils;
+import org.apache.commons.math3.stat.descriptive.moment.StandardDeviation;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-
-import org.apache.commons.math3.stat.StatUtils;
-import org.apache.commons.math3.stat.descriptive.moment.StandardDeviation;
-import org.opentdk.api.logger.MLogger;
 
 /**
  * Class with useful mathematical functions. They can be called in a static way, similar to the Java

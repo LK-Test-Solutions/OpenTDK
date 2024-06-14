@@ -1,11 +1,11 @@
 package org.opentdk.api.datastorage;
 
+import org.opentdk.api.io.FileUtil;
+import org.opentdk.api.filter.Filter;
+
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
-
-import org.opentdk.api.filter.Filter;
-import org.opentdk.api.io.FileUtil;
 
 public class TextDataContainer implements SpecificContainer {
 	

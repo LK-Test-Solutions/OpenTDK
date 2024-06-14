@@ -27,10 +27,9 @@
  */
 package org.opentdk.api.mapping;
 
-import org.opentdk.api.dispatcher.BaseDispatchComponent;
-import org.opentdk.api.dispatcher.BaseDispatcher;
+import org.opentdk.api.dispatcher.*;
 
-public class EOperator extends BaseDispatcher{
+public class EOperator extends BaseDispatcher {
 	public static final BaseDispatchComponent CONTAINS = new BaseDispatchComponent(EOperator.class, "CONTAINS", "like");
 	public static final BaseDispatchComponent CONTAINS_DATE = new BaseDispatchComponent(EOperator.class, "CONTAINS_DATE", "");
 	public static final BaseDispatchComponent CONTAINS_DATE_AFTER = new BaseDispatchComponent(EOperator.class, "CONTAINS_DATE_AFTER", "");

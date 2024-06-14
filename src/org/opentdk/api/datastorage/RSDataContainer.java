@@ -27,6 +27,8 @@
  */
 package org.opentdk.api.datastorage;
 
+import org.opentdk.api.logger.MLogger;
+
 import java.io.IOException;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
@@ -34,8 +36,6 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;
-
-import org.opentdk.api.logger.MLogger;
 
 public class RSDataContainer extends CSVDataContainer {
 

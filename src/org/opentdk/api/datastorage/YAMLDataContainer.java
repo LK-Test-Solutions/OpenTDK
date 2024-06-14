@@ -27,17 +27,17 @@
  */
 package org.opentdk.api.datastorage;
 
+import org.opentdk.api.io.FileUtil;
+import org.opentdk.api.logger.MLogger;
+import org.opentdk.api.filter.Filter;
+import org.yaml.snakeyaml.Yaml;
+
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Map;
 import java.util.logging.Level;
-
-import org.opentdk.api.filter.Filter;
-import org.opentdk.api.io.FileUtil;
-import org.opentdk.api.logger.MLogger;
-import org.yaml.snakeyaml.Yaml;
 
 /**
  * Specific data container class for the YAML format. The storage object for the source is the

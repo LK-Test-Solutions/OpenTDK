@@ -27,18 +27,14 @@
  */
 package org.opentdk.api.filter;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-import java.util.logging.Level;
-
+import org.opentdk.api.logger.MLogger;
+import org.opentdk.api.util.ListUtil;
 import org.opentdk.api.dispatcher.BaseDispatchComponent;
 import org.opentdk.api.filter.FilterRule.ERuleFormat;
-import org.opentdk.api.logger.MLogger;
 import org.opentdk.api.mapping.EOperator;
-import org.opentdk.api.util.ListUtil;
+
+import java.util.*;
+import java.util.logging.Level;
 
 /**
  * This class gets used to define one or more conditions to select data from a data source. <br>
@@ -92,9 +88,9 @@ public class Filter {
 	}
 
 	/**
-	 * Adds an instance of type {@link org.opentdk.api.filter.FilterRule} to the List property {@link #rules}.
+	 * Adds an instance of type {@link FilterRule} to the List property {@link #rules}.
 	 * 
-	 * @param rule instance of type {@link org.opentdk.api.filter.FilterRule}
+	 * @param rule instance of type {@link FilterRule}
 	 */
 	public void addFilterRule(FilterRule rule) {
 		rules.add(rule);
@@ -114,7 +110,7 @@ public class Filter {
 	 * 
 	 * @param headerName	Name of the field or column header, where the rule 
 	 * @param value			
-	 * @param mode			An instance of type BaseDispatchComponent within the class {@link org.opentdk.api.mapping.EOperator} e.g. <code>EOperator.CONTAINS</code>
+	 * @param mode			An instance of type BaseDispatchComponent within the class {@link EOperator} e.g. <code>EOperator.CONTAINS</code>
 	 */
 	public void addFilterRule(String headerName, String value, BaseDispatchComponent mode) {
 		addFilterRule(headerName, new String[] { value }, mode);
@@ -290,7 +286,7 @@ public class Filter {
 	 * 
 	 * @param headerName Header of the column or row within a tabular format.
 	 * @param value      The value.
-	 * @param mode       The operator, used to the the values e.g. EOperator.EQUALS,
+	 * @param mode       The operator, used to the values e.g. EOperator.EQUALS,
 	 *                   EOperator.STARTS_WITH, EOperator.CONTAINS etc
 	 * @return True, if the rule has been deleted, else false.
 	 */
@@ -306,7 +302,7 @@ public class Filter {
 	 * 
 	 * @param headerName Header of the column or row within a tabular format.
 	 * @param values     The values array.
-	 * @param mode       The operator, used to the the values e.g. EOperator.EQUALS,
+	 * @param mode       The operator, used to the values e.g. EOperator.EQUALS,
 	 *                   EOperator.STARTS_WITH, EOperator.CONTAINS etc
 	 * @return True, if the rule has been deleted, else false.
 	 */

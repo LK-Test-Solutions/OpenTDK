@@ -27,19 +27,16 @@
  */
 package org.opentdk.api.logger;
 
+import org.opentdk.api.util.DateUtil;
+import org.opentdk.api.util.EFormat;
+import org.opentdk.api.io.FileUtil;
+import org.apache.commons.lang3.StringUtils;
+
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.PrintStream;
-import java.util.logging.FileHandler;
-import java.util.logging.Handler;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-import java.util.logging.SimpleFormatter;
-
-import org.apache.commons.lang3.StringUtils;
-import org.opentdk.api.io.FileUtil;
-import org.opentdk.api.util.*;
+import java.util.logging.*;
 
 /**
  * Custom logging class which uses the Java Logging API for writing messages to a log file. All methods of this class can be called in a static way, using the <code>getInstance</code> method. When

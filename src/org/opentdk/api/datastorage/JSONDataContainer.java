@@ -27,29 +27,24 @@
  */
 package org.opentdk.api.datastorage;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
+import org.opentdk.api.filter.Filter;
+import org.opentdk.api.filter.FilterRule;
+import org.opentdk.api.io.FileUtil;
+import org.opentdk.api.logger.MLogger;
+import org.opentdk.api.util.ListUtil;
+import org.apache.commons.lang3.StringUtils;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+import org.yaml.snakeyaml.Yaml;
+
+import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.logging.Level;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-
-import org.apache.commons.lang3.StringUtils;
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
-import org.opentdk.api.filter.Filter;
-import org.opentdk.api.filter.FilterRule;
-import org.opentdk.api.io.FileUtil;
-import org.opentdk.api.logger.MLogger;
-import org.opentdk.api.util.ListUtil;
-
-import org.yaml.snakeyaml.Yaml;
 
 /**
  * Specific data container class for the JSON format. In its read and write methods the

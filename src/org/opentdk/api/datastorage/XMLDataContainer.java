@@ -27,18 +27,18 @@
  */
 package org.opentdk.api.datastorage;
 
+import org.opentdk.api.io.XMLEditor;
+import org.opentdk.api.filter.Filter;
+import org.opentdk.api.filter.FilterRule;
+import org.apache.commons.lang3.StringUtils;
+import org.w3c.dom.Element;
+
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.List;
-
-import org.apache.commons.lang3.StringUtils;
-import org.opentdk.api.filter.Filter;
-import org.opentdk.api.filter.FilterRule;
-import org.opentdk.api.io.XMLEditor;
-import org.w3c.dom.Element;
 
 /**
  * SubClass of {@link DataContainer} which provides all methods for reading and writing from or to

@@ -27,26 +27,21 @@
  */
 package org.opentdk.api.datastorage;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.nio.file.Files;
-import java.sql.ResultSet;
-
-import java.util.Map;
-import java.util.logging.Level;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
-
-import org.apache.commons.lang3.StringUtils;
-import org.json.JSONObject;
 import org.opentdk.api.filter.Filter;
 import org.opentdk.api.io.FileUtil;
 import org.opentdk.api.io.XMLEditor;
 import org.opentdk.api.logger.MLogger;
+import org.apache.commons.lang3.StringUtils;
+import org.json.JSONObject;
 import org.yaml.snakeyaml.Yaml;
+
+import java.io.*;
+import java.nio.file.Files;
+import java.sql.ResultSet;
+import java.util.Map;
+import java.util.logging.Level;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  * This class gets used to store data from different sources at runtime of an
@@ -102,7 +97,7 @@ public class DataContainer implements SpecificContainer {
 	 * The non argument constructor get used to have an empty container instance
 	 * without a connected file, stream or result set and without knowing the
 	 * container format. In this case all the fields keep their default value and
-	 * the container gets initialized as {@link TestDataContainer}.
+	 * the container gets initialized as {@link TextDataContainer}.
 	 */
 	public static DataContainer newContainer() {
 		return new DataContainer();
@@ -116,7 +111,7 @@ public class DataContainer implements SpecificContainer {
 	 * Gets used if the exact type is known but without any present data. 
 	 * In this case no adaption process is necessary, because the format gets explicitly set.
 	 *
-	 * @param type {@link org.opentdk.api.datastorage.EHeader}
+	 * @param type {@link EHeader}
 	 */
 	public static DataContainer newContainer(EContainerFormat type) {
 		return new DataContainer(type);
@@ -191,7 +186,7 @@ public class DataContainer implements SpecificContainer {
 	 * data.<br>
 	 * e.g.: An application dynamically receives data by calling RestAPI Service
 	 * Requests and the XML responses will be passed to the
-	 * {@link org.opentdk.api.dispatcher.BaseDispatcher} that creates an
+	 * BaseDispatcher that creates an
 	 * {@link XMLDataContainer} for parsing the XML response.<br>
 	 * <br>
 	 *
@@ -239,11 +234,11 @@ public class DataContainer implements SpecificContainer {
 	/**
 	 * This method adapts the one {@link SpecificContainer} instance to a specific
 	 * {@link DataContainer} depending on the source file ending or existence of a
-	 * stream. It calls {@link #readData(Filter)} at the end if there is a source.
+	 * stream. It calls {@link #readData(File)} at the end if there is a source.
 	 * In case of an empty container the read operation has to be triggered
 	 * separately.
 	 *
-	 * @throws IOException to handle I/O methods when the {@link #readData(Filter)}
+	 * @throws IOException to handle I/O methods when the {@link #readData(File)}
 	 *                     method failed
 	 */
 	private SpecificContainer adaptContainer() {
@@ -555,7 +550,7 @@ public class DataContainer implements SpecificContainer {
 	public String asString() {
 		return instance.asString();
 	}
-	
+
 	@Override
 	public String asString(EContainerFormat format) {
 		return instance.asString(format);

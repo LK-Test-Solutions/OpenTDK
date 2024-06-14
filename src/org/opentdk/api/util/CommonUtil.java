@@ -27,6 +27,8 @@
  */
 package org.opentdk.api.util;
 
+import org.opentdk.api.logger.MLogger;
+
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.NetworkInterface;
@@ -34,8 +36,6 @@ import java.net.SocketException;
 import java.net.UnknownHostException;
 import java.util.Collections;
 import java.util.logging.Level;
-
-import org.opentdk.api.logger.MLogger;
 
 /**
  * Class with common methods that get directly used in a static way. For example the determination

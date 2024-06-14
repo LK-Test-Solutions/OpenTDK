@@ -13,7 +13,7 @@ public class LineParser {
 		NONE;
 	}
 	
-	// Handles on line in the source file and returns the search result depending on the settings
+	// Handles one line in the source file and returns the search result depending on the settings
 	public static String parseLine(String line, ParseMode mode, String regex, boolean includePattern) {
 		StringBuilder res = new StringBuilder();
 		

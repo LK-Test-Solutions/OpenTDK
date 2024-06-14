@@ -27,11 +27,11 @@
  */
 package org.opentdk.api.datastorage;
 
+import org.opentdk.api.filter.Filter;
+
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
-
-import org.opentdk.api.filter.Filter;
 
 /**
  * Used to initialize the right specific data container depending on the given

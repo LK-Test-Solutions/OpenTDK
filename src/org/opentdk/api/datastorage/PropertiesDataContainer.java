@@ -27,20 +27,14 @@
  */
 package org.opentdk.api.datastorage;
 
-import java.io.Reader;
+import org.opentdk.api.io.FileUtil;
+import org.opentdk.api.filter.Filter;
+import org.apache.commons.lang3.StringUtils;
+
+import java.io.*;
 import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.List;
-
-import org.apache.commons.lang3.StringUtils;
-import org.opentdk.api.filter.Filter;
-import org.opentdk.api.io.FileUtil;
-
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.FileReader;
-import java.io.FileWriter;
-import java.io.IOException;
 
 public class PropertiesDataContainer extends CSVDataContainer {
 

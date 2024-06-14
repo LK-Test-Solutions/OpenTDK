@@ -1,4 +1,41 @@
+/*
+ * BSD 2-Clause License
+ *
+ * Copyright (c) 2022, LK Test Solutions GmbH
+ * All rights reserved.
+ *
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions are met:
+ *
+ * 1. Redistributions of source code must retain the above copyright notice, this
+ *    list of conditions and the following disclaimer.
+ *
+ * 2. Redistributions in binary form must reproduce the above copyright notice,
+ *    this list of conditions and the following disclaimer in the documentation
+ *    and/or other materials provided with the distribution.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+ * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+ * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+ * DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE
+ * FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+ * DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
+ * SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
+ * CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
+ * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+ * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ */
 package org.opentdk.api.datastorage;
+
+import org.opentdk.api.filter.Filter;
+import org.opentdk.api.filter.FilterRule;
+import org.opentdk.api.io.FileUtil;
+import org.opentdk.api.io.XFileWriter;
+import org.opentdk.api.logger.MLogger;
+import org.opentdk.api.util.StringUtil;
+import org.apache.commons.lang3.StringUtils;
+import org.json.JSONArray;
+import org.json.JSONObject;
 
 import java.io.File;
 import java.io.IOException;
@@ -7,21 +44,11 @@ import java.util.*;
 import java.util.logging.Level;
 import java.util.stream.Collectors;
 
-import org.apache.commons.lang3.StringUtils;
-import org.json.JSONArray;
-import org.json.JSONObject;
-import org.opentdk.api.filter.Filter;
-import org.opentdk.api.filter.FilterRule;
-import org.opentdk.api.io.FileUtil;
-import org.opentdk.api.io.XFileWriter;
-import org.opentdk.api.logger.MLogger;
-import org.opentdk.api.util.StringUtil;
-
 public class CSVDataContainer implements SpecificContainer {
 
 	/**
 	 * The character(s) that define the delimiter of columns within tabular files. This delimiter is
-	 * used by the {@link DataContainer#readData()} methods to split the rows of the source file into a
+	 * used by the {@link SpecificContainer#readData(File)} methods to split the rows of the source file into a
 	 * String Array and by the {@link CSVDataContainer#exportContainer(String)} methods to write the
 	 * elements of the {@link #values} ArrayList into the target file.
 	 */
@@ -65,8 +92,8 @@ public class CSVDataContainer implements SpecificContainer {
 
 	/**
 	 * This HashMap is used to define fields and values that will be appended to each
-	 * record added to the {@link DataContainer} by the {@link DataContainer#readData()},
-	 * {@link CSVDataContainer#addRow()} and the {@link TabularContainer#appendData(String)} methods.<br>
+	 * record added to the {@link DataContainer} by the {@link SpecificContainer#readData(File)},
+	 * {@link CSVDataContainer#addRow()} and the {@link CSVDataContainer#appendData(String)} methods.<br>
 	 * E.g. add the name of the source file to each record, when putting the content of multiple files
 	 * into one instance of the {@link DataContainer}.
 	 *
@@ -377,9 +404,13 @@ public class CSVDataContainer implements SpecificContainer {
 	protected String[] addMetaValues(String[] inArray) {
 		return extendDataSet(inArray, "VALUE");
 	}
-	
+
+	/**
+	 * Adds a new row to the container with empty values. The size of the row is equal to the size of the header without
+	 * headers that were added as metadata.
+	 */
 	public void addRow() {
-		int rowSize = values.size() - getMetaData().size();
+		int rowSize = getHeaders().size() - getMetaData().size();
 		addRow(new String[rowSize]);
 	}
 	
@@ -864,7 +895,7 @@ public class CSVDataContainer implements SpecificContainer {
 	public String[] getRow(int rowIndex, String columnHeaders, Filter fltr) {
 		String[] colHeaders = null;
 		if (columnHeaders == null) {
-			colHeaders = new String[0];
+			colHeaders = new String[0]; // TODO why not using getHeaders() here to get all if no specific column is passed ?
 		} else {
 			colHeaders = columnHeaders.split(";");
 		}
@@ -1162,13 +1193,13 @@ public class CSVDataContainer implements SpecificContainer {
 		}
 		String[] valArr = null;
 		if (values.size() > 0) {
-			valArr = this.getRow(index);
+			valArr = getRow(index);
 		}
 		if (valArr == null) {
-			valArr = new String[this.getHeaders().size()];
+			valArr = new String[getHeaders().size()];
 		}
-		valArr[this.getHeaderIndex(headerName)] = val;
-		if (values.size() <= 0) {
+		valArr[getHeaderIndex(headerName)] = val;
+		if (values.size() == 0) {
 			values.add(index, valArr);
 		} else {
 			values.set(index, valArr);

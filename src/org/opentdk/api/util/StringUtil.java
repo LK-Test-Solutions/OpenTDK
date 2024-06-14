@@ -27,9 +27,9 @@
  */
 package org.opentdk.api.util;
 
-import java.nio.charset.Charset;
-
 import org.apache.commons.lang3.StringUtils;
+
+import java.nio.charset.Charset;
 
 /**
  * Helper class with string methods for direct use in a static way.
