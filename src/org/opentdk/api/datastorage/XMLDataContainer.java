@@ -31,6 +31,7 @@ import org.opentdk.api.io.XMLEditor;
 import org.opentdk.api.filter.Filter;
 import org.opentdk.api.filter.FilterRule;
 import org.apache.commons.lang3.StringUtils;
+import org.opentdk.api.logger.MLogger;
 import org.w3c.dom.Element;
 
 import java.io.File;
@@ -75,13 +76,44 @@ public class XMLDataContainer implements SpecificContainer {
 		xEdit = new XMLEditor(root);
 		rootNode = xEdit.getRootNodeName();
 	}
-	
 
 	@Override
 	public String asString() {
 		String ret = "";
 		if (xEdit != null) {
 			ret = xEdit.asString();
+		}
+		return ret;
+	}
+
+	/**
+	 * See {@link #getContent(String, boolean)}
+	 */
+	public String getContent(String expr) {
+		return getContent(expr, false);
+	}
+
+	/**
+	 * @param expr XPath to the node that should be returned as string
+	 * @param subContentOnly ignore the node that the expr refers to and only get the child content
+	 * @return the whole content (with children) of the given XML node as string.
+	 */
+	public String getContent(String expr, boolean subContentOnly) {
+		String ret = "";
+		if (xEdit != null) {
+			Element node = xEdit.getElement(expr);
+			if(subContentOnly) {
+				// Children only requires a loop to get their content
+				StringBuilder sb = new StringBuilder();
+				List<Element> children = xEdit.getChildren(node);
+				for(Element child : children) {
+					sb.append(xEdit.asString(child, true));
+				}
+				ret = sb.toString();
+			} else {
+				// Just get the node and its children as string
+				ret = xEdit.asString(node, true);
+			}
 		}
 		return ret;
 	}
@@ -99,18 +131,21 @@ public class XMLDataContainer implements SpecificContainer {
 		xEdit = new XMLEditor(stream);
 		rootNode = xEdit.getRootNodeName();
 	}
-	
 
+	/**
+	 * Calls {@link #readData(File)}. The filter is not supported.
+	 */
 	@Override
 	public void readData(File sourceFile, Filter filter) throws IOException {
-		// TODO Auto-generated method stub
-		
+		readData(sourceFile);
 	}
 
+	/**
+	 * Calls {@link #readData(InputStream)}. The filter is not supported.
+	 */
 	@Override
 	public void readData(InputStream stream, Filter filter) throws IOException {
-		// TODO Auto-generated method stub
-		
+		readData(stream);
 	}
 
 	@Override
@@ -121,37 +156,6 @@ public class XMLDataContainer implements SpecificContainer {
 	public String getRootNode() {
 		return rootNode;
 	}
-	
-//	
-//	public void setRootNode(String root) {
-//		rootNode = root;
-//	}
-	
-//	public void readXMLData(File inputFile) {
-//		StringBuilder sb = new StringBuilder();
-//		sb.append("<").append(getRootNode()).append("/>");
-//		FileUtil.writeOutputFile(sb.toString(), inputFile.getPath());
-//		xEdit = new XMLEditor(inputFile);
-//		xEdit.save();
-//	}
-	
-//	/**
-//	 * An instance of the DataContainer that should be filled with the data from the connected source
-//	 * file. -> Task of the specific data containers.
-//	 */
-//	private final DataContainer dc;
-//
-//	/**
-//	 * This constructor is used to pass the DataContainer when the specific XML Container will be adapted
-//	 * from the base DataContainer class.
-//	 *
-//	 * @param dataContainer the <code>DataContainer</code> instance to use for read and write methods of
-//	 *              		this specific data container
-//	 */
-//	public XMLDataContainer(DataContainer dataContainer) {
-//		dc = dataContainer;
-//		dc.getImplicitHeaders().add("XPath");
-//	}
 
 	public void add(String name, String value) {
 		add(name, value, new Filter());
@@ -236,6 +240,10 @@ public class XMLDataContainer implements SpecificContainer {
 
 	public Element get(String tagName, String attributName, String attributValue){
 		return xEdit.getElement(tagName, attributName, attributValue);
+	}
+
+	public Element getRootElement(){
+		return xEdit.getRoot();
 	}
 
 	/**
@@ -350,10 +358,6 @@ public class XMLDataContainer implements SpecificContainer {
 		}
 		return lst.toArray(new String[lst.size()]);
 	}
-
-	public Element getRootElement(){
-		return xEdit.getRoot();
-	}
 	
 	public void set(String name, String value) {
 		set(name, value, new Filter(), false);
@@ -394,7 +398,4 @@ public class XMLDataContainer implements SpecificContainer {
 			}
 		}
 	}
-
-
-
 }

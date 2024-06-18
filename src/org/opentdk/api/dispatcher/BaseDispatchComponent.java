@@ -179,6 +179,51 @@ public class BaseDispatchComponent {
 		}
 	}
 
+
+	/**
+	 * Returns the parameterName property of the
+	 * {@link BaseDispatchComponent}.
+	 *
+	 * @return The value of the parameterName property as string
+	 * @see BaseDispatchComponent#parameterName
+	 */
+	public String getName() {
+		return parameterName;
+	}
+
+	/**
+	 * Returns the settingsKey property of the
+	 * {@link BaseDispatchComponent}.
+	 *
+	 * @return The value of the settingsKey property as string
+	 * @see BaseDispatchComponent#settingsKey
+	 */
+	public String getSettingsKey() {
+		return settingsKey;
+	}
+
+	/**
+	 * Returns the parentXPath property of the
+	 * {@link BaseDispatchComponent}.
+	 *
+	 * @return The value of the parentXPath property as string
+	 * @see BaseDispatchComponent#parentXPath
+	 */
+	public String getParentXPath() {
+		return parentXPath;
+	}
+
+	/**
+	 * Returns the defaultValue property of the
+	 * {@link BaseDispatchComponent}.
+	 *
+	 * @return The value of the defaultValue property as string
+	 * @see BaseDispatchComponent#defaultValue
+	 */
+	public String getDefaultValue() {
+		return defaultValue;
+	}
+
 	/**
 	 * This method adds a node or field with the defined value into the DataContainer and file that is
 	 * associated with the {@link BaseDispatchComponent} variable.<br>
@@ -554,17 +599,6 @@ public class BaseDispatchComponent {
 			return new String[0];
 		}
 		return attributes;
-	}
-
-	/**
-	 * Returns the parameterName property of the
-	 * {@link BaseDispatchComponent}.
-	 * 
-	 * @return The value of the parameterName property as string
-	 * @see BaseDispatchComponent#parameterName
-	 */
-	public String getName() {
-		return parameterName;
 	}
 
 	public String retrieveRootNode() {
