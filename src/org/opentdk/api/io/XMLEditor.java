@@ -1012,27 +1012,24 @@ public class XMLEditor {
 	}
 
 	public void save(File xmlOut) {
+		TransformerFactory transformerFactory = TransformerFactory.newInstance();
 		try {
-			StreamResult result = new StreamResult(xmlOut);
-			TransformerFactory tf = TransformerFactory.newInstance();
-			// Security settings: Set an empty string to deny all access to external references
-			tf.setAttribute(XMLConstants.ACCESS_EXTERNAL_DTD, "");
-			tf.setAttribute(XMLConstants.ACCESS_EXTERNAL_STYLESHEET, "");
+			// Set recommended secure processing features
+			transformerFactory.setFeature(XMLConstants.FEATURE_SECURE_PROCESSING, true);
 
-			Transformer transformer = tf.newTransformer();
+			Transformer transformer = transformerFactory.newTransformer();
+			transformer.setOutputProperty(OutputKeys.INDENT, "yes");
 
 			removeEmptySpace(rootElement);
 
 			DOMSource source = new DOMSource(doc);
-			transformer.setOutputProperty(OutputKeys.INDENT, "yes");
+			StreamResult result = new StreamResult(xmlOut);
 			transformer.transform(source, result);
 
 			doc.getDocumentElement().normalize();
 
-		} catch (TransformerConfigurationException e) {
-			e.printStackTrace();
 		} catch (TransformerException e) {
-			e.printStackTrace();
+			MLogger.getInstance().log(Level.SEVERE, e.getMessage(), getClass().getSimpleName(), "save");
 		}
 	}
 
