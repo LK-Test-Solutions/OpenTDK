@@ -44,12 +44,12 @@ import java.util.*;
 import java.util.logging.Level;
 import java.util.stream.Collectors;
 
-public class CSVDataContainer implements SpecificContainer {
+public class TabularContainer implements SpecificContainer {
 
 	/**
 	 * The character(s) that define the delimiter of columns within tabular files. This delimiter is
 	 * used by the {@link SpecificContainer#readData(File)} methods to split the rows of the source file into a
-	 * String Array and by the {@link CSVDataContainer#exportContainer(String)} methods to write the
+	 * String Array and by the {@link TabularContainer#exportContainer(String)} methods to write the
 	 * elements of the {@link #values} ArrayList into the target file.
 	 */
 	private String columnDelimiter = ";";
@@ -93,7 +93,7 @@ public class CSVDataContainer implements SpecificContainer {
 	/**
 	 * This HashMap is used to define fields and values that will be appended to each
 	 * record added to the {@link DataContainer} by the {@link SpecificContainer#readData(File)},
-	 * {@link CSVDataContainer#addRow()} and the {@link CSVDataContainer#appendData(String)} methods.<br>
+	 * {@link TabularContainer#addRow()} and the {@link TabularContainer#appendData(String)} methods.<br>
 	 * E.g. add the name of the source file to each record, when putting the content of multiple files
 	 * into one instance of the {@link DataContainer}.
 	 *
@@ -110,11 +110,11 @@ public class CSVDataContainer implements SpecificContainer {
 	
 	private EHeader headerOrientation = EHeader.COLUMN;
 
-	public static CSVDataContainer newInstance() {
-		return new CSVDataContainer();
+	public static TabularContainer newInstance() {
+		return new TabularContainer();
 	}
 	
-	protected CSVDataContainer() {
+	protected TabularContainer() {
 		super();
 	}
 	

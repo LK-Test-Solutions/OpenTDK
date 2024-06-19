@@ -37,7 +37,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;
 
-public class RSDataContainer extends CSVDataContainer {
+public class RSDataContainer extends TabularContainer {
 
 	public static RSDataContainer newInstance() {
 		return new RSDataContainer();

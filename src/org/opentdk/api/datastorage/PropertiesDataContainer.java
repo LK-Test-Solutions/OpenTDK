@@ -36,7 +36,7 @@ import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.List;
 
-public class PropertiesDataContainer extends CSVDataContainer {
+public class PropertiesDataContainer extends TabularContainer {
 
 	public static PropertiesDataContainer newInstance() {		
 		return new PropertiesDataContainer();

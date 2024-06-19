@@ -121,7 +121,7 @@ public class DataContainer implements SpecificContainer {
 		containerFormat = type;
 		switch (type) {
 		case CSV:
-			instance = CSVDataContainer.newInstance();
+			instance = TabularContainer.newInstance();
 			break;
 		case PROPERTIES:
 			instance = PropertiesDataContainer.newInstance();
@@ -244,7 +244,7 @@ public class DataContainer implements SpecificContainer {
 	private SpecificContainer adaptContainer() {
 		switch (detectDataFormat()) {
 		case CSV:
-			return CSVDataContainer.newInstance();
+			return TabularContainer.newInstance();
 		case PROPERTIES:
 			return PropertiesDataContainer.newInstance();
 		case RESULTSET:
@@ -326,13 +326,13 @@ public class DataContainer implements SpecificContainer {
 		return containerFormat;
 	}
 
-	public CSVDataContainer tabInstance() {
+	public TabularContainer tabInstance() {
 		if (instance instanceof PropertiesDataContainer) {
 			return (PropertiesDataContainer) instance;
 		} else if (instance instanceof RSDataContainer) {
 			return (RSDataContainer) instance;
-		} else if (instance instanceof CSVDataContainer) {
-			return (CSVDataContainer) instance;
+		} else if (instance instanceof TabularContainer) {
+			return (TabularContainer) instance;
 		} else {
 			throw new NullPointerException("TabularContainer not intialized");
 		}
@@ -392,7 +392,7 @@ public class DataContainer implements SpecificContainer {
 			ret = true;
 		} else if (instance instanceof RSDataContainer) {
 			ret = true;
-		} else if (instance instanceof CSVDataContainer) {
+		} else if (instance instanceof TabularContainer) {
 			ret = true;
 		}
 		return ret;
