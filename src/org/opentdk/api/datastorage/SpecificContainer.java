@@ -69,9 +69,29 @@ public interface SpecificContainer {
 	 * @throws IOException if the reading failed the user can handle the cause
 	 */
 	void readData(File sourceFile) throws IOException;
-	void readData(File sourceFile, Filter filter) throws IOException;
+
+	/**
+	 * Calls {@link #readData(File)}. The filter is not supported by default.
+	 */
+	default void readData(File sourceFile, Filter filter) throws IOException {
+		readData(sourceFile);
+	}
+
+	/**
+	 * Each specific container needs to implement a method that reads data from a
+	 * stream.
+	 *
+	 * @param stream Stream object with the content
+	 * @throws IOException if the reading failed the user can handle the cause
+	 */
 	void readData(InputStream stream) throws IOException;
-	void readData(InputStream stream, Filter filter) throws IOException;
+
+	/**
+	 * Calls {@link #readData(InputStream)}. The filter is not supported by default.
+	 */
+	default void readData(InputStream stream, Filter filter) throws IOException {
+		readData(stream);
+	}
 
 	/**
 	 * Each specific container has to implement a method that writes the

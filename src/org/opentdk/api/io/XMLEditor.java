@@ -1057,7 +1057,7 @@ public class XMLEditor {
 				transformer.setOutputProperty(OutputKeys.OMIT_XML_DECLARATION, "yes");
 			}
 
-			removeEmptySpace(rootElement);
+			removeEmptySpace(node);
 
 			// Transform the node to a string
 			DOMSource source = new DOMSource(node);

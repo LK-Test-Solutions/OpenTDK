@@ -112,24 +112,13 @@ public class YAMLDataContainer implements SpecificContainer {
 			json.setJsonWithMap(content);
 		}
 	}
-	
-
-	@Override
-	public void readData(File sourceFile, Filter filter) throws IOException {
-		// TODO Auto-generated method stub
-		
-	}
-
-	@Override
-	public void readData(InputStream stream, Filter filter) throws IOException {
-		// TODO Auto-generated method stub
-		
-	}
 
 	@Override
 	public void writeData(File outputFile) throws IOException {
 		yaml.dump(yaml.dumpAsMap(json.getJsonAsMap()), new FileWriter(outputFile.getPath()));	
 	}
+
+	// The following methods just link to the JSONDataContainer
 
 	public void add(String name, String value) {
 		json.add(name, value);

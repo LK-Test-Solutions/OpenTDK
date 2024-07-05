@@ -58,7 +58,7 @@ public class JSONDataContainer implements SpecificContainer {
 
 	/**
 	 * Container object for the JSON data. Supports several read and write methods. Gets initialized in
-	 * {@link #readData(Filter)}.
+	 * {@link #readData(File)}.
 	 */
 	private JSONObject json;
 	
@@ -124,19 +124,6 @@ public class JSONDataContainer implements SpecificContainer {
 				json = new JSONObject(content);
 			}
 		} 	
-	}
-	
-
-	@Override
-	public void readData(File sourceFile, Filter filter) throws IOException {
-		// TODO Auto-generated method stub
-		
-	}
-
-	@Override
-	public void readData(InputStream stream, Filter filter) throws IOException {
-		// TODO Auto-generated method stub
-		
 	}
 	
 	@Override

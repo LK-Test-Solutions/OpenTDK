@@ -132,22 +132,6 @@ public class XMLDataContainer implements SpecificContainer {
 		rootNode = xEdit.getRootNodeName();
 	}
 
-	/**
-	 * Calls {@link #readData(File)}. The filter is not supported.
-	 */
-	@Override
-	public void readData(File sourceFile, Filter filter) throws IOException {
-		readData(sourceFile);
-	}
-
-	/**
-	 * Calls {@link #readData(InputStream)}. The filter is not supported.
-	 */
-	@Override
-	public void readData(InputStream stream, Filter filter) throws IOException {
-		readData(stream);
-	}
-
 	@Override
 	public void writeData(File outputFile) {
 		xEdit.save(outputFile);

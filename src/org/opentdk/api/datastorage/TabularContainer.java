@@ -37,12 +37,11 @@ import org.apache.commons.lang3.StringUtils;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
+import java.io.*;
 import java.util.*;
 import java.util.logging.Level;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class TabularContainer implements SpecificContainer {
 
@@ -195,7 +194,7 @@ public class TabularContainer implements SpecificContainer {
 	}
 
 	@Override
-	public void readData(File sourceFile) throws IOException {
+	public void readData(File sourceFile) {
 		if (sourceFile != null && sourceFile.exists()) {
 			if (StringUtils.isNotBlank(sourceFile.getPath())) {
 				putFile(sourceFile.getPath(), getColumnDelimiter());
@@ -326,18 +325,26 @@ public class TabularContainer implements SpecificContainer {
 	}
 
 	@Override
-	public void readData(File sourceFile, Filter filter) throws IOException {
-		// TODO Auto-generated method stub		
-	}
+	public void readData(InputStream stream) {
+		String content = null;
+		if (stream != null) {
+			InputStreamReader inputStreamReader = new InputStreamReader(stream);
+			Stream<String> streamOfString = new BufferedReader(inputStreamReader).lines();
+			content = streamOfString.collect(Collectors.joining());
 
-	@Override
-	public void readData(InputStream stream) throws IOException {
-		// TODO Auto-generated method stub	
-	}
-
-	@Override
-	public void readData(InputStream stream, Filter filter) throws IOException {
-		// TODO Auto-generated method stub		
+			streamOfString.close();
+			try {
+				inputStreamReader.close();
+			} catch (IOException e) {
+				MLogger.getInstance().log(Level.SEVERE, e);
+			}
+		}
+		if(content != null) {
+			// Store content in a temporary file to use the existing methods to add to the values object
+			String file = "~tmp/" + getClass().getSimpleName() + ".csv";
+			FileUtil.writeOutputFile(content, file);
+			putFile(file, columnDelimiter);
+		}
 	}
 
 	@Override
