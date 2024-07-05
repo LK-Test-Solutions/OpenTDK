@@ -27,31 +27,34 @@
  */
 package org.opentdk.api.datastorage;
 
-import java.io.File;
-import java.io.IOException;
-
 import org.opentdk.api.filter.Filter;
 
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+
 /**
- * The <code>BaseContainer</code> is used by the <code>DataContainer</code> to initialize the right
- * specific data container depending on the given source type. It contains all methods that the
- * <code>DataContainer</code> has to provide.
+ * Used to initialize the right specific data container depending on the given
+ * source type. It contains all methods that the {@link DataContainer}
+ * class has to provide.
  * 
  * @author LK Test Solutions
  */
-interface SpecificContainer {
+public interface SpecificContainer {
+	
 	/**
-	 * Each specific container class has to have a method that provides the container content as string.
+	 * Each specific container class has to have a method that provides the
+	 * container content as string.
 	 * 
 	 * @return the container content as string for further operations.
 	 */
 	String asString();
-
+	
 	/**
 	 * Used to provide the content of the container in another container format as string. Default
 	 * method, because to every format is transformable.
 	 * 
-	 * @param exportAs see {@link org.opentdk.api.datastorage.EContainerFormat}
+	 * @param exportAs see {@link EContainerFormat}
 	 * @return the container content as string for further operations in the chosen format
 	 */
 	default String asString(EContainerFormat exportAs) {
@@ -59,43 +62,44 @@ interface SpecificContainer {
 	}
 
 	/**
-	 * Each specific <code>DataContainer</code> has to implement a method that checks if the connected
-	 * file exists and create it if required.
+	 * Each specific container needs to implement a method that reads data from the
+	 * source.
 	 * 
-	 * @throws IOException if the creation failed the user can handle the cause
+	 * @param sourceFile The path and name of the file to read from
+	 * @throws IOException if the reading failed the user can handle the cause
 	 */
-	void createFile() throws IOException;
+	void readData(File sourceFile) throws IOException;
 
 	/**
-	 * Each specific container needs to implement a method that reads data from the source.
+	 * Calls {@link #readData(File)}. The filter is not supported by default.
 	 */
-	default void readData() throws IOException {
-		readData(new Filter());
-	}
-	
-	/**
-	 * Each specific container needs to implement a method that reads data from the source.
-	 * @param srcFile input file
-	 */
-	default void readData(File srcFile) throws IOException {
-		readData();
+	default void readData(File sourceFile, Filter filter) throws IOException {
+		readData(sourceFile);
 	}
 
 	/**
-	 * Each specific container needs to implement a method that reads data from the source.
-	 * 
-	 * @param filter Possibility to filter the source data
+	 * Each specific container needs to implement a method that reads data from a
+	 * stream.
+	 *
+	 * @param stream Stream object with the content
+	 * @throws IOException if the reading failed the user can handle the cause
 	 */
-	void readData(Filter filter) throws IOException;
+	void readData(InputStream stream) throws IOException;
 
 	/**
-	 * Each specific <code>DataContainer</code> that implements the <code>CustomContainer</code>, needs
-	 * to implement a method that writes the data from the runtime instance of the
-	 * <code>DataContainer</code> into a file.
-	 * 
-	 * @param srcFile The name of the source file to write to
-	 * @throws IOException Throws an exception if file is missing
+	 * Calls {@link #readData(InputStream)}. The filter is not supported by default.
 	 */
-	void writeData(String srcFile) throws IOException;
+	default void readData(InputStream stream, Filter filter) throws IOException {
+		readData(stream);
+	}
+
+	/**
+	 * Each specific container has to implement a method that writes the
+	 * data from the runtime instance into a file.
+	 * 
+	 * @param outputFile The path and name of the file to write to
+	 * @throws IOException if the writing failed the user can handle the cause
+	 */
+	void writeData(File outputFile) throws IOException;
 
 }

@@ -27,23 +27,22 @@
  */
 package org.opentdk.api.dispatcher;
 
+import org.opentdk.api.datastorage.DataContainer;
+import org.opentdk.api.logger.MLogger;
+
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.lang.reflect.Field;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.logging.Level;
-import java.lang.reflect.Field;
-
-import org.apache.commons.lang3.StringUtils;
-import org.opentdk.api.datastorage.DataContainer;
-import org.opentdk.api.logger.MLogger;
 
 /**
  * The BaseDispatcher provides all methods to create the associations between a dispatcher class and
- * a {@link org.opentdk.api.datastorage.DataContainer}.<br>
+ * a {@link DataContainer}.<br>
  * <br>
  * 
  * Dispatcher class sample: <br>
@@ -68,7 +67,7 @@ import org.opentdk.api.logger.MLogger;
 public abstract class BaseDispatcher {
 
 	/**
-	 * This HashMap stores the {@link org.opentdk.api.datastorage.DataContainer} instances of all
+	 * This HashMap stores the {@link DataContainer} instances of all
 	 * settings used within an application during runtime. Once the setDataContainer method of a
 	 * settings class is called, the DataContainer will be stored in the HashMap with the simple name of
 	 * the settings class as key.
@@ -80,9 +79,9 @@ public abstract class BaseDispatcher {
 	 *                        declared. In case the dispatcher class extends a super class with
 	 *                        inherited declarations of {@link BaseDispatchComponent}, then the simple
 	 *                        name of the super class needs to be used. This will not effect the super
-	 *                        class {@link #BaseDispatcher()}, because BaseDispatcher does not include
+	 *                        class {@link BaseDispatcher()}, because BaseDispatcher does not include
 	 *                        declarations of {@link BaseDispatchComponent}.
-	 * @return a {@link org.opentdk.api.datastorage.DataContainer} that is assigned to the extended sub
+	 * @return a {@link DataContainer} that is assigned to the extended sub
 	 *         class of {@link BaseDispatcher}, where the {@link BaseDispatchComponent} variables are
 	 *         declared.
 	 */
@@ -96,9 +95,9 @@ public abstract class BaseDispatcher {
 	 *                            dispatcher class extends a super class with inherited declarations of
 	 *                            {@link BaseDispatchComponent}, then the simple name of the super class
 	 *                            needs to be used. This will not effect the super class
-	 *                            {@link #BaseDispatcher()}, because BaseDispatcher does not include
+	 *                            {@link BaseDispatcher()}, because BaseDispatcher does not include
 	 *                            declarations of {@link BaseDispatchComponent}.
-	 * @return a {@link org.opentdk.api.datastorage.DataContainer} that is assigned to the extended sub
+	 * @return a {@link DataContainer} that is assigned to the extended sub
 	 *         class of {@link BaseDispatcher}, where the {@link BaseDispatchComponent} variables are
 	 *         declared.
 	 */
@@ -107,13 +106,13 @@ public abstract class BaseDispatcher {
 	}
 
 	/**
-	 * Assigns a {@link org.opentdk.api.datastorage.DataContainer} to the {@link BaseDispatchComponent}
-	 * fields that are declared in an extended sub class of {@link BaseDispatcher}. The DataContainer
+	 * Assigns a {@link DataContainer} to the {@link BaseDispatchComponent}
+	 * fields that are declared in an extended subclass of {@link BaseDispatcher}. The DataContainer
 	 * acts as a runtime storage for the values of the {@link BaseDispatchComponent} variables.
 	 * 
 	 * @param dispatcherClass the dispatcher class where the variables of type
 	 *                        {@link BaseDispatchComponent} are declared
-	 * @param dc              {@link org.opentdk.api.datastorage.DataContainer} instance, representing
+	 * @param dc              {@link DataContainer} instance, representing
 	 *                        the runtime storage for values of the {@link BaseDispatchComponent}
 	 *                        variables
 	 */
@@ -122,7 +121,7 @@ public abstract class BaseDispatcher {
 	}
 
 	/**
-	 * Assigns a {@link org.opentdk.api.datastorage.DataContainer} to the {@link BaseDispatchComponent}
+	 * Assigns a {@link DataContainer} to the {@link BaseDispatchComponent}
 	 * fields that are declared in an extended sub class of {@link BaseDispatcher}. The DataContainer
 	 * will be initialized with the contend of an InputStream and acts as a runtime storage for the
 	 * values of the {@link BaseDispatchComponent} variables.
@@ -133,15 +132,15 @@ public abstract class BaseDispatcher {
 	 *                        {@link BaseDispatchComponent} variables
 	 */
 	public static void setDataContainer(Class<?> dispatcherClass, InputStream inStream) {
-		setDataContainer(dispatcherClass, new DataContainer(inStream), false);
+		setDataContainer(dispatcherClass, DataContainer.newContainer(inStream), false);
 	}
 
 	/**
-	 * Assigns a {@link org.opentdk.api.datastorage.DataContainer} to the {@link BaseDispatchComponent}
-	 * fields that are declared in an extended sub class of {@link BaseDispatcher}. The DataContainer
+	 * Assigns a {@link DataContainer} to the {@link BaseDispatchComponent}
+	 * fields that are declared in an extended subclass of {@link BaseDispatcher}. The DataContainer
 	 * acts as a runtime storage for the values of the {@link BaseDispatchComponent} variables and is
 	 * linked to the defined file which acts as the permanent storage for the
-	 * {@link org.opentdk.api.datastorage.DataContainer}.
+	 * {@link DataContainer}.
 	 * 
 	 * @param dispatcherClass the dispatcher class where the variables of type
 	 *                        {@link BaseDispatchComponent} are declared
@@ -150,15 +149,15 @@ public abstract class BaseDispatcher {
 	 *                        dispatcher class
 	 */
 	public static void setDataContainer(Class<?> dispatcherClass, String dispatcherFile) {
-		setDataContainer(dispatcherClass, new DataContainer(new File(dispatcherFile)), false);
+		setDataContainer(dispatcherClass, DataContainer.newContainer(new File(dispatcherFile)), false);
 	}
 
 	/**
-	 * Assigns a {@link org.opentdk.api.datastorage.DataContainer} to the {@link BaseDispatchComponent}
-	 * fields that are declared in an extended sub class of {@link BaseDispatcher}. The DataContainer
+	 * Assigns a {@link DataContainer} to the {@link BaseDispatchComponent}
+	 * fields that are declared in an extended subclass of {@link BaseDispatcher}. The DataContainer
 	 * acts as a runtime storage for the values of the {@link BaseDispatchComponent} variables that is
 	 * linked to the defined file, which acts as the permanent storage for the
-	 * {@link org.opentdk.api.datastorage.DataContainer}. This method will also check if the root node
+	 * {@link DataContainer}. This method will also check if the root node
 	 * of tree formatted file matches with the root node defined within the corresponding dispatcher
 	 * class.
 	 * 
@@ -167,43 +166,40 @@ public abstract class BaseDispatcher {
 	 * @param dispatcherFile  full path and name of the file that stores the values of
 	 *                        {@link BaseDispatchComponent} variables which are defined within the
 	 *                        dispatcher class
-	 * @param createFile      defines if the non existent dispatcherFile gets created
+	 * @param createFile      defines if the nonexistent dispatcherFile gets created
 	 */
 	public static void setDataContainer(Class<?> dispatcherClass, String dispatcherFile, boolean createFile) {
-		setDataContainer(dispatcherClass, new DataContainer(new File(dispatcherFile)), createFile);
+		setDataContainer(dispatcherClass, DataContainer.newContainer(new File(dispatcherFile)), createFile);
 	}	
 
 	/**
-	 * Assigns a {@link org.opentdk.api.datastorage.DataContainer} to the {@link BaseDispatchComponent}
-	 * fields that are declared in an extended sub class of {@link BaseDispatcher}. The DataContainer
+	 * Assigns a {@link DataContainer} to the {@link BaseDispatchComponent}
+	 * fields that are declared in an extended subclass of {@link BaseDispatcher}. The DataContainer
 	 * acts as a runtime storage for the values of the {@link BaseDispatchComponent} variables. This
 	 * method will also check if the root node of tree formatted DataContainer matches with the root
 	 * node defined within the corresponding dispatcher class.
 	 * 
 	 * @param dispatcherClass the dispatcher class where the variables of type
 	 *                        {@link BaseDispatchComponent} are declared
-	 * @param dc              {@link org.opentdk.api.datastorage.DataContainer} instance, representing
+	 * @param dc              {@link DataContainer} instance, representing
 	 *                        the runtime storage for values of the {@link BaseDispatchComponent}
 	 *                        variables
-	 * @param createFile      defines if the non existent dispatcherFile gets created
+	 * @param createFile      defines if the nonexistent dispatcherFile gets created
 	 */
 	public static void setDataContainer(Class<?> dispatcherClass, DataContainer dc, boolean createFile) {
 		Map<String, BaseDispatchComponent> dcomp = BaseDispatcher.getDeclaredComponents(dispatcherClass);
-		String rn = "";
-		for (String key : dcomp.keySet()) {
-			rn = dcomp.get(key).getRootNode();
-			if (!rn.isEmpty()) {
-				break;
-			}
-		}
+			
 		if (createFile) {
-			if (dc.isTree()) {
-				if (StringUtils.isBlank(dc.getRootNode())) {
-					dc.setRootNode(rn);
-				} else {
-					if (!dc.getRootNode().contentEquals(rn)) {
-						throw new IllegalArgumentException("Root node of dispatcher class and data container are not equal");
+			if (dc.isTree() && dc.isXML()) {
+				String rn = "";
+				for (String key : dcomp.keySet()) {
+					rn = dcomp.get(key).retrieveRootNode();
+					if (!rn.isEmpty()) {
+						break;
 					}
+				}
+				if (!dc.xmlInstance().getRootNode().contentEquals(rn)) {
+					dc.xmlInstance().initXmlEditor(rn);
 				}
 			}
 			try {

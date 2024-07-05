@@ -280,8 +280,7 @@ public class XFileWriter {
 		if (lineIndex < 0) {
 			throw new IllegalArgumentException("The value of lineIndex argument is not valid. lineIndex must be >= 0");
 		} else if (append == false) {
-			throw new IllegalArgumentException(
-					"Method insertLine can only be executed in append mode. Please create instance of XFileWriter with append = true defined in the constructor.");
+			throw new IllegalArgumentException("Method insertLine can only be executed in append mode. Please create instance of XFileWriter with append = true defined in the constructor.");
 		} else {
 			// create a temporary copy of the file
 			FileUtil.copyFile(file.getPath(), tmpFileName);

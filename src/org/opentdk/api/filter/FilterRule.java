@@ -27,22 +27,21 @@
  */
 package org.opentdk.api.filter;
 
+import org.opentdk.api.logger.MLogger;
+import org.opentdk.api.util.DateUtil;
+import org.opentdk.api.util.EFormat;
+import org.opentdk.api.dispatcher.BaseDispatchComponent;
+import org.opentdk.api.mapping.EOperator;
+
 import java.sql.Time;
 import java.sql.Timestamp;
 import java.util.logging.Level;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import org.opentdk.api.dispatcher.BaseDispatchComponent;
-import org.opentdk.api.logger.MLogger;
-import org.opentdk.api.mapping.EOperator;
-import org.opentdk.api.util.DateUtil;
-import org.opentdk.api.util.EFormat;
-
 /**
  * This class is used to define rules that will be used for filtering DataSets
- * from tabular data formats like
- * {@link org.opentdk.api.datastorage.DataContainer} or in where and set
+ * from tabular data formats like DataContainer or in where and set
  * conditions of SQL queries.<br>
  * <br>
  * 

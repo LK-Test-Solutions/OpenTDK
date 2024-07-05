@@ -27,33 +27,19 @@
  */
 package org.opentdk.api.io;
 
-import java.io.BufferedInputStream;
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.FileReader;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
+import org.opentdk.api.logger.MLogger;
+import org.opentdk.api.util.CommonUtil;
+import org.apache.commons.io.FileUtils;
+
+import java.io.*;
 import java.net.URLConnection;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
-import java.nio.file.FileVisitResult;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.nio.file.SimpleFileVisitor;
-import java.nio.file.StandardCopyOption;
+import java.nio.file.*;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;
-
-import org.apache.commons.io.FileUtils;
-import org.opentdk.api.logger.MLogger;
-import org.opentdk.api.util.CommonUtil;
 
 /**
  * Class with static methods to perform several I/O operations like reading files, creating files or

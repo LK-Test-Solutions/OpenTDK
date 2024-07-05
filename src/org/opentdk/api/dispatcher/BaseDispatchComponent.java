@@ -27,17 +27,12 @@
  */
 package org.opentdk.api.dispatcher;
 
-import java.io.IOException;
-import java.util.logging.Level;
-
-import org.apache.commons.lang3.StringUtils;
-import org.opentdk.api.application.EBaseSettings;
 import org.opentdk.api.datastorage.DataContainer;
-import org.opentdk.api.datastorage.EHeader;
+import org.opentdk.api.datastorage.EContainerFormat;
 import org.opentdk.api.filter.Filter;
-import org.opentdk.api.logger.MLogger;
 import org.opentdk.api.mapping.EOperator;
 import org.opentdk.api.util.ListUtil;
+import org.apache.commons.lang3.StringUtils;
 
 /**
  * Similar to the native <code><b>enum</b></code> type of java, the
@@ -45,13 +40,13 @@ import org.opentdk.api.util.ListUtil;
  * difference that their values are not static and extended access to the variables values and their
  * attributes is provided.<br>
  * Each <code><b>BaseDispatchComponent</b></code> instance will be declared within a dispatcher
- * definition class like {@link EBaseSettings} and the instance is associated with a node or field,
+ * definition class like EBaseSettings and the instance is associated with a node or field,
  * depending on the format of the underlying DataContainer (tree or table format).<br>
  * <br>
  * Main features of <code><b>BaseDispatchComponent</b></code>:<br>
  * {@literal -} Values and attributes of defined nodes or fields can be read from and written to the
  * structure of the underlying DataContainer.<br>
- * {@literal -} In case the defined file file does not exist, it will be created once a setter
+ * {@literal -} In case the defined file does not exist, it will be created once a setter
  * method is called.<br>
  * {@literal -} In case that no file is associated with the dispatcher component, their values will
  * be stored in runtime objects (DOM Document, HashMap, ArrayList etc.) depending on the container
@@ -175,25 +170,63 @@ public class BaseDispatchComponent {
 		defaultValue = dVal;
 
 		if (!BaseDispatcher.dcMap.containsKey(settingsKey)) {
-			DataContainer dc = null;
-			if (StringUtils.isNotBlank(parentXPath)) {
-				dc = new DataContainer(EHeader.TREE);
-				dc.setRootNode(getRootNode()); 
-			} else {
-				dc = new DataContainer();
-			}
-			try {
-				dc.readData();
-			} catch (IOException e) {
-				MLogger.getInstance().log(Level.SEVERE, e);
-			}
+			DataContainer dc = DataContainer.newContainer(EContainerFormat.CSV);
+			if (StringUtils.isNotBlank(parentXPath)) {	
+				dc = DataContainer.newContainer(EContainerFormat.XML);
+				dc.xmlInstance().initXmlEditor(retrieveRootNode()); 			
+			} 
 			BaseDispatcher.setDataContainer(parentClass, dc);
 		}
 	}
 
+
+	/**
+	 * Returns the parameterName property of the
+	 * {@link BaseDispatchComponent}.
+	 *
+	 * @return The value of the parameterName property as string
+	 * @see BaseDispatchComponent#parameterName
+	 */
+	public String getName() {
+		return parameterName;
+	}
+
+	/**
+	 * Returns the settingsKey property of the
+	 * {@link BaseDispatchComponent}.
+	 *
+	 * @return The value of the settingsKey property as string
+	 * @see BaseDispatchComponent#settingsKey
+	 */
+	public String getSettingsKey() {
+		return settingsKey;
+	}
+
+	/**
+	 * Returns the parentXPath property of the
+	 * {@link BaseDispatchComponent}.
+	 *
+	 * @return The value of the parentXPath property as string
+	 * @see BaseDispatchComponent#parentXPath
+	 */
+	public String getParentXPath() {
+		return parentXPath;
+	}
+
+	/**
+	 * Returns the defaultValue property of the
+	 * {@link BaseDispatchComponent}.
+	 *
+	 * @return The value of the defaultValue property as string
+	 * @see BaseDispatchComponent#defaultValue
+	 */
+	public String getDefaultValue() {
+		return defaultValue;
+	}
+
 	/**
 	 * This method adds a node or field with the defined value into the DataContainer and file that is
-	 * associated with the {@link org.opentdk.api.dispatcher.BaseDispatchComponent} variable.<br>
+	 * associated with the {@link BaseDispatchComponent} variable.<br>
 	 * <br>
 	 * 
 	 * <pre>
@@ -217,7 +250,7 @@ public class BaseDispatchComponent {
 
 	/**
 	 * This method adds a node or field with the defined value into the DataContainer and file that is
-	 * associated with the {@link org.opentdk.api.dispatcher.BaseDispatchComponent} variable. <br>
+	 * associated with the {@link BaseDispatchComponent} variable. <br>
 	 * <br>
 	 * 
 	 * <pre>
@@ -244,7 +277,7 @@ public class BaseDispatchComponent {
 
 	/**
 	 * This method adds a node or field with the defined value into the DataContainer and file that is
-	 * associated with the {@link org.opentdk.api.dispatcher.BaseDispatchComponent} variable.<br>
+	 * associated with the {@link BaseDispatchComponent} variable.<br>
 	 * <br>
 	 * 
 	 * <pre>
@@ -270,7 +303,7 @@ public class BaseDispatchComponent {
 
 	/**
 	 * This method adds a node or tag with the defined value into the DataContainer and file that is
-	 * associated with the {@link org.opentdk.api.dispatcher.BaseDispatchComponent} variable.<br>
+	 * associated with the {@link BaseDispatchComponent} variable.<br>
 	 * <br>
 	 * 
 	 * <pre>
@@ -307,7 +340,7 @@ public class BaseDispatchComponent {
 
 	/**
 	 * Deletes all nodes or fields within the associated DataContainer and file that are representing
-	 * entries for this {@link org.opentdk.api.dispatcher.BaseDispatchComponent}.<br>
+	 * entries for this {@link BaseDispatchComponent}.<br>
 	 * <br>
 	 * 
 	 * XML Sample<br>
@@ -341,7 +374,7 @@ public class BaseDispatchComponent {
 	/**
 	 * Deletes all matching nodes or fields with an assigned attribute within the associated
 	 * DataContainer and file that are representing entries for this
-	 * {@link org.opentdk.api.dispatcher.BaseDispatchComponent}.<br>
+	 * {@link BaseDispatchComponent}.<br>
 	 * <br>
 	 * 
 	 * XML Sample<br>
@@ -378,7 +411,7 @@ public class BaseDispatchComponent {
 	/**
 	 * Deletes all matching nodes or fields with an assigned attribute within the associated
 	 * DataContainer and file that are representing entries for this
-	 * {@link org.opentdk.api.dispatcher.BaseDispatchComponent}. In addition the nodes within the path
+	 * {@link BaseDispatchComponent}. In addition the nodes within the path
 	 * hierarchy can be identified by an attribute<br>
 	 * <br>
 	 * 
@@ -431,7 +464,7 @@ public class BaseDispatchComponent {
 	}
 
 	/**
-	 * This method returns the attribute value of the of the first matching node that is associated with
+	 * This method returns the attribute value of the first matching node that is associated with
 	 * this BaseDispatchComponent instance.
 	 * 
 	 * <pre>
@@ -452,12 +485,8 @@ public class BaseDispatchComponent {
 		}
 		DataContainer dc = BaseDispatcher.getDataContainer(settingsKey);
 		String[] attributes = new String[0];
-		if (dc.isTree()) {
-			try{
-				attributes = dc.treeInstance().get(expr, attrName);
-			}catch(NullPointerException e){
-				return "";
-			}
+		if (dc.isTree() && dc.isXML()) {
+			attributes = dc.xmlInstance().get(expr, attrName);
 		}
 		if (attributes.length == 0) {
 			return "";
@@ -492,12 +521,8 @@ public class BaseDispatchComponent {
 		}
 		DataContainer dc = BaseDispatcher.getDataContainer(settingsKey);
 		String[] attributes = new String[0];
-		if (dc.isTree()) {
-			try{
-				attributes = dc.treeInstance().get(expr, attrName);
-			}catch(NullPointerException e){
-				return "";
-			}
+		if (dc.isTree() && dc.isXML()) {
+			attributes = dc.xmlInstance().get(expr, attrName);
 		}
 		if (attributes.length == 0) {
 			return "";
@@ -528,12 +553,8 @@ public class BaseDispatchComponent {
 		}
 		DataContainer dc = BaseDispatcher.getDataContainer(settingsKey);
 		String[] attributes = new String[0];
-		if (dc.isTree()) {
-			try{
-				attributes = dc.treeInstance().get(expr, attrName);
-			}catch(NullPointerException e){
-				return new String[0];
-			}
+		if (dc.isTree() && dc.isXML()) {
+			attributes = dc.xmlInstance().get(expr, attrName);
 		}
 		if (attributes.length == 0) {
 			return new String[0];
@@ -564,16 +585,15 @@ public class BaseDispatchComponent {
 	public String[] getAttributes(String params, String attrName) {
 		String expr = parameterName;
 		if (!parentXPath.isEmpty()) {
-			expr = resolveXPath(params) + "/" + parameterName;
+			expr = resolveXPath(params);
+			if(StringUtils.isNotBlank(parameterName)) {
+				expr = expr + "/" + parameterName;
+			}
 		}
 		DataContainer dc = BaseDispatcher.getDataContainer(settingsKey);
 		String[] attributes = new String[0];
-		if (dc.isTree()) {
-			try{
-				attributes = dc.treeInstance().get(expr, attrName);
-			}catch(NullPointerException e){
-				return new String[0];
-			}
+		if (dc.isTree() && dc.isXML()) {
+			attributes = dc.xmlInstance().get(expr, attrName);
 		}
 		if (attributes.length == 0) {
 			return new String[0];
@@ -581,18 +601,7 @@ public class BaseDispatchComponent {
 		return attributes;
 	}
 
-	/**
-	 * Returns the parameterName property of the
-	 * {@link org.opentdk.api.dispatcher.BaseDispatchComponent}.
-	 * 
-	 * @return The value of the parameterName property as string
-	 * @see org.opentdk.api.dispatcher.BaseDispatchComponent#parameterName
-	 */
-	public String getName() {
-		return parameterName;
-	}
-
-	public String getRootNode() {
+	public String retrieveRootNode() {
 		String rootNode = "";
 		String[] nodeArray = parentXPath.split("/");
 		if (nodeArray.length > 0) {
@@ -612,14 +621,14 @@ public class BaseDispatchComponent {
 
 	/**
 	 * This method retrieves the value that is assigned to the
-	 * {@link org.opentdk.api.dispatcher.BaseDispatchComponent} variable in the following way:<br>
+	 * {@link BaseDispatchComponent} variable in the following way:<br>
 	 * {@literal -} Search the node or field, defined by property {@link #parameterName}. For tree
 	 * formats the node will be searched within the XPath, defined by property {@link #parentXPath}<br>
 	 * {@literal -} If the node or field does not exist within the associated DataContainer, the default
 	 * value defined by property {@link #defaultValue} will be retrieved.<br>
 	 * {@literal -} If multiple nodes or fields exist, then the first value will be retrieved
 	 * 
-	 * @return the value, assigned to the {@link org.opentdk.api.dispatcher.BaseDispatchComponent}
+	 * @return the value, assigned to the {@link BaseDispatchComponent}
 	 *         variable as String
 	 */
 	public String getValue() {
@@ -642,7 +651,7 @@ public class BaseDispatchComponent {
 
 	/**
 	 * This method retrieves the value that is assigned to the
-	 * {@link org.opentdk.api.dispatcher.BaseDispatchComponent} variable in the following way:<br>
+	 * {@link BaseDispatchComponent} variable in the following way:<br>
 	 * {@literal -} Search the node or field, defined by property {@link #parameterName}. For tree
 	 * formats the node will be searched within the XPath, defined by property {@link #parentXPath}<br>
 	 * {@literal -} If the node or field does not exist within the associated DataContainer, the default
@@ -651,7 +660,7 @@ public class BaseDispatchComponent {
 	 * 
 	 * @param params Semicolon separated string with the values of node attributes within the
 	 *               parentXPath
-	 * @return the value, assigned to the {@link org.opentdk.api.dispatcher.BaseDispatchComponent}
+	 * @return the value, assigned to the {@link BaseDispatchComponent}
 	 *         variable as String
 	 */
 	public String getValue(String params) {
@@ -667,14 +676,14 @@ public class BaseDispatchComponent {
 
 	/**
 	 * This method retrieves the values that are assigned to the
-	 * {@link org.opentdk.api.dispatcher.BaseDispatchComponent} variable in the following way:<br>
+	 * {@link BaseDispatchComponent} variable in the following way:<br>
 	 * {@literal -} Search the nodes or fields, defined by property {@link #parameterName}. For tree
 	 * formats the nodes will be searched within the XPath, defined by property {@link #parentXPath}<br>
 	 * {@literal -} If the nodes or fields do not exist within the associated DataContainer, the default
 	 * value defined by property {@link #defaultValue} will be retrieved.<br>
 	 * {@literal -} Otherwise the values of all matching nodes or fields will be retrieved.
 	 * 
-	 * @return the values, assigned to the {@link org.opentdk.api.dispatcher.BaseDispatchComponent}
+	 * @return the values, assigned to the {@link BaseDispatchComponent}
 	 *         variable as Array of type String
 	 */
 	public String[] getValues() {
@@ -683,7 +692,7 @@ public class BaseDispatchComponent {
 
 	/**
 	 * This method retrieves the values that are assigned to the
-	 * {@link org.opentdk.api.dispatcher.BaseDispatchComponent} variable in the following way:<br>
+	 * {@link BaseDispatchComponent} variable in the following way:<br>
 	 * {@literal -} Search the nodes or fields, defined by property {@link #parameterName}. For tree
 	 * formats the nodes will be searched within the XPath, defined by property {@link #parentXPath}<br>
 	 * {@literal -} If the nodes or fields do not exist within the associated DataContainer, the default
@@ -692,7 +701,7 @@ public class BaseDispatchComponent {
 	 * 
 	 * @param params - Semicolon separated string with the values of tag attributes within the
 	 *               parentXPath
-	 * @return the values, assigned to the {@link org.opentdk.api.dispatcher.BaseDispatchComponent}
+	 * @return the values, assigned to the {@link BaseDispatchComponent}
 	 *         variable as Array of type String
 	 */
 	public String[] getValues(String params) {
@@ -830,8 +839,8 @@ public class BaseDispatchComponent {
 		Filter fltr = new Filter();
 		fltr.addFilterRule("XPath", xPath, EOperator.EQUALS);
 		DataContainer dc = BaseDispatcher.getDataContainer(settingsKey);
-		if(dc.isTree()) {
-			dc.treeInstance().set(parameterName, attrName, oldValue, attrValue, fltr);
+		if(dc.isTree() && dc.isXML()) {
+			dc.xmlInstance().set(parameterName, attrName, oldValue, attrValue, fltr);
 		}
 	}
 
@@ -861,10 +870,12 @@ public class BaseDispatchComponent {
 
 	public void setValue(int valueIndex, String value) {
 		if ((parentXPath == null) || (parentXPath.isEmpty())) {
-			if(valueIndex >= BaseDispatcher.getDataContainer(settingsKey).tabInstance().getRowCount()) {
-				BaseDispatcher.getDataContainer(settingsKey).tabInstance().addRow(BaseDispatcher.getDataContainer(settingsKey).tabInstance().createPreparedRow());
+			DataContainer dc = BaseDispatcher.getDataContainer(settingsKey);
+			if(valueIndex >= dc.tabInstance().getRowCount()) {
+				//dc.tabInstance().addRow(new String[dc.tabInstance().getHeaders().size()]);
+				dc.tabInstance().addRow();
 			}
-			BaseDispatcher.getDataContainer(settingsKey).tabInstance().setValue(parameterName, valueIndex, value);
+			dc.tabInstance().setValue(parameterName, valueIndex, value);
 		} else {
 			// ToDo: implementation for tree format, if required
 		}

@@ -27,135 +27,166 @@
  */
 package org.opentdk.api.datastorage;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
+import org.opentdk.api.filter.Filter;
+import org.opentdk.api.io.FileUtil;
+import org.opentdk.api.io.XMLEditor;
+import org.opentdk.api.logger.MLogger;
+import org.apache.commons.lang3.StringUtils;
+import org.json.JSONObject;
+import org.yaml.snakeyaml.Yaml;
+
+import java.io.*;
+import java.nio.file.Files;
 import java.sql.ResultSet;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.logging.Level;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import org.apache.commons.lang3.StringUtils;
-import org.json.JSONObject;
-import org.opentdk.api.filter.Filter;
-import org.opentdk.api.filter.FilterRule;
-import org.opentdk.api.io.XMLEditor;
-import org.opentdk.api.logger.MLogger;
-import org.yaml.snakeyaml.Yaml;
-
 /**
- * This class gets used to store data from different sources at runtime of an application. The class
- * provides methods to put data from different sources into an instance of a specific container
- * class, as well as getter and setter methods to read data from, and write data into the
- * object.<br>
+ * This class gets used to store data from different sources at runtime of an
+ * application. The class provides methods to put data from different sources
+ * into an instance of a specific container class, as well as getter and setter
+ * methods to read data from, and write data into the object.<br>
  * <br>
- * This will allow to build applications with standardized data interface with minimum maintenance
- * effort in case that the data source changes.
+ * This will allow to build applications with standardized data interface with
+ * minimum maintenance effort in case that the data source changes.
  *
  * @author LK Test Solutions
  */
 public class DataContainer implements SpecificContainer {
 
 	/**
-	 * The object that will be adapted to a specific <code>DataContainer</code> like
-	 * {@link XMLDataContainer} or {@link PropertiesDataContainer}. The caller of the
-	 * <code>DataContainer</code> does not need to know about the adaption process. In other words: The
-	 * caller can use the <code>DataContainer</code> on all supported file formats without calling
-	 * specific functions for the source file type.
+	 * The object that will be adapted to a specific data container like
+	 * {@link XMLDataContainer} or {@link PropertiesDataContainer}. The caller does
+	 * not need to know about the adaption process.
 	 */
-	private SpecificContainer instance;
+	private final SpecificContainer instance;
 
 	/**
-	 * Full path and name of the file for DataContainers with file based sources like
-	 * {@link TabularContainer}, {@link PropertiesDataContainer} or {@link XMLDataContainer}. This file
-	 * will be used as default for all read and write methods that are called without an explicit file
-	 * attribute.
+	 * This property is used to assign the data as an {@link java.io.File} to the
+	 * {@link DataContainer} instance.
 	 */
-	private File inputFile = new File("");
+	private File inputFile;
 
 	/**
-	 * The filter object that does not filter the data in the <code>DataContainer</code> during runtime
-	 * but when reading from and writing to the configuration file.
-	 */
-	private Filter filter = new Filter();
-
-	/**
-	 * Property that stores the container format for the instance of the {@link DataContainer} as an
-	 * enumeration of type {@link EContainerFormat}.
-	 */
-	private EContainerFormat containerFormat = EContainerFormat.TEXT;
-
-	/**
-	 * This property is used to assign the data as an {@link java.io.InputStream} to the
-	 * {@link DataContainer} instance in case that no source file exists.
+	 * This property is used to assign the data as an {@link java.io.InputStream} to
+	 * the {@link DataContainer} instance in case that no source file exists.
 	 */
 	private InputStream inputStream;
 
 	/**
-	 * Keeps the SQL result set of {@link org.opentdk.api.datastorage.RSDataContainer}.
+	 * This property is used to assign the data as an {@link java.sql.ResultSet} to
+	 * the {@link DataContainer} instance in case that no source file exists.
 	 */
 	private ResultSet resultSet;
 
 	/**
-	 * Stores the root node of the {@link org.opentdk.api.datastorage.XMLDataContainer}.
+	 * The filter object that does not filter the data in the {@link DataContainer}
+	 * during runtime but when reading from and writing to the source file.
 	 */
-	private String rootNode = "";
+	private Filter filter = new Filter();
 
 	/**
-	 * This property is used for the adaption of different source formats, to make the data accessible
-	 * in a similar way, as they were organized in tabular format.<br>
-	 * E.g. source data of tree format will be transposed into a tree table with the parent path stored
-	 * within an additional column for each node. This allows access to the node with the same methods
-	 * as implemented for tabular formated data.
+	 * Property that stores the container format for the instance of the
+	 * {@link DataContainer} as an enumeration of type {@link EContainerFormat}.
 	 */
-	private final Set<String> implicitHeaders = new HashSet<>();
+	private EContainerFormat containerFormat = EContainerFormat.TEXT;
 
 	/**
-	 * The non argument constructor get used to have an empty container instance without a connected
-	 * file, stream or result set and without knowing the container format. In this case all the fields
-	 * in the {@link org.opentdk.api.datastorage.DataContainer} class keep their default value.
-	 * The container gets initialized as <code>CSVDataContainer</code> that stores text formats as well.
+	 * The non argument constructor get used to have an empty container instance
+	 * without a connected file, stream or result set and without knowing the
+	 * container format. In this case all the fields keep their default value and
+	 * the container gets initialized as {@link TextDataContainer}.
 	 */
-	public DataContainer() {
-		adaptContainer();
+	public static DataContainer newContainer() {
+		return new DataContainer();
 	}
 
+	private DataContainer() {
+		instance = adaptContainer();
+	}
+	
 	/**
-	 * Gets used if only the orientation is known. Format TREE points to XML and TEXT gets used
-	 * otherwise.
+	 * Gets used if the exact type is known but without any present data. 
+	 * In this case no adaption process is necessary, because the format gets explicitly set.
 	 *
-	 * @param type {@link org.opentdk.api.datastorage.EHeader}
+	 * @param type {@link EHeader}
 	 */
-	public DataContainer(EHeader type) {
+	public static DataContainer newContainer(EContainerFormat type) {
+		return new DataContainer(type);
+	}
+
+	private DataContainer(EContainerFormat type) {
+		containerFormat = type;
 		switch (type) {
-		case COLUMN:
-			containerFormat = EContainerFormat.CSV;
+		case CSV:
+			instance = TabularContainer.newInstance();
 			break;
-		case ROW:
-			containerFormat = EContainerFormat.PROPERTIES;
+		case PROPERTIES:
+			instance = PropertiesDataContainer.newInstance();
 			break;
-		case TREE:
-			containerFormat = EContainerFormat.XML;
+		case RESULTSET:
+			instance = RSDataContainer.newInstance();
+			break;
+		case XML:
+			instance = XMLDataContainer.newInstance();
+			break;
+		case JSON:
+			instance = JSONDataContainer.newInstance();
+			break;
+		case YAML:
+			instance = YAMLDataContainer.newInstance();
 			break;
 		default:
-			containerFormat = EContainerFormat.TEXT;
-			break;
-		}
-		adaptContainer();
+			instance = TextDataContainer.newInstance();	
+		}		
 	}
 
 	/**
-	 * Constructor that is called when no input file exists and the container for the specific data
-	 * format also accepts {@link java.io.InputStream} for the data.<br>
-	 * e.g.: An application dynamically receives data by calling RestAPI Service Requests and the XML
-	 * responses will be passed to the {@link org.opentdk.api.dispatcher.BaseDispatcher} that creates an
+	 * Gets used to initialize from a source path string that gets committed to a
+	 * file instance.
+	 * 
+	 * @param sourcePath {@link #inputFile}
+	 * @return Data container instance depending on the file type
+	 */
+	public static DataContainer newContainer(String sourcePath) {
+		return new DataContainer(new File(sourcePath));
+	}
+
+	/**
+	 * Constructor that is called with the source file object to store data from.
+	 * 
+	 * @param sourceFile valid java.io.File object
+	 * @return Data container instance depending on the file type
+	 */
+	public static DataContainer newContainer(File sourceFile) {
+		return new DataContainer(sourceFile);
+	}
+
+	private DataContainer(File sourceFile) {
+		inputFile = sourceFile;
+		instance = adaptContainer();
+		try {
+			if(sourceFile.exists() && sourceFile.isFile() && Files.size(sourceFile.toPath()) > 0) {
+				instance.readData(sourceFile);
+			}
+		} catch (IOException e) {
+			MLogger.getInstance().log(Level.SEVERE, e);
+		}
+	}
+
+	public static DataContainer newContainer(InputStream inStream) {
+		return new DataContainer(inStream);
+	}
+
+	/**
+	 * Constructor that is called when no input file exists and the container for
+	 * the specific data format also accepts {@link java.io.InputStream} for the
+	 * data.<br>
+	 * e.g.: An application dynamically receives data by calling RestAPI Service
+	 * Requests and the XML responses will be passed to the
+	 * BaseDispatcher that creates an
 	 * {@link XMLDataContainer} for parsing the XML response.<br>
 	 * <br>
 	 *
@@ -169,140 +200,74 @@ public class DataContainer implements SpecificContainer {
 	 *
 	 * @param inStream Object of type {@link java.io.InputStream}
 	 */
-	public DataContainer(InputStream inStream) {
+	private DataContainer(InputStream inStream) {
 		inputStream = inStream;
-		adaptContainer();
+		instance = adaptContainer();
+		try {
+			instance.readData(inStream);
+		} catch (IOException e) {
+			MLogger.getInstance().log(Level.SEVERE, e);
+		}
 	}
 
 	/**
-	 * Constructor that is called, when importing data from a database request to the container. No
-	 * filter will be used and the column delimiter for the imported data is the semicolon.
+	 * Constructor that is called, when importing data from a database request to
+	 * the container. No filter will be used and the column delimiter for the
+	 * imported data is the semicolon.
 	 *
 	 * @param rs The result of the database request.
 	 */
-	public DataContainer(ResultSet rs) {
-		this(rs, null);
+	public static DataContainer newContainer(ResultSet rs) {
+		return new DataContainer(rs);
 	}
 
-	/**
-	 * Constructor that is called, when importing data from a database request to the container with the
-	 * possibility to filter the data before it gets imported. The column delimiter of the imported data
-	 * is the semicolon.
-	 *
-	 * @param rs   The result of the database request.
-	 * @param fltr A {@link org.opentdk.api.filter.Filter} object to define which data should be
-	 *             ignored. If it is null no filter gets used.
-	 */
-	public DataContainer(ResultSet rs, Filter fltr) {
+	private DataContainer(ResultSet rs) {
 		resultSet = rs;
-		filter = fltr;
-		adaptContainer();
-	}
-
-	/**
-	 * Constructor that is called with the source file to store data from.
-	 *
-	 * @param srcFile Full path and name of the source file, from which the data will be loaded into the
-	 *                <code>DataContainer</code>
-	 */
-	public DataContainer(File srcFile) {
-		this(srcFile, null);
-	}
-
-	/**
-	 * Constructor that is called with the source file to store data from and a filter to decide if part
-	 * of the data should be ignored.
-	 *
-	 * @param srcFile Full path and name of the source file, from which the data will be loaded into the
-	 *                <code>DataContainer</code>
-	 * @param fltr    The {@link #filter} object to decide which data should be ignored
-	 */
-	public DataContainer(File srcFile, Filter fltr) {
-		inputFile = srcFile;
-		filter = fltr;
-		adaptContainer();
-	}
-
-	/**
-	 * Constructor that is called when a DataContainer shall be copied. The copy holds only the columns
-	 * with the headers specified in headerIndices.
-	 *
-	 * @param dc            Original DataContainer from which the columns shall be copied
-	 * @param headerIndices Headers which shall be copied to the new DataContainer
-	 *
-	 */
-	public DataContainer(DataContainer dc, int[] headerIndices) {
-		if (dc.isTabular()) {
-			instance = dc.instance;
-			inputFile = dc.getInputFile();
-			containerFormat = dc.getContainerFormat();
-			filter = dc.getFilter();
-
-			tabInstance().setColumnDelimiter(dc.tabInstance().getColumnDelimiter());
-			tabInstance().setHeaderRowIndex(dc.tabInstance().getHeaderRowIndex());
-
-			String[] headerNames = new String[headerIndices.length];
-			for (int i = 0; i < headerIndices.length; i++) {
-				headerNames[i] = dc.tabInstance().getHeaderName(headerIndices[i]);
-			}
-			tabInstance().setHeaders(headerNames);
-			for (int i = 0; i < headerIndices.length; i++) {
-				tabInstance().setColumn(headerNames[i], dc.tabInstance().getColumn(headerNames[i]));
-			}
-		} else {
-			MLogger.getInstance().log(Level.WARNING, "Copy from other DataContainer only available for tabular formats");
+		instance = adaptContainer();
+		try {
+			rsInstance().readData(rs);
+		} catch (IOException e) {
+			MLogger.getInstance().log(Level.SEVERE, e);
 		}
 	}
 
 	/**
-	 * This method adapts the one {@link SpecificContainer} instance to a specific {@link DataContainer}
-	 * depending on the source file ending or existence of a stream. It calls {@link #readData(Filter)}
-	 * at the end if there is a source. In case of an empty container the read operation has to be
-	 * triggered separately.
+	 * This method adapts the one {@link SpecificContainer} instance to a specific
+	 * {@link DataContainer} depending on the source file ending or existence of a
+	 * stream. It calls {@link #readData(File)} at the end if there is a source.
+	 * In case of an empty container the read operation has to be triggered
+	 * separately.
 	 *
-	 * @throws IOException to handle I/O methods when the {@link #readData(Filter)} method failed
+	 * @throws IOException to handle I/O methods when the {@link #readData(File)}
+	 *                     method failed
 	 */
-	private void adaptContainer() {
-		detectDataFormat();
-		switch (containerFormat) {
+	private SpecificContainer adaptContainer() {
+		switch (detectDataFormat()) {
 		case CSV:
-			instance = new TabularContainer(this);
-			break;
+			return TabularContainer.newInstance();
 		case PROPERTIES:
-			instance = new PropertiesDataContainer(this);
-			break;
+			return PropertiesDataContainer.newInstance();
 		case RESULTSET:
-			instance = new RSDataContainer(this);
-			break;
+			return RSDataContainer.newInstance();
 		case XML:
-			instance = new XMLDataContainer(this);
-			break;
+			return XMLDataContainer.newInstance(); 
 		case JSON:
-			instance = new JSONDataContainer(this);
-			break;
+			return JSONDataContainer.newInstance();
 		case YAML:
-			instance = new YAMLDataContainer(this);
-			break;
+			return YAMLDataContainer.newInstance();
 		default:
-			instance = new TabularContainer(this);
-			return;
-		}
-		if ((inputFile != null && inputFile.exists()) || inputStream != null || resultSet != null) {
-			try {
-				instance.readData(filter);
-			} catch (IOException e) {
-				MLogger.getInstance().log(Level.SEVERE, e);
-			}
+			return TextDataContainer.newInstance();
 		}
 	}
 
 	/**
-	 * Analyzes the file extension and/or structure of the data content and an enumeration of type
-	 * {@link EContainerFormat} which defines the type of DataContaner that needs to be adapted.
+	 * Analyzes the file extension and/or structure of the data content and an
+	 * enumeration of type {@link EContainerFormat} which defines the type of
+	 * container that needs to be adapted.
 	 *
 	 * @return enumeration of type {@link EContainerFormat}
 	 */
-	private void detectDataFormat() {
+	private EContainerFormat detectDataFormat() {
 		if (resultSet != null) {
 			containerFormat = EContainerFormat.RESULTSET;
 		} else if (inputStream != null) {
@@ -358,54 +323,66 @@ public class DataContainer implements SpecificContainer {
 				}
 			}
 		}
-	}
-
-	/**
-	 * Gets the value of the property {@link #containerFormat} which keeps information about the format
-	 * of the source that is associated to the DataContainer.
-	 *
-	 * @return ENUM element of type {@link EContainerFormat}
-	 */
-	public EContainerFormat getContainerFormat() {
 		return containerFormat;
 	}
 
-	/**
-	 * @return the {@link #instance} if it was initialized as tabular format
-	 * @throws NullPointerException is there is no tabular format available
-	 */
 	public TabularContainer tabInstance() {
 		if (instance instanceof PropertiesDataContainer) {
 			return (PropertiesDataContainer) instance;
 		} else if (instance instanceof RSDataContainer) {
 			return (RSDataContainer) instance;
 		} else if (instance instanceof TabularContainer) {
-			return (TabularContainer) instance; // default CSV (has to be checked at the end)
+			return (TabularContainer) instance;
 		} else {
 			throw new NullPointerException("TabularContainer not intialized");
 		}
 	}
-
-	/**
-	 * @return the {@link #instance} if it was initialized as tree format
-	 * @throws NullPointerException is there is no tree format available
-	 */
-	public TreeContainer treeInstance() {
+	
+	public RSDataContainer rsInstance() {
+		if (instance instanceof RSDataContainer) {
+			return (RSDataContainer) instance;
+		} else {
+			throw new NullPointerException("RSDataContainer not intialized");
+		}
+	} 
+	
+	public XMLDataContainer xmlInstance() {
 		if (instance instanceof XMLDataContainer) {
 			return (XMLDataContainer) instance;
-		} else if (instance instanceof JSONDataContainer) {
+		} else {
+			throw new NullPointerException("XMLContainer not intialized");
+		}
+	} 
+	
+	public JSONDataContainer jsonInstance() {
+		if (instance instanceof JSONDataContainer) {
 			return (JSONDataContainer) instance;
-		} else if (instance instanceof YAMLDataContainer) {
+		} else {
+			throw new NullPointerException("XMLContainer not intialized");
+		}
+	} 
+	
+	public YAMLDataContainer yamlInstance() {
+		if (instance instanceof YAMLDataContainer) {
 			return (YAMLDataContainer) instance;
 		} else {
-			throw new NullPointerException("TreeContainer not intialized");
+			throw new NullPointerException("XMLContainer not intialized");
+		}
+	} 
+	
+	public TextDataContainer textInstance() {
+		if (instance instanceof TextDataContainer) {
+			return (TextDataContainer) instance;
+		} else {
+			throw new NullPointerException("TextContainer not intialized");
 		}
 	}
 
 	/**
-	 * Checks if the {@link #instance} was initialized as one of the tabular format e.g. CSV or
-	 * RESULSET. This can be done before calling {@link #tabInstance()} to be sure that a tabular format
-	 * is available. CSV format is default for TabularContainer and gets checked at the end.
+	 * Checks if the {@link #instance} was initialized as one of the tabular format
+	 * e.g. CSV or RESULSET. This can be done before calling {@link #tabInstance()}
+	 * to be sure that a tabular format is available. CSV format is default for
+	 * TabularContainer and gets checked at the end.
 	 *
 	 * @return true: is tree format, false otherwise
 	 */
@@ -422,9 +399,8 @@ public class DataContainer implements SpecificContainer {
 	}
 
 	/**
-	 * Checks if the {@link #instance} was initialized as one of the tree format e.g. XML, JSON or YAML.
-	 * This can be done before calling {@link #treeInstance()} to be sure that a tree format is
-	 * available.
+	 * Checks if the {@link #instance} was initialized as one of the tree formats
+	 * e.g. XML, JSON or YAML. 
 	 *
 	 * @return true: is tree format, false otherwise
 	 */
@@ -438,6 +414,56 @@ public class DataContainer implements SpecificContainer {
 			ret = true;
 		}
 		return ret;
+	}
+	
+	public boolean isText() {
+		boolean ret = false;
+		if (instance instanceof TextDataContainer) {
+			ret = true;
+		} 
+		return ret;
+	}
+	
+	public boolean isXML() {
+		boolean ret = false;
+		if (instance instanceof XMLDataContainer) {
+			ret = true;
+		} 
+		return ret;
+	}
+	
+	public boolean isJSON() {
+		boolean ret = false;
+		if (instance instanceof JSONDataContainer) {
+			ret = true;
+		} 
+		return ret;
+	}
+	
+	public boolean isYAML() {
+		boolean ret = false;
+		if (instance instanceof YAMLDataContainer) {
+			ret = true;
+		} 
+		return ret;
+	}
+	
+	private void checkInstance() {
+		if(!isTree() && !isTabular()) {
+			throw new RuntimeException("DataContainer#instance not initialized");
+		} 
+	}
+	
+	public void createFile() throws IOException {
+		if (inputFile != null && StringUtils.isNotBlank(inputFile.getPath())) {
+			if(instance instanceof XMLDataContainer) {
+				xmlInstance().readData(inputFile);
+			} else {
+				FileUtil.createFile(inputFile, true);
+			}
+		} else {
+			MLogger.getInstance().log(Level.WARNING, "DataContainer.createFile() was called, but inputFile is null.");
+		}
 	}
 
 	/**
@@ -455,37 +481,6 @@ public class DataContainer implements SpecificContainer {
 	}
 
 	/**
-	 * Returns the filter rules which belong to an implicit header column. This allows to use same
-	 * column and row based getter and setter methods for tree formatted sources like XML, as they are
-	 * used for tabular formatted sources. e.g. the {@link #getImplFilterRules(Filter)} method is used
-	 * to limit the data records for the search to specified xPath(s).
-	 *
-	 * @param fltr Filter object with the complete filter rules for a data search
-	 * @return List object with all FilterRules that belong to implicit columns
-	 */
-	List<FilterRule> getImplFilterRules(Filter fltr) {
-		List<FilterRule> frList = new ArrayList<FilterRule>();
-		for (FilterRule fr : fltr.getFilterRules()) {
-			if (implicitHeaders.contains(fr.getHeaderName())) {
-				frList.add(fr);
-			}
-		}
-		return frList;
-	}
-
-	/**
-	 * Sets the name of columns that will be populated with processed data by implemented logic of the
-	 * individual DataContainer. e.g. The implicitHeaders will be used by the {@link XMLDataContainer}
-	 * to add the column XPath, where the complete path of each tag will be inserted. This allows to
-	 * transpose data from tree format into tabular format.
-	 *
-	 * @return object of type java.util.set with column names
-	 */
-	public Set<String> getImplicitHeaders() {
-		return implicitHeaders;
-	}
-
-	/**
 	 * @return {@link #inputStream}
 	 */
 	public InputStream getInputStream() {
@@ -493,29 +488,14 @@ public class DataContainer implements SpecificContainer {
 	}
 
 	/**
-	 * Returns the {@link #resultSet} property with SQL results of type {@link java.sql.ResultSet}. This
-	 * property is used to store the data of {@link RSDataContainer}.
+	 * Returns the {@link #resultSet} property with SQL results of type
+	 * {@link java.sql.ResultSet}. This property is used to store the data of
+	 * {@link RSDataContainer}.
 	 *
 	 * @return {@link #resultSet}
 	 */
 	public ResultSet getResultSet() {
 		return resultSet;
-	}
-
-	/**
-	 * @return {@link #rootNode}
-	 */
-	public String getRootNode() {
-		return rootNode;
-	}
-
-	/**
-	 * Sets the format information of the source used for this instance of DataContainer.
-	 *
-	 * @param cFormat ENUM value of type EContainerFormat
-	 */
-	public void setContainerFormat(EContainerFormat cFormat) {
-		containerFormat = cFormat;
 	}
 
 	/**
@@ -533,10 +513,11 @@ public class DataContainer implements SpecificContainer {
 	}
 
 	/**
-	 * Sets content of type {@link java.io.InputStream} to the {@link #inputStream} property that is
-	 * used by DataContainers that have document type data connected like {@link XMLDataContainer} using
-	 * {@link org.w3c.dom.Document} for XML and HTML formats. The {@link #inputStream} property can be
-	 * used in case that the data source is not a file.
+	 * Sets content of type {@link java.io.InputStream} to the {@link #inputStream}
+	 * property that is used by DataContainers that have document type data
+	 * connected like {@link XMLDataContainer} using {@link org.w3c.dom.Document}
+	 * for XML and HTML formats. The {@link #inputStream} property can be used in
+	 * case that the data source is not a file.
 	 *
 	 * @param inStream {@link #inputStream}
 	 */
@@ -545,21 +526,25 @@ public class DataContainer implements SpecificContainer {
 	}
 
 	/**
-	 * Assigns an object of type {@link java.sql.ResultSet} with SQL results to the property
-	 * {@link #resultSet}. This property is used by the {@link RSDataContainer}
+	 * Assigns an object of type {@link java.sql.ResultSet} with SQL results to the
+	 * property {@link #resultSet}. This property is used by the {@link RSDataContainer}.
 	 *
-	 * @param rs Object of type {@link java.sql.ResultSet}
+	 * @param rs {@link #resultSet}
 	 */
 	public void setResultSet(ResultSet rs) {
 		resultSet = rs;
 	}
-
+	
 	/**
-	 * @param rn {@link #rootNode}
+	 * @return {@link #containerFormat}
 	 */
-	public void setRootNode(String rn) {
-		rootNode = rn;
+	public EContainerFormat getContainerFormat() {
+		return containerFormat;
 	}
+	
+	// --------------------------------------------------------------------
+	// Inherited methods that just link to the instance
+	// --------------------------------------------------------------------
 
 	@Override
 	public String asString() {
@@ -567,11 +552,8 @@ public class DataContainer implements SpecificContainer {
 	}
 
 	@Override
-	public void createFile() throws IOException {
-		if (StringUtils.isNotBlank(inputFile.getPath())) {
-			instance.createFile();
-		}
-
+	public String asString(EContainerFormat format) {
+		return instance.asString(format);
 	}
 
 	@Override
@@ -580,13 +562,23 @@ public class DataContainer implements SpecificContainer {
 	}
 
 	@Override
-	public void readData(Filter filter) throws IOException {
-		instance.readData(filter);
+	public void readData(InputStream stream) throws IOException {
+		instance.readData(stream);
+	}
+	
+	@Override
+	public void readData(File sourceFile, Filter filter) throws IOException {
+		instance.readData(sourceFile, filter);
 	}
 
 	@Override
-	public void writeData(String srcFile) throws IOException {
-		instance.writeData(srcFile);
+	public void readData(InputStream stream, Filter filter) throws IOException {
+		instance.readData(stream, filter);	
+	}
+
+	@Override
+	public void writeData(File outputFile) throws IOException {
+		instance.writeData(outputFile);
 	}
 
 	// --------------------------------------------------------------------
@@ -594,19 +586,33 @@ public class DataContainer implements SpecificContainer {
 	// --------------------------------------------------------------------
 
 	public void add(String name, String value, Filter filter) {
+		checkInstance();
 		if (isTabular()) {
 			tabInstance().addColumn(name);
 		} else if (isTree()) {
-			treeInstance().add(name, value, filter);
-		}
+			if(isXML()) {
+				xmlInstance().add(name, value, filter);
+			} else if (isJSON()) {
+				jsonInstance().add(name, value, filter);
+			} else if(isYAML()) {
+				yamlInstance().add(name, value, filter);
+			}
+		} 
 	}
 
 	public void delete(String params, String attrName, String attrValue, Filter fltr) {
+		checkInstance();
 		if (isTabular()) {
 			tabInstance().deleteValue(params);
 		} else if (isTree()) {
-			treeInstance().delete(params, attrName, attrValue, fltr);
-		}
+			if(isXML()) {
+				xmlInstance().delete(params, attrName, attrValue, fltr);
+			} else if (isJSON()) {
+				jsonInstance().delete(params, fltr);
+			} else if(isYAML()) {
+				yamlInstance().delete(params, fltr);
+			}
+		} 
 	}
 
 	public String[] get(String parameterName) {
@@ -615,11 +621,18 @@ public class DataContainer implements SpecificContainer {
 
 	public String[] get(String parameterName, Filter fltr) {
 		String[] ret = new String[0];
+		checkInstance();
 		if (isTabular()) {
 			ret = tabInstance().getColumn(parameterName, fltr);
 		} else if (isTree()) {
-			ret = treeInstance().get(parameterName, fltr);
-			for(int i=0; i<ret.length; i++){
+			if(isXML()) {
+				ret = xmlInstance().get(parameterName, fltr);
+			} else if (isJSON()) {
+				ret = jsonInstance().get(parameterName, fltr);
+			} else if(isYAML()) {
+				ret = yamlInstance().get(parameterName, fltr);
+			}		
+			for (int i = 0; i < ret.length; i++) {
 				ret[i] = ret[i].trim();
 			}
 		}
@@ -635,10 +648,18 @@ public class DataContainer implements SpecificContainer {
 	}
 
 	public void set(String parameterName, String value, Filter fltr, boolean allOccurences) {
+		checkInstance();
 		if (isTabular()) {
 			tabInstance().setValues(parameterName, value, fltr, allOccurences);
 		} else if (isTree()) {
-			treeInstance().set(parameterName, value, fltr, allOccurences);
+			if(isXML()) {
+				xmlInstance().set(parameterName, value, fltr, allOccurences);
+			} else if (isJSON()) {
+				jsonInstance().set(parameterName, value, fltr);
+			} else if(isYAML()) {
+				yamlInstance().set(parameterName, value, fltr);
+			}	
 		}
 	}
+
 }

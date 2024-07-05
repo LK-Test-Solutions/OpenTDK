@@ -27,16 +27,19 @@
  */
 package org.opentdk.api.datastorage;
 
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-
-import org.apache.commons.lang3.StringUtils;
+import org.opentdk.api.io.XMLEditor;
 import org.opentdk.api.filter.Filter;
 import org.opentdk.api.filter.FilterRule;
-import org.opentdk.api.io.FileUtil;
-import org.opentdk.api.io.XMLEditor;
+import org.apache.commons.lang3.StringUtils;
+import org.opentdk.api.logger.MLogger;
 import org.w3c.dom.Element;
+
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.nio.file.Files;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * SubClass of {@link DataContainer} which provides all methods for reading and writing from or to
@@ -53,45 +56,103 @@ import org.w3c.dom.Element;
  * @author LK Test Solutions
  * @see org.opentdk.api.datastorage.DataContainer
  */
-public class XMLDataContainer implements TreeContainer {
+public class XMLDataContainer implements SpecificContainer {
 	/**
 	 * An instance of the class that handles XML files.
 	 */
 	private XMLEditor xEdit;
-	/**
-	 * An instance of the DataContainer that should be filled with the data from the connected source
-	 * file. -> Task of the specific data containers.
-	 */
-	private final DataContainer dc;
+	
+	private String rootNode; 
+		
+	public static XMLDataContainer newInstance() {		
+		return new XMLDataContainer();
+	}	
 
-	/**
-	 * This constructor is used to pass the DataContainer when the specific XML Container will be adapted
-	 * from the base DataContainer class.
-	 *
-	 * @param dataContainer the <code>DataContainer</code> instance to use for read and write methods of
-	 *              		this specific data container
-	 */
-	public XMLDataContainer(DataContainer dataContainer) {
-		dc = dataContainer;
-		dc.getImplicitHeaders().add("XPath");
+	private XMLDataContainer() {
+		initXmlEditor(null);
+	}
+	
+	public void initXmlEditor(String root) {
+		xEdit = new XMLEditor(root);
+		rootNode = xEdit.getRootNodeName();
 	}
 
 	@Override
+	public String asString() {
+		String ret = "";
+		if (xEdit != null) {
+			ret = xEdit.asString();
+		}
+		return ret;
+	}
+
+	/**
+	 * See {@link #getContent(String, boolean)}
+	 */
+	public String getContent(String expr) {
+		return getContent(expr, false);
+	}
+
+	/**
+	 * @param expr XPath to the node that should be returned as string
+	 * @param subContentOnly ignore the node that the expr refers to and only get the child content
+	 * @return the whole content (with children) of the given XML node as string.
+	 */
+	public String getContent(String expr, boolean subContentOnly) {
+		String ret = "";
+		if (xEdit != null) {
+			Element node = xEdit.getElement(expr);
+			if(subContentOnly) {
+				// Children only requires a loop to get their content
+				StringBuilder sb = new StringBuilder();
+				List<Element> children = xEdit.getChildren(node);
+				for(Element child : children) {
+					sb.append(xEdit.asString(child, true));
+				}
+				ret = sb.toString();
+			} else {
+				// Just get the node and its children as string
+				ret = xEdit.asString(node, true);
+			}
+		}
+		return ret;
+	}
+	
+	@Override
+	public void readData(File sourceFile) throws IOException {
+		if(sourceFile.exists() && sourceFile.isFile() && Files.size(sourceFile.toPath()) > 0) {
+			xEdit = new XMLEditor(sourceFile); 	
+			rootNode = xEdit.getRootNodeName();
+		}
+	}
+
+	@Override
+	public void readData(InputStream stream) throws IOException {
+		xEdit = new XMLEditor(stream);
+		rootNode = xEdit.getRootNodeName();
+	}
+
+	@Override
+	public void writeData(File outputFile) {
+		xEdit.save(outputFile);
+	}
+	
+	public String getRootNode() {
+		return rootNode;
+	}
+
 	public void add(String name, String value) {
 		add(name, value, new Filter());
 	}
 
-	@Override
 	public void add(String name, String value, Filter filter) {
 		add(name, "", value, filter);
 	}
 
-	@Override
 	public void add(String name, String attr, String value, Filter filter) {
 		add(name, attr, "", value, filter);
 	}
 
-	@Override
 	public void add(String name, String attr, String oldValue, String value, Filter filter) {
 		for (FilterRule fltrRule : filter.getFilterRules()) {
 			if (fltrRule.getHeaderName().equalsIgnoreCase("XPath")) {
@@ -115,35 +176,14 @@ public class XMLDataContainer implements TreeContainer {
 		}
 	}
 
-	@Override
-	public String asString() {
-		String ret = "";
-		if (xEdit != null) {
-			ret = xEdit.asString();
-		}
-		return ret;
-	}
-
-	@Override
-	public void createFile() throws IOException {
-		StringBuilder sb = new StringBuilder();
-		sb.append("<").append(dc.getRootNode()).append("/>");
-		FileUtil.writeOutputFile(sb.toString(), dc.getInputFile().getPath());
-		xEdit = new XMLEditor(dc.getInputFile());
-		xEdit.save();
-	}
-
-	@Override
 	public void delete(String name, String value) {
 		delete(name, value, new Filter());
 	}
 
-	@Override
 	public void delete(String name, String value, Filter filter) {
 		delete(name, value, "", filter);
 	}
 
-	@Override
 	public void delete(String headerName, String attributeName, String attributeValue, Filter filter) {
 		for (FilterRule fltrRule : filter.getFilterRules()) {
 			if (fltrRule.getHeaderName().equalsIgnoreCase("XPath")) {
@@ -160,7 +200,6 @@ public class XMLDataContainer implements TreeContainer {
 	 * @param tagName Name of the tag(s) to search for
 	 * @return String-Array with the text-content of all found tags
 	 */
-	@Override
 	public String[] get(String tagName) {
 		return get(tagName, new Filter());
 	}
@@ -179,14 +218,16 @@ public class XMLDataContainer implements TreeContainer {
 	 * @param filter Filter condition for more precise localization of the element within the data structure
 	 * @return String array with the text-content of all found tags
 	 */
-	@Override
 	public String[] get(String tagName, Filter filter) {
 		return (String[]) get(tagName, filter, "values");
 	}
 
-	@Override
-	public Object get(String tagName, String attributName, String attributValue){
+	public Element get(String tagName, String attributName, String attributValue){
 		return xEdit.getElement(tagName, attributName, attributValue);
+	}
+
+	public Element getRootElement(){
+		return xEdit.getRoot();
 	}
 
 	/**
@@ -196,25 +237,24 @@ public class XMLDataContainer implements TreeContainer {
 	 * formats (table, tree etc.).
 	 * 
 	 * @param headerName The name of the tag that will be searched within an XML document.
-	 * @param fltr       Filter rules that will be applied as additional search criteria for the
+	 * @param filter       Filter rules that will be applied as additional search criteria for the
 	 *                   returning tags.
 	 * @param returnType values = String Array with all values of the matching tags; elements = Element
 	 *                   Array with all matching tag objects
 	 * @return Array of the type, specified by returnType argument
 	 */
-	@Override
-	public Object[] get(String headerName, Filter fltr, String returnType) {
-		List<FilterRule> implFilterRules = dc.getImplFilterRules(fltr);
+	public Object[] get(String headerName, Filter filter, String returnType) {
+
 		List<Element> filteredElements = new ArrayList<>();
 		List<String> filteredValues = new ArrayList<>();
 
 		/*
 		 * Filter all tags and values that match an implicit XPath filter rule.
 		 */
-		if (implFilterRules.size() > 0) {
-			for (FilterRule frImpl : implFilterRules) {
-				if (frImpl.getHeaderName().equalsIgnoreCase("XPath")) {
-					for (Element tagElement : xEdit.getElementsListByXPath(frImpl.getValue())) {
+		if (filter.getFilterRules().size() > 0) {
+			for (FilterRule rule : filter.getFilterRules()) {
+				if (rule.getHeaderName().equalsIgnoreCase("XPath")) {
+					for (Element tagElement : xEdit.getElementsListByXPath(rule.getValue())) {
 						for (Element childE : xEdit.getChildren(tagElement)) {
 							if (childE.getTagName().equals(headerName)) {
 								filteredElements.add(childE);
@@ -235,12 +275,12 @@ public class XMLDataContainer implements TreeContainer {
 			}
 		}
 		/*
-		 * Finally remove all tags that do not apply to any other filter rule defined by the fltr argument.
+		 * Finally remove all tags that do not apply to any other filter rule defined by the filter argument.
 		 */
 		List<Element> retElements = new ArrayList<>(filteredElements);
 		List<String> retValues = new ArrayList<>(filteredValues);
-		for (FilterRule fr : fltr.getFilterRules()) {
-			if (dc.getImplFilterRules(fltr).contains(fr) == false) {
+		for (FilterRule fr : filter.getFilterRules()) {
+			if (!fr.getHeaderName().equalsIgnoreCase("XPath")) {
 				for (Element fltrE : filteredElements) {
 					if (fr.isValidValue(fltrE.getTextContent(), fr.getValue()) == false) {
 						retValues.remove(fltrE.getTextContent());
@@ -274,8 +314,7 @@ public class XMLDataContainer implements TreeContainer {
 	 * @param expr     Name or full XPath of XML tags
 	 * @param attrName Name of the XML tags attribute from which the values will be returned
 	 */
-	@Override
-	public String[] get(String expr, String attrName) throws NullPointerException{
+	public String[] get(String expr, String attrName) {
 		List<String> lst = new ArrayList<String>();
 		// leading "/" indicates a tag name with full xPath
 		if (expr.startsWith("/")) {
@@ -303,59 +342,29 @@ public class XMLDataContainer implements TreeContainer {
 		}
 		return lst.toArray(new String[lst.size()]);
 	}
-
-	@Override
-	public Object getRootElement(){
-		return xEdit.getRoot();
-	}
-
-	/**
-	 * This method is used to load data from an XML-File to the data container. As the structure of a
-	 * XML is fundamentally different from the data container instance, only references of the values
-	 * are stored in the container as "X-Paths". Every XML-Tag has its own column in the container. The
-	 * references alone are useless, they need to be read out by <code>getValue</code>.
-	 *
-	 * @param filter Has no effect here.
-	 * @throws IOException
-	 */
-	@Override
-	public void readData(Filter filter) throws IOException {
-		if (dc.getInputFile().exists()) {
-			xEdit = new XMLEditor(dc.getInputFile());
-			dc.setRootNode(xEdit.getRootNodeName());
-		} else if (dc.getInputStream() != null) {
-			xEdit = new XMLEditor(dc.getInputStream());
-			dc.setRootNode(xEdit.getRootNodeName());
-		} else {
-			xEdit = new XMLEditor(dc.getRootNode());
-		}
-	}
 	
-	@Override
 	public void set(String name, String value) {
-		set(name, value, new Filter());
+		set(name, value, new Filter(), false);
 	}
 
-	@Override
-	public void set(String name, String value, Filter filter) {
-		set(name, value, filter, false);
-	}
-
-	@Override
-	public void set(String tagName, String tagValue, Filter filter, boolean allOccurences) {
+	public void set(String tagName, String tagValue, Filter filter, boolean allOccurrences) {
+		// Creates the missing nodes if not present
 		for (FilterRule fltrRule : filter.getFilterRules()) {
 			if (fltrRule.getHeaderName().equalsIgnoreCase("XPath")) {
-					xEdit.checkXPath(fltrRule.getValue() + "/" + tagName, true); // Creates the hierarchy if not present
-					Element[] elements = (Element[]) get(tagName, filter, "elements");								
-					for (int i = 0; i < elements.length; i++) {
-						xEdit.setElementValue(elements[i], tagValue);
-					}
+				xEdit.checkXPath(fltrRule.getValue() + "/" + tagName, true); 
+				break;
+			}
+		}
+
+		Element[] elements = (Element[]) get(tagName, filter, "elements");								
+		for (int i = 0; i < elements.length; i++) {
+			xEdit.setElementValue(elements[i], tagValue);
+			if(!allOccurrences) {
 				break;
 			}
 		}
 	}
 	
-	@Override
 	public void set(String tagName, String attributeName, String oldAttributeValue, String attributeValue, Filter filter) {
 		for (FilterRule fltrRule : filter.getFilterRules()) {
 			if (fltrRule.getHeaderName().equalsIgnoreCase("XPath")) {
@@ -372,10 +381,5 @@ public class XMLDataContainer implements TreeContainer {
 				break;
 			}
 		}
-	}
-
-	@Override
-	public void writeData(String srcFile) {
-		xEdit.save(srcFile);
 	}
 }

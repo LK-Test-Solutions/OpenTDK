@@ -1,24 +1,53 @@
+/*
+ * BSD 2-Clause License
+ *
+ * Copyright (c) 2022, LK Test Solutions GmbH
+ * All rights reserved.
+ *
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions are met:
+ *
+ * 1. Redistributions of source code must retain the above copyright notice, this
+ *    list of conditions and the following disclaimer.
+ *
+ * 2. Redistributions in binary form must reproduce the above copyright notice,
+ *    this list of conditions and the following disclaimer in the documentation
+ *    and/or other materials provided with the distribution.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+ * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+ * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+ * DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE
+ * FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+ * DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
+ * SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
+ * CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
+ * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+ * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ */
 package org.opentdk.api.datastorage;
 
-import java.io.File;
-import java.io.IOException;
-import java.util.*;
-import java.util.logging.Level;
-import java.util.stream.Collectors;
-
-import org.apache.commons.lang3.StringUtils;
 import org.opentdk.api.filter.Filter;
 import org.opentdk.api.filter.FilterRule;
 import org.opentdk.api.io.FileUtil;
 import org.opentdk.api.io.XFileWriter;
 import org.opentdk.api.logger.MLogger;
 import org.opentdk.api.util.StringUtil;
+import org.apache.commons.lang3.StringUtils;
+import org.json.JSONArray;
+import org.json.JSONObject;
+
+import java.io.*;
+import java.util.*;
+import java.util.logging.Level;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class TabularContainer implements SpecificContainer {
 
 	/**
 	 * The character(s) that define the delimiter of columns within tabular files. This delimiter is
-	 * used by the {@link DataContainer#readData()} methods to split the rows of the source file into a
+	 * used by the {@link SpecificContainer#readData(File)} methods to split the rows of the source file into a
 	 * String Array and by the {@link TabularContainer#exportContainer(String)} methods to write the
 	 * elements of the {@link #values} ArrayList into the target file.
 	 */
@@ -58,11 +87,11 @@ public class TabularContainer implements SpecificContainer {
 	 * ArrayList. In this case the adapted DataContainer class needs to implement the logic how to store
 	 * the data at runtime e.g. {@link org.w3c.dom.Document} for HTML and XML files.
 	 */
-	private final ArrayList<String[]> values = new ArrayList<String[]>();
+	private final ArrayList<String[]> values = new ArrayList<>();
 
 	/**
 	 * This HashMap is used to define fields and values that will be appended to each
-	 * record added to the {@link DataContainer} by the {@link DataContainer#readData()},
+	 * record added to the {@link DataContainer} by the {@link SpecificContainer#readData(File)},
 	 * {@link TabularContainer#addRow()} and the {@link TabularContainer#appendData(String)} methods.<br>
 	 * E.g. add the name of the source file to each record, when putting the content of multiple files
 	 * into one instance of the {@link DataContainer}.
@@ -76,24 +105,262 @@ public class TabularContainer implements SpecificContainer {
 	 * dc.readData("./data/Attendees_FirstAid_Course_Q1-2021.csv");
 	 * </pre>
 	 */
-	private final HashMap<String, String> metaData = new HashMap<String, String>();
+	private final HashMap<String, String> metaData = new HashMap<>();
+	
+	private EHeader headerOrientation = EHeader.COLUMN;
 
-	/**
-	 * An instance of the DataContainer that should be filled with the data from the connected source
-	 * file. Task of the specific data containers.
-	 */
-	protected final DataContainer dc;
-
-	/**
-	 * Construct a new specific <code>DataContainer</code> for CSV files.
-	 *
-	 * @param dCont the <code>DataContainer</code> instance to use it in the read and write methods of
-	 *              this specific data container
-	 */
-	TabularContainer(DataContainer dCont) {
-		dc = dCont;
+	public static TabularContainer newInstance() {
+		return new TabularContainer();
+	}
+	
+	protected TabularContainer() {
+		super();
+	}
+	
+	// INHERTIED METHODS
+	
+	@Override
+	public String asString() {
+		return getValuesAsString();
 	}
 
+	@Override
+	public String asString(EContainerFormat format) {
+		return asString(format, 0, false);
+	}
+
+	public String asString(EContainerFormat format, int depth) {
+		return asString(format, depth, false);
+	}
+
+	public String asString(EContainerFormat format, int depth, boolean skipParent) {
+		switch (format) {
+			case CSV:
+				MLogger.getInstance().log(Level.INFO, "Format already is CSV. Call asString instead.", getClass().getSimpleName(), "asString(format)");
+				return asString();
+			case JSON:
+				if(skipParent) {
+					StringBuilder ret = new StringBuilder();
+					ArrayList<String> jsonObjectList = new ArrayList<>();
+					for (String[] row : values) {
+						JSONObject rowObject = new JSONObject();
+						for (int i = 0; i < row.length; i++) {
+							rowObject.put(getHeaderName(i), row[i]);
+						}
+						jsonObjectList.add(rowObject.toString(depth));
+					}
+					int rowIndex = 0;
+					for (String obj : jsonObjectList) {
+						ret.append(obj);
+						if(rowIndex < jsonObjectList.size() - 1) {
+							ret.append(",\n");
+						}
+						rowIndex++;
+					}
+					return ret.toString();
+				} else {
+					JSONArray jsonArray = new JSONArray();
+					for (String[] row : values) {
+						JSONObject rowObject = new JSONObject();
+						for (int i = 0; i < row.length; i++) {
+							rowObject.put(getHeaderName(i), row[i]);
+						}
+						jsonArray.put(rowObject);
+					}
+					return jsonArray.toString(depth);
+				}
+			default:
+				MLogger.getInstance().log(Level.WARNING, "Format not supported to export from CSV", getClass().getSimpleName(), "asString(format)");
+				return "";
+		}
+	}
+
+	/**
+	 * @return CSV content as JSONObject with leading and trailing '{}' and as array of objects, where one object has the column headers
+	 * as keys and the values of the row as values.
+	 */
+	public JSONObject toJson() {
+		JSONObject jsonObject = new JSONObject();
+		JSONArray jsonArray = new JSONArray();
+		for (String[] row : values) {
+			JSONObject rowObject = new JSONObject();
+			for (int i = 0; i < row.length; i++) {
+				rowObject.put(getHeaderName(i), row[i]);
+			}
+			jsonArray.put(rowObject);
+		}
+		jsonObject.put("data", jsonArray);
+		return jsonObject;
+	}
+
+	@Override
+	public void readData(File sourceFile) {
+		if (sourceFile != null && sourceFile.exists()) {
+			if (StringUtils.isNotBlank(sourceFile.getPath())) {
+				putFile(sourceFile.getPath(), getColumnDelimiter());
+			}
+		}	
+	}
+	
+	public void setOrientation(EHeader orientation) {
+		headerOrientation = orientation;
+	}
+	
+	private void putFile(String fileName, String columnDelimiter) {
+		switch (headerOrientation) {
+			case COLUMN:
+				putDatasetRows(fileName, columnDelimiter);
+				break;
+			case ROW:
+				putDatasetColumns(fileName, columnDelimiter);
+				break;
+			default:
+				MLogger.getInstance().log(Level.WARNING, "Source header '" + headerOrientation + "' is not valid for this method. Either EHeader.COLUMN or EHeader.ROW.", getClass().getSimpleName(), "putFile");
+				break;
+		}
+	}
+	
+	/**
+	 * This method reads data from a CSV file, converts it to a row orientation and puts it row by row
+	 * in the DataContainer's value property. Every column corresponds to one data set, so the header
+	 * orientation has to be row wise.
+	 *
+	 * @param fileName        The filename of the file to read from
+	 * @param columnDelimiter The column delimiter used to separate columns in the CSV file
+	 */
+	private void putDatasetColumns(String fileName, String columnDelimiter) {
+		List<List<String>> tmpRowsList = new ArrayList<>();
+		int rowIndex = -1;
+
+		List<String> rows = FileUtil.getRowsAsList(fileName);
+		for (String row : rows) {
+			rowIndex++;
+			String[] valArray = cleanValues(row.split(columnDelimiter));
+			int firstValueIndex = 0;
+			for (int i = 0; i < valArray.length; i++) {
+				// if withHeaders = true, add values in the first column to the headers HashMap,
+				// and start values at index 1
+				if (i == 0) {
+					if (!getHeaders().containsValue(rowIndex)) {
+						getHeaders().put(valArray[0], rowIndex);
+					}
+					firstValueIndex = 1;
+				}
+				// initialize one tmpRowsList for each value in valArray
+				while (tmpRowsList.size() < valArray.length - firstValueIndex) {
+					tmpRowsList.add(new ArrayList<>());
+				}
+				// write all values into temporary lists
+				if (i >= firstValueIndex) {
+					tmpRowsList.get(i - firstValueIndex).add(valArray[i]);
+				}
+			}
+		}
+
+		for (int i = 0; i < tmpRowsList.size(); i++) {
+			// get existing values from 'values' List Object
+			String[] currentValues = new String[0];
+			if ((!values.isEmpty()) && (rowIndex <= values.size() - 1)) {
+				currentValues = Arrays.copyOf(values.get(rowIndex), values.get(rowIndex).length);
+			}
+			String[] newValues = tmpRowsList.get(i).toArray(new String[tmpRowsList.get(i).size()]);
+			List<String> both = new ArrayList<>(currentValues.length + newValues.length);
+			Collections.addAll(both, currentValues);
+			Collections.addAll(both, newValues);
+			if (rowIndex <= values.size() - 1) {
+				setRow(rowIndex, both.toArray(new String[both.size()]));
+			} else {
+				addRow(both.toArray(new String[both.size()]));
+			}
+		}
+	}
+
+	/**
+	 * This method reads data from a CSV file and puts it row by row in the DataContainer's value
+	 * property. Every row corresponds to one data set, so the header orientation has to be column wise.
+	 *
+	 * @param fileName        The filename of the file to read from
+	 * @param columnDelimiter The column delimiter used to separate columns in the CSV file
+	 */
+	private void putDatasetRows(String fileName, String columnDelimiter) {
+		int rowIndex = -1;
+		int headerState = 0;
+		HashMap<Integer, Integer> sortMap = null;
+
+		List<String> rows = FileUtil.getRowsAsList(fileName);
+		for (String row : rows) {
+			rowIndex++;
+			String[] valArray = row.split(columnDelimiter, -1);
+
+//			String[] valArray = dc.cleanValues(row.split(columnDelimiter, -1));
+			if (rowIndex < getHeaderRowIndex()) {
+				MLogger.getInstance().log(Level.INFO, "Skipping row with index " + rowIndex + "! Just rows after the headerRowIndex will be loaded into DataContainer.", this.getClass().getSimpleName(), "putDataSetRows");
+			} else if (rowIndex == getHeaderRowIndex()) {
+				if (getHeaders().isEmpty()) {
+					setHeaders(valArray);
+				}
+				headerState = checkHeader(valArray);
+				if (headerState < 0) {
+					for (String h : valArray) {
+						if (!getHeaders().containsKey(h)) {
+							addColumn(h);
+						}
+					}
+				}
+				if (headerState != 0)
+					sortMap = sortHeadersIndexes(valArray);
+			} else {
+				// FIXME This condition fails when metadata columns get added to the data set
+				if (addMetaValues(valArray).length == (getHeaders().size() + metaData.size())) {
+					if (headerState == 0) {
+						addRow(valArray);
+					} else {
+						addRow(sortValues(sortMap, valArray));
+					}
+				} else {
+					MLogger.getInstance().log(Level.WARNING, "The number of values doesn't match to the number of headers! Values will not be added to DataContainer.", this.getClass().getSimpleName(), "putDataSetRows");
+				}
+			}
+		}
+	}
+
+	@Override
+	public void readData(InputStream stream) {
+		String content = null;
+		if (stream != null) {
+			InputStreamReader inputStreamReader = new InputStreamReader(stream);
+			Stream<String> streamOfString = new BufferedReader(inputStreamReader).lines();
+			content = streamOfString.collect(Collectors.joining());
+
+			streamOfString.close();
+			try {
+				inputStreamReader.close();
+			} catch (IOException e) {
+				MLogger.getInstance().log(Level.SEVERE, e);
+			}
+		}
+		if(content != null) {
+			// Store content in a temporary file to use the existing methods to add to the values object
+			String file = "~tmp/" + getClass().getSimpleName() + ".csv";
+			FileUtil.writeOutputFile(content, file);
+			putFile(file, columnDelimiter);
+		}
+	}
+
+	@Override
+	public void writeData(File outputFile) throws IOException {
+		List<String[]> writeable = new ArrayList<>();
+		writeable.add(getHeaderNamesIndexed());
+		for (String[] dataArr : getRowsList()) {
+			writeable.add(dataArr);
+		}
+		FileUtil.checkDir(outputFile.getParent(), true);
+		XFileWriter writer = new XFileWriter(outputFile);
+		writer.writeLines(writeable);
+		writer.close();		
+	}
+	
+	// ADD
 	
 	public void addColumn(String col) {
 		addColumn(col, false);
@@ -145,29 +412,31 @@ public class TabularContainer implements SpecificContainer {
 		return extendDataSet(inArray, "VALUE");
 	}
 
-	
+	/**
+	 * Adds a new row to the container with empty values. The size of the row is equal to the size of the header without
+	 * headers that were added as metadata.
+	 */
 	public void addRow() {
-		int rowSize = values.size() - getMetaData().size();
+		int rowSize = getHeaders().size() - getMetaData().size();
 		addRow(new String[rowSize]);
 	}
-
 	
 	public void addRow(int rowIndex, String[] rowValues) {
 		values.add(rowIndex, addMetaValues(rowValues));
 	}
-
 	
 	public void addRow(String[] row) {
-		if ((dc.getFilter() != null) && (!dc.getFilter().getFilterRules().isEmpty())) {
-			try {
-				if (!checkValuesFilter(row, dc.getFilter())) {
-					return;
-				}
-			} catch (NoSuchHeaderException e) {
-				MLogger.getInstance().log(Level.SEVERE, e);
-				throw new RuntimeException(e);
-			}
-		}
+		// TODO when readData with filter was called, the data is already filtered, what's the purpose here
+//		if ((getFilter() != null) && (!getFilter().getFilterRules().isEmpty())) {
+//			try {
+//				if (!checkValuesFilter(row, getFilter())) {
+//					return;
+//				}
+//			} catch (NoSuchHeaderException e) {
+//				MLogger.getInstance().log(Level.SEVERE, e);
+//				throw new RuntimeException(e);
+//			}
+//		}
 		values.add(addMetaValues(row));
 	}
 
@@ -178,6 +447,7 @@ public class TabularContainer implements SpecificContainer {
 		}
 	}
 
+	// APPEND
 	
 	public void appendData(String fileName) throws IOException {
 		if (getColumnDelimiter() == null) {
@@ -188,13 +458,12 @@ public class TabularContainer implements SpecificContainer {
 
 	
 	public void appendData(String fileName, String columnDelimiter) throws IOException {
-		dc.setInputFile(new File(fileName));
 		setColumnDelimiter(columnDelimiter);
-
-		if (dc.getFilter() == null) {
-			dc.setFilter(new Filter());
-		}
-		readData(dc.getFilter());
+		// TODO when readData with filter was called, the data is already filtered, what's the purpose here
+//		if (getFilter() == null) {
+//			setFilter(new Filter());
+//		}
+		readData(new File(fileName));
 	}
 
 	public void appendDataContainer(DataContainer dc) {
@@ -219,11 +488,7 @@ public class TabularContainer implements SpecificContainer {
 		}
 	}
 
-	
-	public String asString() {
-		return getValuesAsString();
-	}
-
+	// CHECK
 	
 	public int checkHeader(HashMap<String, Integer> compareHeaders) {
 		// transfer compareHeaders HashMap into String Array
@@ -280,7 +545,9 @@ public class TabularContainer implements SpecificContainer {
 	private boolean checkValuesFilter(String[] values, Filter fltr) throws NoSuchHeaderException {
 		boolean returnCode = false;
 		for (FilterRule rule : fltr.getFilterRules()) {
-			if ((!this.headerNames.containsKey(rule.getHeaderName())) && (!dc.getImplicitHeaders().contains(rule.getHeaderName()))) {
+//			if ((!this.headerNames.containsKey(rule.getHeaderName())) && (!getImplicitHeaders().contains(rule.getHeaderName()))) {
+
+			if (!headerNames.containsKey(rule.getHeaderName())) {
 				throw new NoSuchHeaderException("Header " + rule.getHeaderName() + " doesn't comply to DataContainer!");
 			}
 		}
@@ -306,6 +573,8 @@ public class TabularContainer implements SpecificContainer {
 		}
 		return returnCode;
 	}
+	
+	// PREPARE / CLEAN
 
 	/**
 	 * This method is used to prepare an Array of strings before inserting the values into the ArrayList
@@ -327,12 +596,6 @@ public class TabularContainer implements SpecificContainer {
 		return outArray;
 	}
 
-	
-	public void createFile() throws IOException {
-		FileUtil.createFile(dc.getInputFile(), true);
-	}
-
-	
 	public String[] createPreparedRow(){
 		return createPreparedRow(new String[0]);
 	}
@@ -350,17 +613,19 @@ public class TabularContainer implements SpecificContainer {
 		return preparedRow;
 	}
 
+	// DELETE
 	
 	public void deleteValue(String headerName) {
 		int headerIndex = getHeaderIndex(headerName);
 		values.get(0)[headerIndex] = null;
-		if (!dc.getInputFile().getPath().isEmpty()) {
-			try {
-				writeData(dc.getInputFile().getPath());
-			} catch (IOException e) {
-				MLogger.getInstance().log(Level.SEVERE, e);
-			}
-		}
+		// TODO why does deleteValue have to write into file instantly ?
+//		if (!dc.getInputFile().getPath().isEmpty()) {
+//			try {
+//				writeData(dc.getInputFile().getPath());
+//			} catch (IOException e) {
+//				MLogger.getInstance().log(Level.SEVERE, e);
+//			}
+//		}
 	}
 
 	
@@ -377,16 +642,18 @@ public class TabularContainer implements SpecificContainer {
 			for (int index : indexes) {
 				getValues().remove(index);
 			}
-			if (!dc.getInputFile().getName().isEmpty()) {
-				try {
-					writeData(dc.getInputFile().getPath());
-				} catch (IOException e) {
-					MLogger.getInstance().log(Level.SEVERE, e);
-				}
-			}
+			// TODO why does deleteRows have to write into file instantly ?
+//			if (!dc.getInputFile().getName().isEmpty()) {
+//				try {
+//					writeData(dc.getInputFile().getPath());
+//				} catch (IOException e) {
+//					MLogger.getInstance().log(Level.SEVERE, e);
+//				}
+//			}
 		}
 	}
 
+	// EXPORT
 	
 	public void exportContainer(String fileName) throws IOException {
 		exportContainer(fileName, ";");
@@ -397,7 +664,7 @@ public class TabularContainer implements SpecificContainer {
 		HashMap<Integer, String> hm = getHeadersIndexed();
 		XFileWriter writer = new XFileWriter(new File(fileName));
 		if (writer != null) {
-			switch (dc.getContainerFormat().getOrientation()) {
+			switch (headerOrientation) {
 				case COLUMN:
 					writer.writeLine(hm.values().toArray(new String[hm.values().size()]), columnDelimiter);
 					for (String[] row : getRowsList()) {
@@ -411,7 +678,7 @@ public class TabularContainer implements SpecificContainer {
 					}
 					break;
 				default:
-					MLogger.getInstance().log(Level.WARNING, "Header Type '" + dc.getContainerFormat().getOrientation().toString() + "' not supported by for export!", getClass().getSimpleName(), getClass().getName(), "exportContainer");
+					MLogger.getInstance().log(Level.WARNING, "Header Type '" + headerOrientation.toString() + "' not supported by for export!", getClass().getSimpleName(), getClass().getName(), "exportContainer");
 					return;
 			}
 			writer.close();
@@ -448,6 +715,7 @@ public class TabularContainer implements SpecificContainer {
 		return valList.toArray(new String[valList.size()]);
 	}
 
+	// GET
 	
 	public String[] getColumn(int index) {
 		return getColumn(getHeaderName(index), new int[0], new Filter());
@@ -634,7 +902,7 @@ public class TabularContainer implements SpecificContainer {
 	public String[] getRow(int rowIndex, String columnHeaders, Filter fltr) {
 		String[] colHeaders = null;
 		if (columnHeaders == null) {
-			colHeaders = new String[0];
+			colHeaders = new String[0]; // TODO why not using getHeaders() here to get all if no specific column is passed ?
 		} else {
 			colHeaders = columnHeaders.split(";");
 		}
@@ -870,146 +1138,12 @@ public class TabularContainer implements SpecificContainer {
 		values.set(rowIndex, valArr);
 	}
 
-	/**
-	 * This method reads data from a CSV file, converts it to a row orientation and puts it row by row
-	 * in the DataContainer's value property. Every column corresponds to one data set, so the header
-	 * orientation has to be row wise.
-	 *
-	 * @param fileName        The filename of the file to read from
-	 * @param columnDelimiter The column delimiter used to separate columns in the CSV file
-	 */
-	private void putDatasetColumns(String fileName, String columnDelimiter) {
-		List<List<String>> tmpRowsList = new ArrayList<>();
-		int rowIndex = -1;
-
-		List<String> rows = FileUtil.getRowsAsList(fileName);
-		for (String row : rows) {
-			rowIndex++;
-			String[] valArray = cleanValues(row.split(columnDelimiter));
-			int firstValueIndex = 0;
-			for (int i = 0; i < valArray.length; i++) {
-				// if withHeaders = true, add values in the first column to the headers HashMap,
-				// and start values at index 1
-				if (i == 0) {
-					if (!getHeaders().containsValue(rowIndex)) {
-						getHeaders().put(valArray[0], rowIndex);
-					}
-					firstValueIndex = 1;
-				}
-				// initialize one tmpRowsList for each value in valArray
-				while (tmpRowsList.size() < valArray.length - firstValueIndex) {
-					tmpRowsList.add(new ArrayList<>());
-				}
-				// write all values into temporary lists
-				if (i >= firstValueIndex) {
-					tmpRowsList.get(i - firstValueIndex).add(valArray[i]);
-				}
-			}
-		}
-
-		for (int i = 0; i < tmpRowsList.size(); i++) {
-			// get existing values from 'values' List Object
-			String[] currentValues = new String[0];
-			if ((!values.isEmpty()) && (rowIndex <= values.size() - 1)) {
-				currentValues = Arrays.copyOf(values.get(rowIndex), values.get(rowIndex).length);
-			}
-			String[] newValues = tmpRowsList.get(i).toArray(new String[tmpRowsList.get(i).size()]);
-			List<String> both = new ArrayList<>(currentValues.length + newValues.length);
-			Collections.addAll(both, currentValues);
-			Collections.addAll(both, newValues);
-			if (rowIndex <= values.size() - 1) {
-				setRow(rowIndex, both.toArray(new String[both.size()]));
-			} else {
-				addRow(both.toArray(new String[both.size()]));
-			}
-		}
-	}
-
-	/**
-	 * This method reads data from a CSV file and puts it row by row in the DataContainer's value
-	 * property. Every row corresponds to one data set, so the header orientation has to be column wise.
-	 *
-	 * @param fileName        The filename of the file to read from
-	 * @param columnDelimiter The column delimiter used to separate columns in the CSV file
-	 */
-	private void putDatasetRows(String fileName, String columnDelimiter) {
-		int rowIndex = -1;
-		int headerState = 0;
-		HashMap<Integer, Integer> sortMap = null;
-
-		List<String> rows = FileUtil.getRowsAsList(fileName);
-		for (String row : rows) {
-			rowIndex++;
-			String[] valArray = row.split(columnDelimiter, -1);
-
-//			String[] valArray = dc.cleanValues(row.split(columnDelimiter, -1));
-			if (rowIndex < getHeaderRowIndex()) {
-				MLogger.getInstance().log(Level.INFO, "Skipping row with index " + rowIndex + "! Just rows after the headerRowIndex will be loaded into DataContainer.", this.getClass().getSimpleName(), "putDataSetRows");
-			} else if (rowIndex == getHeaderRowIndex()) {
-				if (getHeaders().isEmpty()) {
-					setHeaders(valArray);
-				}
-				headerState = checkHeader(valArray);
-				if (headerState < 0) {
-					for (String h : valArray) {
-						if (!getHeaders().containsKey(h)) {
-							addColumn(h);
-						}
-					}
-				}
-				if (headerState != 0)
-					sortMap = sortHeadersIndexes(valArray);
-			} else {
-				// FIXME This condition fails when metadata columns get added to the dataset
-				if (addMetaValues(valArray).length == (getHeaders().size() + metaData.size())) {
-					if (headerState == 0) {
-						addRow(valArray);
-					} else {
-						addRow(sortValues(sortMap, valArray));
-					}
-				} else {
-					MLogger.getInstance().log(Level.WARNING, "The number of values doesn't match to the number of headers! Values will not be added to DataContainer.", this.getClass().getSimpleName(), "putDataSetRows");
-				}
-			}
-		}
-	}
-
-	/**
-	 * This method is used to put data from a CSV file to the DataContainer. Depending on the header
-	 * orientation, the correct underlying method will be called.
-	 *
-	 * @param fileName        The filename of the file to read from
-	 * @param columnDelimiter The column delimiter used to separate columns in the CSV file
-	 */
-	private void putFile(String fileName, String columnDelimiter) {
-		switch (dc.getContainerFormat().getOrientation()) {
-			case COLUMN:
-				putDatasetRows(fileName, columnDelimiter);
-				break;
-			case ROW:
-				putDatasetColumns(fileName, columnDelimiter);
-				break;
-			default:
-				MLogger.getInstance().log(Level.WARNING, "Source header '" + dc.getContainerFormat().getOrientation().toString() + "' is not valid for this method. Please set the property sourceHeader with a valid option of EHeader.COLUMN or EHeader.ROW.", this.getClass().getSimpleName(), "putFile");
-				break;
-		}
-	}
-
-	
 	public void putMetaData(String headerName, String value) {
 		metaData.put(headerName, value);
 	}
-
 	
-	public void readData(Filter filter) throws IOException {
-		if (dc.getInputFile() != null && dc.getInputFile().exists()) {
-			if (StringUtils.isNotBlank(dc.getInputFile().getPath())) {
-				putFile(dc.getInputFile().getPath(), getColumnDelimiter());
-			}
-		}
-	}
+	// SET
 
-	
 	public void setColumn(String headerName, List<String> columnValues) {
 		setColumn(headerName, columnValues.toArray(new String[columnValues.size()]));
 	}
@@ -1066,13 +1200,13 @@ public class TabularContainer implements SpecificContainer {
 		}
 		String[] valArr = null;
 		if (values.size() > 0) {
-			valArr = this.getRow(index);
+			valArr = getRow(index);
 		}
 		if (valArr == null) {
-			valArr = new String[this.getHeaders().size()];
+			valArr = new String[getHeaders().size()];
 		}
-		valArr[this.getHeaderIndex(headerName)] = val;
-		if (values.size() <= 0) {
+		valArr[getHeaderIndex(headerName)] = val;
+		if (values.size() == 0) {
 			values.add(index, valArr);
 		} else {
 			values.set(index, valArr);
@@ -1180,13 +1314,14 @@ public class TabularContainer implements SpecificContainer {
 				}
 			}
 		}
-		if (!dc.getInputFile().getName().isEmpty()) {
-			try {
-				writeData(dc.getInputFile().getPath());
-			} catch (IOException e) {
-				MLogger.getInstance().log(Level.SEVERE, e);
-			}
-		}
+		// TODO why does setValues have to write to file ?
+//		if (!dc.getInputFile().getName().isEmpty()) {
+//			try {
+//				writeData(dc.getInputFile().getPath());
+//			} catch (IOException e) {
+//				MLogger.getInstance().log(Level.SEVERE, e);
+//			}
+//		}
 	}
 
 	
@@ -1242,17 +1377,4 @@ public class TabularContainer implements SpecificContainer {
 		return ret;
 	}
 
-	
-	public void writeData(String srcFile) throws IOException {
-		List<String[]> writeable = new ArrayList<>();
-		writeable.add(getHeaderNamesIndexed());
-		for (String[] dataArr : getRowsList()) {
-			writeable.add(dataArr);
-		}
-		File f = new File(srcFile);
-		FileUtil.checkDir(f.getParent(), true);
-		XFileWriter writer = new XFileWriter(f);
-		writer.writeLines(writeable);
-		writer.close();
-	}
 }

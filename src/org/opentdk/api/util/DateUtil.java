@@ -27,12 +27,9 @@
  */
 package org.opentdk.api.util;
 
-import java.time.Instant;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.LocalTime;
-import java.time.ZoneId;
-import java.time.ZonedDateTime;
+import org.opentdk.api.logger.MLogger;
+
+import java.time.*;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoField;
 import java.time.temporal.ChronoUnit;
@@ -40,8 +37,6 @@ import java.util.Random;
 import java.util.logging.Level;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
-import org.opentdk.api.logger.MLogger;
 
 /**
  * Class with static utility methods to work with date, time and time stamp formats using the {@link java.time} package.
@@ -319,7 +314,7 @@ public class DateUtil {
 	 * This method gets a date string out of the committed string (exact match or containment).
 	 * 
 	 * @param inStr   The input string that is a date string or contains one.
-	 * @param pFormat One of the date formats in {@link org.opentdk.api.util.EFormat}.
+	 * @param pFormat One of the date formats in {@link EFormat}.
 	 * @return The detected date string or an empty string, if nothing could be found.
 	 */
 	public static String parse(String inStr, String pFormat) {
@@ -349,7 +344,7 @@ public class DateUtil {
 	 * Gets the date from a given age. If the age is given as in interval separated with a minus, the function get a random date between the given ages.
 	 * 
 	 * @param age    the age to be found as a date. To give an interval of ages, the ages must be separated with a minus within the string.
-	 * @param format one of the date formats in {@link org.opentdk.api.util.EFormat}.
+	 * @param format one of the date formats in {@link EFormat}.
 	 * @return the date of the given age or a random age between the given age interval.
 	 */
 	public static String getDateFromAge(String age, String format) {
@@ -376,7 +371,7 @@ public class DateUtil {
 	/**
 	 * Gets an age in years from a given date.
 	 * 
-	 * @param date the date where the age is calculated from in one of the formats defined in {@link org.opentdk.api.util.EFormat}.
+	 * @param date the date where the age is calculated from in one of the formats defined in {@link EFormat}.
 	 * @return the age in years as integer value.
 	 */
 	public int getAgeFromDate(String date) {

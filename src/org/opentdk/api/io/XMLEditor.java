@@ -27,44 +27,31 @@
  */
 package org.opentdk.api.io;
 
-import java.io.File;
-import java.io.IOException;
-import java.io.ByteArrayInputStream;
-import java.io.InputStream;
-import java.io.StringWriter;
-import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.logging.Level;
+import org.opentdk.api.logger.MLogger;
+import org.apache.commons.lang3.StringUtils;
+import org.w3c.dom.*;
+import org.xml.sax.InputSource;
+import org.xml.sax.SAXException;
+import org.xml.sax.helpers.DefaultHandler;
 
 import javax.xml.XMLConstants;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.parsers.SAXParserFactory;
-import javax.xml.transform.OutputKeys;
-import javax.xml.transform.Transformer;
-import javax.xml.transform.TransformerConfigurationException;
-import javax.xml.transform.TransformerException;
-import javax.xml.transform.TransformerFactory;
+import javax.xml.transform.*;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
 import javax.xml.xpath.XPath;
 import javax.xml.xpath.XPathConstants;
 import javax.xml.xpath.XPathExpressionException;
 import javax.xml.xpath.XPathFactory;
-
-import org.apache.commons.lang3.StringUtils;
-import org.opentdk.api.logger.MLogger;
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
-import org.w3c.dom.NamedNodeMap;
-import org.w3c.dom.Node;
-import org.w3c.dom.NodeList;
-import org.xml.sax.InputSource;
-import org.xml.sax.SAXException;
-import org.xml.sax.helpers.DefaultHandler;
+import java.io.*;
+import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.logging.Level;
 
 /**
  * This class is used for read and write access to data which is stored in XML format.
@@ -110,7 +97,7 @@ public class XMLEditor {
 	 * @param rootNode {@link #rootNodeName}
 	 */
 	public XMLEditor(String rootNode) {
-		if (StringUtils.isNotBlank(rootNode)) {
+		if (rootNode != null && StringUtils.isNotBlank(rootNode)) {
 			rootNodeName = rootNode;
 		}
 		createXMLEditor();
@@ -149,20 +136,18 @@ public class XMLEditor {
 
 	private void createXMLEditor() {
 		DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
-		String feature = null;
 		try {
-			// Security settings: If document type definitions (DTD) are disallowed, almost all XML entity
-			// attacks are prevented
-			feature = "http://apache.org/xml/features/disallow-doctype-decl";
-			dbf.setFeature(feature, true);
+			// Security settings: If document type definitions (DTD) are disallowed, almost all XML entity attacks are prevented
+			dbf.setFeature("http://apache.org/xml/features/disallow-doctype-decl", true);
+			// Set recommended secure processing features
+			dbf.setFeature(XMLConstants.FEATURE_SECURE_PROCESSING, true);
+			// dbf.setFeature(XMLConstants.ACCESS_EXTERNAL_DTD, false);
+			// dbf.setFeature(XMLConstants.ACCESS_EXTERNAL_SCHEMA, false);
 		} catch (ParserConfigurationException e) {
-			MLogger.getInstance().log(Level.WARNING, "The feature '" + feature + "' is probably not supported the XML processor. XML will not be read.", getClass().getSimpleName(), "createXMLEditor");
+			MLogger.getInstance().log(Level.SEVERE, e.getMessage(), getClass().getSimpleName(), "createXMLEditor");
 		}
 		// Security settings: This prevents the parser to expand the entity reference node
 		dbf.setExpandEntityReferences(false);
-		// Security settings: Set an empty string to deny all access to external references
-		dbf.setAttribute(XMLConstants.ACCESS_EXTERNAL_DTD, "");
-		dbf.setAttribute(XMLConstants.ACCESS_EXTERNAL_SCHEMA, "");
 
 		try {
 			DocumentBuilder docBuilder = dbf.newDocumentBuilder();
@@ -182,12 +167,8 @@ public class XMLEditor {
 				rootElement = doc.createElement(rootNodeName);
 				doc.appendChild(rootElement);
 			}
-		} catch (ParserConfigurationException e) {
-			MLogger.getInstance().log(Level.SEVERE, "The feature '" + feature + "' is probably not supported the XML processor.", getClass().getSimpleName(), "createXMLEditor");
-		} catch (SAXException e) {
-			MLogger.getInstance().log(Level.SEVERE, "A DOCTYPE was passed into the XML document.", getClass().getSimpleName(), "createXMLEditor");
-		} catch (IOException e) {
-			MLogger.getInstance().log(Level.SEVERE, "Exception occured: XXE may still possible ==> XML will not be read.", getClass().getSimpleName(), "createXMLEditor");
+		} catch (ParserConfigurationException | SAXException | IOException e) {
+			MLogger.getInstance().log(Level.SEVERE, e.getMessage(), getClass().getSimpleName(), "createXMLEditor");
 		}
 	}
 
@@ -470,7 +451,7 @@ public class XMLEditor {
 	}
 
 	/**
-	 * Delete a element by tag name and attribute.
+	 * Delete an element by tag name and attribute.
 	 * 
 	 * @param tagName        the tag name
 	 * @param attributeName  the target's attributeName for identification
@@ -540,7 +521,7 @@ public class XMLEditor {
 	}
 
 	/**
-	 * Retrieve a child element by it's parent, applicable to the specified tag name and attribute
+	 * Retrieve a child element by its parent, applicable to the specified tag name and attribute
 	 * value.
 	 * 
 	 * @param parent    the parent element
@@ -913,10 +894,12 @@ public class XMLEditor {
 	 */
 	private List<String> getXmlTags(List<Element> eList, List<String> tags) {
 		for (Element e : eList) {
-			if (!tags.contains(e.getNodeName()))
+			if (!tags.contains(e.getNodeName())) {
 				tags.add(e.getNodeName());
-			if (e.hasChildNodes())
+			}
+			if (e.hasChildNodes()) {
 				getXmlTags(this.getChildren(e), tags);
+			}
 		}
 		return tags;
 	}
@@ -1029,47 +1012,65 @@ public class XMLEditor {
 	}
 
 	public void save(File xmlOut) {
+		TransformerFactory transformerFactory = TransformerFactory.newInstance();
 		try {
-			StreamResult result = new StreamResult(xmlOut);
-			TransformerFactory tf = TransformerFactory.newInstance();
-			// Security settings: Set an empty string to deny all access to external references
-			tf.setAttribute(XMLConstants.ACCESS_EXTERNAL_DTD, "");
-			tf.setAttribute(XMLConstants.ACCESS_EXTERNAL_STYLESHEET, "");
+			// Set recommended secure processing features
+			transformerFactory.setFeature(XMLConstants.FEATURE_SECURE_PROCESSING, true);
 
-			Transformer transformer = tf.newTransformer();
+			Transformer transformer = transformerFactory.newTransformer();
+			transformer.setOutputProperty(OutputKeys.INDENT, "yes");
 
 			removeEmptySpace(rootElement);
 
 			DOMSource source = new DOMSource(doc);
-			transformer.setOutputProperty(OutputKeys.INDENT, "yes");
+			StreamResult result = new StreamResult(xmlOut);
 			transformer.transform(source, result);
 
 			doc.getDocumentElement().normalize();
 
-		} catch (TransformerConfigurationException e) {
-			e.printStackTrace();
 		} catch (TransformerException e) {
-			e.printStackTrace();
+			MLogger.getInstance().log(Level.SEVERE, e.getMessage(), getClass().getSimpleName(), "save");
 		}
 	}
 
+	/**
+	 * @return {@link #asString(Node, boolean)}  for the complete {@link #doc} object
+	 */
 	public String asString() {
+		return asString(doc, false);
+	}
+
+	/**
+	 * @return the whole content (with children) of the given XML node as string.
+	 */
+	public String asString(Node node, boolean skipHeader) {
 		String ret = "";
-		TransformerFactory tf = TransformerFactory.newInstance();
-		// Security settings: Set an empty string to deny all access to external references
-		tf.setAttribute(XMLConstants.ACCESS_EXTERNAL_DTD, "");
-		tf.setAttribute(XMLConstants.ACCESS_EXTERNAL_STYLESHEET, "");
+		TransformerFactory transformerFactory  = TransformerFactory.newInstance();
 		try {
-			Transformer transformer = tf.newTransformer();
+			// Set recommended secure processing features
+			transformerFactory .setFeature(XMLConstants.FEATURE_SECURE_PROCESSING, true);
+
+			Transformer transformer = transformerFactory .newTransformer();
 			transformer.setOutputProperty(OutputKeys.INDENT, "yes");
+			// true ==> No XML header in the output
+			if(skipHeader) {
+				transformer.setOutputProperty(OutputKeys.OMIT_XML_DECLARATION, "yes");
+			}
 
-			this.removeEmptySpace(rootElement);
+			removeEmptySpace(node);
 
+			// Transform the node to a string
+			DOMSource source = new DOMSource(node);
 			StringWriter writer = new StringWriter();
-			transformer.transform(new DOMSource(doc), new StreamResult(writer));
+			StreamResult result = new StreamResult(writer);
+			transformer.transform(source, result);
+			// Store result
 			ret = writer.getBuffer().toString();
-		} catch (TransformerException e) {
-			e.printStackTrace();
+
+			// Clean up
+			writer.close();
+		} catch (TransformerException | IOException e) {
+			MLogger.getInstance().log(Level.SEVERE, e.getMessage(), getClass().getSimpleName(), "asString");
 		}
 		return ret;
 	}

@@ -28,7 +28,7 @@
 package org.opentdk.api.util;
 
 /**
- * Enumeration of all formats (date, time, time stamp) that the {@link org.opentdk.api.util.DateUtil} class uses.
+ * Enumeration of all formats (date, time, time stamp) that the {@link DateUtil} class uses.
  * 
  * <br>
  * <br>
