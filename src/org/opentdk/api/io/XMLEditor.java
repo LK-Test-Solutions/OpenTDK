@@ -645,11 +645,11 @@ public class XMLEditor {
 	}
 
 	/**
-	 * Get Element by using tagName and attribute (only if it is unique).
+	 * Get Element by using tag name and attribute (only if it is unique).
 	 * 
-	 * @param tagName    the tagName of the target element
+	 * @param tagName    the tag name of the target element
 	 * @param attributes the attributes of the searched element
-	 * @return the found element
+	 * @return the found element or null in case of no hit
 	 */
 	public Element getElement(String tagName, HashMap<String, String> attributes) {
 		Element ret = null;
@@ -658,16 +658,15 @@ public class XMLEditor {
 		NodeList matchElements = rootElement.getElementsByTagName(tagName);
 
 		while (ret == null && i < matchElements.getLength()) {
-
-			if (matchElements.item(i).getAttributes().getLength() == attributes.size()) {
-				int matches = 0;
-				for (String attr : attributes.keySet()) {
-					Node attrNode = matchElements.item(i).getAttributes().getNamedItem(attr);
-					if (attrNode != null && attrNode.getNodeValue().equals(attributes.get(attr)))
-						matches++;
+			int matches = 0;
+			for (String attr : attributes.keySet()) {
+				Node attrNode = matchElements.item(i).getAttributes().getNamedItem(attr);
+				if (attrNode != null && attrNode.getNodeValue().equals(attributes.get(attr))) {
+					matches++;
 				}
-				if (matches == attributes.size())
-					ret = (Element) matchElements.item(i);
+			}
+			if (matches > 0 && matches <= attributes.size()) {
+				ret = (Element) matchElements.item(i);
 			}
 			i++;
 		}
