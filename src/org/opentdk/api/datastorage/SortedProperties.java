@@ -33,7 +33,7 @@ import java.util.Properties;
 import java.util.Vector;
 
 @SuppressWarnings("serial")
-public class SortedProperties extends Properties{
+public class SortedProperties extends Properties {
 	@SuppressWarnings({ "rawtypes", "unchecked" })
 	public Enumeration keys() {
 		Enumeration keysEnum = super.keys();

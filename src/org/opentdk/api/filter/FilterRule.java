@@ -379,11 +379,13 @@ public class FilterRule {
 			if (o.getClass().equals(this.getClass())) {
 				FilterRule rule = (FilterRule) o;
 				if (this.getValue() != null) {
-					if (this.getHeaderName().equals(rule.getHeaderName()) && this.getValue().equals(rule.getValue()) && this.getFilterOperator().equals(rule.getFilterOperator()))
+					if (this.getHeaderName().equals(rule.getHeaderName()) && this.getValue().equals(rule.getValue()) && this.getFilterOperator().equals(rule.getFilterOperator())) {
 						ret = true;
+					}
 				} else if (this.getValues() != null) {
-					if (this.getHeaderName().equals(rule.getHeaderName()) && this.getValues().equals(rule.getValues()) && this.getFilterOperator().equals(rule.getFilterOperator()))
+					if (this.getHeaderName().equals(rule.getHeaderName()) && this.getValues().equals(rule.getValues()) && this.getFilterOperator().equals(rule.getFilterOperator())) {
 						ret = true;
+					}
 				}
 			}
 		}
@@ -466,7 +468,7 @@ public class FilterRule {
 				Double.parseDouble(value);
 				ret = true;
 			} catch (NumberFormatException e) {
-				MLogger.getInstance().log(Level.SEVERE, "Value is not a number. Rule can not be applied to filter!", this.getClass().getSimpleName(), this.getClass().getName(), "isValidOperator");
+				ret = false;
 			}
 		} else {
 			ret = true;

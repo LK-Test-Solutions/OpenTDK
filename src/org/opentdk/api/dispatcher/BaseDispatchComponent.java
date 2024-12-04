@@ -33,6 +33,12 @@ import org.opentdk.api.filter.Filter;
 import org.opentdk.api.mapping.EOperator;
 import org.opentdk.api.util.ListUtil;
 import org.apache.commons.lang3.StringUtils;
+import org.xml.sax.SAXException;
+
+import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.transform.TransformerException;
+import java.io.IOException;
+import java.io.UncheckedIOException;
 
 /**
  * Similar to the native <code><b>enum</b></code> type of java, the
@@ -173,8 +179,12 @@ public class BaseDispatchComponent {
 			DataContainer dc = DataContainer.newContainer(EContainerFormat.CSV);
 			if (StringUtils.isNotBlank(parentXPath)) {	
 				dc = DataContainer.newContainer(EContainerFormat.XML);
-				dc.xmlInstance().initXmlEditor(retrieveRootNode()); 			
-			} 
+				try {
+					dc.xmlInstance().initXmlEditor(retrieveRootNode());
+				} catch (ParserConfigurationException | IOException | SAXException e) {
+					throw new RuntimeException(e);
+				}
+			}
 			BaseDispatcher.setDataContainer(parentClass, dc);
 		}
 	}
@@ -805,7 +815,7 @@ public class BaseDispatchComponent {
 	 * @param attrName  Attribute name of the node
 	 * @param attrValue Attribute value of the node that will be set
 	 */
-	public void setAttribute(String attrName, String attrValue) {
+	public void setAttribute(String attrName, String attrValue) throws IOException, TransformerException {
 		setAttribute("", attrName, attrValue);
 	}
 
@@ -819,7 +829,7 @@ public class BaseDispatchComponent {
 	 * @param attrName  Attribute name of the node
 	 * @param attrValue Attribute value of the node that will be set
 	 */
-	public void setAttribute(String params, String attrName, String attrValue) {
+	public void setAttribute(String params, String attrName, String attrValue) throws IOException, TransformerException {
 		setAttribute("", params, attrName, attrValue);
 	}
 
@@ -834,7 +844,7 @@ public class BaseDispatchComponent {
 	 * @param attrName  Attribute name of the node
 	 * @param attrValue Attribute value of the node that will be set
 	 */
-	public void setAttribute(String oldValue, String params, String attrName, String attrValue) {
+	public void setAttribute(String oldValue, String params, String attrName, String attrValue) throws IOException, TransformerException {
 		String xPath = resolveXPath(params);
 		Filter fltr = new Filter();
 		fltr.addFilterRule("XPath", xPath, EOperator.EQUALS);

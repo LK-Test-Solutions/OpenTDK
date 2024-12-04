@@ -107,7 +107,7 @@ public class DataProvider {
 		} else if (bothDouble) {
 			return min.doubleValue() + randgen.nextDouble() * (max.doubleValue() - min.doubleValue());
 		} else {
-			throw new RuntimeException("Initialization of 'DataProvider' went wrong and now there is no correct usage of the 'data' method possible.");
+			throw new IllegalArgumentException("Initialization of 'DataProvider' went wrong and now there is no correct usage of the 'data' method possible.");
 		}
 	}
 

@@ -101,7 +101,7 @@ public class Counter {
 	 * 
 	 * @param counterName  The reference name to count for.
 	 * @param initialValue If the start value should differ from 0.
-	 * @param stepSize     Value thats gets added to the current count.
+	 * @param stepSize     Value that gets added to the current count.
 	 * @return The current count.
 	 */
 	public int decrease(String counterName, int initialValue, int stepSize) {
@@ -127,7 +127,7 @@ public class Counter {
 	 * Count down.
 	 * 
 	 * @param counterName The reference name to count for.
-	 * @param stepSize    Value thats gets subtracted to the current count.
+	 * @param stepSize    Value that gets subtracted to the current count.
 	 * @return The current count.
 	 */
 	public int increase(String counterName, int stepSize) {
@@ -139,7 +139,7 @@ public class Counter {
 	 * 
 	 * @param counterName  The reference name to count for.
 	 * @param initialValue If the start value should differ from 0.
-	 * @param stepSize     Value thats gets subtracted to the current count.
+	 * @param stepSize     Value that gets subtracted to the current count.
 	 * @return The current count.
 	 */
 	public int increase(String counterName, int initialValue, int stepSize) {

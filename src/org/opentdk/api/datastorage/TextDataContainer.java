@@ -33,18 +33,15 @@ public class TextDataContainer implements SpecificContainer {
 	public void readData(InputStream stream) throws IOException {
 		content.append(FileUtil.getContent(stream));
 	}
-	
 
 	@Override
 	public void readData(File sourceFile, Filter filter) throws IOException {
-		// TODO Auto-generated method stub
-		
+		throw new UnsupportedOperationException();
 	}
 
 	@Override
 	public void readData(InputStream stream, Filter filter) throws IOException {
-		// TODO Auto-generated method stub
-		
+		throw new UnsupportedOperationException();
 	}
 
 	@Override

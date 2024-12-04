@@ -75,7 +75,7 @@ public class CommonUtil {
 	}
 
 	/**
-	 * @return the system property os.version e.g. '10.0' of Windows 10.
+	 * @return the system property os version e.g. '10.0' of Windows 10.
 	 */
 	public static final String getOSVersion() {
 		return System.getProperty("os.version");
@@ -84,46 +84,36 @@ public class CommonUtil {
 	/**
 	 * @return The {@link java.net.InetAddress} object for the local host for further operations.
 	 */
-	public static final InetAddress getInetAdress() {
-		InetAddress i = null;
-		try {
-			i = InetAddress.getLocalHost();
-		} catch (UnknownHostException e) {
-			throw new RuntimeException(e);
-		}
-		return i;
+	public static final InetAddress getInetAdress() throws UnknownHostException {
+		return InetAddress.getLocalHost();
 	}
 
 	/**
 	 * @return The name of the local host machine.
 	 */
-	public static final String getComputername() {
+	public static final String getComputername() throws UnknownHostException {
 		return getInetAdress().getHostName();
 	}
 
 	/**
 	 * @return The IP address of the local host machine.
 	 */
-	public static final String getIPAdress() {
+	public static final String getIPAdress() throws UnknownHostException {
 		return getInetAdress().getHostAddress();
 	}
 
 	/**
 	 * @return The MAC address of the local host machine.
 	 */
-	public static final String getMacAddress() {
+	public static final String getMacAddress() throws SocketException {
 		String result = "";
-		try {
-			for (NetworkInterface ni : Collections.list(NetworkInterface.getNetworkInterfaces())) {
-				byte[] hardwareAddress = ni.getHardwareAddress();
-				if (hardwareAddress != null && hardwareAddress.length > 0) {
-					for (int i = 0; i < hardwareAddress.length; i++)
-						result += String.format((i == 0 ? "" : "-") + "%02X", hardwareAddress[i]);
-					return result;
-				}
+		for (NetworkInterface ni : Collections.list(NetworkInterface.getNetworkInterfaces())) {
+			byte[] hardwareAddress = ni.getHardwareAddress();
+			if (hardwareAddress != null && hardwareAddress.length > 0) {
+				for (int i = 0; i < hardwareAddress.length; i++)
+					result += String.format((i == 0 ? "" : "-") + "%02X", hardwareAddress[i]);
+				return result;
 			}
-		} catch (SocketException e) {
-			throw new RuntimeException(e);
 		}
 		return result;
 	}
@@ -131,24 +121,18 @@ public class CommonUtil {
 	/**
 	 * Executes any command via getRuntime().exec() of {@link java.lang.Runtime}.
 	 * 
-	 * @param command a valid batch or shell command to execute
+	 * @param command a valid batch command to execute
 	 * @return {@literal -}1: Return value of the process could not be determined, 0: Execution
 	 *         succeeded, {@literal >}1: Execution failed
 	 */
-	public static int executeCommand(String command) {
+	public static int executeCommand(String command) throws IOException, InterruptedException {
 		int ret = -1;
 		Process process = null;
 		try {
 			process = Runtime.getRuntime().exec(command);
-		} catch (IOException e) {
-			MLogger.getInstance().log(Level.SEVERE, e);
 		} finally {
 			if (process != null) {
-				try {
-					ret = process.waitFor();
-				} catch (InterruptedException e) {
-					MLogger.getInstance().log(Level.SEVERE, e);
-				}
+				ret = process.waitFor();
 				process.destroy();
 			}
 		}

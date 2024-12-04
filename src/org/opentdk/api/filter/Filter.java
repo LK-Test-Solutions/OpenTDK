@@ -59,8 +59,7 @@ public class Filter {
 	 */
 	private List<FilterRule> rules;
 	/**
-	 * This object can be used to only allow specific headers as filter criteria. They are not case
-	 * sensitive. So if this list has elements and any <code>addFilterRule</code> method gets called
+	 * This object can be used to only allow specific headers as filter criteria. They are not case-sensitive. So if this list has elements and any <code>addFilterRule</code> method gets called
 	 * with an invalid header the rule will not be added to the {@link #rules} list.
 	 */
 	private List<String> plausibleHeaders;
@@ -181,7 +180,7 @@ public class Filter {
 	 * @param headers Set of applicable headers (e.g. column names of a table) - NOT case-sensitive
 	 */
 	public void setPlausibleHeaders(Set<String> headers) {
-		plausibleHeaders = new ArrayList<String>(headers);
+		plausibleHeaders = new ArrayList<>(headers);
 	}
 
 	/**
@@ -199,7 +198,7 @@ public class Filter {
 	 * applied again to the filter.
 	 */
 	public void clearPlausibleHeaders() {
-		plausibleHeaders = new ArrayList<String>();
+		plausibleHeaders = new ArrayList<>();
 	}
 
 	/**
@@ -217,9 +216,6 @@ public class Filter {
 			for (String h : plausibleHeaders) {
 				if (headerName.equals(h.trim().toLowerCase()))
 					ret = true;
-			}
-			if (!ret) {
-				MLogger.getInstance().log(Level.SEVERE, "Header of new rule doesn't match to the headers of the current DataContainer instance. Rule will not be applied!", this.getClass().getSimpleName(), this.getClass().getName(), "checkHeader");
 			}
 		}
 		return ret;

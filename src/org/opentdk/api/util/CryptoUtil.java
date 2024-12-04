@@ -95,30 +95,16 @@ public class CryptoUtil {
 	 * @param privateKeyFullName path and name for the private key file e.g. ./private.key
 	 * @param publicKeyFullName  path and name for the public key file e.g. ./public.key
 	 */
-	public static void generateKeyPair(int size, String privateKeyFullName, String publicKeyFullName) {
-		KeyPairGenerator generator = null;
-		try {
-			generator = KeyPairGenerator.getInstance(algorithm);
-		} catch (NoSuchAlgorithmException e) {
-			MLogger.getInstance().log(Level.SEVERE, e);
-			throw new RuntimeException(e);
-		}
+	public static void generateKeyPair(int size, String privateKeyFullName, String publicKeyFullName) throws NoSuchAlgorithmException, IOException {
+		KeyPairGenerator generator = KeyPairGenerator.getInstance(algorithm);
 		generator.initialize(size);
 		KeyPair pair = generator.generateKeyPair();
 
 		PrivateKey privateKey = pair.getPrivate();
 		PublicKey publicKey = pair.getPublic();
 
-		try {
-			FileUtils.writeByteArrayToFile(new File(privateKeyFullName), privateKey.getEncoded());
-		} catch (IOException e) {
-			MLogger.getInstance().log(Level.SEVERE, e);
-		}
-		try {
-			FileUtils.writeByteArrayToFile(new File(publicKeyFullName), publicKey.getEncoded());
-		} catch (IOException e) {
-			MLogger.getInstance().log(Level.SEVERE, e);
-		}
+		FileUtils.writeByteArrayToFile(new File(privateKeyFullName), privateKey.getEncoded());
+		FileUtils.writeByteArrayToFile(new File(publicKeyFullName), publicKey.getEncoded());
 	}
 
 	/**
@@ -130,7 +116,7 @@ public class CryptoUtil {
 	 *         generates a binary format) or null in case of a wrong block size or padding
 	 * @throws IOException If reading the key bytes from the file fails
 	 */
-	public static String encrypt(String toEncrypt, File publicKeyFile) throws IOException {
+	public static String encrypt(String toEncrypt, File publicKeyFile) throws IOException, IllegalBlockSizeException, NoSuchPaddingException, BadPaddingException, NoSuchAlgorithmException, InvalidKeyException, InvalidKeySpecException {
 		return encrypt(toEncrypt, Files.readAllBytes(publicKeyFile.toPath()));
 	}
 
@@ -142,31 +128,16 @@ public class CryptoUtil {
 	 * @return the encoded string in Base64 encoding to store it properly (the encryption itself only
 	 *         generates a binary format) or null in case of a wrong block size or padding
 	 */
-	public static String encrypt(String toEncrypt, byte[] publicKeyBytes) {
+	public static String encrypt(String toEncrypt, byte[] publicKeyBytes) throws IllegalBlockSizeException, BadPaddingException, NoSuchPaddingException, NoSuchAlgorithmException, InvalidKeyException, InvalidKeySpecException {
 		String ret = null;
 		Key publicKey = CryptoUtil.getKey(publicKeyBytes, Cipher.PUBLIC_KEY);
 		if (publicKey != null) {
-			Cipher encryptCipher = null;
-			try {
-				encryptCipher = Cipher.getInstance(algorithm);
-			} catch (NoSuchAlgorithmException | NoSuchPaddingException e) {
-				MLogger.getInstance().log(Level.SEVERE, e);
-				throw new RuntimeException(e);
-			}
-			try {
-				encryptCipher.init(Cipher.ENCRYPT_MODE, publicKey);
-			} catch (InvalidKeyException e) {
-				MLogger.getInstance().log(Level.SEVERE, e);
-				throw new RuntimeException(e);
-			}
+			Cipher encryptCipher = Cipher.getInstance(algorithm);
+			encryptCipher.init(Cipher.ENCRYPT_MODE, publicKey);
+
 			byte[] secretMessageBytes = toEncrypt.getBytes(StandardCharsets.UTF_8);
-			byte[] encryptedMessageBytes = null;
-			try {
-				encryptedMessageBytes = encryptCipher.doFinal(secretMessageBytes);
-			} catch (IllegalBlockSizeException | BadPaddingException e) {
-				MLogger.getInstance().log(Level.SEVERE, e);
-				throw new RuntimeException(e);
-			}
+			byte[] encryptedMessageBytes = encryptCipher.doFinal(secretMessageBytes);
+
 			if (encryptedMessageBytes != null) {
 				ret = Base64.getEncoder().encodeToString(encryptedMessageBytes);
 			}
@@ -182,7 +153,7 @@ public class CryptoUtil {
 	 * @return the decoded string in raw format or the raw string if it could not be decoded
 	 * @throws IOException If reading the key bytes from the file fails
 	 */
-	public static String decrypt(String toDecrypt, File privateKeyFile) throws IOException {
+	public static String decrypt(String toDecrypt, File privateKeyFile) throws IOException, NoSuchPaddingException, IllegalBlockSizeException, NoSuchAlgorithmException, BadPaddingException, InvalidKeyException, InvalidKeySpecException {
 		return decrypt(toDecrypt, Files.readAllBytes(privateKeyFile.toPath()));
 	}
 
@@ -193,31 +164,16 @@ public class CryptoUtil {
 	 * @param privateKeyBytes private key as byte array
 	 * @return the decoded string in raw format or the raw string if it could not be decoded
 	 */
-	public static String decrypt(String toDecrypt, byte[] privateKeyBytes) {
+	public static String decrypt(String toDecrypt, byte[] privateKeyBytes) throws NoSuchPaddingException, NoSuchAlgorithmException, InvalidKeyException, IllegalBlockSizeException, BadPaddingException, InvalidKeySpecException {
 		String ret = null;
 		Key privateKey = CryptoUtil.getKey(privateKeyBytes, Cipher.PRIVATE_KEY);
 		if (privateKey != null) {
-			Cipher decryptCipher = null;
-			try {
-				decryptCipher = Cipher.getInstance(algorithm);
-			} catch (NoSuchAlgorithmException | NoSuchPaddingException e) {
-				MLogger.getInstance().log(Level.SEVERE, e);
-				throw new RuntimeException(e);
-			}
-			try {
-				decryptCipher.init(Cipher.DECRYPT_MODE, privateKey);
-			} catch (InvalidKeyException e) {
-				MLogger.getInstance().log(Level.SEVERE, e);
-				throw new RuntimeException(e);
-			}
+			Cipher decryptCipher = Cipher.getInstance(algorithm);
+			decryptCipher.init(Cipher.DECRYPT_MODE, privateKey);
+
 			byte[] secretMessageBytes = Base64.getDecoder().decode(toDecrypt);
-			byte[] decryptedMessageBytes = null;
-			try {
-				decryptedMessageBytes = decryptCipher.doFinal(secretMessageBytes);
-			} catch (IllegalBlockSizeException | BadPaddingException e) {
-				ret = toDecrypt;
-				MLogger.getInstance().log(Level.INFO, e);
-			}
+			byte[] decryptedMessageBytes = decryptCipher.doFinal(secretMessageBytes);
+
 			if (decryptedMessageBytes != null) {
 				ret = StringUtils.newStringUtf8(decryptedMessageBytes);
 			}
@@ -233,28 +189,17 @@ public class CryptoUtil {
 	 * @param keyType 1: Cipher.PUBLIC_KEY, 2: Cipher.PRIVATE_KEY
 	 * @return the key object or null if no key object could be created
 	 */
-	private static Key getKey(byte[] keyBytes, int keyType) {
+	private static Key getKey(byte[] keyBytes, int keyType) throws NoSuchAlgorithmException, InvalidKeySpecException {
 		Key ret = null;
 		if (keyBytes != null) {
-			KeyFactory keyFactory = null;
-			try {
-				keyFactory = KeyFactory.getInstance(algorithm);
-			} catch (NoSuchAlgorithmException e) {
-				MLogger.getInstance().log(Level.SEVERE, e);
-				throw new RuntimeException(e);
-			}
+			KeyFactory keyFactory = KeyFactory.getInstance(algorithm);
 			EncodedKeySpec keySpec = null;
-			try {
-				if (keyType == Cipher.PRIVATE_KEY) {
-					keySpec = new PKCS8EncodedKeySpec(keyBytes);
-					ret = keyFactory.generatePrivate(keySpec);
-				} else if (keyType == Cipher.PUBLIC_KEY) {
-					keySpec = new X509EncodedKeySpec(keyBytes);
-					ret = keyFactory.generatePublic(keySpec);
-				}
-			} catch (InvalidKeySpecException e) {
-				MLogger.getInstance().log(Level.SEVERE, e);
-				throw new RuntimeException(e);
+			if (keyType == Cipher.PRIVATE_KEY) {
+				keySpec = new PKCS8EncodedKeySpec(keyBytes);
+				ret = keyFactory.generatePrivate(keySpec);
+			} else if (keyType == Cipher.PUBLIC_KEY) {
+				keySpec = new X509EncodedKeySpec(keyBytes);
+				ret = keyFactory.generatePublic(keySpec);
 			}
 		}
 		return ret;

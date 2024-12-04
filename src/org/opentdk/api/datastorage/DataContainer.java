@@ -27,17 +27,25 @@
  */
 package org.opentdk.api.datastorage;
 
+import org.opentdk.api.exception.DataContainerException;
 import org.opentdk.api.filter.Filter;
 import org.opentdk.api.io.FileUtil;
-import org.opentdk.api.io.XMLEditor;
 import org.opentdk.api.logger.MLogger;
 import org.apache.commons.lang3.StringUtils;
 import org.json.JSONObject;
+import org.xml.sax.InputSource;
+import org.xml.sax.SAXException;
 import org.yaml.snakeyaml.Yaml;
 
+import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.parsers.SAXParserFactory;
+import javax.xml.transform.TransformerException;
+import javax.xml.xpath.XPathExpressionException;
 import java.io.*;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.Map;
 import java.util.logging.Level;
 import java.util.stream.Collectors;
@@ -61,7 +69,7 @@ public class DataContainer implements SpecificContainer {
 	 * {@link XMLDataContainer} or {@link PropertiesDataContainer}. The caller does
 	 * not need to know about the adaption process.
 	 */
-	private final SpecificContainer instance;
+	private SpecificContainer instance = TextDataContainer.newInstance();
 
 	/**
 	 * This property is used to assign the data as an {@link java.io.File} to the
@@ -104,9 +112,41 @@ public class DataContainer implements SpecificContainer {
 	}
 
 	private DataContainer() {
-		instance = adaptContainer();
+		try {
+			instance = adaptContainer();
+		} catch (IOException e) {
+			throw new UncheckedIOException(e);
+		}
 	}
-	
+
+	/**
+	 * @return CSV instance directly
+	 */
+	public static DataContainer newCSVContainer() {
+		return new DataContainer(EContainerFormat.CSV);
+	}
+
+	/**
+	 * @return XML instance directly
+	 */
+	public static DataContainer newXMLContainer() {
+		return new DataContainer(EContainerFormat.XML);
+	}
+
+	/**
+	 * @return JSON instance directly
+	 */
+	public static DataContainer newJSONContainer() {
+		return new DataContainer(EContainerFormat.JSON);
+	}
+
+	/**
+	 * @return YAML instance directly
+	 */
+	public static DataContainer newYAMLContainer() {
+		return new DataContainer(EContainerFormat.YAML);
+	}
+
 	/**
 	 * Gets used if the exact type is known but without any present data. 
 	 * In this case no adaption process is necessary, because the format gets explicitly set.
@@ -120,27 +160,20 @@ public class DataContainer implements SpecificContainer {
 	private DataContainer(EContainerFormat type) {
 		containerFormat = type;
 		switch (type) {
-		case CSV:
-			instance = TabularContainer.newInstance();
-			break;
-		case PROPERTIES:
-			instance = PropertiesDataContainer.newInstance();
-			break;
-		case RESULTSET:
-			instance = RSDataContainer.newInstance();
-			break;
-		case XML:
-			instance = XMLDataContainer.newInstance();
-			break;
-		case JSON:
-			instance = JSONDataContainer.newInstance();
-			break;
-		case YAML:
-			instance = YAMLDataContainer.newInstance();
-			break;
-		default:
-			instance = TextDataContainer.newInstance();	
-		}		
+			case CSV -> instance = TabularContainer.newInstance();
+			case PROPERTIES -> instance = PropertiesDataContainer.newInstance();
+			case RESULTSET -> instance = RSDataContainer.newInstance();
+			case XML -> {
+				try {
+					instance = XMLDataContainer.newInstance();
+				} catch (ParserConfigurationException | IOException | SAXException e) {
+					throw new DataContainerException(e);
+				}
+			}
+			case JSON -> instance = JSONDataContainer.newInstance();
+			case YAML -> instance = YAMLDataContainer.newInstance();
+			default -> instance = TextDataContainer.newInstance();
+		}
 	}
 
 	/**
@@ -166,13 +199,13 @@ public class DataContainer implements SpecificContainer {
 
 	private DataContainer(File sourceFile) {
 		inputFile = sourceFile;
-		instance = adaptContainer();
 		try {
+			instance = adaptContainer();
 			if(sourceFile.exists() && sourceFile.isFile() && Files.size(sourceFile.toPath()) > 0) {
 				instance.readData(sourceFile);
 			}
 		} catch (IOException e) {
-			MLogger.getInstance().log(Level.SEVERE, e);
+			throw new DataContainerException(e);
 		}
 	}
 
@@ -202,9 +235,9 @@ public class DataContainer implements SpecificContainer {
 	 */
 	private DataContainer(InputStream inStream) {
 		inputStream = inStream;
-		instance = adaptContainer();
 		try {
-			instance.readData(inStream);
+			instance = adaptContainer();
+			instance.readData(inputStream);
 		} catch (IOException e) {
 			MLogger.getInstance().log(Level.SEVERE, e);
 		}
@@ -217,18 +250,14 @@ public class DataContainer implements SpecificContainer {
 	 *
 	 * @param rs The result of the database request.
 	 */
-	public static DataContainer newContainer(ResultSet rs) {
+	public static DataContainer newContainer(ResultSet rs) throws SQLException, IOException {
 		return new DataContainer(rs);
 	}
 
-	private DataContainer(ResultSet rs) {
+	private DataContainer(ResultSet rs) throws IOException, SQLException {
 		resultSet = rs;
 		instance = adaptContainer();
-		try {
-			rsInstance().readData(rs);
-		} catch (IOException e) {
-			MLogger.getInstance().log(Level.SEVERE, e);
-		}
+		rsInstance().readData(rs);
 	}
 
 	/**
@@ -241,23 +270,22 @@ public class DataContainer implements SpecificContainer {
 	 * @throws IOException to handle I/O methods when the {@link #readData(File)}
 	 *                     method failed
 	 */
-	private SpecificContainer adaptContainer() {
-		switch (detectDataFormat()) {
-		case CSV:
-			return TabularContainer.newInstance();
-		case PROPERTIES:
-			return PropertiesDataContainer.newInstance();
-		case RESULTSET:
-			return RSDataContainer.newInstance();
-		case XML:
-			return XMLDataContainer.newInstance(); 
-		case JSON:
-			return JSONDataContainer.newInstance();
-		case YAML:
-			return YAMLDataContainer.newInstance();
-		default:
-			return TextDataContainer.newInstance();
-		}
+	private SpecificContainer adaptContainer() throws IOException {
+		return switch (detectDataFormat()) {
+			case CSV -> TabularContainer.newInstance();
+			case PROPERTIES -> PropertiesDataContainer.newInstance();
+			case RESULTSET -> RSDataContainer.newInstance();
+			case XML -> {
+				try {
+					yield XMLDataContainer.newInstance();
+				} catch (ParserConfigurationException | IOException | SAXException e) {
+					throw new DataContainerException(e);
+				}
+			}
+			case JSON -> JSONDataContainer.newInstance();
+			case YAML -> YAMLDataContainer.newInstance();
+			default -> TextDataContainer.newInstance();
+		};
 	}
 
 	/**
@@ -267,43 +295,32 @@ public class DataContainer implements SpecificContainer {
 	 *
 	 * @return enumeration of type {@link EContainerFormat}
 	 */
-	private EContainerFormat detectDataFormat() {
+	private EContainerFormat detectDataFormat() throws IOException {
 		if (resultSet != null) {
 			containerFormat = EContainerFormat.RESULTSET;
-		} else if (inputStream != null) {
-			try {
-				if (inputStream.available() > 0) {
-					InputStreamReader inputStreamReader = new InputStreamReader(inputStream);
-					Stream<String> streamOfString = new BufferedReader(inputStreamReader).lines();
-					String inputContent = streamOfString.collect(Collectors.joining());
+		} else if (inputStream != null && inputStream.available() > 0) {
+			try(Stream<String> streamOfString = new BufferedReader(new InputStreamReader(inputStream)).lines()) {
+				String inputContent = streamOfString.collect(Collectors.joining());
 
-					// Reader not needed anymore after stored to string
-					inputStreamReader.close();
-					streamOfString.close();
-
-					// Every access consumes the stream so a reset is necessary
-					inputStream.reset();
-
-					if (inputContent.startsWith("<")) {
-						// Own if clause due to performance reasons
-						if (XMLEditor.validateXMLString(inputStream)) {
-							inputStream.reset();
-							containerFormat = EContainerFormat.XML;
-						}
-						inputStream.reset();
-					} else if (inputContent.startsWith("{")) {
-						if (StringUtils.isNotBlank(JSONObject.valueToString(inputContent))) {
-							containerFormat = EContainerFormat.JSON;
-						}
-					} else {
-						Map<String, Object> yamlContent = new Yaml().load(inputContent);
-						if (!yamlContent.isEmpty()) {
-							containerFormat = EContainerFormat.YAML;
-						}
+				if (inputContent.startsWith("<")) {
+					// Own if clause due to performance reasons
+					if (validateXMLString(inputContent)) {
+						containerFormat = EContainerFormat.XML;
+					}
+				} else if (inputContent.startsWith("{")) {
+					if (StringUtils.isNotBlank(JSONObject.valueToString(inputContent))) {
+						containerFormat = EContainerFormat.JSON;
+					}
+				} else {
+					Map<String, Object> yamlContent = new Yaml().load(inputContent);
+					if (!yamlContent.isEmpty()) {
+						containerFormat = EContainerFormat.YAML;
 					}
 				}
-			} catch (IOException e) {
-				MLogger.getInstance().log(Level.SEVERE, e);
+				// Stream gets passed to specific container afterwards and has to be reset
+				if(inputStream.available() == 0) {
+					inputStream.reset();
+				}
 			}
 		} else if (inputFile != null) {
 			String fileName = inputFile.getName();
@@ -417,35 +434,19 @@ public class DataContainer implements SpecificContainer {
 	}
 	
 	public boolean isText() {
-		boolean ret = false;
-		if (instance instanceof TextDataContainer) {
-			ret = true;
-		} 
-		return ret;
+		return instance instanceof TextDataContainer;
 	}
 	
 	public boolean isXML() {
-		boolean ret = false;
-		if (instance instanceof XMLDataContainer) {
-			ret = true;
-		} 
-		return ret;
+		return instance instanceof XMLDataContainer;
 	}
 	
 	public boolean isJSON() {
-		boolean ret = false;
-		if (instance instanceof JSONDataContainer) {
-			ret = true;
-		} 
-		return ret;
+		return instance instanceof JSONDataContainer;
 	}
 	
 	public boolean isYAML() {
-		boolean ret = false;
-		if (instance instanceof YAMLDataContainer) {
-			ret = true;
-		} 
-		return ret;
+		return instance instanceof YAMLDataContainer;
 	}
 	
 	private void checkInstance() {
@@ -456,14 +457,28 @@ public class DataContainer implements SpecificContainer {
 	
 	public void createFile() throws IOException {
 		if (inputFile != null && StringUtils.isNotBlank(inputFile.getPath())) {
+			FileUtil.createFile(inputFile, true);
 			if(instance instanceof XMLDataContainer) {
-				xmlInstance().readData(inputFile);
-			} else {
-				FileUtil.createFile(inputFile, true);
+				xmlInstance().writeData(inputFile);
 			}
-		} else {
-			MLogger.getInstance().log(Level.WARNING, "DataContainer.createFile() was called, but inputFile is null.");
 		}
+	}
+
+	public Boolean validateXMLString(String inString) {
+		try {
+			InputStream inStream = new ByteArrayInputStream(inString.getBytes(StandardCharsets.UTF_8));
+			SAXParserFactory.newInstance().newSAXParser().getXMLReader().parse(new InputSource(inStream));
+		} catch (IOException e) {
+			// log.warn("Invalid input used for XML parser");
+			return false;
+		} catch (ParserConfigurationException e) {
+			// log.warn("Probably non-supported feature used for the XML processor");
+			return false;
+		} catch (SAXException e) {
+			// log.warn("A DOCTYPE was passed into the XML document");
+			return false;
+		}
+		return true;
 	}
 
 	/**
@@ -606,7 +621,11 @@ public class DataContainer implements SpecificContainer {
 			tabInstance().deleteValue(params);
 		} else if (isTree()) {
 			if(isXML()) {
-				xmlInstance().delete(params, attrName, attrValue, fltr);
+				try {
+					xmlInstance().delete(params, attrName, attrValue, fltr);
+				} catch (IOException| TransformerException e) {
+					throw new DataContainerException(e);
+				}
 			} else if (isJSON()) {
 				jsonInstance().delete(params, fltr);
 			} else if(isYAML()) {
@@ -626,7 +645,11 @@ public class DataContainer implements SpecificContainer {
 			ret = tabInstance().getColumn(parameterName, fltr);
 		} else if (isTree()) {
 			if(isXML()) {
-				ret = xmlInstance().get(parameterName, fltr);
+				try {
+					ret = xmlInstance().get(parameterName, fltr);
+				} catch (XPathExpressionException e) {
+					throw new DataContainerException(e);
+				}
 			} else if (isJSON()) {
 				ret = jsonInstance().get(parameterName, fltr);
 			} else if(isYAML()) {
@@ -653,7 +676,11 @@ public class DataContainer implements SpecificContainer {
 			tabInstance().setValues(parameterName, value, fltr, allOccurences);
 		} else if (isTree()) {
 			if(isXML()) {
-				xmlInstance().set(parameterName, value, fltr, allOccurences);
+				try {
+					xmlInstance().set(parameterName, value, fltr, allOccurences);
+				} catch (IOException | TransformerException | XPathExpressionException e) {
+					throw new DataContainerException(e);
+				}
 			} else if (isJSON()) {
 				jsonInstance().set(parameterName, value, fltr);
 			} else if(isYAML()) {

@@ -28,8 +28,11 @@
 package org.opentdk.api.dispatcher;
 
 import org.opentdk.api.datastorage.DataContainer;
+import org.opentdk.api.exception.DataContainerException;
 import org.opentdk.api.logger.MLogger;
+import org.xml.sax.SAXException;
 
+import javax.xml.parsers.ParserConfigurationException;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
@@ -64,255 +67,149 @@ import java.util.logging.Level;
  * @author LK Test Solutions
  *
  */
-public abstract class BaseDispatcher {
+public final class BaseDispatcher {
 
-	/**
-	 * This HashMap stores the {@link DataContainer} instances of all
-	 * settings used within an application during runtime. Once the setDataContainer method of a
-	 * settings class is called, the DataContainer will be stored in the HashMap with the simple name of
-	 * the settings class as key.
-	 */
-	static Map<String, DataContainer> dcMap = new HashMap<String, DataContainer>();
+    /**
+     * This HashMap stores the {@link DataContainer} instances of all settings used within an application during runtime. Once the setDataContainer method of a settings class is called, the
+     * DataContainer will be stored in the HashMap with the simple name of the settings class as key.
+     */
+    static Map<String, DataContainer> dcMap = new HashMap<>();
 
-	/**
-	 * @param dispatcherClass The dispatcher class where the {@link BaseDispatchComponent} variables are
-	 *                        declared. In case the dispatcher class extends a super class with
-	 *                        inherited declarations of {@link BaseDispatchComponent}, then the simple
-	 *                        name of the super class needs to be used. This will not effect the super
-	 *                        class {@link BaseDispatcher()}, because BaseDispatcher does not include
-	 *                        declarations of {@link BaseDispatchComponent}.
-	 * @return a {@link DataContainer} that is assigned to the extended sub
-	 *         class of {@link BaseDispatcher}, where the {@link BaseDispatchComponent} variables are
-	 *         declared.
-	 */
-	public static DataContainer getDataContainer(Class<?> dispatcherClass) {
-		return getDataContainer(dispatcherClass.getSimpleName());
-	}
+    /**
+     * @param dispatcherClass The dispatcher class where the {@link BaseDispatchComponent} variables are declared. In case the dispatcher class extends a super class with inherited declarations of
+     *                        {@link BaseDispatchComponent}, then the simple name of the super class needs to be used. This will not affect the super class {@link BaseDispatcher()}, because
+     *                        BaseDispatcher does not include declarations of {@link BaseDispatchComponent}.
+     * @return a {@link DataContainer} that is assigned to the extended subclass of {@link BaseDispatcher}, where the {@link BaseDispatchComponent} variables are declared.
+     */
+    public static DataContainer getDataContainer(Class<?> dispatcherClass) {
+        return getDataContainer(dispatcherClass.getSimpleName());
+    }
 
-	/**
-	 * @param dispatcherClassName The simple name of the dispatcher class where the
-	 *                            {@link BaseDispatchComponent} variables are declared. In case the
-	 *                            dispatcher class extends a super class with inherited declarations of
-	 *                            {@link BaseDispatchComponent}, then the simple name of the super class
-	 *                            needs to be used. This will not effect the super class
-	 *                            {@link BaseDispatcher()}, because BaseDispatcher does not include
-	 *                            declarations of {@link BaseDispatchComponent}.
-	 * @return a {@link DataContainer} that is assigned to the extended sub
-	 *         class of {@link BaseDispatcher}, where the {@link BaseDispatchComponent} variables are
-	 *         declared.
-	 */
-	public static DataContainer getDataContainer(String dispatcherClassName) {
-		return dcMap.get(dispatcherClassName);
-	}
+    /**
+     * @param dispatcherClassName The simple name of the dispatcher class where the {@link BaseDispatchComponent} variables are declared. In case the dispatcher class extends a super class with
+     *                            inherited declarations of {@link BaseDispatchComponent}, then the simple name of the super class needs to be used. This will not affect the super class
+     *                            {@link BaseDispatcher()}, because BaseDispatcher does not include declarations of {@link BaseDispatchComponent}.
+     * @return a {@link DataContainer} that is assigned to the extended subclass of {@link BaseDispatcher}, where the {@link BaseDispatchComponent} variables are declared.
+     */
+    public static DataContainer getDataContainer(String dispatcherClassName) {
+        return dcMap.get(dispatcherClassName);
+    }
 
-	/**
-	 * Assigns a {@link DataContainer} to the {@link BaseDispatchComponent}
-	 * fields that are declared in an extended subclass of {@link BaseDispatcher}. The DataContainer
-	 * acts as a runtime storage for the values of the {@link BaseDispatchComponent} variables.
-	 * 
-	 * @param dispatcherClass the dispatcher class where the variables of type
-	 *                        {@link BaseDispatchComponent} are declared
-	 * @param dc              {@link DataContainer} instance, representing
-	 *                        the runtime storage for values of the {@link BaseDispatchComponent}
-	 *                        variables
-	 */
-	public static void setDataContainer(Class<?> dispatcherClass, DataContainer dc) {
-		setDataContainer(dispatcherClass, dc, false);
-	}
+    /**
+     * Assigns a {@link DataContainer} to the {@link BaseDispatchComponent} fields that are declared in an extended subclass of {@link BaseDispatcher}. The DataContainer acts as a runtime storage for
+     * the values of the {@link BaseDispatchComponent} variables.
+     *
+     * @param dispatcherClass the dispatcher class where the variables of type {@link BaseDispatchComponent} are declared
+     * @param dc              {@link DataContainer} instance, representing the runtime storage for values of the {@link BaseDispatchComponent} variables
+     */
+    public static void setDataContainer(Class<?> dispatcherClass, DataContainer dc) {
+        setDataContainer(dispatcherClass, dc, false);
+    }
 
-	/**
-	 * Assigns a {@link DataContainer} to the {@link BaseDispatchComponent}
-	 * fields that are declared in an extended sub class of {@link BaseDispatcher}. The DataContainer
-	 * will be initialized with the contend of an InputStream and acts as a runtime storage for the
-	 * values of the {@link BaseDispatchComponent} variables.
-	 * 
-	 * @param dispatcherClass the dispatcher class where the variables of type
-	 *                        {@link BaseDispatchComponent} are declared
-	 * @param inStream        InputStream with text content that will be linked to the
-	 *                        {@link BaseDispatchComponent} variables
-	 */
-	public static void setDataContainer(Class<?> dispatcherClass, InputStream inStream) {
-		setDataContainer(dispatcherClass, DataContainer.newContainer(inStream), false);
-	}
+    /**
+     * Assigns a {@link DataContainer} to the {@link BaseDispatchComponent} fields that are declared in an extended subclass of {@link BaseDispatcher}. The DataContainer will be initialized with the
+     * content of an InputStream and acts as a runtime storage for the values of the {@link BaseDispatchComponent} variables.
+     *
+     * @param dispatcherClass the dispatcher class where the variables of type {@link BaseDispatchComponent} are declared
+     * @param inStream        InputStream with text content that will be linked to the {@link BaseDispatchComponent} variables
+     */
+    public static void setDataContainer(Class<?> dispatcherClass, InputStream inStream) {
+        setDataContainer(dispatcherClass, DataContainer.newContainer(inStream), false);
+    }
 
-	/**
-	 * Assigns a {@link DataContainer} to the {@link BaseDispatchComponent}
-	 * fields that are declared in an extended subclass of {@link BaseDispatcher}. The DataContainer
-	 * acts as a runtime storage for the values of the {@link BaseDispatchComponent} variables and is
-	 * linked to the defined file which acts as the permanent storage for the
-	 * {@link DataContainer}.
-	 * 
-	 * @param dispatcherClass the dispatcher class where the variables of type
-	 *                        {@link BaseDispatchComponent} are declared
-	 * @param dispatcherFile  full path and name of the file that stores the values of
-	 *                        {@link BaseDispatchComponent} variables which are defined within the
-	 *                        dispatcher class
-	 */
-	public static void setDataContainer(Class<?> dispatcherClass, String dispatcherFile) {
-		setDataContainer(dispatcherClass, DataContainer.newContainer(new File(dispatcherFile)), false);
-	}
+    /**
+     * Assigns a {@link DataContainer} to the {@link BaseDispatchComponent} fields that are declared in an extended subclass of {@link BaseDispatcher}. The DataContainer acts as a runtime storage for
+     * the values of the {@link BaseDispatchComponent} variables and is linked to the defined file which acts as the permanent storage for the {@link DataContainer}.
+     *
+     * @param dispatcherClass the dispatcher class where the variables of type {@link BaseDispatchComponent} are declared
+     * @param dispatcherFile  full path and name of the file that stores the values of {@link BaseDispatchComponent} variables which are defined within the dispatcher class
+     */
+    public static void setDataContainer(Class<?> dispatcherClass, String dispatcherFile) {
+        setDataContainer(dispatcherClass, DataContainer.newContainer(new File(dispatcherFile)), false);
+    }
 
-	/**
-	 * Assigns a {@link DataContainer} to the {@link BaseDispatchComponent}
-	 * fields that are declared in an extended subclass of {@link BaseDispatcher}. The DataContainer
-	 * acts as a runtime storage for the values of the {@link BaseDispatchComponent} variables that is
-	 * linked to the defined file, which acts as the permanent storage for the
-	 * {@link DataContainer}. This method will also check if the root node
-	 * of tree formatted file matches with the root node defined within the corresponding dispatcher
-	 * class.
-	 * 
-	 * @param dispatcherClass the dispatcher class where the variables of type
-	 *                        {@link BaseDispatchComponent} are declared
-	 * @param dispatcherFile  full path and name of the file that stores the values of
-	 *                        {@link BaseDispatchComponent} variables which are defined within the
-	 *                        dispatcher class
-	 * @param createFile      defines if the nonexistent dispatcherFile gets created
-	 */
-	public static void setDataContainer(Class<?> dispatcherClass, String dispatcherFile, boolean createFile) {
-		setDataContainer(dispatcherClass, DataContainer.newContainer(new File(dispatcherFile)), createFile);
-	}	
+    /**
+     * Assigns a {@link DataContainer} to the {@link BaseDispatchComponent} fields that are declared in an extended subclass of {@link BaseDispatcher}. The DataContainer acts as a runtime storage for
+     * the values of the {@link BaseDispatchComponent} variables that is linked to the defined file, which acts as the permanent storage for the {@link DataContainer}. This method will also check if
+     * the root node of tree formatted file matches with the root node defined within the corresponding dispatcher class.
+     *
+     * @param dispatcherClass the dispatcher class where the variables of type {@link BaseDispatchComponent} are declared
+     * @param dispatcherFile  full path and name of the file that stores the values of {@link BaseDispatchComponent} variables which are defined within the dispatcher class
+     * @param createFile      defines if the nonexistent dispatcherFile gets created
+     */
+    public static void setDataContainer(Class<?> dispatcherClass, String dispatcherFile, boolean createFile) {
+        setDataContainer(dispatcherClass, DataContainer.newContainer(new File(dispatcherFile)), createFile);
+    }
 
-	/**
-	 * Assigns a {@link DataContainer} to the {@link BaseDispatchComponent}
-	 * fields that are declared in an extended subclass of {@link BaseDispatcher}. The DataContainer
-	 * acts as a runtime storage for the values of the {@link BaseDispatchComponent} variables. This
-	 * method will also check if the root node of tree formatted DataContainer matches with the root
-	 * node defined within the corresponding dispatcher class.
-	 * 
-	 * @param dispatcherClass the dispatcher class where the variables of type
-	 *                        {@link BaseDispatchComponent} are declared
-	 * @param dc              {@link DataContainer} instance, representing
-	 *                        the runtime storage for values of the {@link BaseDispatchComponent}
-	 *                        variables
-	 * @param createFile      defines if the nonexistent dispatcherFile gets created
-	 */
-	public static void setDataContainer(Class<?> dispatcherClass, DataContainer dc, boolean createFile) {
-		Map<String, BaseDispatchComponent> dcomp = BaseDispatcher.getDeclaredComponents(dispatcherClass);
-			
-		if (createFile) {
-			if (dc.isTree() && dc.isXML()) {
-				String rn = "";
-				for (String key : dcomp.keySet()) {
-					rn = dcomp.get(key).retrieveRootNode();
-					if (!rn.isEmpty()) {
-						break;
-					}
-				}
-				if (!dc.xmlInstance().getRootNode().contentEquals(rn)) {
-					dc.xmlInstance().initXmlEditor(rn);
-				}
-			}
-			try {
-				if(dc.getInputFile().exists() == false) {
-					dc.createFile();
-				}
-			} catch (IOException e) {
-				MLogger.getInstance().log(Level.SEVERE, e);
-			}
-		}
-		dcMap.put(dispatcherClass.getSimpleName(), dc);
-	}
+    /**
+     * Assigns a {@link DataContainer} to the {@link BaseDispatchComponent} fields that are declared in an extended subclass of {@link BaseDispatcher}. The DataContainer acts as a runtime storage for
+     * the values of the {@link BaseDispatchComponent} variables. This method will also check if the root node of tree formatted DataContainer matches with the root node defined within the
+     * corresponding dispatcher class.
+     *
+     * @param dispatcherClass the dispatcher class where the variables of type {@link BaseDispatchComponent} are declared
+     * @param dc              {@link DataContainer} instance, representing the runtime storage for values of the {@link BaseDispatchComponent} variables
+     * @param createFile      defines if the nonexistent dispatcherFile gets created
+     */
+    public static void setDataContainer(Class<?> dispatcherClass, DataContainer dc, boolean createFile) {
+        Map<String, BaseDispatchComponent> dcomp = BaseDispatcher.getDeclaredComponents(dispatcherClass);
 
-	/**
-	 * @param dispatcherClass the dispatcher class where the variables of type
-	 *                        {@link BaseDispatchComponent} are declared
-	 * @return the field instances as list of the committed class via reflection
-	 */
-	public static List<Field> getFields(Class<?> dispatcherClass) {
-		return Arrays.asList(dispatcherClass.getDeclaredFields());
-	}
+        if (createFile) {
+            if (dc.isTree() && dc.isXML()) {
+                String rn = "";
+                for (String key : dcomp.keySet()) {
+                    rn = dcomp.get(key).retrieveRootNode();
+                    if (!rn.isEmpty()) {
+                        break;
+                    }
+                }
+                if (!dc.xmlInstance().getRootNode().contentEquals(rn)) {
+                    try {
+                        dc.xmlInstance().initXmlEditor(rn);
+                    } catch (ParserConfigurationException | SAXException | IOException e) {
+                        throw new DataContainerException(e);
+                    }
+                }
+            }
+            if (!dc.getInputFile().exists()) {
+                try {
+                    dc.createFile();
+                } catch (IOException e) {
+                    throw new DataContainerException(e);
+                }
+            }
+        }
+        dcMap.put(dispatcherClass.getSimpleName(), dc);
+    }
 
-	/**
-	 * @param dispatcherClass the dispatcher class where the variables of type
-	 *                        {@link BaseDispatchComponent} are declared
-	 * @return the {@link BaseDispatchComponent} instances as map by using the {@link #getFields(Class)}
-	 *         method
-	 */
-	public static Map<String, BaseDispatchComponent> getDeclaredComponents(Class<?> dispatcherClass) {
-		Map<String, BaseDispatchComponent> componentMap = new HashMap<>();
-		for (Field fld : getFields(dispatcherClass)) {
-			// Get the runtime object to execute the method with
-			Object fieldInstance = null;
-			try {
-				fieldInstance = fld.get(dispatcherClass);
-			} catch (IllegalArgumentException | IllegalAccessException e) {
-				e.printStackTrace();
-			}
-			if (fieldInstance != null) {
-				if (fieldInstance instanceof BaseDispatchComponent) {
-					componentMap.put(fld.getName(), ((BaseDispatchComponent) fieldInstance));
-				}
-			}
-		}
-		return componentMap;
-	}
+    /**
+     * @param dispatcherClass the dispatcher class where the variables of type {@link BaseDispatchComponent} are declared
+     * @return the field instances as list of the committed class via reflection
+     */
+    public static List<Field> getFields(Class<?> dispatcherClass) {
+        return Arrays.asList(dispatcherClass.getDeclaredFields());
+    }
 
-	/**
-	 * Checks if the assigned file matches with the expected format of the
-	 * {@link BaseDispatchComponent}.
-	 * 
-	 * @param fileName Full name of the file to check
-	 * @param rootNode The value of this parameter defines the expected name of the root node within
-	 *                 tree formated file
-	 * @return true = rootNode matches with the first node within the file ; false = rootNode does not
-	 *         match to the first node within the file
-	 * @throws IOException
-	 */
-//	static boolean checkDispatcherFile(String fileName, String rootNode) throws IOException {
-//		return checkDispatcherFile(new DataContainer(new File(fileName)), rootNode, false);
-//	}
-
-	/**
-	 * Checks if the file, associated with the DataContainer <code>dc</code>, matches with the expected
-	 * format of the {@link BaseDispatchComponent}.
-	 * 
-	 * @param dc       DataContainer instance with the associated file, that needs to be checked
-	 * @param rootNode The value of this parameter defines the expected name of the root node within
-	 *                 tree formated file.
-	 * @return true = rootNode matches with the first node within the file ; false = rootNode does not
-	 *         match to the first node within the file
-	 * @throws IOException
-	 */
-//	static boolean checkDispatcherFile(DataContainer dc, String rootNode) throws IOException {
-//		return checkDispatcherFile(dc, rootNode, false);
-//	}
-
-	/**
-	 * Checks if the file, associated with the DataContainer <code>dc</code>, matches with the expected
-	 * format of the {@link BaseDispatchComponent}.
-	 * 
-	 * @param dc        DataContainer instance with the associated file, that needs to be checked
-	 * @param rootNode  The value of this parameter defines the expected name of the root node within
-	 *                  tree formated file
-	 * @param createNew defines the behavior if the file does not exist.<br>
-	 *                  true = create new file with first node and return true<br>
-	 *                  false = do nothing and return false
-	 * @return true = rootNode matches with the first node within the file ; false = rootNode does not
-	 *         match to the first node within the file
-	 * @throws IOException
-	 */
-//	static boolean checkDispatcherFile(DataContainer dc, String rootNode, boolean createNew) throws IOException {
-//		File file = new File(dc.getInputFile().getPath());		
-//		if (createNew && !file.exists()) {	
-//			String filePath = file.getPath();
-//			if(StringUtils.isBlank(rootNode)) {
-//				dc.createFile(filePath);
-//			} else {
-//				dc.createFile(filePath, rootNode);
-//			}
-//		}
-//		return file.exists();
-//	}
-
-	/**
-	 * Removes all the mappings from the {@link #dcMap}.
-	 */
-//	public static void clearDataContainer() {
-//		dcMap.clear();
-//	}
-//
-//	public static Map<String, DataContainer> getDataContainers() {
-//		return dcMap;
-//	}
+    /**
+     * @param dispatcherClass the dispatcher class where the variables of type {@link BaseDispatchComponent} are declared
+     * @return the {@link BaseDispatchComponent} instances as map by using the {@link #getFields(Class)} method
+     */
+    public static Map<String, BaseDispatchComponent> getDeclaredComponents(Class<?> dispatcherClass) {
+        Map<String, BaseDispatchComponent> componentMap = new HashMap<>();
+        for (Field fld : getFields(dispatcherClass)) {
+            // Get the runtime object to execute the method with
+            Object fieldInstance = null;
+            try {
+                fieldInstance = fld.get(dispatcherClass);
+            } catch (IllegalArgumentException | IllegalAccessException e) {
+                e.printStackTrace();
+            }
+            if (fieldInstance != null) {
+                if (fieldInstance instanceof BaseDispatchComponent) {
+                    componentMap.put(fld.getName(), ((BaseDispatchComponent) fieldInstance));
+                }
+            }
+        }
+        return componentMap;
+    }
 
 }

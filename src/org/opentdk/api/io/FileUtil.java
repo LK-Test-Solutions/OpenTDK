@@ -202,8 +202,6 @@ public class FileUtil {
 	 */
 	public static void copyFile(String sourceFile, String targetFile) throws IOException {
 		FileUtils.copyFile(new File(sourceFile), new File(targetFile));
-//		OutputStream os = new FileOutputStream(targetFile);
-//		return Files.copy(Paths.get(sourceFile), os);
 	}
 
 	/**
@@ -442,7 +440,7 @@ public class FileUtil {
 	 * @param file The {@link java.io.File} instance of the file to work with.
 	 * @return A list of type String with all lines of the file as elements.
 	 */
-	public static String getRowsAsString(File file) {
+	public static String getRowsAsString(File file) throws IOException {
 		return getRowsAsString(file.getPath());
 	}
 
@@ -453,7 +451,7 @@ public class FileUtil {
 	 * @param path Full name (path + name) of the file to work with.
 	 * @return A list of type String with all lines of the file as elements.
 	 */
-	public static String getRowsAsString(String path) {
+	public static String getRowsAsString(String path) throws IOException {
 		return getRowsAsString(path, -1);
 	}
 	
@@ -465,7 +463,7 @@ public class FileUtil {
 	 * @param lineCount Possibility to determine the number of iterations/lines. Use {@literal -} 1 to switch off.
 	 * @return A list of type string with all lines of the file as elements.
 	 */
-	public static String getRowsAsString(String path, int lineCount) {
+	public static String getRowsAsString(String path, int lineCount) throws IOException {
 		return getRowsAsString(path, lineCount, StandardCharsets.UTF_8);
 	}
 
@@ -478,13 +476,10 @@ public class FileUtil {
 	 * @param encoding Character encoding, see {@link java.nio.charset.StandardCharsets}
 	 * @return A list of type string with all lines of the file as elements.
 	 */
-	public static String getRowsAsString(String path, int lineCount, Charset encoding) {
-		BufferedReader br = null;
+	public static String getRowsAsString(String path, int lineCount, Charset encoding) throws IOException {
 		StringBuilder sb = new StringBuilder();
-		try {
-			br = new BufferedReader(new FileReader(path, encoding));
-
-			String line = null;
+		try (BufferedReader br = new BufferedReader(new FileReader(path, encoding))) {
+			String line;
 			int i = 0;
 			while ((line = br.readLine()) != null) {
 				sb.append(line).append('\n');
@@ -493,41 +488,30 @@ public class FileUtil {
 				}
 				i++;
 			}		
-		} catch (IOException e) {
-			MLogger.getInstance().log(Level.SEVERE, e);
-			throw new RuntimeException(e);
-		} finally {
-			if (br != null) {
-				try {
-					br.close();
-				} catch (IOException e) {
-					e.printStackTrace();
-				}
-			}
 		}
 		return new String(sb);
 	}
 
 	/**
-	 * Read the lines of a ASCII file to a {@link java.util.List} by using the
+	 * Read the lines of an ASCII file to a {@link java.util.List} by using the
 	 * {@link java.io.BufferedReader}. This is a very fast type of reading. Especially for large files.
 	 * 
 	 * @param file The {@link java.io.File} instance of the file to work with.
 	 * @return A list of type string with all lines of the file as elements.
 	 */
-	public static List<String> getRowsAsList(File file) {
+	public static List<String> getRowsAsList(File file) throws IOException {
 		return FileUtil.getRowsAsList(file.getPath());
 	}
 
 	/**
-	 * Read the lines of a ASCII file to a {@link java.util.List} by using the
+	 * Read the lines of an ASCII file to a {@link java.util.List} by using the
 	 * {@link java.io.BufferedReader}. This is a very fast type of reading. Especially for large files.
 	 * Default character encoding is UTF8.
 	 * 
 	 * @param path Full name (path + name) of the file to work with.
 	 * @return A list of type string with all lines of the file as elements.
 	 */
-	public static List<String> getRowsAsList(String path) {		
+	public static List<String> getRowsAsList(String path) throws IOException {
 		return getRowsAsList(path, StandardCharsets.UTF_8);
 	}
 	
@@ -539,27 +523,13 @@ public class FileUtil {
 	 * @param encoding Character encoding, see {@link java.nio.charset.StandardCharsets}
 	 * @return A list of type string with all lines of the file as elements.
 	 */
-	public static List<String> getRowsAsList(String path, Charset encoding) {
-		BufferedReader br = null;
+	public static List<String> getRowsAsList(String path, Charset encoding) throws IOException {
 		List<String> rows = new ArrayList<>();
-		try {
-			br = new BufferedReader(new FileReader(path, encoding));
-
-			String line = null;
+		try(BufferedReader br = new BufferedReader(new FileReader(path, encoding))) {
+			String line;
 			while ((line = br.readLine()) != null) {
 				rows.add(line);
 			}		
-		} catch (IOException e) {
-			MLogger.getInstance().log(Level.SEVERE, e);
-			throw new RuntimeException(e);
-		} finally {
-			if (br != null) {
-				try {
-					br.close();
-				} catch (IOException e) {
-					e.printStackTrace();
-				}
-			}
 		}
 		return rows;
 	}
@@ -572,7 +542,7 @@ public class FileUtil {
 	 * @param path Full name (path + name) of the file to read the content from.
 	 * @return The file content as string.
 	 */
-	public static String getContent(String path) {
+	public static String getContent(String path) throws IOException {
 		return getContent(path, StandardCharsets.UTF_8);
 	}
 	
@@ -584,15 +554,8 @@ public class FileUtil {
 	 * @param cs The {@link java.nio.charset.Charset}, used to transfer the file content into the returned string.
 	 * @return The file content as string.
 	 */
-	public static String getContent(String path, Charset cs) {
-		InputStream stream = null;
-		try {
-			stream = new FileInputStream(path);
-		} catch (FileNotFoundException e) {
-			MLogger.getInstance().log(Level.SEVERE, e);
-			throw new RuntimeException(e);
-		}
-		return getContent(stream, cs);
+	public static String getContent(String path, Charset cs) throws IOException{
+		return getContent(new FileInputStream(path), cs);
 	}
 
 	/**
@@ -615,7 +578,7 @@ public class FileUtil {
 	 * @param is An object of type {@link java.io.InputStream} with the content
 	 * @return The content of the {@link java.io.InputStream} object as string.
 	 */
-	public static String getContent(InputStream is) {
+	public static String getContent(InputStream is) throws IOException {
 		return getContent(is, StandardCharsets.UTF_8);
 	}
 	
@@ -640,24 +603,12 @@ public class FileUtil {
 	 * @param cs {@link java.nio.charset.StandardCharsets}
 	 * @return The content of the {@link java.io.InputStream} object as string.
 	 */
-	public static String getContent(InputStream is, Charset cs) {
+	public static String getContent(InputStream is, Charset cs) throws IOException {
 		StringBuilder sb = new StringBuilder();
-		try {
-			BufferedReader br = new BufferedReader(new InputStreamReader(is, cs));
+		try(BufferedReader br = new BufferedReader(new InputStreamReader(is, cs))) {
 			String line;
 			while ((line = br.readLine()) != null) {
 				sb.append(line);
-			}
-		} catch (IOException e) {
-			MLogger.getInstance().log(Level.SEVERE, e);
-			throw new RuntimeException(e);
-		} finally {
-			try {
-				if (is != null) {
-					is.close();
-				}
-			} catch (IOException e) {
-				e.printStackTrace();
 			}
 		}
 		return new String(sb);
@@ -670,28 +621,13 @@ public class FileUtil {
 	 * @param list     Object of type List(String) which content will be written into the output file.
 	 * @param fileName Full path and name of the file, where content of the list will be written.
 	 */
-	public static void writeOutputFile(List<String> list, String fileName) {
-		FileWriter writer = null;
-		try {
-			FileUtil.createFile(fileName, true);
-			writer = new FileWriter(fileName);
+	public static void writeOutputFile(List<String> list, String fileName) throws IOException {
+		FileUtil.createFile(fileName, true);
+		try(FileWriter writer = new FileWriter(fileName)) {
 			for (String row : list) {
 				writer.append(row);
 				writer.append(System.getProperty("line.separator"));
 			}
-		} catch (IOException e) {
-			MLogger.getInstance().log(Level.SEVERE, e);
-			throw new RuntimeException(e);
-		} finally {
-			try {
-				if (writer != null) {
-					writer.flush();
-					writer.close();
-				}
-			} catch (IOException e) {
-				e.printStackTrace();
-			}
-
 		}
 	}
 	
@@ -702,25 +638,10 @@ public class FileUtil {
 	 * @param content     Object of type String which content will be written into the output file.
 	 * @param fileName Full path and name of the file, where content of the list will be written.
 	 */
-	public static void writeOutputFile(String content, String fileName) {
-		FileWriter writer = null;
-		try {
-			FileUtil.createFile(fileName, true);
-			writer = new FileWriter(fileName);
+	public static void writeOutputFile(String content, String fileName) throws IOException {
+		FileUtil.createFile(fileName, true);
+		try(FileWriter writer = new FileWriter(fileName)) {
 			writer.append(content);
-		} catch (IOException e) {
-			MLogger.getInstance().log(Level.SEVERE, e);
-			throw new RuntimeException(e);
-		} finally {
-			try {
-				if (writer != null) {
-					writer.flush();
-					writer.close();
-				}
-			} catch (IOException e) {
-				e.printStackTrace();
-			}
-
 		}
 	}
 

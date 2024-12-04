@@ -62,14 +62,6 @@ public class PropertiesDataContainer extends TabularContainer {
 	public void deleteField(String headerName, String attributeName, String attributeValue, Filter fltr) {
 		int headerIndex = getHeaderIndex(headerName);
 		getValues().get(0)[headerIndex] = null;
-//		if(!dc.getInputFile().getPath().isEmpty()) {
-//			try {
-//				writeData(dc.getInputFile().getPath());
-//			} catch (IOException e) {
-//				MLogger.getInstance().log(Level.SEVERE, e, "getRowsIndexes");
-//				throw new RuntimeException(e);
-//			}
-//		}
 	}
 
 	@Override

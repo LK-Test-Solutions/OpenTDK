@@ -245,11 +245,6 @@ public class MathUtil {
 	 * @param values a list of type double
 	 */
 	public static void norm(final List<Double> values) {
-		if (values.isEmpty()) {
-			MLogger.getInstance().log("Empty list comitted to the MathUtil.norm() method.");
-			return;
-		}
-
 		double max = getMaximum(values);
 		double min = getMinimum(values, 1);
 
@@ -318,10 +313,6 @@ public class MathUtil {
 	 * @return the list of ranks or an empty list if the list is empty
 	 */
 	public static List<Double> getRankList(final List<? extends Number> values) {
-		if (values.isEmpty()) {
-			MLogger.getInstance().log("Empty list comitted to the MathUtil.norm() method.");
-		}
-
 		List<Double> sorted = new ArrayList<>(), ranks = new ArrayList<>();
 		for (Number temp : values) {
 			sorted.add(temp.doubleValue());

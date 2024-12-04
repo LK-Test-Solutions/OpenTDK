@@ -85,11 +85,9 @@ public class YAMLDataContainer implements SpecificContainer {
 		case JSON:
 			return json.asString();
 		case YAML:
-			MLogger.getInstance().log(Level.INFO, "Format already is YAML. Call asString", getClass().getSimpleName(), "asString(format)");
 			return asString();
 		default:
-			MLogger.getInstance().log(Level.WARNING, "Format not supported to export from YAML", getClass().getSimpleName(), "asString(format)");
-			return "";
+			throw new IllegalArgumentException("No EContainerFormat detected");
 		}
 	}
 
@@ -126,14 +124,6 @@ public class YAMLDataContainer implements SpecificContainer {
 
 	public void add(String name, String value, Filter filter) {
 		json.add(name, value, filter);
-	}
-	
-	public void add(String name, String fieldName, String newFieldValue, Filter filter) {
-		json.add(name, fieldName, newFieldValue, filter);
-	}
-
-	public void add(String name, String fieldName, String oldFieldValue, String newFieldValue, Filter filter) {
-		json.add(name, fieldName, oldFieldValue, newFieldValue, filter);
 	}
 
 	public void delete(String name, Filter filter) {

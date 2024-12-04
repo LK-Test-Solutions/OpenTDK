@@ -85,7 +85,7 @@ public class XMLEditor {
 	 * access can be performed to the XML file, using the methods provided by this class. The root tag
 	 * has its default value {@link #rootNodeName}.
 	 */
-	public XMLEditor() {
+	public XMLEditor() throws ParserConfigurationException, IOException, SAXException {
 		this("");
 	}
 
@@ -96,7 +96,7 @@ public class XMLEditor {
 	 * 
 	 * @param rootNode {@link #rootNodeName}
 	 */
-	public XMLEditor(String rootNode) {
+	public XMLEditor(String rootNode) throws ParserConfigurationException, IOException, SAXException {
 		if (rootNode != null && StringUtils.isNotBlank(rootNode)) {
 			rootNodeName = rootNode;
 		}
@@ -110,7 +110,7 @@ public class XMLEditor {
 	 * 
 	 * @param inputFile {@link #xmlFile}
 	 */
-	public XMLEditor(File inputFile) {
+	public XMLEditor(File inputFile) throws ParserConfigurationException, IOException, SAXException {
 		if(FileUtil.checkFile(inputFile.getPath())) {
 			xmlFile = inputFile;
 			FileUtil.checkDir(xmlFile.getParentFile(), true);
@@ -125,7 +125,7 @@ public class XMLEditor {
 	 * 
 	 * @param inStream {@link #xmlStream}
 	 */
-	public XMLEditor(InputStream inStream) {
+	public XMLEditor(InputStream inStream) throws ParserConfigurationException, IOException, SAXException {
 		if(inStream == null) {
 			throw new IllegalArgumentException("Input stream is empty");
 		} else {
@@ -134,59 +134,52 @@ public class XMLEditor {
 		}
 	}
 
-	private void createXMLEditor() {
+	private void createXMLEditor() throws ParserConfigurationException, IOException, SAXException {
 		DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
-		try {
-			// Security settings: If document type definitions (DTD) are disallowed, almost all XML entity attacks are prevented
-			dbf.setFeature("http://apache.org/xml/features/disallow-doctype-decl", true);
-			// Set recommended secure processing features
-			dbf.setFeature(XMLConstants.FEATURE_SECURE_PROCESSING, true);
-			// dbf.setFeature(XMLConstants.ACCESS_EXTERNAL_DTD, false);
-			// dbf.setFeature(XMLConstants.ACCESS_EXTERNAL_SCHEMA, false);
-		} catch (ParserConfigurationException e) {
-			MLogger.getInstance().log(Level.SEVERE, e.getMessage(), getClass().getSimpleName(), "createXMLEditor");
-		}
+		// Security settings: If document type definitions (DTD) are disallowed, almost all XML entity attacks are prevented
+		dbf.setFeature("http://apache.org/xml/features/disallow-doctype-decl", true);
+		// Set recommended secure processing features
+		dbf.setFeature(XMLConstants.FEATURE_SECURE_PROCESSING, true);
+		// dbf.setFeature(XMLConstants.ACCESS_EXTERNAL_DTD, false);
+		// dbf.setFeature(XMLConstants.ACCESS_EXTERNAL_SCHEMA, false);
+
 		// Security settings: This prevents the parser to expand the entity reference node
 		dbf.setExpandEntityReferences(false);
 
-		try {
-			DocumentBuilder docBuilder = dbf.newDocumentBuilder();
-			if ((xmlFile != null) && (xmlFile.exists())) {
-				doc = docBuilder.parse(xmlFile);
-				doc.getDocumentElement().normalize();
-				rootElement = doc.getDocumentElement();
-				rootNodeName = rootElement.getNodeName();
-			} else if (xmlStream != null) {
-				xmlStream.reset();
-				doc = docBuilder.parse(xmlStream);
-				doc.getDocumentElement().normalize();
-				rootElement = doc.getDocumentElement();
-				rootNodeName = rootElement.getNodeName();
-			} else {
-				doc = docBuilder.newDocument();
-				rootElement = doc.createElement(rootNodeName);
-				doc.appendChild(rootElement);
-			}
-		} catch (ParserConfigurationException | SAXException | IOException e) {
-			MLogger.getInstance().log(Level.SEVERE, e.getMessage(), getClass().getSimpleName(), "createXMLEditor");
+		DocumentBuilder docBuilder = dbf.newDocumentBuilder();
+		if ((xmlFile != null) && (xmlFile.exists())) {
+			doc = docBuilder.parse(xmlFile);
+			doc.getDocumentElement().normalize();
+			rootElement = doc.getDocumentElement();
+			rootNodeName = rootElement.getNodeName();
+		} else if (xmlStream != null) {
+			xmlStream.reset();
+			doc = docBuilder.parse(xmlStream);
+			doc.getDocumentElement().normalize();
+			rootElement = doc.getDocumentElement();
+			rootNodeName = rootElement.getNodeName();
+		} else {
+			doc = docBuilder.newDocument();
+			rootElement = doc.createElement(rootNodeName);
+			doc.appendChild(rootElement);
 		}
 	}
 
-	public Element addChildElement(Element parent, Element child) {
+	public Element addChildElement(Element parent, Element child) throws IOException, TransformerException {
 		Element newE = (Element) parent.appendChild(child);
 		save();
 		return newE;
 	}
 
-	public Element addElement(String xPath, String elementName, String elementValue) {
+	public Element addElement(String xPath, String elementName, String elementValue) throws IOException, TransformerException {
 		return addElement(xPath, elementName, elementValue, "", "");
 	}
 
-	public Element addElement(String xPath, String elementName, String attributeName, String attributeValue) {
+	public Element addElement(String xPath, String elementName, String attributeName, String attributeValue) throws IOException, TransformerException {
 		return addElement(xPath, elementName, "", attributeName, attributeValue);
 	}
 
-	public Element addElement(String xPath, String elementName, String elementValue, String attributeName, String attributeValue) {
+	public Element addElement(String xPath, String elementName, String elementValue, String attributeName, String attributeValue) throws IOException, TransformerException {
 		// check if all xpath nodes exist and create missing nodes
 		Element pathE = checkXPath(xPath, true);
 		// create the element to add
@@ -202,7 +195,7 @@ public class XMLEditor {
 		return newChild;
 	}
 
-	public Element addRootElement(Element rootE) {
+	public Element addRootElement(Element rootE) throws IOException, TransformerException {
 		rootNodeName = rootE.getNodeName();
 		Element outRoot = doc.createElement(rootNodeName);
 		save();
@@ -217,7 +210,7 @@ public class XMLEditor {
 	 * @param entry The XML tag as type {@link org.w3c.dom.Element} that will be added to the root
 	 *              element of the current XML Document
 	 */
-	public void addTag(Element entry) {
+	public void addTag(Element entry) throws IOException, TransformerException {
 		Element parent = null;
 		if (parent == null) {
 			// get the root node of the XML document
@@ -232,7 +225,7 @@ public class XMLEditor {
 	 * 
 	 * @param tagName the tag name
 	 */
-	public void addTag(String tagName) {
+	public void addTag(String tagName) throws IOException, TransformerException {
 		addTag(createElement(tagName));
 	}
 
@@ -245,7 +238,7 @@ public class XMLEditor {
 	 * @param tagName    Name of the XML tag
 	 * @param attributes HashMap containing attributes with their names as keys
 	 */
-	public void addTag(String tagName, HashMap<String, String> attributes) {
+	public void addTag(String tagName, HashMap<String, String> attributes) throws IOException, TransformerException {
 		addTag(createElement(tagName, attributes));
 	}
 
@@ -256,7 +249,7 @@ public class XMLEditor {
 	 * @param attributeName  name of the attribute as String
 	 * @param attributeValue value of the attribute as String
 	 */
-	public void addTag(String tagName, String attributeName, String attributeValue) {
+	public void addTag(String tagName, String attributeName, String attributeValue) throws IOException, TransformerException {
 		HashMap<String, String> hm = new HashMap<String, String>();
 		hm.put(attributeName, attributeValue);
 		addTag(tagName, hm);
@@ -267,7 +260,7 @@ public class XMLEditor {
 	 * @param createMissingNodes true: missing elements along the path get created to be able to place an element, false otherwise
 	 * @return the detected or created element defined at the end of the xPath or null if there is no hiz
 	 */
-	public Element checkXPath(String xPath, boolean createMissingNodes) {
+	public Element checkXPath(String xPath, boolean createMissingNodes) throws IOException, TransformerException {
 		List<Element> eList = getElementsListFromXPath(xPath);
 		Element resolvedE = null;
 		for (Element searchE : eList) {
@@ -435,7 +428,7 @@ public class XMLEditor {
 	 * 
 	 * @param target the {@link org.w3c.dom.Element} that should be removed. Retrieve via getElement().
 	 */
-	public void delElement(Element target) {
+	public void delElement(Element target) throws IOException, TransformerException {
 		getElement(target).getParentNode().removeChild(getElement(target));
 		save();
 	}
@@ -446,7 +439,7 @@ public class XMLEditor {
 	 * @param tagName    the tag name
 	 * @param attributes the target element's attributes
 	 */
-	public void delElement(String tagName, HashMap<String, String> attributes) {
+	public void delElement(String tagName, HashMap<String, String> attributes) throws IOException, TransformerException {
 		this.delElement(this.getElement(this.createElement(tagName, attributes)));
 	}
 
@@ -457,17 +450,17 @@ public class XMLEditor {
 	 * @param attributeName  the target's attributeName for identification
 	 * @param attributeValue the target's attributeValue for identification
 	 */
-	public void delElement(String tagName, String attributeName, String attributeValue) {
+	public void delElement(String tagName, String attributeName, String attributeValue) throws IOException, TransformerException {
 		HashMap<String, String> hm = new HashMap<String, String>();
 		hm.put(attributeName, attributeValue);
 		delElement(tagName, hm);
 	}
 
-	public void delElement(String xPath, String elementName) {
+	public void delElement(String xPath, String elementName) throws IOException, TransformerException {
 		delElement(xPath, elementName, "", "");
 	}
 
-	public void delElement(String xPath, String elementName, String attributeName, String attributeValue) {
+	public void delElement(String xPath, String elementName, String attributeName, String attributeValue) throws IOException, TransformerException {
 		Element oldChild = null;
 		Element pathE = checkXPath(xPath, false);
 		if (pathE != null) {
@@ -707,20 +700,15 @@ public class XMLEditor {
 		return ret;
 	}
 
-	public ArrayList<Element> getElementsListByXPath(String exp) {
+	public ArrayList<Element> getElementsListByXPath(String exp) throws XPathExpressionException {
 		NodeList nl = null;
 		ArrayList<Element> ret = new ArrayList<Element>();
 		if (isXPath(exp)) {
 			XPath xPath = XPathFactory.newInstance().newXPath();
-			try {
-				// Security: This evaluation is fine because the document object is already checked when the XML is
-				// read.
-				nl = (NodeList) xPath.compile(exp).evaluate(doc, XPathConstants.NODESET);
-				for (int i = 0; i < nl.getLength(); i++) {
-					ret.add((Element) nl.item(i));
-				}
-			} catch (XPathExpressionException e) {
-				MLogger.getInstance().log(Level.SEVERE, e);
+			// Security: This evaluation is fine because the document object is already checked when the XML is read.
+			nl = (NodeList) xPath.compile(exp).evaluate(doc, XPathConstants.NODESET);
+			for (int i = 0; i < nl.getLength(); i++) {
+				ret.add((Element) nl.item(i));
 			}
 		}
 		return ret;
@@ -835,17 +823,12 @@ public class XMLEditor {
 	 * @param exp XPath referencing to the searched element
 	 * @return the value of the found element
 	 */
-	public String getText(String exp) {
+	public String getText(String exp) throws XPathExpressionException {
 		String ret = null;
 		if (isXPath(exp)) {
 			XPath xPath = XPathFactory.newInstance().newXPath();
-			try {
-				// Security: This evaluation is fine because the document object is already checked when the XML is
-				// read.
-				ret = (String) xPath.compile(exp).evaluate(doc, XPathConstants.STRING);
-			} catch (XPathExpressionException e) {
-				MLogger.getInstance().log(Level.SEVERE, e);
-			}
+			// Security: This evaluation is fine because the document object is already checked when the XML is read.
+			ret = (String) xPath.compile(exp).evaluate(doc, XPathConstants.STRING);
 		}
 		return ret;
 	}
@@ -982,7 +965,7 @@ public class XMLEditor {
 	 * @param oldEl the old Element
 	 * @param newEl the new Element
 	 */
-	public void replaceElement(Element oldEl, Element newEl) {
+	public void replaceElement(Element oldEl, Element newEl) throws IOException, TransformerException {
 		Element parent = this.getParent(oldEl);
 		this.delElement(oldEl);
 		this.addChildElement(parent, newEl);
@@ -998,7 +981,7 @@ public class XMLEditor {
 	/**
 	 * Write out results of the XMLEditor to the related file.
 	 */
-	public void save() {
+	public void save() throws IOException, TransformerException {
 		if (doc.getDocumentURI() != null) {
 			if (StringUtils.isNotBlank(doc.getDocumentURI())) {
 				save(xmlFile);
@@ -1006,46 +989,40 @@ public class XMLEditor {
 		}
 	}
 
-	public void save(String fileName) {
+	public void save(String fileName) throws IOException, TransformerException {
 		save(new File(fileName));
 	}
 
-	public void save(File xmlOut) {
+	public void save(File xmlOut) throws IOException, TransformerException {
 		TransformerFactory transformerFactory = TransformerFactory.newInstance();
-		try {
-			// Set recommended secure processing features
-			transformerFactory.setFeature(XMLConstants.FEATURE_SECURE_PROCESSING, true);
+		// Set recommended secure processing features
+		transformerFactory.setFeature(XMLConstants.FEATURE_SECURE_PROCESSING, true);
 
-			Transformer transformer = transformerFactory.newTransformer();
-			transformer.setOutputProperty(OutputKeys.INDENT, "yes");
+		Transformer transformer = transformerFactory.newTransformer();
+		transformer.setOutputProperty(OutputKeys.INDENT, "yes");
 
-			removeEmptySpace(rootElement);
+		removeEmptySpace(rootElement);
 
-			DOMSource source = new DOMSource(doc);
-			StreamResult result = new StreamResult(xmlOut);
-			transformer.transform(source, result);
-
-			doc.getDocumentElement().normalize();
-
-		} catch (TransformerException e) {
-			MLogger.getInstance().log(Level.SEVERE, e.getMessage(), getClass().getSimpleName(), "save");
-		}
+		DOMSource source = new DOMSource(doc);
+		StreamResult result = new StreamResult(xmlOut);
+		transformer.transform(source, result);
+		doc.getDocumentElement().normalize();
 	}
 
 	/**
 	 * @return {@link #asString(Node, boolean)}  for the complete {@link #doc} object
 	 */
-	public String asString() {
+	public String asString() throws IOException, TransformerException {
 		return asString(doc, false);
 	}
 
 	/**
 	 * @return the whole content (with children) of the given XML node as string.
 	 */
-	public String asString(Node node, boolean skipHeader) {
+	public String asString(Node node, boolean skipHeader) throws TransformerException, IOException {
 		String ret = "";
 		TransformerFactory transformerFactory  = TransformerFactory.newInstance();
-		try {
+		try(StringWriter writer = new StringWriter()) {
 			// Set recommended secure processing features
 			transformerFactory .setFeature(XMLConstants.FEATURE_SECURE_PROCESSING, true);
 
@@ -1060,16 +1037,12 @@ public class XMLEditor {
 
 			// Transform the node to a string
 			DOMSource source = new DOMSource(node);
-			StringWriter writer = new StringWriter();
 			StreamResult result = new StreamResult(writer);
 			transformer.transform(source, result);
 			// Store result
 			ret = writer.getBuffer().toString();
 
 			// Clean up
-			writer.close();
-		} catch (TransformerException | IOException e) {
-			MLogger.getInstance().log(Level.SEVERE, e.getMessage(), getClass().getSimpleName(), "asString");
 		}
 		return ret;
 	}
@@ -1082,7 +1055,7 @@ public class XMLEditor {
 	 * @param val new TextValue
 	 * @return the changed element
 	 */
-	public Element setElementValue(Element el, String val) {
+	public Element setElementValue(Element el, String val) throws IOException, TransformerException {
 		while (el.hasChildNodes()) {
 			el.removeChild(el.getFirstChild());
 		}

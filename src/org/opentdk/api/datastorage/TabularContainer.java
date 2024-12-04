@@ -1,45 +1,16 @@
-/*
- * BSD 2-Clause License
- *
- * Copyright (c) 2022, LK Test Solutions GmbH
- * All rights reserved.
- *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions are met:
- *
- * 1. Redistributions of source code must retain the above copyright notice, this
- *    list of conditions and the following disclaimer.
- *
- * 2. Redistributions in binary form must reproduce the above copyright notice,
- *    this list of conditions and the following disclaimer in the documentation
- *    and/or other materials provided with the distribution.
- *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
- * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
- * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
- * DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE
- * FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
- * DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
- * SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
- * CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
- * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
- * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
- */
 package org.opentdk.api.datastorage;
 
+import org.apache.commons.lang3.StringUtils;
+import org.json.JSONArray;
+import org.json.JSONObject;
 import org.opentdk.api.filter.Filter;
 import org.opentdk.api.filter.FilterRule;
 import org.opentdk.api.io.FileUtil;
 import org.opentdk.api.io.XFileWriter;
-import org.opentdk.api.logger.MLogger;
 import org.opentdk.api.util.StringUtil;
-import org.apache.commons.lang3.StringUtils;
-import org.json.JSONArray;
-import org.json.JSONObject;
 
 import java.io.*;
 import java.util.*;
-import java.util.logging.Level;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -117,7 +88,7 @@ public class TabularContainer implements SpecificContainer {
 		super();
 	}
 	
-	// INHERTIED METHODS
+	// INHERITED METHODS
 	
 	@Override
 	public String asString() {
@@ -136,7 +107,6 @@ public class TabularContainer implements SpecificContainer {
 	public String asString(EContainerFormat format, int depth, boolean skipParent) {
 		switch (format) {
 			case CSV:
-				MLogger.getInstance().log(Level.INFO, "Format already is CSV. Call asString instead.", getClass().getSimpleName(), "asString(format)");
 				return asString();
 			case JSON:
 				if(skipParent) {
@@ -170,8 +140,7 @@ public class TabularContainer implements SpecificContainer {
 					return jsonArray.toString(depth);
 				}
 			default:
-				MLogger.getInstance().log(Level.WARNING, "Format not supported to export from CSV", getClass().getSimpleName(), "asString(format)");
-				return "";
+				throw new IllegalArgumentException("Format " + format.name() + " not supported to export from CSV");
 		}
 	}
 
@@ -194,7 +163,7 @@ public class TabularContainer implements SpecificContainer {
 	}
 
 	@Override
-	public void readData(File sourceFile) {
+	public void readData(File sourceFile) throws IOException {
 		if (sourceFile != null && sourceFile.exists()) {
 			if (StringUtils.isNotBlank(sourceFile.getPath())) {
 				putFile(sourceFile.getPath(), getColumnDelimiter());
@@ -206,7 +175,7 @@ public class TabularContainer implements SpecificContainer {
 		headerOrientation = orientation;
 	}
 	
-	private void putFile(String fileName, String columnDelimiter) {
+	private void putFile(String fileName, String columnDelimiter) throws IOException {
 		switch (headerOrientation) {
 			case COLUMN:
 				putDatasetRows(fileName, columnDelimiter);
@@ -215,8 +184,7 @@ public class TabularContainer implements SpecificContainer {
 				putDatasetColumns(fileName, columnDelimiter);
 				break;
 			default:
-				MLogger.getInstance().log(Level.WARNING, "Source header '" + headerOrientation + "' is not valid for this method. Either EHeader.COLUMN or EHeader.ROW.", getClass().getSimpleName(), "putFile");
-				break;
+				throw new IllegalArgumentException("Source header '" + headerOrientation + "' is not valid for this method. Either EHeader.COLUMN or EHeader.ROW.");
 		}
 	}
 	
@@ -228,7 +196,7 @@ public class TabularContainer implements SpecificContainer {
 	 * @param fileName        The filename of the file to read from
 	 * @param columnDelimiter The column delimiter used to separate columns in the CSV file
 	 */
-	private void putDatasetColumns(String fileName, String columnDelimiter) {
+	private void putDatasetColumns(String fileName, String columnDelimiter) throws IOException {
 		List<List<String>> tmpRowsList = new ArrayList<>();
 		int rowIndex = -1;
 
@@ -282,7 +250,7 @@ public class TabularContainer implements SpecificContainer {
 	 * @param fileName        The filename of the file to read from
 	 * @param columnDelimiter The column delimiter used to separate columns in the CSV file
 	 */
-	private void putDatasetRows(String fileName, String columnDelimiter) {
+	private void putDatasetRows(String fileName, String columnDelimiter) throws IOException {
 		int rowIndex = -1;
 		int headerState = 0;
 		HashMap<Integer, Integer> sortMap = null;
@@ -291,11 +259,10 @@ public class TabularContainer implements SpecificContainer {
 		for (String row : rows) {
 			rowIndex++;
 			String[] valArray = row.split(columnDelimiter, -1);
-
-//			String[] valArray = dc.cleanValues(row.split(columnDelimiter, -1));
-			if (rowIndex < getHeaderRowIndex()) {
-				MLogger.getInstance().log(Level.INFO, "Skipping row with index " + rowIndex + "! Just rows after the headerRowIndex will be loaded into DataContainer.", this.getClass().getSimpleName(), "putDataSetRows");
-			} else if (rowIndex == getHeaderRowIndex()) {
+//			if (rowIndex < getHeaderRowIndex()) {
+//				log.info("Skipping row with index " + rowIndex + "! Just rows after the headerRowIndex will be loaded into DataContainer.", this.getClass().getSimpleName(), "putDataSetRows");
+//			} else
+			if (rowIndex == getHeaderRowIndex()) {
 				if (getHeaders().isEmpty()) {
 					setHeaders(valArray);
 				}
@@ -317,26 +284,20 @@ public class TabularContainer implements SpecificContainer {
 					} else {
 						addRow(sortValues(sortMap, valArray));
 					}
-				} else {
-					MLogger.getInstance().log(Level.WARNING, "The number of values doesn't match to the number of headers! Values will not be added to DataContainer.", this.getClass().getSimpleName(), "putDataSetRows");
 				}
+//				else {
+//					log.warn("The number of values doesn't match to the number of headers! Values will not be added to DataContainer.");
+//				}
 			}
 		}
 	}
 
 	@Override
-	public void readData(InputStream stream) {
+	public void readData(InputStream stream) throws IOException {
 		String content = null;
 		if (stream != null) {
-			InputStreamReader inputStreamReader = new InputStreamReader(stream);
-			Stream<String> streamOfString = new BufferedReader(inputStreamReader).lines();
-			content = streamOfString.collect(Collectors.joining());
-
-			streamOfString.close();
-			try {
-				inputStreamReader.close();
-			} catch (IOException e) {
-				MLogger.getInstance().log(Level.SEVERE, e);
+			try(InputStreamReader inputStreamReader = new InputStreamReader(stream); Stream<String> streamOfString = new BufferedReader(inputStreamReader).lines()) {
+				content = streamOfString.collect(Collectors.joining());
 			}
 		}
 		if(content != null) {
@@ -426,17 +387,6 @@ public class TabularContainer implements SpecificContainer {
 	}
 	
 	public void addRow(String[] row) {
-		// TODO when readData with filter was called, the data is already filtered, what's the purpose here
-//		if ((getFilter() != null) && (!getFilter().getFilterRules().isEmpty())) {
-//			try {
-//				if (!checkValuesFilter(row, getFilter())) {
-//					return;
-//				}
-//			} catch (NoSuchHeaderException e) {
-//				MLogger.getInstance().log(Level.SEVERE, e);
-//				throw new RuntimeException(e);
-//			}
-//		}
 		values.add(addMetaValues(row));
 	}
 
@@ -459,32 +409,28 @@ public class TabularContainer implements SpecificContainer {
 	
 	public void appendData(String fileName, String columnDelimiter) throws IOException {
 		setColumnDelimiter(columnDelimiter);
-		// TODO when readData with filter was called, the data is already filtered, what's the purpose here
-//		if (getFilter() == null) {
-//			setFilter(new Filter());
-//		}
 		readData(new File(fileName));
 	}
 
-	public void appendDataContainer(DataContainer dc) {
+	public boolean appendDataContainer(DataContainer dc) {
 		if (checkHeader(dc.tabInstance().getHeaders()) == 0) {
 			values.addAll(dc.tabInstance().getValues());
+			return true;
 		} else if (checkHeader(dc.tabInstance().getHeaders()) == 1) {
 			int i = 0;
 			while (i < dc.tabInstance().getRowCount()) {
 				String[] row = new String[getColumnCount()];
 				for (int j = 0; j < getColumnCount(); j++) {
-					try {
-						row[j] = dc.tabInstance().getValuesAsList(getHeadersIndexed().get(j)).get(i);
-					} catch (RuntimeException e) {
-						row[j] = null;
-					}
+					row[j] = dc.tabInstance().getValuesAsList(getHeadersIndexed().get(j)).get(i);
 				}
 				i++;
 				values.add(row);
 			}
-		} else {
-			MLogger.getInstance().log(Level.WARNING, "Headers of appending DataContainer don't match to the headers of the current instance. DataContainer will not be appended!", getClass().getSimpleName(), getClass().getName(), "appendDataContainer");
+			return true;
+		}
+		else {
+			return false;
+			// log.warn("Headers of appending DataContainer don't match to the headers of the current instance. DataContainer will not be appended!", getClass().getSimpleName(), getClass().getName(), "appendDataContainer");
 		}
 	}
 
@@ -526,7 +472,7 @@ public class TabularContainer implements SpecificContainer {
 
 	
 	public int checkHeader(String[] referenceHeaders, String[] compareHeaders) {
-		HashMap<String, Integer> refH = new HashMap<String, Integer>();
+		HashMap<String, Integer> refH = new HashMap<>();
 		for (int i = 0; i < referenceHeaders.length; i++) {
 			refH.put(referenceHeaders[i], i);
 		}
@@ -539,16 +485,12 @@ public class TabularContainer implements SpecificContainer {
 	 * @param values String Array with all values of a defined data set (row).
 	 * @param fltr   Object of type Filter, which includes one or more filter rules
 	 * @return true = values match to the filter; false = values don't match to the
-	 * @throws NoSuchHeaderException If the container does not have a header that is defined in the
-	 *                               filter
 	 */
-	private boolean checkValuesFilter(String[] values, Filter fltr) throws NoSuchHeaderException {
+	private boolean checkValuesFilter(String[] values, Filter fltr) {
 		boolean returnCode = false;
 		for (FilterRule rule : fltr.getFilterRules()) {
-//			if ((!this.headerNames.containsKey(rule.getHeaderName())) && (!getImplicitHeaders().contains(rule.getHeaderName()))) {
-
 			if (!headerNames.containsKey(rule.getHeaderName())) {
-				throw new NoSuchHeaderException("Header " + rule.getHeaderName() + " doesn't comply to DataContainer!");
+				throw new IllegalCallerException("Header " + rule.getHeaderName() + " doesn't comply to DataContainer!");
 			}
 		}
 		// return true, if no filter rule is defined
@@ -588,7 +530,7 @@ public class TabularContainer implements SpecificContainer {
 	 * @return an Array of strings with cleaned values
 	 */
 	private String[] cleanValues(String[] inArray) {
-		ArrayList<String> valList = new ArrayList<String>(Arrays.asList(inArray));
+		ArrayList<String> valList = new ArrayList<>(Arrays.asList(inArray));
 		String[] outArray = new String[inArray.length];
 		for (int i = 0; i < inArray.length; i++) {
 			outArray[i] = StringUtil.removeEnclosingQuotes(valList.get(i));
@@ -618,14 +560,6 @@ public class TabularContainer implements SpecificContainer {
 	public void deleteValue(String headerName) {
 		int headerIndex = getHeaderIndex(headerName);
 		values.get(0)[headerIndex] = null;
-		// TODO why does deleteValue have to write into file instantly ?
-//		if (!dc.getInputFile().getPath().isEmpty()) {
-//			try {
-//				writeData(dc.getInputFile().getPath());
-//			} catch (IOException e) {
-//				MLogger.getInstance().log(Level.SEVERE, e);
-//			}
-//		}
 	}
 
 	
@@ -634,22 +568,16 @@ public class TabularContainer implements SpecificContainer {
 	}
 
 	
-	public void deleteRows(Filter fltr) {
+	public boolean deleteRows(Filter fltr) {
 		int[] indexes = getRowsIndexes(fltr);
 		if (indexes.length == 0) {
-			MLogger.getInstance().log(Level.WARNING, "No row indexes detected for the filter criteria", getClass().getSimpleName(), "deleteRows");
+			// log.warn("No row indexes detected for the filter criteria", getClass().getSimpleName(), "deleteRows");
+			return false;
 		} else {
 			for (int index : indexes) {
 				getValues().remove(index);
 			}
-			// TODO why does deleteRows have to write into file instantly ?
-//			if (!dc.getInputFile().getName().isEmpty()) {
-//				try {
-//					writeData(dc.getInputFile().getPath());
-//				} catch (IOException e) {
-//					MLogger.getInstance().log(Level.SEVERE, e);
-//				}
-//			}
+			return true;
 		}
 	}
 
@@ -678,7 +606,7 @@ public class TabularContainer implements SpecificContainer {
 					}
 					break;
 				default:
-					MLogger.getInstance().log(Level.WARNING, "Header Type '" + headerOrientation.toString() + "' not supported by for export!", getClass().getSimpleName(), getClass().getName(), "exportContainer");
+					// log.warn("Header Type '" + headerOrientation.toString() + "' not supported by for export!", getClass().getSimpleName(), getClass().getName(), "exportContainer");
 					return;
 			}
 			writer.close();
@@ -789,16 +717,16 @@ public class TabularContainer implements SpecificContainer {
 		return colList;
 	}
 
-	public List<?> getColumnsList(Filter rowFilter, Class<?> storageObject) {
-		List<?> ret = new ArrayList<>();
-		List<String[]> rows = getColumnsList(new String[0], new int[0], rowFilter);
-		for(String[] row : rows) {
-			for(int i = 0; i < row.length; i++) {
-				// .. TODO
-			}
-		}
-		return ret;
-	}
+//	public List<?> getColumnsList(Filter rowFilter, Class<?> storageObject) {
+//		List<?> ret = new ArrayList<>();
+//		List<String[]> rows = getColumnsList(new String[0], new int[0], rowFilter);
+//		for(String[] row : rows) {
+//			for(int i = 0; i < row.length; i++) {
+//				// .. TODO
+//			}
+//		}
+//		return ret;
+//	}
 	
 	public int getHeaderIndex(String headerName) {
 		int retVal = -1;
@@ -937,16 +865,11 @@ public class TabularContainer implements SpecificContainer {
 	public int[] getRowsIndexes(Filter filter) {
 		StringBuilder indexBuffer = new StringBuilder();
 		for (int i = 0; i < values.size(); i++) {
-			try {
-				if (checkValuesFilter(values.get(i), filter)) {
-					if (indexBuffer.length() > 0) {
-						indexBuffer.append(";");
-					}
-					indexBuffer.append(String.valueOf(i));
+			if (checkValuesFilter(values.get(i), filter)) {
+				if (indexBuffer.length() > 0) {
+					indexBuffer.append(";");
 				}
-			} catch (NoSuchHeaderException e) {
-				MLogger.getInstance().log(Level.SEVERE, e, "getRowsIndexes");
-				throw new RuntimeException(e);
+				indexBuffer.append(i);
 			}
 		}
 		if (indexBuffer.length() > 0) {
@@ -980,31 +903,26 @@ public class TabularContainer implements SpecificContainer {
 		}
 		for (int i = 0; i < rowIndexes.length; i++) {
 			if (rowIndexes[i] >= values.size()) {
-				MLogger.getInstance().log(Level.INFO, "Row-index " + rowIndexes[i] + " is out of range. Maximum number of rows in container is " + values.size(), this.getClass().getSimpleName(), this.getClass().getName(), "getRowsList");
+				// log.warn("Row-index " + rowIndexes[i] + " is out of range. Maximum number of rows in container is " + values.size(), this.getClass().getSimpleName(), this.getClass().getName(), "getRowsList");
 				break;
 			}
 			String[] row = values.get(rowIndexes[i]);
 			if (row.length > 0) {
-				try {
-					if (checkValuesFilter(row, rowFilter)) {
-						if (columnHeaders.length == 0) {
-							// if no headerNames are defined, return the complete row
-							outValues.add(row);
-						} else {
-							// else return the values of all defined columns
-							String[] rowArray = new String[columnHeaders.length];
-							for (int j = 0; j < columnHeaders.length; j++) {
-								int headerIndex = getHeaderIndex(columnHeaders[j]);
-								if (headerIndex > -1) {
-									rowArray[j] = row[headerIndex];
-								}
+				if (checkValuesFilter(row, rowFilter)) {
+					if (columnHeaders.length == 0) {
+						// if no headerNames are defined, return the complete row
+						outValues.add(row);
+					} else {
+						// else return the values of all defined columns
+						String[] rowArray = new String[columnHeaders.length];
+						for (int j = 0; j < columnHeaders.length; j++) {
+							int headerIndex = getHeaderIndex(columnHeaders[j]);
+							if (headerIndex > -1) {
+								rowArray[j] = row[headerIndex];
 							}
-							outValues.add(rowArray);
 						}
+						outValues.add(rowArray);
 					}
-				} catch (NoSuchHeaderException e) {
-					MLogger.getInstance().log(Level.SEVERE, e, "getRowsList");
-					throw new RuntimeException(e);
 				}
 			}
 		}
@@ -1314,14 +1232,6 @@ public class TabularContainer implements SpecificContainer {
 				}
 			}
 		}
-		// TODO why does setValues have to write to file ?
-//		if (!dc.getInputFile().getName().isEmpty()) {
-//			try {
-//				writeData(dc.getInputFile().getPath());
-//			} catch (IOException e) {
-//				MLogger.getInstance().log(Level.SEVERE, e);
-//			}
-//		}
 	}
 
 	

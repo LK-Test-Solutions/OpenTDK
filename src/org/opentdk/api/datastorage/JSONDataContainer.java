@@ -97,18 +97,11 @@ public class JSONDataContainer implements SpecificContainer {
 	}
 	
 	@Override
-	public void readData(InputStream stream) {
+	public void readData(InputStream stream) throws IOException {
 		String content = null;
 		if (stream != null) {
-			InputStreamReader inputStreamReader = new InputStreamReader(stream);
-			Stream<String> streamOfString = new BufferedReader(inputStreamReader).lines();
-			content = streamOfString.collect(Collectors.joining());
-
-			streamOfString.close();
-			try {
-				inputStreamReader.close();
-			} catch (IOException e) {
-				MLogger.getInstance().log(Level.SEVERE, e);
+			try(InputStreamReader inputStreamReader = new InputStreamReader(stream); Stream<String> streamOfString = new BufferedReader(inputStreamReader).lines();) {
+				content = streamOfString.collect(Collectors.joining());
 			}
 		}
 		if (content != null) {
@@ -127,17 +120,12 @@ public class JSONDataContainer implements SpecificContainer {
 	}
 	
 	@Override
-	public void writeData(File srcFile) throws IOException {
+	public void writeData(File srcFile) throws IOException, JSONException {
 		if (json == null || json.isEmpty()) {
 			MLogger.getInstance().log(Level.WARNING, "JSON object is not initialized or empty ==> No JSON content to write", getClass().getSimpleName(), "writeData");
 		} else {
-			try {
-				FileUtil.createFile(srcFile, true);
-				FileUtil.writeOutputFile(json.toString(1), srcFile.getPath());
-			} catch (JSONException e) {
-				MLogger.getInstance().log(Level.SEVERE, e);
-				throw new RuntimeException(e);
-			}
+			FileUtil.createFile(srcFile, true);
+			FileUtil.writeOutputFile(json.toString(1), srcFile.getPath());
 		}
 	}
 	
@@ -176,14 +164,6 @@ public class JSONDataContainer implements SpecificContainer {
 				break;
 			}
 		}
-	}
-	
-	public void add(String name, String fieldName, String newValue, Filter filter) {
-		MLogger.getInstance().log(Level.INFO, "Method not used", getClass().getSimpleName(), "add");
-	}
-
-	public void add(String headerName, String fieldName, String oldFieldValue, String newFieldValue, Filter filter) {
-		MLogger.getInstance().log(Level.INFO, "Method not used", getClass().getSimpleName(), "add");
 	}
 
 	public void delete(String name, Filter filter) {

@@ -27,13 +27,17 @@
  */
 package org.opentdk.api.datastorage;
 
+import org.opentdk.api.exception.DataContainerException;
 import org.opentdk.api.io.XMLEditor;
 import org.opentdk.api.filter.Filter;
 import org.opentdk.api.filter.FilterRule;
 import org.apache.commons.lang3.StringUtils;
-import org.opentdk.api.logger.MLogger;
 import org.w3c.dom.Element;
+import org.xml.sax.SAXException;
 
+import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.transform.TransformerException;
+import javax.xml.xpath.XPathExpressionException;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
@@ -64,15 +68,15 @@ public class XMLDataContainer implements SpecificContainer {
 	
 	private String rootNode; 
 		
-	public static XMLDataContainer newInstance() {		
+	public static XMLDataContainer newInstance() throws ParserConfigurationException, IOException, SAXException {
 		return new XMLDataContainer();
 	}	
 
-	private XMLDataContainer() {
+	private XMLDataContainer() throws ParserConfigurationException, IOException, SAXException {
 		initXmlEditor(null);
 	}
 	
-	public void initXmlEditor(String root) {
+	public void initXmlEditor(String root) throws ParserConfigurationException, IOException, SAXException {
 		xEdit = new XMLEditor(root);
 		rootNode = xEdit.getRootNodeName();
 	}
@@ -81,7 +85,11 @@ public class XMLDataContainer implements SpecificContainer {
 	public String asString() {
 		String ret = "";
 		if (xEdit != null) {
-			ret = xEdit.asString();
+			try {
+				ret = xEdit.asString();
+			} catch (IOException | TransformerException e) {
+				throw new DataContainerException(e);
+			}
 		}
 		return ret;
 	}
@@ -89,7 +97,7 @@ public class XMLDataContainer implements SpecificContainer {
 	/**
 	 * See {@link #getContent(String, boolean)}
 	 */
-	public String getContent(String expr) {
+	public String getContent(String expr) throws IOException, TransformerException {
 		return getContent(expr, false);
 	}
 
@@ -98,7 +106,7 @@ public class XMLDataContainer implements SpecificContainer {
 	 * @param subContentOnly ignore the node that the expr refers to and only get the child content
 	 * @return the whole content (with children) of the given XML node as string.
 	 */
-	public String getContent(String expr, boolean subContentOnly) {
+	public String getContent(String expr, boolean subContentOnly) throws IOException, TransformerException {
 		String ret = "";
 		if (xEdit != null) {
 			Element node = xEdit.getElement(expr);
@@ -121,20 +129,32 @@ public class XMLDataContainer implements SpecificContainer {
 	@Override
 	public void readData(File sourceFile) throws IOException {
 		if(sourceFile.exists() && sourceFile.isFile() && Files.size(sourceFile.toPath()) > 0) {
-			xEdit = new XMLEditor(sourceFile); 	
+			try {
+				xEdit = new XMLEditor(sourceFile);
+			} catch (ParserConfigurationException | SAXException e) {
+				throw new DataContainerException(e);
+			}
 			rootNode = xEdit.getRootNodeName();
 		}
 	}
 
 	@Override
 	public void readData(InputStream stream) throws IOException {
-		xEdit = new XMLEditor(stream);
+		try {
+			xEdit = new XMLEditor(stream);
+		} catch (ParserConfigurationException | SAXException e) {
+			throw new DataContainerException(e);
+		}
 		rootNode = xEdit.getRootNodeName();
 	}
 
 	@Override
 	public void writeData(File outputFile) {
-		xEdit.save(outputFile);
+		try {
+			xEdit.save(outputFile);
+		} catch (IOException | TransformerException e) {
+			throw new DataContainerException(e);
+		}
 	}
 	
 	public String getRootNode() {
@@ -158,17 +178,25 @@ public class XMLDataContainer implements SpecificContainer {
 			if (fltrRule.getHeaderName().equalsIgnoreCase("XPath")) {
 				Element oldElement = xEdit.getElement(name, attr, oldValue);
 				if (oldElement == null) {
-					if(StringUtils.isBlank(attr)) {
-						xEdit.addElement(fltrRule.getValue(), name, value); // Add tag
-					} else {
-						xEdit.addElement(fltrRule.getValue(), name, attr, value); // Add tag with attribute
+					try {
+						if(StringUtils.isBlank(attr)) {
+							xEdit.addElement(fltrRule.getValue(), name, value); // Add tag
+						} else {
+							xEdit.addElement(fltrRule.getValue(), name, attr, value); // Add tag with attribute
+						}
+					} catch (IOException | TransformerException e) {
+						throw new DataContainerException(e);
 					}
 				} else {
 					// Add in case of existing tag results to an attribute replacement
 					if(StringUtils.isNotBlank(attr)) {
 						Element newElement = oldElement;
 						newElement.setAttribute(attr, value);
-						xEdit.replaceElement(oldElement, newElement);
+						try {
+							xEdit.replaceElement(oldElement, newElement);
+						} catch (IOException | TransformerException e) {
+							throw new DataContainerException(e);
+						}
 					}
 				}
 				break;
@@ -176,15 +204,15 @@ public class XMLDataContainer implements SpecificContainer {
 		}
 	}
 
-	public void delete(String name, String value) {
+	public void delete(String name, String value) throws IOException, TransformerException {
 		delete(name, value, new Filter());
 	}
 
-	public void delete(String name, String value, Filter filter) {
+	public void delete(String name, String value, Filter filter) throws IOException, TransformerException {
 		delete(name, value, "", filter);
 	}
 
-	public void delete(String headerName, String attributeName, String attributeValue, Filter filter) {
+	public void delete(String headerName, String attributeName, String attributeValue, Filter filter) throws IOException, TransformerException {
 		for (FilterRule fltrRule : filter.getFilterRules()) {
 			if (fltrRule.getHeaderName().equalsIgnoreCase("XPath")) {
 				xEdit.delElement(fltrRule.getValue(), headerName, attributeName, attributeValue);
@@ -200,7 +228,7 @@ public class XMLDataContainer implements SpecificContainer {
 	 * @param tagName Name of the tag(s) to search for
 	 * @return String-Array with the text-content of all found tags
 	 */
-	public String[] get(String tagName) {
+	public String[] get(String tagName) throws XPathExpressionException {
 		return get(tagName, new Filter());
 	}
 
@@ -218,7 +246,7 @@ public class XMLDataContainer implements SpecificContainer {
 	 * @param filter Filter condition for more precise localization of the element within the data structure
 	 * @return String array with the text-content of all found tags
 	 */
-	public String[] get(String tagName, Filter filter) {
+	public String[] get(String tagName, Filter filter) throws XPathExpressionException {
 		return (String[]) get(tagName, filter, "values");
 	}
 
@@ -243,7 +271,7 @@ public class XMLDataContainer implements SpecificContainer {
 	 *                   Array with all matching tag objects
 	 * @return Array of the type, specified by returnType argument
 	 */
-	public Object[] get(String headerName, Filter filter, String returnType) {
+	public Object[] get(String headerName, Filter filter, String returnType) throws XPathExpressionException {
 
 		List<Element> filteredElements = new ArrayList<>();
 		List<String> filteredValues = new ArrayList<>();
@@ -282,7 +310,7 @@ public class XMLDataContainer implements SpecificContainer {
 		for (FilterRule fr : filter.getFilterRules()) {
 			if (!fr.getHeaderName().equalsIgnoreCase("XPath")) {
 				for (Element fltrE : filteredElements) {
-					if (fr.isValidValue(fltrE.getTextContent(), fr.getValue()) == false) {
+					if (!fr.isValidValue(fltrE.getTextContent(), fr.getValue())) {
 						retValues.remove(fltrE.getTextContent());
 						retElements.remove(fltrE);
 					}
@@ -290,15 +318,9 @@ public class XMLDataContainer implements SpecificContainer {
 				}
 			}
 		}
-
-		filteredElements = null;
-		filteredValues = null;
-
 		if (returnType.equalsIgnoreCase("elements")) {
-			filteredValues = null;
 			return retElements.toArray(new Element[retElements.size()]);
 		} else {
-			filteredElements = null;
 			return retValues.toArray(new String[retValues.size()]);
 		}
 	}
@@ -343,11 +365,11 @@ public class XMLDataContainer implements SpecificContainer {
 		return lst.toArray(new String[lst.size()]);
 	}
 	
-	public void set(String name, String value) {
+	public void set(String name, String value) throws IOException, TransformerException, XPathExpressionException {
 		set(name, value, new Filter(), false);
 	}
 
-	public void set(String tagName, String tagValue, Filter filter, boolean allOccurrences) {
+	public void set(String tagName, String tagValue, Filter filter, boolean allOccurrences) throws IOException, TransformerException, XPathExpressionException {
 		// Creates the missing nodes if not present
 		for (FilterRule fltrRule : filter.getFilterRules()) {
 			if (fltrRule.getHeaderName().equalsIgnoreCase("XPath")) {
@@ -365,7 +387,7 @@ public class XMLDataContainer implements SpecificContainer {
 		}
 	}
 	
-	public void set(String tagName, String attributeName, String oldAttributeValue, String attributeValue, Filter filter) {
+	public void set(String tagName, String attributeName, String oldAttributeValue, String attributeValue, Filter filter) throws IOException, TransformerException {
 		for (FilterRule fltrRule : filter.getFilterRules()) {
 			if (fltrRule.getHeaderName().equalsIgnoreCase("XPath")) {
 				Element oldEl = xEdit.getElement(tagName, attributeName, oldAttributeValue);

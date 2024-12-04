@@ -48,7 +48,7 @@ public class LineParser {
 					res.append("None");
 					break;
 				default:
-					throw new RuntimeException("No parse mode set");
+					throw new IllegalArgumentException("No parse mode set");
 				}
 			}
 		}

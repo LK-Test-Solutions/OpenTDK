@@ -172,10 +172,6 @@ public class DateUtil {
 	 */
 	public static String get(String dateTime, int diff, String format, ChronoUnit unit) {
 		Instant instant = getInstantInstance(dateTime);
-		if (instant == null) {
-			MLogger.getInstance().log(Level.WARNING, "DateUtil.getDateTravel ==> Could not create an instant for the committed date: " + dateTime);
-			return "";
-		}
 		ZonedDateTime zonedInstant = instant.atZone(zoneId);
 		if (diff > 0) {
 			zonedInstant = zonedInstant.plus(diff, unit);
@@ -187,7 +183,7 @@ public class DateUtil {
 	}
 
 	/**
-	 * Retrieves the first date or time or time stamp depending on the committed type.
+	 * Retrieves the first date or time stamp depending on the committed type.
 	 * 
 	 * @param type   The field to use e.g. <code>ChronoField.DAY_OF_WEEK</code> gets the first day of the week.
 	 * @param format The preferred date/time format e.g. yyyyMMdd.
@@ -201,7 +197,7 @@ public class DateUtil {
 	}
 
 	/**
-	 * Retrieves the first date or time or time stamp depending on the committed type.
+	 * Retrieves the first date or time stamp depending on the committed type.
 	 * 
 	 * @param dateTime A valid date, time or time stamp string in one of the formats defined in <code>EFormat</code>.
 	 * @param type     The field to use e.g. <code>ChronoField.DAY_OF_WEEK</code> gets the first day of the week.
@@ -229,7 +225,7 @@ public class DateUtil {
 	}
 
 	/**
-	 * Retrieves the first date or time or time stamp depending on the committed type with the possibility to travel to the past or future.
+	 * Retrieves the first date or time stamp depending on the committed type with the possibility to travel to the past or future.
 	 * 
 	 * @param dateTime A valid date, time or time stamp string in one of the formats defined in <code>EFormat</code>.
 	 * @param type     The field to use e.g. <code>ChronoField.DAY_OF_WEEK</code> gets the first day of the week.
@@ -243,7 +239,7 @@ public class DateUtil {
 	}
 
 	/**
-	 * Retrieves the last date or time or time stamp depending on the committed type.
+	 * Retrieves the last date or time stamp depending on the committed type.
 	 * 
 	 * @param type   The field to use e.g. <code>ChronoField.DAY_OF_WEEK</code> gets the first day of the week.
 	 * @param format The preferred date/time format e.g. yyyyMMdd.
@@ -257,7 +253,7 @@ public class DateUtil {
 	}
 
 	/**
-	 * Retrieves the last date or time or time stamp depending on the committed type.
+	 * Retrieves the last date or time stamp depending on the committed type.
 	 * 
 	 * @param dateTime A valid date, time or time stamp string in one of the formats defined in <code>EFormat</code>.
 	 * @param type     The field to use e.g. <code>ChronoField.DAY_OF_WEEK</code> gets the first day of the week.
@@ -272,7 +268,7 @@ public class DateUtil {
 	}
 
 	/**
-	 * Retrieves the last date or time or time stamp depending on the committed type with the possibility to travel to the past or future.
+	 * Retrieves the last date or time stamp depending on the committed type with the possibility to travel to the past or future.
 	 * 
 	 * @param type   The field to use e.g. <code>ChronoField.DAY_OF_WEEK</code> gets the first day of the week.
 	 * @param format The preferred date/time format e.g. yyyyMMdd.
@@ -285,7 +281,7 @@ public class DateUtil {
 	}
 
 	/**
-	 * Retrieves the last date or time or time stamp depending on the committed type with the possibility to travel to the past or future.
+	 * Retrieves the last date or time stamp depending on the committed type with the possibility to travel to the past or future.
 	 * 
 	 * @param dateTime A valid date, time or time stamp string in one of the formats defined in <code>EFormat</code>.
 	 * @param type     The field to use e.g. <code>ChronoField.DAY_OF_WEEK</code> gets the first day of the week.
@@ -389,20 +385,16 @@ public class DateUtil {
 		LocalDate ret = null;
 		EFormat format = EFormat.getDateEFormat(inDate);
 		if (format != EFormat.NONE) {
-//			try {
-				int year = format.getYear(inDate);
-				int month = format.getMonth(inDate);
-				int day = format.getDay(inDate);
+			int year = format.getYear(inDate);
+			int month = format.getMonth(inDate);
+			int day = format.getDay(inDate);
 
-				if (year == -1) {
-					year = 0;
-				}
-				if (month != -1 && day != -1) {
-					ret = LocalDate.of(year, month, day);
-				}
-//			} catch (DateTimeException e) {
-//				MLogger.getInstance().log(Level.SEVERE, DateUtil.class.getName() + ".getDateInstance ==> Error while retrieving date: " + inDate);
-//			}
+			if (year == -1) {
+				year = 0;
+			}
+			if (month != -1 && day != -1) {
+				ret = LocalDate.of(year, month, day);
+			}
 		}
 		return ret;
 	}
@@ -418,22 +410,18 @@ public class DateUtil {
 		LocalTime ret = null;
 		EFormat format = EFormat.getDateEFormat(inTime);
 		if (format != EFormat.NONE) {
-//			try {
-				int hours = format.getHour(inTime);
-				int minutes = format.getMinute(inTime);
-				int seconds = format.getSecond(inTime);
+			int hours = format.getHour(inTime);
+			int minutes = format.getMinute(inTime);
+			int seconds = format.getSecond(inTime);
 
-				if (hours != -1 && minutes != -1 && seconds != -1) {
-					int millis = format.getMilliSecond(inTime);
-					int micros = format.getMicroSecond(inTime);
-					int nanos = format.getNanoSecond(inTime);
+			if (hours != -1 && minutes != -1 && seconds != -1) {
+				int millis = format.getMilliSecond(inTime);
+				int micros = format.getMicroSecond(inTime);
+				int nanos = format.getNanoSecond(inTime);
 
-					int rest = (millis * 1000 * 1000) + (micros * 1000) + nanos;
-					ret = LocalTime.of(hours, minutes, seconds, rest);
-				}
-//			} catch (DateTimeException e) {
-//				MLogger.getInstance().log(Level.SEVERE, DateUtil.class.getName() + ".getTimeInstance ==> Error while retrieving time: " + inTime);
-//			}
+				int rest = (millis * 1000 * 1000) + (micros * 1000) + nanos;
+				ret = LocalTime.of(hours, minutes, seconds, rest);
+			}
 		}
 		return ret;
 	}
@@ -449,27 +437,23 @@ public class DateUtil {
 		LocalDateTime ret = null;
 		EFormat format = EFormat.getDateEFormat(inTimestamp);
 		if (format != EFormat.NONE) {
-//			try {
-				int year = format.getYear(inTimestamp);
-				int month = format.getMonth(inTimestamp);
-				int day = format.getDay(inTimestamp);
+			int year = format.getYear(inTimestamp);
+			int month = format.getMonth(inTimestamp);
+			int day = format.getDay(inTimestamp);
 
-				int hours = format.getHour(inTimestamp);
-				int minutes = format.getMinute(inTimestamp);
-				int seconds = format.getSecond(inTimestamp);
+			int hours = format.getHour(inTimestamp);
+			int minutes = format.getMinute(inTimestamp);
+			int seconds = format.getSecond(inTimestamp);
 
-				if (year != -1 && month != -1 && day != -1 && hours != -1 && minutes != -1 && seconds != -1) {
+			if (year != -1 && month != -1 && day != -1 && hours != -1 && minutes != -1 && seconds != -1) {
 
-					int millis = format.getMilliSecond(inTimestamp);
-					int micros = format.getMicroSecond(inTimestamp);
-					int nanos = format.getNanoSecond(inTimestamp);
+				int millis = format.getMilliSecond(inTimestamp);
+				int micros = format.getMicroSecond(inTimestamp);
+				int nanos = format.getNanoSecond(inTimestamp);
 
-					int rest = (millis * 1000 * 1000) + (micros * 1000) + nanos;
-					ret = LocalDateTime.of(year, month, day, hours, minutes, seconds, rest);
-				}
-//			} catch (DateTimeException e) {
-//				MLogger.getInstance().log(Level.SEVERE, DateUtil.class.getName() + ".getTimestampInstance ==> Error while retrieving timestamp: " + inTimestamp);
-//			}
+				int rest = (millis * 1000 * 1000) + (micros * 1000) + nanos;
+				ret = LocalDateTime.of(year, month, day, hours, minutes, seconds, rest);
+			}
 		}
 		return ret;
 	}
@@ -478,7 +462,7 @@ public class DateUtil {
 	 * Retrieves an {@link java.time.Instant} object to the current date, time or time stamp string. This represents an object on the time line and can be
 	 * build out of a {@link java.time.LocalDate}, {@link java.time.LocalTime} or {@link java.time.LocalDateTime} by using the
 	 * {@link java.time.ZonedDateTime} class which is a combination of {@link java.time.LocalDateTime} and {@link java.time.ZoneId} to handle any type on
-	 * the time line.
+	 * the timeline.
 	 * 
 	 * @return The instance for further operations.
 	 */
@@ -501,10 +485,10 @@ public class DateUtil {
 	}
 
 	/**
-	 * Retrieves an {@link java.time.Instant} object to the committed date, time or time stamp string. This represents an object on the time line and can
+	 * Retrieves an {@link java.time.Instant} object to the committed date, time or time stamp string. This represents an object on the timeline and can
 	 * be build out of a {@link java.time.LocalDate}, {@link java.time.LocalTime} or {@link java.time.LocalDateTime} by using the
 	 * {@link java.time.ZonedDateTime} class which is a combination of {@link java.time.LocalDateTime} and {@link java.time.ZoneId} to handle any type on
-	 * the time line.
+	 * the timeline.
 	 * 
 	 * @param dateTime a valid input string in one of the formats defined in <code>EFormat</code>.
 	 * @return The instance for further operations.

@@ -118,7 +118,7 @@ public class ArchiveUtil {
 	}
 
 	/**
-	 * Compress a directory with the 7 ZIP application via command line. Only usable on windows.
+	 * Compress a directory with the 7 ZIP application via command line. Only usable on Windows.
 	 * 
 	 * @param currentDirectory The path to the folder with the files to compress (folder name included)
 	 * @param zipExecutable    The full name (path + name) of the 7 ZIP executable
@@ -128,12 +128,12 @@ public class ArchiveUtil {
 	 * @throws IllegalArgumentException in case of null or blank parameter or invalid directory
 	 * @throws UncheckedIOException when the process execution failed
 	 */
-	public int runProcess(String currentDirectory, String zipExecutable, String archiveName) {
+	public int runProcess(String currentDirectory, String zipExecutable, String archiveName) throws IOException, InterruptedException {
 		return runProcess(currentDirectory, zipExecutable, archiveName, ArchiveCommand.Add);
 	}
 
 	/**
-	 * Compress a directory with the 7 ZIP application via command line. Only usable on windows.
+	 * Compress a directory with the 7 ZIP application via command line. Only usable on Windows.
 	 * 
 	 * @param currentDirectory The path to the folder with the files to compress (folder name included)
 	 * @param zipExecutable    The full name (path + name) of the 7 ZIP executable
@@ -145,12 +145,12 @@ public class ArchiveUtil {
 	 * @throws IllegalArgumentException in case of null or blank parameter or invalid directory
 	 * @throws UncheckedIOException when the process execution failed
 	 */
-	public int runProcess(String currentDirectory, String zipExecutable, String archiveName, ArchiveCommand command) {
+	public int runProcess(String currentDirectory, String zipExecutable, String archiveName, ArchiveCommand command) throws IOException, InterruptedException {
 		return runProcess(currentDirectory, zipExecutable, archiveName, command, false);
 	}
 
 	/**
-	 * Compress a directory with the 7 ZIP application via command line. Only usable on windows.
+	 * Compress a directory with the 7 ZIP application via command line. Only usable on Windows.
 	 * 
 	 * @param currentDirectory The path to the folder with the files to compress (folder name included)
 	 * @param zipExecutable    The full name (path + name) of the 7 ZIP executable
@@ -163,7 +163,7 @@ public class ArchiveUtil {
 	 * @throws IllegalArgumentException in case of null or blank parameter or invalid directory
 	 * @throws UncheckedIOException when the process execution failed
 	 */
-	public int runProcess(String currentDirectory, String zipExecutable, String archiveName, ArchiveCommand command, boolean printDetails) {
+	public int runProcess(String currentDirectory, String zipExecutable, String archiveName, ArchiveCommand command, boolean printDetails) throws IOException, InterruptedException {
 		if (StringUtils.isBlank(currentDirectory) || StringUtils.isBlank(zipExecutable) || StringUtils.isBlank(archiveName)) {
 			throw new IllegalArgumentException("ArchiveUtil.runProcess: Null or blank parameter committed");
 		}
@@ -188,23 +188,14 @@ public class ArchiveUtil {
 				}
 			}
 		} catch (IOException e) {
-			MLogger.getInstance().log(Level.SEVERE, e);
 			throw new UncheckedIOException(e);
 		} finally {
 			if (process != null) {
-				try {
-					ret = process.waitFor();
-				} catch (InterruptedException e) {
-					MLogger.getInstance().log(Level.SEVERE, e);
-				}
+				ret = process.waitFor();
 				process.destroy();
 			}
 			if (reader != null) {
-				try {
-					reader.close();
-				} catch (IOException e) {
-					MLogger.getInstance().log(Level.SEVERE, e);
-				}
+				reader.close();
 			}
 		}
 		return ret;

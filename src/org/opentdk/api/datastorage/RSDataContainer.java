@@ -27,15 +27,12 @@
  */
 package org.opentdk.api.datastorage;
 
-import org.opentdk.api.logger.MLogger;
-
 import java.io.IOException;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.logging.Level;
 
 public class RSDataContainer extends TabularContainer {
 
@@ -47,11 +44,11 @@ public class RSDataContainer extends TabularContainer {
 		super();
 	}
 
-	public void readData(ResultSet rs) throws IOException {
+	public void readData(ResultSet rs) throws IOException, SQLException {
 		readData(rs, "Label");
 	}
 
-	public void readData(ResultSet rs, String headerOrigin) throws IOException {
+	public void readData(ResultSet rs, String headerOrigin) throws IOException, SQLException {
 		if (rs != null) {
 			try {
 				// read description of the ResultSet columns
@@ -81,9 +78,8 @@ public class RSDataContainer extends TabularContainer {
 					}
 					addRow(row);
 				} while (rs.next());
+			} finally {
 				rs.close();
-			} catch (SQLException e) {
-				MLogger.getInstance().log(Level.SEVERE, e, "readData");
 			}
 		}
 	}
