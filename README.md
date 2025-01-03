@@ -13,19 +13,19 @@
 <dependency>
    <groupId>org.opentdk</groupId>
    <artifactId>opentdk-api</artifactId>
-   <version>1.6.4</version>
+   <version>1.6.5</version>
 </dependency> 
 ```
 
 
-The `Open Tool Development Kit` provides packages and classes for easy implementation of java tools or applications. Developers don't need to take care about implementing code for the handling of data souces. Once a data source is required within an application it can be connected to the application by one of the concepts, provided by OpenTDK. These data sources can be configuration files, result sets of DB requests, Webservice responses (JSON, XML, YAML) and several more.
-There are two java projects includes in this repository, which are:
+The `Open Tool Development Kit` provides packages and classes for easy implementation of Java tools or applications. Developers don't need to take care about implementing code for handling data sources. Once a data source is required within an application it can be connected to the application by one of the concepts, provided by OpenTDK. These data sources can be configuration files, result sets of DB requests, Webservice responses (JSON, XML, YAML) and several more.
+There are two Java projects included in this repository, which are:
 
 | Project name | Project purpose |
 |--------------|-----------------|
 | opentdk_api | Implements the functional concepts of OpenTDK to create non-GUI applications |
 | opentdk_gui | Implements concepts and base classes to create JavaFX GUI applications |
-| opentdk_test | Implements java classes, used for regression test of OpenTDK |
+| opentdk_test | Implements Java classes, used for regression test of OpenTDK |
 
 The opentdk_api project includes the following packages:
 
@@ -38,10 +38,12 @@ The package `org.opentdk.api.datastorage` implements a concept to access data fr
 * PropertiesDataContainer: Adapts funktionality to access data of properties files with key/value pairs per row, separated by = symbol
 * RSDataContainer: Adapts functionality to acces data from tabular result sets received by SQL requests
 * XMLDataContainer: Adapts funktionality to acces data in XML format<br>
+* JsonDataContainer: Adapts funktionality to acces data in JSON format<br>
+* YamlDataContainer: Adapts funktionality to acces data in YAML format<br>
 Due to the adaption technique, the package can be extended for nearly any tabular or tree format by implementing format specific DataContainers. There are nearly no code changes required in case that the data source of a DataContainer object will change.<br> 
 
 ### Sample usage:
-A java application is using a DataContainer to load settings from a `.properties` file at runtime. The `.properties` file includes key/value pairs like `Language=german`. Now it is planned to change from the current `.properties` format to a `.xml` format where the same information is stored in tags like `<Language>german</Language>`. In case the tag `Language` is unique in the `.xml` file, then no change is required except assign the new file name `AppSettings.xml` to the String variable `settingsFile`. The following is a complete code sample for loading the content of a file into a DataContainer and getting a value of a defined field (column or node):<br>
+A Java application is using a DataContainer to load settings from a `.properties` file at runtime. The `.properties` file includes key/value pairs like `Language=german`. Now it is planned to change from the current `.properties` format to a `.xml` format where the same information is stored in tags like `<Language>german</Language>`. In case the tag `Language` is unique in the `.xml` file, then no change is required except assign the new file name `AppSettings.xml` to the String variable `settingsFile`. The following is a complete code sample for loading the content of a file into a DataContainer and getting a value of a defined field (column or node):<br>
 `String settingsFile = "AppSettings.properties";`<br>
 `DataContainer dc = new DataContainer(settingsFile);`<br>
 `dc.getValue("Language");`<br>
