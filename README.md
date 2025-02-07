@@ -5,7 +5,6 @@
 | Maturity | moderate stable |
 | Author | LK Test Solutions GmbH |
 | License |	BSD 2-Clause "Simplified" |
-| Documentation, Tutorials, Samples | GitHub Repsoitory [OpenTDK_Labs](https://github.com/LK-Test-Solutions/OpenTDK_Labs) |
 | Download Binaries	| [Releases](https://github.com/LK-Test-Solutions/OpenTDK/releases) |
 
 <b>Maven</b> 
@@ -25,7 +24,6 @@ There are two Java projects included in this repository, which are:
 |--------------|-----------------|
 | opentdk_api | Implements the functional concepts of OpenTDK to create non-GUI applications |
 | opentdk_gui | Implements concepts and base classes to create JavaFX GUI applications |
-| opentdk_test | Implements Java classes, used for regression test of OpenTDK |
 
 The opentdk_api project includes the following packages:
 
@@ -70,14 +68,3 @@ A dispatcher class is defined to setup the logger settings for an application an
 `<AppSettings>`<br>
 &emsp;`<TraceLevel>3</TraceLevel>`<br>
 `</AppSettings>`<br>
-
-## Logger
-The class `org.opentdk.api.logger.MLogger` can be used in a static way without any further setup or initialization, to log messages at runtime of an application into a log file. <br>
-With its implemented default behaviour the `MLogger` will write all messages of level `SEVERE` into the file `Application.log` within a folder `logs` relative to the current working directory. The logfile will be automatically cleared, once a size of 10 MB has been reached and its content will be moved into an archive file with a date prefix in the file name. When an archived files has reached an age of 30 days, it will be deleted next time when the MLogger is called, in case the log file setting will not change.<br>
-### Sample usage:
-`/* Change the behaviour */`<br>
-`MLogger.getInstance().setLogFile("c:/temp/logs/myJavaApp.log");`<br>
-`MLogger.getInstance().setTraceLevel(3); // Log all messages (Error, Warning and Information)`<br>
-`MLogger.getInstance().setLogKeepAge(100); // Keep archived log files for 100 days`<br><br>
-`/* Log an error message */`<br>
-`MLogger.getInstance().log(Level.SEVERE, "The mesh trace string has the wrong format! ", FileUtil.class.getSimpleName(), "createResultsFileName");`<br><br>
