@@ -3,6 +3,9 @@ package org.opentdk.api.util;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+/**
+ * @author FME (LK Test Solutions)
+ */
 public class LineParser {
 	
 	public enum ParseMode {
@@ -18,7 +21,7 @@ public class LineParser {
 		StringBuilder res = new StringBuilder();
 		
 		Pattern pattern = Pattern.compile(regex, 2);
-		Matcher matcher = null;
+		Matcher matcher;
 		if (!line.isEmpty()) {
 			matcher = pattern.matcher(line);
 			if (matcher.find()) {
@@ -29,20 +32,20 @@ public class LineParser {
 					break;
 				case LEFT_OF_MATCHING_STRING:
 					if (includePattern) {
-						res.append(line.substring(0, matcher.end()));
+						res.append(line, 0, matcher.end());
 						break;
 					}
-					res.append(line.substring(0, matcher.start()));
+					res.append(line, 0, matcher.start());
 					break;
 				case MATCHING_STRING:
-					res.append(line.substring(matcher.start(), matcher.end()));
+					res.append(line, matcher.start(), matcher.end());
 					break;
 				case RIGHT_OF_MATCHING_STRING:
 					if (includePattern) {
-						res.append(line.substring(matcher.start(), line.length()));
+						res.append(line.substring(matcher.start()));
 						break;
 					}
-					res.append(line.substring(matcher.end(), line.length()));
+					res.append(line.substring(matcher.end()));
 					break;
 				case NONE:
 					res.append("None");

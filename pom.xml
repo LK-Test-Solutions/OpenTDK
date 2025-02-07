@@ -3,10 +3,10 @@
 	<!-- Coordinates -->
 	<groupId>org.opentdk</groupId>
 	<artifactId>opentdk-api</artifactId>
-	<version>1.6.6</version>
+	<version>2.0.0</version>
 	<properties>
-		<maven.compiler.source>17</maven.compiler.source>
-		<maven.compiler.target>17</maven.compiler.target>
+		<maven.compiler.source>21</maven.compiler.source>
+		<maven.compiler.target>21</maven.compiler.target>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
 	</properties>
@@ -35,20 +35,6 @@
 			<id>fme</id>
 			<name>Fabian Meisinger</name>
 			<email>fabian.meisinger@lk-test.de</email>
-			<organization>LK Test Solutions</organization>
-			<organizationUrl>https://www.lk-test.de/</organizationUrl>
-		</developer>
-		<developer>
-			<id>tku</id>
-			<name>Thomas Kunschner</name>
-			<email>thomas.kunschner@lk-test.de</email>
-			<organization>LK Test Solutions</organization>
-			<organizationUrl>https://www.lk-test.de/</organizationUrl>
-		</developer>
-		<developer>
-			<id>mla</id>
-			<name>Matthias Langer</name>
-			<email>matthias.langer@lk-test.de</email>
 			<organization>LK Test Solutions</organization>
 			<organizationUrl>https://www.lk-test.de/</organizationUrl>
 		</developer>
@@ -103,6 +89,7 @@
 	<!-- Build Properties -->
 	<build>
 		<sourceDirectory>src</sourceDirectory>
+		<testSourceDirectory>test</testSourceDirectory>
 		<resources>
 			<resource>
 				<directory>src</directory>
@@ -164,7 +151,7 @@
 		<dependency>
 			<groupId>commons-io</groupId>
 			<artifactId>commons-io</artifactId>
-			<version>2.11.0</version>
+			<version>2.14.0</version>
 		</dependency>
 		<dependency>
 			<groupId>org.apache.commons</groupId>
@@ -174,7 +161,7 @@
 		<dependency>
 			<groupId>org.json</groupId>
 			<artifactId>json</artifactId>
-			<version>20230227</version>
+			<version>20231013</version>
 		</dependency>
 		<dependency>
 			<groupId>org.apache.commons</groupId>
@@ -190,6 +177,34 @@
 			<groupId>org.yaml</groupId>
 			<artifactId>snakeyaml</artifactId>
 			<version>2.0</version>
+		</dependency>
+		<dependency>
+			<groupId>org.projectlombok</groupId>
+			<artifactId>lombok</artifactId>
+			<version>1.18.36</version>
+			<scope>provided</scope>
+		</dependency>
+		<dependency>
+			<groupId>com.univocity</groupId>
+			<artifactId>univocity-parsers</artifactId>
+			<version>2.9.1</version>
+		</dependency>
+		<dependency>
+			<groupId>org.testng</groupId>
+			<artifactId>testng</artifactId>
+			<version>7.8.0</version>
+			<scope>test</scope>
+		</dependency>
+		<!-- https://mvnrepository.com/artifact/org.projectlombok/lombok -->
+		<dependency>
+			<groupId>org.projectlombok</groupId>
+			<artifactId>lombok</artifactId>
+			<version>1.18.36</version>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.commons</groupId>
+			<artifactId>commons-csv</artifactId>
+			<version>1.10.0</version>
 		</dependency>
 	</dependencies>
 </project>

@@ -1,40 +1,9 @@
-/* 
- * BSD 2-Clause License
- * 
- * Copyright (c) 2022, LK Test Solutions GmbH
- * All rights reserved.
- * 
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions are met:
- * 
- * 1. Redistributions of source code must retain the above copyright notice, this
- *    list of conditions and the following disclaimer.
- * 
- * 2. Redistributions in binary form must reproduce the above copyright notice,
- *    this list of conditions and the following disclaimer in the documentation
- *    and/or other materials provided with the distribution.
- * 
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
- * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
- * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
- * DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE
- * FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
- * DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
- * SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
- * CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
- * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
- * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE. 
- */
 package org.opentdk.api.filter;
 
-import org.opentdk.api.logger.MLogger;
-import org.opentdk.api.util.ListUtil;
-import org.opentdk.api.dispatcher.BaseDispatchComponent;
 import org.opentdk.api.filter.FilterRule.ERuleFormat;
 import org.opentdk.api.mapping.EOperator;
 
 import java.util.*;
-import java.util.logging.Level;
 
 /**
  * This class gets used to define one or more conditions to select data from a data source. <br>
@@ -51,7 +20,6 @@ import java.util.logging.Level;
  * </pre>
  *
  * @author LK Test Solutions
- *
  */
 public class Filter {
 	/**
@@ -68,8 +36,8 @@ public class Filter {
 	 * Create a new instance without arguments. The filter rules get added later.
 	 */
 	public Filter() {
-		rules = new ArrayList<FilterRule>();
-		plausibleHeaders = new ArrayList<String>();
+		rules = new ArrayList<>();
+		plausibleHeaders = new ArrayList<>();
 	}
 
 	/**
@@ -79,7 +47,7 @@ public class Filter {
 	 * Filter fltr = new Filter();
 	 * fltr.addFilterRule("AND Company = LK Test Solutions");
 	 * </pre>
-	 * 
+	 *
 	 * @param rule The rule definition as String
 	 */
 	public void addFilterRule(String rule) {
@@ -88,7 +56,7 @@ public class Filter {
 
 	/**
 	 * Adds an instance of type {@link FilterRule} to the List property {@link #rules}.
-	 * 
+	 *
 	 * @param rule instance of type {@link FilterRule}
 	 */
 	public void addFilterRule(FilterRule rule) {
@@ -97,8 +65,8 @@ public class Filter {
 
 	/**
 	 * Directly adds several {@link FilterRule} instances to the {@link #rules} list.
-	 * 
-	 * @param filterRules A {@link java.util.List} object with items of type {@link FilterRule}
+	 *
+	 * @param filterRules A {@link List} object with items of type {@link FilterRule}
 	 */
 	public void addFilterRules(List<FilterRule> filterRules) {
 		rules.addAll(filterRules);
@@ -106,68 +74,60 @@ public class Filter {
 
 	/**
 	 * Creates a new instance of type {@link FilterRule} and adds the instance to the {@link #rules} list.
-	 * 
+	 *
 	 * @param headerName	Name of the field or column header, where the rule 
-	 * @param value			
-	 * @param mode			An instance of type BaseDispatchComponent within the class {@link EOperator} e.g. <code>EOperator.CONTAINS</code>
+	 * @param value
+	 * @param mode			An instance of type {@link EOperator} e.g. <code>EOperator.CONTAINS</code>
 	 */
-	public void addFilterRule(String headerName, String value, BaseDispatchComponent mode) {
+	public void addFilterRule(String headerName, String value, EOperator mode) {
 		addFilterRule(headerName, new String[] { value }, mode);
 	}
 
-//	/**
-//	 * See {@link #addFilterRule(String, String[], BaseDispatchComponent, FilterRule.ERuleFormat)} with
-//	 * {@link ERuleFormat.STRING}.
-//	 */
-	public void addFilterRule(String headerName, String[] values, BaseDispatchComponent mode) {
+	public void addFilterRule(String headerName, String[] values, EOperator mode) {
 		addFilterRule(headerName, values, mode, ERuleFormat.STRING);
 	}
 
-//	/**
-//	 * See {@link #addFilterRule(String, String[], BaseDispatchComponent, FilterRule.ERuleFormat)} for
-//	 * single value comparison.
-//	 */
-	public void addFilterRule(String headerName, String value, BaseDispatchComponent mode, FilterRule.ERuleFormat ruleFormat) {
+	public void addFilterRule(String headerName, String value, EOperator mode, FilterRule.ERuleFormat ruleFormat) {
 		addFilterRule(headerName, new String[] { value }, mode, ruleFormat);
 	}
 
 	/**
-	 * Adds a rule definition into the rules property, that will check a condition against multiple
+	 * Adds a rule definition into the rule property, that will check a condition against multiple
 	 * values. The following sample filters all data set where the city equals to Munich, Vienna or
 	 * Lisboa. If regular expression or quoted strings should be used the ruleFormat parameter can be
 	 * set.
-	 * 
+	 *
 	 * <pre>
 	 * Filter filter = new Filter();
 	 * String[] cities = { "Munich", "Vienna", "Lisboa" };
 	 * filter.addFilterRule("City", cities, EOperator.EQUALS);
 	 * </pre>
-	 * 
+	 *
 	 * @param headerName Header or key to search for the defined values
 	 * @param values     Array with multiple values that will be checked by the operation.
 	 * @param mode       The operator that defines the filter operation for the value e.g.
-	 *                   EOperator.EQUALS, EOperator.STARTS_WITH, EOperator.CONTAINS etc
+	 *                   EOperator.EQUALS, EOperator.STARTS_WITH, EOperator.CONTAINS etc.
 	 * @param ruleFormat See {@link FilterRule.ERuleFormat}
 	 */
-	public void addFilterRule(String headerName, String[] values, BaseDispatchComponent mode, FilterRule.ERuleFormat ruleFormat) {
+	public void addFilterRule(String headerName, String[] values, EOperator mode, FilterRule.ERuleFormat ruleFormat) {
 		if (plausibleHeaders.isEmpty() || checkHeader(headerName)) {
 			rules.add(new FilterRule(headerName, values, mode, ruleFormat));
 		}
 	}
 
-	public void addFilterRule(String headerName, String value, BaseDispatchComponent mode, BaseDispatchComponent concat) {
+	public void addFilterRule(String headerName, String value, EOperator mode, EOperator concat) {
 		addFilterRule(headerName, new String[] { value }, mode, concat);
 	}
 
-	public void addFilterRule(String headerName, String[] values, BaseDispatchComponent mode, BaseDispatchComponent concat) {
+	public void addFilterRule(String headerName, String[] values, EOperator mode, EOperator concat) {
 		addFilterRule(headerName, values, mode, concat, ERuleFormat.STRING);
 	}
 
-	public void addFilterRule(String headerName, String value, BaseDispatchComponent mode, BaseDispatchComponent concat, FilterRule.ERuleFormat ruleFormat) {
+	public void addFilterRule(String headerName, String value, EOperator mode, EOperator concat, FilterRule.ERuleFormat ruleFormat) {
 		addFilterRule(headerName, new String[] { value }, mode, concat, ruleFormat);
 	}
 
-	public void addFilterRule(String headerName, String[] values, BaseDispatchComponent mode, BaseDispatchComponent concat, FilterRule.ERuleFormat ruleFormat) {
+	public void addFilterRule(String headerName, String[] values, EOperator mode, EOperator concat, FilterRule.ERuleFormat ruleFormat) {
 		if (plausibleHeaders.isEmpty() || checkHeader(headerName)) {
 			rules.add(new FilterRule(headerName, values, mode, concat, ruleFormat));
 		}
@@ -176,7 +136,7 @@ public class Filter {
 	/**
 	 * Sets a Set of plausible headers to the Filter. As soon as this method has been called, only
 	 * headers equal to the ones in the plausibleHeaders List can be applied to the filter.
-	 * 
+	 *
 	 * @param headers Set of applicable headers (e.g. column names of a table) - NOT case-sensitive
 	 */
 	public void setPlausibleHeaders(Set<String> headers) {
@@ -186,7 +146,7 @@ public class Filter {
 	/**
 	 * Adds a Set of plausible headers to the filter. As soon as this method has been called, only
 	 * headers equal to the ones in the plausibleHeaders List can be applied to the filter.
-	 * 
+	 *
 	 * @param headers Set of applicable headers (e.g. column names of a table) - NOT case-sensitive
 	 */
 	public void addPlausibleHeaders(Set<String> headers) {
@@ -204,7 +164,7 @@ public class Filter {
 	/**
 	 * Checks if a defined headerName matches to a value defined in the plausibleHeaders list of current
 	 * the Filter instance.
-	 * 
+	 *
 	 * @param headerName The header name to search for in the plausibleHeaders list
 	 * @return true = <code>headerName</code> exists in <code>plausibleHeaders</code>; false =
 	 *         <code>headerName</code> doesn't exist in <code>plausibleHeaders</code>
@@ -214,8 +174,10 @@ public class Filter {
 		headerName = headerName.trim().toLowerCase();
 		if (!plausibleHeaders.isEmpty()) {
 			for (String h : plausibleHeaders) {
-				if (headerName.equals(h.trim().toLowerCase()))
+				if (headerName.equals(h.trim().toLowerCase())) {
 					ret = true;
+					break;
+				}
 			}
 		}
 		return ret;
@@ -223,7 +185,7 @@ public class Filter {
 
 	/**
 	 * Returns the List property <code>rules</code> with elements of type {@link FilterRule}
-	 * 
+	 *
 	 * @return The property <code>rules</code> of type List.
 	 */
 	public List<FilterRule> getFilterRules() {
@@ -236,16 +198,16 @@ public class Filter {
 			headersList.add(rule.getHeaderName());
 		}
 		List<String> outHeaders = new ArrayList<String>();
-		outHeaders.addAll(new HashSet<String>(headersList));
+		outHeaders.addAll(new HashSet<>(headersList));
 		return outHeaders;
 	}
 
 	public List<String> getFilterRulesValues(String headerName) {
 		List<String> valuesList = new ArrayList<>();
 		for (FilterRule rule : rules) {
-			if ((rule.getFilterOperator().equals(EOperator.EQUALS)) || (rule.getFilterOperator().equals(EOperator.EQUALS_IGNORE_CASE))) {
+			if (rule.getFilterOperator() == EOperator.EQUALS || rule.getFilterOperator() == EOperator.EQUALS_IGNORE_CASE) {
 				if (rule.getHeaderName().equalsIgnoreCase(headerName)) {
-					valuesList.addAll(ListUtil.asList(Arrays.asList(rule.getValues())));
+					valuesList.addAll(Arrays.asList(rule.getValues()));
 				}
 			}
 		}
@@ -263,7 +225,7 @@ public class Filter {
 	 * Deletes a rule from the filter instance. For example the rule can be created with new
 	 * FilterRule(), but has to have the same headerName, value and mode as the rule that has to be
 	 * deleted in the filter.
-	 * 
+	 *
 	 * @param rule An equal rule to the one that has to be deleted.
 	 * @return True, if the rule has been deleted, else false.
 	 */
@@ -279,45 +241,39 @@ public class Filter {
 	/**
 	 * Deletes a rule from the filter instance. The rule has to have the same headerName, value and mode
 	 * as the rule that has to be deleted in the filter.
-	 * 
+	 *
 	 * @param headerName Header of the column or row within a tabular format.
 	 * @param value      The value.
 	 * @param mode       The operator, used to the values e.g. EOperator.EQUALS,
-	 *                   EOperator.STARTS_WITH, EOperator.CONTAINS etc
+	 *                   EOperator.STARTS_WITH, EOperator.CONTAINS etc.
 	 * @return True, if the rule has been deleted, else false.
 	 */
-	public boolean deleteRule(String headerName, String value, BaseDispatchComponent mode) {
-		boolean ret = false;
-		ret = this.deleteRule(new FilterRule(headerName, value, mode));
-		return ret;
+	public boolean deleteRule(String headerName, String value, EOperator mode) {
+		return deleteRule(new FilterRule(headerName, value, mode));
 	}
 
 	/**
 	 * Deletes a rule from the filter instance. The rule has to have the same headerName, values and
 	 * mode as the rule that has to be deleted in the filter.
-	 * 
+	 *
 	 * @param headerName Header of the column or row within a tabular format.
 	 * @param values     The values array.
 	 * @param mode       The operator, used to the values e.g. EOperator.EQUALS,
-	 *                   EOperator.STARTS_WITH, EOperator.CONTAINS etc
+	 *                   EOperator.STARTS_WITH, EOperator.CONTAINS etc.
 	 * @return True, if the rule has been deleted, else false.
 	 */
-	public boolean deleteRule(String headerName, String[] values, BaseDispatchComponent mode) {
-		boolean ret = false;
-		ret = this.deleteRule(new FilterRule(headerName, values, mode));
-		return ret;
+	public boolean deleteRule(String headerName, String[] values, EOperator mode) {
+		return deleteRule(new FilterRule(headerName, values, mode));
 	}
 
 	/**
 	 * Deletes a rule from the filter instance, specified through an index.
-	 * 
+	 *
 	 * @param index Index of the rule in the rules property of the filter instance.
 	 * @return True, if the rule has been deleted, else false.
 	 */
 	public boolean deleteRule(int index) {
-		boolean ret = false;
-		if (rules.remove(index) != null)
-			ret = true;
+		boolean ret = rules.remove(index) != null;
 		return ret;
 	}
 }

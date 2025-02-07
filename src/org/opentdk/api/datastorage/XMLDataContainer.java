@@ -1,34 +1,7 @@
-/* 
- * BSD 2-Clause License
- * 
- * Copyright (c) 2022, LK Test Solutions GmbH
- * All rights reserved.
- * 
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions are met:
- * 
- * 1. Redistributions of source code must retain the above copyright notice, this
- *    list of conditions and the following disclaimer.
- * 
- * 2. Redistributions in binary form must reproduce the above copyright notice,
- *    this list of conditions and the following disclaimer in the documentation
- *    and/or other materials provided with the distribution.
- * 
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
- * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
- * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
- * DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE
- * FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
- * DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
- * SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
- * CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
- * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
- * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE. 
- */
 package org.opentdk.api.datastorage;
 
-import org.opentdk.api.exception.DataContainerException;
 import org.opentdk.api.io.XMLEditor;
+import org.opentdk.api.exception.DataContainerException;
 import org.opentdk.api.filter.Filter;
 import org.opentdk.api.filter.FilterRule;
 import org.apache.commons.lang3.StringUtils;
@@ -42,6 +15,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -58,7 +32,7 @@ import java.util.List;
  * </pre>
  * 
  * @author LK Test Solutions
- * @see org.opentdk.api.datastorage.DataContainer
+ * @see DataContainer
  */
 public class XMLDataContainer implements SpecificContainer {
 	/**
@@ -97,7 +71,7 @@ public class XMLDataContainer implements SpecificContainer {
 	/**
 	 * See {@link #getContent(String, boolean)}
 	 */
-	public String getContent(String expr) throws IOException, TransformerException {
+	public String getContent(String expr) throws IOException, TransformerException, XPathExpressionException {
 		return getContent(expr, false);
 	}
 
@@ -106,7 +80,7 @@ public class XMLDataContainer implements SpecificContainer {
 	 * @param subContentOnly ignore the node that the expr refers to and only get the child content
 	 * @return the whole content (with children) of the given XML node as string.
 	 */
-	public String getContent(String expr, boolean subContentOnly) throws IOException, TransformerException {
+	public String getContent(String expr, boolean subContentOnly) throws IOException, TransformerException, XPathExpressionException {
 		String ret = "";
 		if (xEdit != null) {
 			Element node = xEdit.getElement(expr);
@@ -127,8 +101,8 @@ public class XMLDataContainer implements SpecificContainer {
 	}
 	
 	@Override
-	public void readData(File sourceFile) throws IOException {
-		if(sourceFile.exists() && sourceFile.isFile() && Files.size(sourceFile.toPath()) > 0) {
+	public void readData(Path sourceFile) throws IOException {
+		if(Files.exists(sourceFile) && Files.isRegularFile(sourceFile)) {
 			try {
 				xEdit = new XMLEditor(sourceFile);
 			} catch (ParserConfigurationException | SAXException e) {
@@ -149,9 +123,9 @@ public class XMLDataContainer implements SpecificContainer {
 	}
 
 	@Override
-	public void writeData(File outputFile) {
+	public void writeData(Path outputFile) {
 		try {
-			xEdit.save(outputFile);
+			xEdit.save(outputFile.toFile());
 		} catch (IOException | TransformerException e) {
 			throw new DataContainerException(e);
 		}
@@ -204,15 +178,15 @@ public class XMLDataContainer implements SpecificContainer {
 		}
 	}
 
-	public void delete(String name, String value) throws IOException, TransformerException {
+	public void delete(String name, String value) throws IOException, TransformerException, XPathExpressionException {
 		delete(name, value, new Filter());
 	}
 
-	public void delete(String name, String value, Filter filter) throws IOException, TransformerException {
+	public void delete(String name, String value, Filter filter) throws IOException, TransformerException, XPathExpressionException {
 		delete(name, value, "", filter);
 	}
 
-	public void delete(String headerName, String attributeName, String attributeValue, Filter filter) throws IOException, TransformerException {
+	public void delete(String headerName, String attributeName, String attributeValue, Filter filter) throws IOException, TransformerException, XPathExpressionException {
 		for (FilterRule fltrRule : filter.getFilterRules()) {
 			if (fltrRule.getHeaderName().equalsIgnoreCase("XPath")) {
 				xEdit.delElement(fltrRule.getValue(), headerName, attributeName, attributeValue);
@@ -336,7 +310,7 @@ public class XMLDataContainer implements SpecificContainer {
 	 * @param expr     Name or full XPath of XML tags
 	 * @param attrName Name of the XML tags attribute from which the values will be returned
 	 */
-	public String[] get(String expr, String attrName) {
+	public String[] get(String expr, String attrName) throws XPathExpressionException {
 		List<String> lst = new ArrayList<String>();
 		// leading "/" indicates a tag name with full xPath
 		if (expr.startsWith("/")) {
@@ -393,12 +367,12 @@ public class XMLDataContainer implements SpecificContainer {
 				Element oldEl = xEdit.getElement(tagName, attributeName, oldAttributeValue);
 				if (oldEl == null) {
 					Element newEl = xEdit.addElement(fltrRule.getValue(), tagName, attributeName, attributeValue);
-					newEl.getAttribute(attributeName);
+//					newEl.getAttribute(attributeName); // TODO has no effect
 				} else {
 					Element newEl = oldEl;
 					newEl.setAttribute(attributeName, attributeValue);
 					xEdit.replaceElement(oldEl, newEl);
-					newEl.getAttribute(attributeName);
+//					newEl.getAttribute(attributeName); // TODO has no effect
 				}
 				break;
 			}

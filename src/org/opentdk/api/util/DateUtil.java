@@ -27,14 +27,13 @@
  */
 package org.opentdk.api.util;
 
-import org.opentdk.api.logger.MLogger;
-
 import java.time.*;
 import java.time.format.DateTimeFormatter;
-import java.time.temporal.ChronoField;
-import java.time.temporal.ChronoUnit;
+import java.time.format.DateTimeParseException;
+import java.time.temporal.*;
+import java.util.Arrays;
+import java.util.List;
 import java.util.Random;
-import java.util.logging.Level;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -47,14 +46,14 @@ import java.util.regex.Pattern;
 public class DateUtil {
 
 	/**
-	 * The {@link java.time.ZoneId} that gets used in the date and time utility functions of the <code>DateUtil</code> class. The default is
-	 * <code>ZoneId.systemDefault()</code> which is 'UTC+02:00' for Berlin (summer time).
+	 * The {@link ZoneId} that gets used in the date and time utility functions of the <code>DateUtil</code> class. The default is
+	 * <code>ZoneId.systemDefault()</code> which is 'UTC+02:00' for Berlin (summer-time) and 'UTC+1' for winter time.
 	 */
 	private static ZoneId zoneId = ZoneId.systemDefault();
 
 	/**
 	 * Set a new time zone by committing a string with the UTC value e.g. 'UTC+01:00'.
-	 * 
+	 *
 	 * @param zone {@link #zoneId}
 	 */
 	public static void setZoneId(String zone) {
@@ -62,96 +61,267 @@ public class DateUtil {
 	}
 
 	/**
+	 * List of all supported date formats. Can be enriched by {@link #addPattern(String)}.
+	 */
+	private static List<String> formats = Arrays.asList(
+			// Dates
+			"yyyyMMdd",              // Kompaktformat ohne Trenner
+			"yyMMdd",
+			"yyyy-MM-dd",            // ISO-Standardformat
+			"yy-MM-dd",
+			"yyyy-M-d",
+			"yy-M-d",
+			"yyyy.MM.dd",            // Punkte als Trenner (technisch)
+			"yy.MM.dd",
+			"yyyy.M.d",
+			"yy.M.d",
+			"yyyy/MM/dd",             // Technisch mit Slash
+			"yy/MM/dd",
+			"yyyy/M/d",
+			"yy/M/d",
+			"dd-MM-yyyy",            // Europäisches Standardformat
+			"dd-MM-yy",
+			"d-M-yyyy",
+			"d-M-yy",
+			"dd.MM.yyyy",            // Deutsches Standardformat
+			"dd.MM.yy",
+			"d.M.yyyy",
+			"d.M.yy",
+			"dd/MM/yyyy",            // Britisches Format
+			"dd/MM/yy",
+			"dd-MMM-yyyy",           // Tag, abgekürzter Monat, Jahr
+			"dd-MMM-yy",
+			"MM/dd/yyyy",            // US-Format
+			"MM/dd/yy",
+			"E, MMM dd yyyy",        // Abgekürzter Wochentag, Monat, Tag, Jahr
+			"EEEE, MMMM dd, yyyy",   // Vollständiger Wochentag, Monat, Tag, Jahr
+			"MMMM dd, yyyy",         // Vollständiger Monat, Tag, Jahr
+			"EEE, d MMM yyyy",       // Abgekürzter Wochentag, Tag, abgekürzter Monat, Jahr
+			"yyyy-'W'ww-u",           // ISO Woche-Jahr-Tag
+			// Times
+			"HH:mm",                 // Stunden:Minuten (24-Stunden-Format)
+			"hh:mm a",               // Stunden:Minuten AM/PM (12-Stunden-Format)
+			"HH:mm:ss",              // Stunden:Minuten:Sekunden (24-Stunden-Format)
+			"HH.mm.ss",
+			"hh:mm:ss a",            // Stunden:Minuten:Sekunden AM/PM (12-Stunden-Format)
+			"HH:mm:ss.SSS",          // Stunden:Minuten:Sekunden.Millisekunden
+			"HH:mm:ss.SSSSSS",       // Stunden:Minuten:Sekunden.Mikrosekunden
+			"HH:mm:ss.SSSSSSSSS",    // Stunden:Minuten:Sekunden.Nanosekunden
+			"h:mm a",                // Einzeldigit-Stunden, Minuten AM/PM
+			"HH:mm:ss z",            // Stunden:Minuten:Sekunden mit Zeitzone
+			"HH:mm:ss Z",            // Stunden:Minuten:Sekunden mit numerischer Zeitzone
+			"HH:mm:ss.SSS XXX",       // Stunden:Minuten:Sekunden.Millisekunden mit ISO 8601 Zeitzone
+			// Date times
+			"dd.MM.yyyy HH:mm:ss",
+			"dd.MM.yyyy HH:mm:ss.SSS",
+			"dd.MM.yyyy HH:mm:ss.SSSSSSSSS",
+			"dd-MM-yyyy HH:mm:ss",
+			"dd-MM-yyyy HH:mm:ss.SSS",
+			"dd-MM-yyyy HH:mm:ss.SSSSSSSSS",
+
+			"yyyy-MM-dd HH:mm:ss",              // ISO-Datum mit Zeit
+			"yyyy-MM-dd'T'HH:mm:ss",            // ISO 8601 Standard
+			"yyyy-MM-dd'T'HH:mm:ss.SSS",        // ISO 8601 mit Millisekunden
+			"yyyy-MM-dd'T'HH:mm:ss.SSSXXX",     // ISO 8601 mit Millisekunden und Zeitzone
+			"dd/MM/yyyy HH:mm",                 // Britisches Datum mit Zeit
+			"MM/dd/yyyy hh:mm a",               // US-Datum mit 12-Stunden-Zeit
+			"EEE, MMM d, ''yy h:mm a",          // Abgekürzter Wochentag, Monat, Jahr, Zeit
+			"yyyy.MM.dd G 'at' HH:mm:ss z",     // ISO mit Ära und Zeitzone
+			"EEE, d MMM yyyy HH:mm:ss Z",       // HTTP-Datum
+			"yyyyMMddHHmmss",                   // Kompaktformat Datum und Zeit
+			"yyyy-MM-dd'T'HH:mm:ss.SSSZ",        // ISO-Standard mit Zeitzone
+			"yyyy.MM.dd HH:mm:ss",
+			"yyyyMMdd HH:mm:ss",
+			"yyyy-MM-dd-HH.mm.ss.SSSSSS",
+			"yyyy.MM.dd HH:mm:ss.SSSSSSSSS",
+			"yyyy-MM-dd.HH:mm:ss",
+			"yyyy-MM-dd-HH:mm:ss,SSS",
+			"yyyy.MM.dd HH:mm:ss.SSS",
+			"yyyy-MM-dd.HH:mm:ss.SSS",
+			"yyyy-MM-dd HH:mm:ss.SSSSSS",
+			"yyyy-MM-dd HH:mm:ss.SSS",
+			// Specials
+			"G yyyy-MM-dd",           // Ära (AD/BC) mit Datum
+			"yyyy-MM-dd'T'HH:mm:ssXXX", // ISO-Format mit Offset-Zeitzone
+			"yyyy-MM-dd'T'HH:mm:ss.SSSVV", // ISO-Format mit vollständigem Zeitzonennamen
+			"w yyyy",                 // Kalenderwoche und Jahr
+			"Q yyyy",                 // Quartal und Jahr
+			"D yyyy",                 // Tag des Jahres und Jahr
+			"D",                 		// Tag des Jahres
+			"'Today is' EEEE",        // Benutzerdefinierter Text mit Wochentag
+			"yyyy GGGG",              // Jahr mit vollständiger Ära
+			"e yyyy-MM-dd",           // Lokalisierter Wochentag und Datum
+			"u yyyy-MM-dd"            // ISO-Wochentag (1=Montag)
+	);
+
+	/**
+	 * @return {@link #formats}
+	 */
+	public static List<String> getAllFormats() {
+		return formats;
+	}
+
+	/**
+	 * @return all available formats of DateUtil as pipe separated string in brackets for regular expression checks.
+	 */
+	public static String getAllFormatsAsRegex() {
+		StringBuilder ret = new StringBuilder("(");
+		for(int index = 0; index < formats.size(); index++) {
+			ret.append(formats.get(index));
+			if(index < formats.size() - 1) {
+				ret.append("|");
+			}
+		}
+		ret.append(")");
+		return ret.toString();
+	}
+
+	/**
+	 * @param format pattern to add to the {@link #formats} list during runtime. Allows to take this format into account
+	 *               when using DateUtil
+	 */
+	public static void addPattern(String format) {
+		formats.add(format);
+	}
+
+	/**
 	 * Compares to strings as date, time or time stamp.
-	 * 
+	 *
 	 * @param dateTime        first comparison string.
 	 * @param compareDateTime second comparison string.
 	 * @return 0 = both instants are equal; -1 = first instant is before second; 1 = first instant is after second.
+	 * @throws DateTimeException
 	 */
 	public static int compare(String dateTime, String compareDateTime) {
-		Instant first = getInstantInstance(dateTime);
-		Instant second = getInstantInstance(compareDateTime);
-
-		int ret = -999;
-		if (first != null && second != null) {
-			if (first.isBefore(second)) {
-				ret = -1;
-			} else if (first.isAfter(second)) {
-				ret = 1;
-			} else {
-				ret = 0;
-			}
+		TemporalAccessor tempFirst = retrieveTemporal(dateTime);
+		TemporalAccessor tempSecond = retrieveTemporal(compareDateTime);
+		ZonedDateTime first = retrieveZonedDateTime(tempFirst);
+		ZonedDateTime second = retrieveZonedDateTime(tempSecond);
+		if (first.isBefore(second)) {
+			return -1;
+		} else if (first.isAfter(second)) {
+			return 1;
+		} else {
+			return 0;
 		}
-		return ret;
 	}
 
 	/**
 	 * Get the day difference between two instants as integer value. Turn of the year will be taken into account as well. E.g. getDayDiff("20193112",
 	 * "20200101") would return 1.
-	 * 
+	 *
 	 * @param dateTime        The first comparison input string.
 	 * @param compareDateTime The second comparison string.
 	 * @param type            the unit that will be compared e.g. days or seconds.
 	 * @return A positive integer value, or 0 if the instants are similar and -1 when no instant format could be detected.
+	 * @throws DateTimeException
 	 */
 	public static int diff(String dateTime, String compareDateTime, ChronoUnit type) {
-		Instant first = getInstantInstance(dateTime);
-		Instant second = getInstantInstance(compareDateTime);
-
-		int ret = -1;
-		if (first != null && second != null) {
-			ret = (int) Math.abs(type.between(first, second));
+		TemporalAccessor tempFirst = retrieveTemporal(dateTime);
+		TemporalAccessor tempSecond = retrieveTemporal(compareDateTime);
+		ZonedDateTime first = retrieveZonedDateTime(tempFirst);
+		ZonedDateTime second = retrieveZonedDateTime(tempSecond);
+		// Ensure comparison between the correct instance types
+		switch(type) {
+			case NANOS, MICROS, MILLIS, SECONDS, MINUTES, HOURS, HALF_DAYS -> {
+				first = first.toLocalDateTime().atZone(zoneId);
+				second = second.toLocalDateTime().atZone(zoneId);
+			}
+			case DAYS, WEEKS, MONTHS, YEARS, DECADES, CENTURIES, MILLENNIA, ERAS -> {
+				first = first.toLocalDate().atStartOfDay(zoneId);
+				second = second.toLocalDate().atStartOfDay(zoneId);
+			}
+			default -> throw new DateTimeException("Unexpected value: " + type);
 		}
-		return ret;
+		return (int) Math.abs(type.between(first, second));
 	}
 
 	/**
 	 * Retrieves the current date, time or time stamp.
-	 * 
+	 *
 	 * @param format The preferred date/time format e.g. yyyyMMdd.
 	 * @return The current instant in the committed format as string.
+	 * @throws DateTimeException
 	 */
 	public static String get(String format) {
-		ZonedDateTime instant = getInstantInstance().atZone(zoneId);
-		DateTimeFormatter formatter = DateTimeFormatter.ofPattern(format);
-		return formatter.format(instant);
+		ZonedDateTime instant = LocalDateTime.now().atZone(zoneId);
+		try {
+			DateTimeFormatter formatter = DateTimeFormatter.ofPattern(format);
+			return formatter.format(instant);
+		} catch(IllegalArgumentException e) {
+			throw new DateTimeException(e.getMessage());
+		}
 	}
 
 	/**
 	 * Retrieves the date, time or time stamp depending on the input instant.
-	 * 
-	 * @param dateTime A valid date, time or time stamp string in one of the formats defined in <code>EFormat</code>.
+	 *
+	 * @param dateTime A valid date, time or time stamp string.
 	 * @param format   The preferred date/time format e.g. yyyyMMdd.
 	 * @return The formatted/transformed string or an empty string if no instant could be retrieved.
+	 * @throws DateTimeException
 	 */
 	public static String get(String dateTime, String format) {
-		ZonedDateTime instant = getInstantInstance(dateTime).atZone(zoneId);
+		TemporalAccessor temporal = retrieveTemporal(dateTime);
+		ZonedDateTime instant = retrieveZonedDateTime(temporal);
 		DateTimeFormatter formatter = DateTimeFormatter.ofPattern(format);
 		return formatter.format(instant);
 	}
 
 	/**
 	 * Retrieves the current date.
-	 * 
+	 *
 	 * @param millis The milliseconds from the epoch of 1970-01-01T00:00:00Z.
 	 * @param format The preferred date/time format e.g. yyyyMMdd.
 	 * @return The detected date as string in the default time zone.
+	 * @throws DateTimeException
 	 */
 	public static String get(long millis, String format) {
-		DateTimeFormatter formatter = DateTimeFormatter.ofPattern(format);
-		return formatter.format(ZonedDateTime.ofInstant(Instant.ofEpochMilli(millis), zoneId));
+		try {
+			DateTimeFormatter formatter = DateTimeFormatter.ofPattern(format);
+			return formatter.format(ZonedDateTime.ofInstant(Instant.ofEpochMilli(millis), zoneId));
+		} catch(IllegalArgumentException e) {
+			throw new DateTimeException(e.getMessage());
+		}
 	}
 
 	/**
 	 * Retrieves the current date, time or time stamp shifted to the past or future.
-	 * 
+	 *
 	 * @param diff   The amount to travel. This depends on the committed unit.
 	 * @param format The preferred date/time format e.g. yyyyMMdd.
 	 * @param unit   The travel unit e.g. <code>ChronoUnit.DAYS</code>.
 	 * @return The resulting date string in the committed format.
+	 * @throws DateTimeException
 	 */
 	public static String get(int diff, String format, ChronoUnit unit) {
-		ZonedDateTime instant = getInstantInstance().atZone(zoneId);
+		ZonedDateTime instant = LocalDateTime.now().atZone(zoneId);
+		if (diff > 0) {
+			instant = instant.plus(diff, unit);
+		} else if (diff < 0) {
+			instant = instant.minus(-diff, unit);
+		}
+		try {
+			DateTimeFormatter formatter = DateTimeFormatter.ofPattern(format);
+			return formatter.format(instant);
+		} catch(IllegalArgumentException e) {
+			throw new DateTimeException(e.getMessage());
+		}
+	}
+
+	/**
+	 * Retrieves the committed date, time or time stamp shifted to the past or future.
+	 *
+	 * @param dateTime A valid date, time or time stamp string.
+	 * @param diff     The amount to travel. This depends on the committed unit.
+	 * @param format   The preferred date/time format e.g. yyyyMMdd.
+	 * @param unit     The travel unit e.g. <code>ChronoUnit.DAYS</code>.
+	 * @return The resulting date/time string in the committed format.
+	 * @throws DateTimeException
+	 */
+	public static String get(String dateTime, int diff, String format, ChronoUnit unit) {
+		TemporalAccessor temporal = retrieveTemporal(dateTime);
+		ZonedDateTime instant = retrieveZonedDateTime(temporal);
 		if (diff > 0) {
 			instant = instant.plus(diff, unit);
 		} else if (diff < 0) {
@@ -162,63 +332,50 @@ public class DateUtil {
 	}
 
 	/**
-	 * Retrieves the committed date, time or time stamp shifted to the past or future.
-	 * 
-	 * @param dateTime A valid date, time or time stamp string in one of the formats defined in <code>EFormat</code>.
-	 * @param diff     The amount to travel. This depends on the committed unit.
-	 * @param format   The preferred date/time format e.g. yyyyMMdd.
-	 * @param unit     The travel unit e.g. <code>ChronoUnit.DAYS</code>.
-	 * @return The resulting date/time string in the committed format.
-	 */
-	public static String get(String dateTime, int diff, String format, ChronoUnit unit) {
-		Instant instant = getInstantInstance(dateTime);
-		ZonedDateTime zonedInstant = instant.atZone(zoneId);
-		if (diff > 0) {
-			zonedInstant = zonedInstant.plus(diff, unit);
-		} else if (diff < 0) {
-			zonedInstant = zonedInstant.minus(-diff, unit);
-		}
-		DateTimeFormatter formatter = DateTimeFormatter.ofPattern(format);
-		return formatter.format(zonedInstant);
-	}
-
-	/**
 	 * Retrieves the first date or time stamp depending on the committed type.
-	 * 
+	 *
 	 * @param type   The field to use e.g. <code>ChronoField.DAY_OF_WEEK</code> gets the first day of the week.
 	 * @param format The preferred date/time format e.g. yyyyMMdd.
 	 * @return The resulting date/time string in the committed format.
+	 * @throws DateTimeException
 	 */
 	public static String getFirstOf(ChronoField type, String format) {
-		ZonedDateTime instant = getInstantInstance().atZone(zoneId);
+		ZonedDateTime instant = LocalDateTime.now().atZone(zoneId);
 		instant = instant.with(type, instant.range(type).getMinimum());
-		DateTimeFormatter formatter = DateTimeFormatter.ofPattern(format);
-		return formatter.format(instant);
+		try {
+			DateTimeFormatter formatter = DateTimeFormatter.ofPattern(format);
+			return formatter.format(instant);
+		} catch(IllegalArgumentException e) {
+			throw new DateTimeException(e.getMessage());
+		}
 	}
 
 	/**
 	 * Retrieves the first date or time stamp depending on the committed type.
-	 * 
-	 * @param dateTime A valid date, time or time stamp string in one of the formats defined in <code>EFormat</code>.
+	 *
+	 * @param dateTime A valid date, time or time stamp string.
 	 * @param type     The field to use e.g. <code>ChronoField.DAY_OF_WEEK</code> gets the first day of the week.
 	 * @param format   The preferred date/time format e.g. yyyyMMdd.
 	 * @return The resulting date/time string in the committed format.
+	 * @throws DateTimeException
 	 */
 	public static String getFirstOf(String dateTime, ChronoField type, String format) {
-		ZonedDateTime instant = getInstantInstance(dateTime).atZone(zoneId);
+		TemporalAccessor temporal = retrieveTemporal(dateTime);
+		ZonedDateTime instant = retrieveZonedDateTime(temporal);
 		instant = instant.with(type, instant.range(type).getMinimum());
 		DateTimeFormatter formatter = DateTimeFormatter.ofPattern(format);
 		return formatter.format(instant);
 	}
 
 	/**
-	 * Retrieves the first date or time or time stamp depending on the committed type with the possibility to travel to the past or future.
-	 * 
+	 * Retrieves the first date or time stamp depending on the committed type with the possibility to travel to the past or future.
+	 *
 	 * @param type   The field to use e.g. <code>ChronoField.DAY_OF_WEEK</code> gets the first day of the week.
 	 * @param format The preferred date/time format e.g. yyyyMMdd.
 	 * @param unit   The travel unit e.g. <code>ChronoUnit.DAYS</code>.
 	 * @param diff   The amount to travel. This depends on the committed unit.
 	 * @return The resulting date/time string in the committed format.
+	 * @throws DateTimeException
 	 */
 	public static String getFirstOf(ChronoField type, String format, ChronoUnit unit, int diff) {
 		return getFirstOf(get(diff, format, unit), type, format);
@@ -226,13 +383,14 @@ public class DateUtil {
 
 	/**
 	 * Retrieves the first date or time stamp depending on the committed type with the possibility to travel to the past or future.
-	 * 
-	 * @param dateTime A valid date, time or time stamp string in one of the formats defined in <code>EFormat</code>.
+	 *
+	 * @param dateTime A valid date, time or time stamp string.
 	 * @param type     The field to use e.g. <code>ChronoField.DAY_OF_WEEK</code> gets the first day of the week.
 	 * @param format   The preferred date/time format e.g. yyyyMMdd.
 	 * @param unit     The travel unit e.g. <code>ChronoUnit.DAYS</code>.
 	 * @param diff     The amount to travel. This depends on the committed unit.
 	 * @return The resulting date/time string in the committed format.
+	 * @throws DateTimeException
 	 */
 	public static String getFirstOf(String dateTime, ChronoField type, String format, ChronoUnit unit, int diff) {
 		return getFirstOf(get(dateTime, diff, format, unit), type, format);
@@ -240,28 +398,35 @@ public class DateUtil {
 
 	/**
 	 * Retrieves the last date or time stamp depending on the committed type.
-	 * 
+	 *
 	 * @param type   The field to use e.g. <code>ChronoField.DAY_OF_WEEK</code> gets the first day of the week.
 	 * @param format The preferred date/time format e.g. yyyyMMdd.
 	 * @return The resulting date/time string in the committed format.
+	 * @throws DateTimeException
 	 */
 	public static String getLastOf(ChronoField type, String format) {
-		ZonedDateTime instant = getInstantInstance().atZone(zoneId);
+		ZonedDateTime instant = LocalDateTime.now().atZone(zoneId);
 		instant = instant.with(type, instant.range(type).getMaximum());
-		DateTimeFormatter formatter = DateTimeFormatter.ofPattern(format);
-		return formatter.format(instant);
+		try {
+			DateTimeFormatter formatter = DateTimeFormatter.ofPattern(format);
+			return formatter.format(instant);
+		} catch(IllegalArgumentException e) {
+			throw new DateTimeException(e.getMessage());
+		}
 	}
 
 	/**
 	 * Retrieves the last date or time stamp depending on the committed type.
-	 * 
-	 * @param dateTime A valid date, time or time stamp string in one of the formats defined in <code>EFormat</code>.
+	 *
+	 * @param dateTime A valid date, time or time stamp string.
 	 * @param type     The field to use e.g. <code>ChronoField.DAY_OF_WEEK</code> gets the first day of the week.
-	 * @param format  The preferred date/time format e.g. yyyyMMdd.
+	 * @param format The preferred date/time format e.g. yyyyMMdd.
 	 * @return The resulting date/time string in the committed format.
+	 * @throws DateTimeException
 	 */
 	public static String getLastOf(String dateTime, ChronoField type, String format) {
-		ZonedDateTime instant = getInstantInstance(dateTime).atZone(zoneId);
+		TemporalAccessor temporal = retrieveTemporal(dateTime);
+		ZonedDateTime instant = retrieveZonedDateTime(temporal);
 		instant = instant.with(type, instant.range(type).getMaximum());
 		DateTimeFormatter formatter = DateTimeFormatter.ofPattern(format);
 		return formatter.format(instant);
@@ -269,12 +434,13 @@ public class DateUtil {
 
 	/**
 	 * Retrieves the last date or time stamp depending on the committed type with the possibility to travel to the past or future.
-	 * 
+	 *
 	 * @param type   The field to use e.g. <code>ChronoField.DAY_OF_WEEK</code> gets the first day of the week.
 	 * @param format The preferred date/time format e.g. yyyyMMdd.
 	 * @param unit   The travel unit e.g. <code>ChronoUnit.DAYS</code>.
 	 * @param diff   The amount to travel. This depends on the committed unit.
 	 * @return The resulting date/time string in the committed format.
+	 * @throws DateTimeException
 	 */
 	public static String getLastOf(ChronoField type, String format, ChronoUnit unit, int diff) {
 		return getLastOf(get(diff, format, unit), type, format);
@@ -282,13 +448,14 @@ public class DateUtil {
 
 	/**
 	 * Retrieves the last date or time stamp depending on the committed type with the possibility to travel to the past or future.
-	 * 
-	 * @param dateTime A valid date, time or time stamp string in one of the formats defined in <code>EFormat</code>.
+	 *
+	 * @param dateTime A valid date, time or time stamp string.
 	 * @param type     The field to use e.g. <code>ChronoField.DAY_OF_WEEK</code> gets the first day of the week.
 	 * @param format   The preferred date/time format e.g. yyyyMMdd.
 	 * @param unit     The travel unit e.g. <code>ChronoUnit.DAYS</code>.
 	 * @param diff     The amount to travel. This depends on the committed unit.
 	 * @return The resulting date/time string in the committed format.
+	 * @throws DateTimeException
 	 */
 	public static String getLastOf(String dateTime, ChronoField type, String format, ChronoUnit unit, int diff) {
 		return getLastOf(get(dateTime, diff, format, unit), type, format);
@@ -296,21 +463,21 @@ public class DateUtil {
 
 	/**
 	 * Retrieves the number of the part of the committed date, time or time stamp depending on the committed type.
-	 * 
-	 * @param dateTime A valid date, time or time stamp string in one of the formats defined in <code>EFormat</code>.
+	 *
+	 * @param dateTime A valid date, time or time stamp string.
 	 * @param type     The field to use e.g. <code>ChronoField.DAY_OF_WEEK</code> gets the first day of the week.
 	 * @return The number as integer value.
+	 * @throws DateTimeException
 	 */
 	public static int getNumber(String dateTime, ChronoField type) {
-		ZonedDateTime instant = getInstantInstance(dateTime).atZone(zoneId);
-		return instant.get(type);
+		return retrieveZonedDateTime(retrieveTemporal(dateTime)).get(type);
 	}
 
 	/**
 	 * This method gets a date string out of the committed string (exact match or containment).
-	 * 
+	 *
 	 * @param inStr   The input string that is a date string or contains one.
-	 * @param pFormat One of the date formats in {@link EFormat}.
+	 * @param pFormat A valid date format
 	 * @return The detected date string or an empty string, if nothing could be found.
 	 */
 	public static String parse(String inStr, String pFormat) {
@@ -328,7 +495,7 @@ public class DateUtil {
 	 * value 1000 is passed, 4 when the value 10000 is passed etc. So one digit has to be added. Another example: The value log10(111) is a bit higher
 	 * than 2 and the value log10(999) is a bit lower than 3. But the integer cast always returns 2 in this case (round down) and the result of this
 	 * method is 3, which is correct for both numbers.
-	 * 
+	 *
 	 * @return an integer value with the length of the milliseconds.
 	 */
 	public static int getLengthMilliseconds() {
@@ -338,9 +505,9 @@ public class DateUtil {
 
 	/**
 	 * Gets the date from a given age. If the age is given as in interval separated with a minus, the function get a random date between the given ages.
-	 * 
+	 *
 	 * @param age    the age to be found as a date. To give an interval of ages, the ages must be separated with a minus within the string.
-	 * @param format one of the date formats in {@link EFormat}.
+	 * @param format valid date format.
 	 * @return the date of the given age or a random age between the given age interval.
 	 */
 	public static String getDateFromAge(String age, String format) {
@@ -351,162 +518,128 @@ public class DateUtil {
 			a_age = age.split("-");
 		}
 		switch (a_age.length) {
-		case 1:
-			outDate = "'" + get(-(Integer.parseInt(a_age[0]) * 365), format, ChronoUnit.DAYS) + "'";
-			break;
-		case 2:
-			outDate = "'" + get(-(random.nextInt(Integer.parseInt(a_age[1]) * 365 - Integer.parseInt(a_age[0]) * 365) + Integer.parseInt(a_age[0]) * 365), format, ChronoUnit.DAYS) + "'";
-			break;
-		case 3:
-			outDate = "'" + age + "'";
-			break;
+			case 1 -> outDate = "'" + get(-(Integer.parseInt(a_age[0]) * 365), format, ChronoUnit.DAYS) + "'";
+			case 2 -> outDate = "'" + get(-(random.nextInt(Integer.parseInt(a_age[1]) * 365 - Integer.parseInt(a_age[0]) * 365) + Integer.parseInt(a_age[0]) * 365), format, ChronoUnit.DAYS) + "'";
+			case 3 -> outDate = "'" + age + "'";
 		}
 		return outDate;
 	}
 
 	/**
 	 * Gets an age in years from a given date.
-	 * 
-	 * @param date the date where the age is calculated from in one of the formats defined in {@link EFormat}.
+	 *
+	 * @param date the date where the age is calculated from.
 	 * @return the age in years as integer value.
 	 */
 	public int getAgeFromDate(String date) {
-		return diff(get(date, EFormat.getDateEFormat(date).getDateFormat()), get("yyyy-MM-dd"), ChronoUnit.YEARS);
+		return diff(get(date, "yyyy-MM-dd"), get("yyyy-MM-dd"), ChronoUnit.YEARS);
 	}
 
 	/**
-	 * Retrieves a <code>java.time.LocalDate</code> instance out a given date string. This is done by comparing the date string with all formats that are
-	 * available in the <code>EFormat</code> enumeration.
-	 * 
-	 * @param inDate The date string in valid format <code>EFormat</code>.
-	 * @return The date instance for further operations or null if no format matches to the committed date string.
+	 * Gets a {@link java.time.temporal.TemporalAccessor} object out of a date string to
+	 * pass it to te {@link #retrieveZonedDateTime(TemporalAccessor)} method.
+	 * @param dateTime input date in all available formats
+	 * @return {@link java.time.temporal.TemporalAccessor}
+	 * @throws DateTimeException
 	 */
-	private static LocalDate getDateInstance(String inDate) {
-		LocalDate ret = null;
-		EFormat format = EFormat.getDateEFormat(inDate);
-		if (format != EFormat.NONE) {
-			int year = format.getYear(inDate);
-			int month = format.getMonth(inDate);
-			int day = format.getDay(inDate);
-
-			if (year == -1) {
-				year = 0;
-			}
-			if (month != -1 && day != -1) {
-				ret = LocalDate.of(year, month, day);
+	public static TemporalAccessor retrieveTemporal(String dateTime) {
+		for(String pattern : getAllFormats()) {
+			DateTimeFormatter formatter = DateTimeFormatter.ofPattern(pattern);
+			try {
+				return formatter.parse(dateTime);
+			} catch(DateTimeParseException e) {
+				continue;
 			}
 		}
-		return ret;
+		throw new DateTimeException("Format not supported ==> " + dateTime);
 	}
 
-	/**
-	 * Retrieves a <code>java.time.LocalTime</code> instance out a given time string. This is done by comparing the time string with all formats that are
-	 * available in the <code>EFormat</code> enumeration.
-	 * 
-	 * @param inTime The time string in valid format <code>EFormat</code>.
-	 * @return The time instance for further operations or null if no format matches to the committed time string.
-	 */
-	private static LocalTime getTimeInstance(String inTime) {
-		LocalTime ret = null;
-		EFormat format = EFormat.getDateEFormat(inTime);
-		if (format != EFormat.NONE) {
-			int hours = format.getHour(inTime);
-			int minutes = format.getMinute(inTime);
-			int seconds = format.getSecond(inTime);
+//	/**
+//	 * Gets a {@link java.time.temporal.TemporalAccessor} object out of a date string to
+//	 * pass it to te {@link #retrieveZonedDateTime(TemporalAccessor)} method.
+//	 * @param dateTime input date in all available formats
+//	 * @param format the pattern that the DateTimeFormatter should use to parse the date/time
+//	 * @return {@link java.time.temporal.TemporalAccessor}
+//	 * @throws DateTimeException
+//	 */
+//	public static TemporalAccessor retrieveTemporal(String dateTime, String format) {
+//		DateTimeFormatter formatter;
+//		try {
+//			formatter = DateTimeFormatter.ofPattern(format);
+//		} catch(IllegalArgumentException e) {
+//			throw new DateTimeException(e.getMessage());
+//		}
+//		try {
+//			return formatter.parse(dateTime);
+//		} catch(DateTimeParseException e) {
+//			throw new DateTimeException(e.getMessage());
+//		}
+//	}
 
-			if (hours != -1 && minutes != -1 && seconds != -1) {
-				int millis = format.getMilliSecond(inTime);
-				int micros = format.getMicroSecond(inTime);
-				int nanos = format.getNanoSecond(inTime);
-
-				int rest = (millis * 1000 * 1000) + (micros * 1000) + nanos;
-				ret = LocalTime.of(hours, minutes, seconds, rest);
+	public static boolean isTemporal(String dateTime) {
+		for(String pattern : getAllFormats()) {
+			try {
+				DateTimeFormatter.ofPattern(pattern).parse(dateTime);
+				return true;
+			} catch(IllegalArgumentException | DateTimeParseException e) {
+				continue;
 			}
 		}
-		return ret;
+		return false;
+	}
+
+	public static boolean isTemporal(String dateTime, String format) {
+		try {
+			DateTimeFormatter.ofPattern(format).parse(dateTime);
+			return true;
+		} catch(IllegalArgumentException | DateTimeParseException e) {
+			return false;
+		}
 	}
 
 	/**
-	 * Retrieves a <code>java.time.LocalDateTime</code> instance out a given time stamp string. This is done by comparing the time stamp string with all
-	 * formats that are available in the <code>EFormat</code> enumeration.
-	 * 
-	 * @param inTimestamp The time stamp string in valid format <code>EFormat</code>.
-	 * @return The time stamp instance for further operations or null if no format matches to the committed time stamp string.
+	 * Gets a {@link java.time.ZonedDateTime} object out of a {@link java.time.temporal.TemporalAccessor} by using the {@link LocalDate#from(TemporalAccessor)} method
+	 * for the zone that is defined in {@link #zoneId}. The methods of the DateUtil class require it for further operations.
+	 * @param temporal {@link java.time.temporal.TemporalAccessor} from {@link #retrieveTemporal(String)}
+	 * @return {@link java.time.ZonedDateTime}
+	 * @throws DateTimeException when no result could be retrieved
 	 */
-	private static LocalDateTime getTimestampInstance(String inTimestamp) {
-		LocalDateTime ret = null;
-		EFormat format = EFormat.getDateEFormat(inTimestamp);
-		if (format != EFormat.NONE) {
-			int year = format.getYear(inTimestamp);
-			int month = format.getMonth(inTimestamp);
-			int day = format.getDay(inTimestamp);
-
-			int hours = format.getHour(inTimestamp);
-			int minutes = format.getMinute(inTimestamp);
-			int seconds = format.getSecond(inTimestamp);
-
-			if (year != -1 && month != -1 && day != -1 && hours != -1 && minutes != -1 && seconds != -1) {
-
-				int millis = format.getMilliSecond(inTimestamp);
-				int micros = format.getMicroSecond(inTimestamp);
-				int nanos = format.getNanoSecond(inTimestamp);
-
-				int rest = (millis * 1000 * 1000) + (micros * 1000) + nanos;
-				ret = LocalDateTime.of(year, month, day, hours, minutes, seconds, rest);
+	public static ZonedDateTime retrieveZonedDateTime(TemporalAccessor temporal) {
+		ZonedDateTime ret;
+		try {
+			ret = LocalDateTime.from(temporal).atZone(zoneId);
+		} catch (DateTimeException e) {
+			ret = null;
+		}
+		if(ret == null) {
+			try {
+				ret = LocalDate.from(temporal).atStartOfDay(zoneId);
+			} catch(DateTimeException e) {
+				ret = null;
 			}
 		}
-		return ret;
-	}
-
-	/**
-	 * Retrieves an {@link java.time.Instant} object to the current date, time or time stamp string. This represents an object on the time line and can be
-	 * build out of a {@link java.time.LocalDate}, {@link java.time.LocalTime} or {@link java.time.LocalDateTime} by using the
-	 * {@link java.time.ZonedDateTime} class which is a combination of {@link java.time.LocalDateTime} and {@link java.time.ZoneId} to handle any type on
-	 * the timeline.
-	 * 
-	 * @return The instance for further operations.
-	 */
-	private static Instant getInstantInstance() {
-		LocalDate date = LocalDate.now(zoneId);
-		LocalTime time = LocalTime.now(zoneId);
-		LocalDateTime timestamp = LocalDateTime.now(zoneId);
-
-		Instant ret = null;
-		if (date != null) {
-			ret = date.atStartOfDay(zoneId).toInstant();
+		if(ret == null) {
+			try {
+				ret = LocalTime.from(temporal).atDate(LocalDate.now()).atZone(zoneId);
+			} catch (DateTimeException e) {
+				ret = null;
+			}
 		}
-		if (time != null) {
-			ret = time.atDate(LocalDate.now(zoneId)).atZone(zoneId).toInstant();
-		}
-		if (timestamp != null) {
-			ret = timestamp.atZone(zoneId).toInstant();
-		}
-		return ret;
-	}
-
-	/**
-	 * Retrieves an {@link java.time.Instant} object to the committed date, time or time stamp string. This represents an object on the timeline and can
-	 * be build out of a {@link java.time.LocalDate}, {@link java.time.LocalTime} or {@link java.time.LocalDateTime} by using the
-	 * {@link java.time.ZonedDateTime} class which is a combination of {@link java.time.LocalDateTime} and {@link java.time.ZoneId} to handle any type on
-	 * the timeline.
-	 * 
-	 * @param dateTime a valid input string in one of the formats defined in <code>EFormat</code>.
-	 * @return The instance for further operations.
-	 */
-	private static Instant getInstantInstance(String dateTime) {
-		LocalDate date = getDateInstance(dateTime);
-		LocalTime time = getTimeInstance(dateTime);
-		LocalDateTime timestamp = getTimestampInstance(dateTime);
-
-		Instant ret = null;
-		if (date != null) {
-			ret = date.atStartOfDay(zoneId).toInstant();
-		}
-		if (time != null) {
-			ret = time.atDate(LocalDate.now()).atZone(zoneId).toInstant();
-		}
-		if (timestamp != null) {
-			ret = timestamp.atZone(zoneId).toInstant();
+		// Last try for special formats
+		if(ret == null) {
+			int year = 0;
+			int week = 1;
+			int dayOfWeek = 1;
+			if(temporal.isSupported(ChronoField.YEAR)) {
+				year = temporal.get(ChronoField.YEAR);
+			}
+			if(temporal.isSupported(WeekFields.ISO.weekOfYear())) {
+				week = (int) temporal.getLong(WeekFields.ISO.weekOfYear());
+			}
+			if(temporal.isSupported(WeekFields.ISO.dayOfWeek())) {
+				dayOfWeek = (int) temporal.getLong(WeekFields.ISO.dayOfWeek());
+			}
+			ret = LocalDate.of(year, 1, 1).with(WeekFields.ISO.weekOfYear(), week).with(WeekFields.ISO.dayOfWeek(), dayOfWeek).atStartOfDay(zoneId);
 		}
 		return ret;
 	}

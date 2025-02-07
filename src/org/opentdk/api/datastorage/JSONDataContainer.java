@@ -1,37 +1,9 @@
-/* 
- * BSD 2-Clause License
- * 
- * Copyright (c) 2022, LK Test Solutions GmbH
- * All rights reserved.
- * 
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions are met:
- * 
- * 1. Redistributions of source code must retain the above copyright notice, this
- *    list of conditions and the following disclaimer.
- * 
- * 2. Redistributions in binary form must reproduce the above copyright notice,
- *    this list of conditions and the following disclaimer in the documentation
- *    and/or other materials provided with the distribution.
- * 
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
- * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
- * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
- * DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE
- * FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
- * DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
- * SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
- * CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
- * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
- * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE. 
- */
+
 package org.opentdk.api.datastorage;
 
+import org.opentdk.api.exception.DataContainerException;
 import org.opentdk.api.filter.Filter;
 import org.opentdk.api.filter.FilterRule;
-import org.opentdk.api.io.FileUtil;
-import org.opentdk.api.logger.MLogger;
-import org.opentdk.api.util.ListUtil;
 import org.apache.commons.lang3.StringUtils;
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -39,26 +11,26 @@ import org.json.JSONObject;
 import org.yaml.snakeyaml.Yaml;
 
 import java.io.*;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.logging.Level;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 /**
  * Specific data container class for the JSON format. In its read and write methods the
- * {@link org.json.JSONObject} class gets used to handle sources from an {@link java.io.InputStream}
+ * {@link JSONObject} class gets used to handle sources from an {@link InputStream}
  * or a JSON file.
  * 
  * @author FME (LK Test Solutions)
- * @see org.opentdk.api.datastorage.DataContainer
+ * @see DataContainer
  */
 public class JSONDataContainer implements SpecificContainer {
-
 	/**
 	 * Container object for the JSON data. Supports several read and write methods. Gets initialized in
-	 * {@link #readData(File)}.
+	 * {@link #readData(Path)}.
 	 */
 	private JSONObject json;
 	
@@ -72,27 +44,19 @@ public class JSONDataContainer implements SpecificContainer {
 	
 	@Override
 	public String asString() {
-		String ret = "";
-		if (json == null || json.isEmpty()) {
-			MLogger.getInstance().log(Level.WARNING, "JSON object is not initialized or empty ==> No JSON content to return", getClass().getSimpleName(), "asString");
-		} else {
-			ret = json.toString(1);
-		}
-		return ret;
+		return json.toString(1);
 	}
 
 	@Override
 	public String asString(EContainerFormat format) {
 		switch(format) {
 		case JSON:
-			MLogger.getInstance().log(Level.INFO, "Format already is JSON. Call asString", getClass().getSimpleName(), "asString(format)");
 			return asString();
 		case YAML:
 			Yaml yaml = new Yaml();
 			return yaml.dump(yaml.dumpAsMap(getJsonAsMap()));
 		default:
-			MLogger.getInstance().log(Level.WARNING, "Format not supported to export from YAML", getClass().getSimpleName(), "asString(format)");
-			return "";
+			throw new UnsupportedOperationException("Format not supported to export from YAML");
 		}
 	}
 	
@@ -110,22 +74,24 @@ public class JSONDataContainer implements SpecificContainer {
 	}
 	
 	@Override
-	public void readData(File srcFile) throws IOException {
-		if (!srcFile.getName().isEmpty()) {
-			String content = FileUtil.getContent(srcFile.getPath());
-			if (content != null) {
-				json = new JSONObject(content);
-			}
-		} 	
+	public void readData(Path srcFile) throws IOException {
+		String content = Files.readString(srcFile);
+		if (!content.isBlank()) {
+			json = new JSONObject(content);
+		}
 	}
 	
 	@Override
-	public void writeData(File srcFile) throws IOException, JSONException {
+	public void writeData(Path srcFile) throws IOException {
 		if (json == null || json.isEmpty()) {
-			MLogger.getInstance().log(Level.WARNING, "JSON object is not initialized or empty ==> No JSON content to write", getClass().getSimpleName(), "writeData");
+			throw new DataContainerException("JSON object is not initialized or empty ==> No JSON content to write");
 		} else {
-			FileUtil.createFile(srcFile, true);
-			FileUtil.writeOutputFile(json.toString(1), srcFile.getPath());
+			try {
+				Files.createFile(srcFile);
+				Files.writeString(srcFile, json.toString(1));
+			} catch (JSONException e) {
+				throw new DataContainerException(e);
+			}
 		}
 	}
 	
@@ -144,7 +110,7 @@ public class JSONDataContainer implements SpecificContainer {
 				Object newValue = this.getDataType(value);
 				Object result = null;
 
-				List<String> keyList = ListUtil.asList(searchExp.split("/"));
+				List<String> keyList = List.of(searchExp.split("/"));
 				int i = 0;
 				for (String key : keyList) {
 					if (i == 0) {
@@ -160,6 +126,7 @@ public class JSONDataContainer implements SpecificContainer {
 					}
 					i++;
 				}
+				assert result != null;
 				((JSONObject) result).append(name, newValue);
 				break;
 			}
@@ -175,7 +142,7 @@ public class JSONDataContainer implements SpecificContainer {
 				String searchExp = fltrRule.getValue().replace(";", "/") + "/" + name;
 				Object result = null;
 
-				List<String> keyList = ListUtil.asList(searchExp.split("/"));
+				List<String> keyList = List.of(searchExp.split("/"));
 				int i = 0;
 				for (String key : keyList) {
 					if (i == 0) {
@@ -191,6 +158,7 @@ public class JSONDataContainer implements SpecificContainer {
 					}
 					i++;
 				}
+				assert result != null;
 				((JSONObject) result).remove(name);
 				break;
 			}
@@ -202,7 +170,7 @@ public class JSONDataContainer implements SpecificContainer {
 	}
 
 	public String[] get(String headerName, Filter fltr) {
-		String[] ret = null;
+		String[] ret;
 		List<String> filteredValues = new ArrayList<>();
 
 		if (fltr.getFilterRules().size() > 0) {
@@ -217,8 +185,7 @@ public class JSONDataContainer implements SpecificContainer {
 						throw new JSONException("JSON key not present");
 					} else {
 						String sResult = result.toString();
-						if (result instanceof JSONArray) {
-							JSONArray values = (JSONArray) result;
+						if (result instanceof JSONArray values) {
 							for (int i = 0; i < values.length(); i++) {
 								filteredValues.add(values.get(i).toString());
 							}
@@ -228,13 +195,12 @@ public class JSONDataContainer implements SpecificContainer {
 					}
 				}
 			}
-			ret = ListUtil.asStringArr(filteredValues);
+			ret = (String[]) filteredValues.toArray();
 		} else {
 			Object result = json.get(headerName);
 			String sResult = result.toString();
 
-			if (result instanceof JSONArray) {
-				JSONArray values = (JSONArray) result;
+			if (result instanceof JSONArray values) {
 				ret = new String[values.length()];
 				for (int i = 0; i < values.length(); i++) {
 					ret[i] = values.get(i).toString();
@@ -260,7 +226,7 @@ public class JSONDataContainer implements SpecificContainer {
 	private Object getDataType(String newValue) {
 		JSONObject.testValidity(newValue);
 
-		Object ret = null;
+		Object ret;
 		if (newValue.startsWith("\"") && newValue.endsWith("\"")) {
 			ret = newValue.substring(newValue.indexOf("\"") + 1, newValue.indexOf("\""));
 		} else {
@@ -305,7 +271,7 @@ public class JSONDataContainer implements SpecificContainer {
 				Object newValue = this.getDataType(value);
 				Object result = null;
 
-				List<String> keyList = ListUtil.asList(searchExp.split("/"));
+				List<String> keyList = List.of(searchExp.split("/"));
 				int i = 0;
 				for (String key : keyList) {
 					if (i == 0) {
@@ -324,6 +290,7 @@ public class JSONDataContainer implements SpecificContainer {
 				if (result instanceof JSONArray) {
 					((JSONArray) result).put(newValue);
 				} else {
+					assert result != null;
 					((JSONObject) result).put(name, newValue);
 				}
 				break;
@@ -338,7 +305,7 @@ public class JSONDataContainer implements SpecificContainer {
 	 */
 	void setJsonWithMap(Map<String, Object> content) {
 		if(content == null) {
-			MLogger.getInstance().log(Level.WARNING, "Map object is not initialized ==> No JSON content to read", getClass().getSimpleName(), "setJsonWithMap");
+			throw new DataContainerException("Map object is not initialized ==> No JSON content to read");
 		} else {
 			json = new JSONObject(content);
 		}

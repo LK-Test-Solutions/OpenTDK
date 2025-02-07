@@ -1,34 +1,6 @@
-/* 
- * BSD 2-Clause License
- * 
- * Copyright (c) 2022, LK Test Solutions GmbH
- * All rights reserved.
- * 
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions are met:
- * 
- * 1. Redistributions of source code must retain the above copyright notice, this
- *    list of conditions and the following disclaimer.
- * 
- * 2. Redistributions in binary form must reproduce the above copyright notice,
- *    this list of conditions and the following disclaimer in the documentation
- *    and/or other materials provided with the distribution.
- * 
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
- * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
- * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
- * DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE
- * FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
- * DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
- * SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
- * CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
- * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
- * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE. 
- */
 package org.opentdk.api.datastorage;
 
-import org.opentdk.api.io.FileUtil;
-import org.opentdk.api.logger.MLogger;
+import org.opentdk.api.exception.DataContainerException;
 import org.opentdk.api.filter.Filter;
 import org.yaml.snakeyaml.Yaml;
 
@@ -36,18 +8,19 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.Map;
-import java.util.logging.Level;
 
 /**
  * Specific data container class for the YAML format. The storage object for the source is the
- * {@link org.yaml.snakeyaml.Yaml} class to read from an {@link java.io.InputStream} or a YAML file.
+ * {@link Yaml} class to read from an {@link InputStream} or a YAML file.
  * All read and write methods use the {@link JSONDataContainer}, because both the
- * {@link org.yaml.snakeyaml.Yaml} and the {@link org.json.JSONObject} support a method to provide
+ * {@link Yaml} and the {@link org.json.JSONObject} support a method to provide
  * the content as map.
  * 
  * @author FME (LK Test Solutions)
- * @see org.opentdk.api.datastorage.DataContainer
+ * @see DataContainer
  */
 public class YAMLDataContainer implements SpecificContainer {
 	/**
@@ -81,21 +54,18 @@ public class YAMLDataContainer implements SpecificContainer {
 
 	@Override
 	public String asString(EContainerFormat format) {
-		switch(format) {
-		case JSON:
-			return json.asString();
-		case YAML:
-			return asString();
-		default:
-			throw new IllegalArgumentException("No EContainerFormat detected");
-		}
+		return switch (format) {
+			case JSON -> json.asString();
+			case YAML -> asString();
+			default -> throw new IllegalArgumentException("No EContainerFormat detected");
+		};
 	}
 
 	@Override
-	public void readData(File sourceFile) throws IOException {
-		content = yaml.load(FileUtil.getRowsAsString(sourceFile));		
+	public void readData(Path sourceFile) throws IOException {
+		content = yaml.load(Files.readString(sourceFile));
 		if (content == null) {
-			MLogger.getInstance().log(Level.WARNING, "YAML object is not initialized or empty ==> No YAML content to read", getClass().getSimpleName(), "constructor");
+			throw new DataContainerException("YAML object is not initialized or empty ==> No YAML content to read");
 		} else {
 			json.setJsonWithMap(content);
 		}
@@ -105,15 +75,15 @@ public class YAMLDataContainer implements SpecificContainer {
 	public void readData(InputStream stream) throws IOException {
 		content = yaml.load(stream);
 		if (content == null) {
-			MLogger.getInstance().log(Level.WARNING, "YAML object is not initialized or empty ==> No YAML content to read", getClass().getSimpleName(), "constructor");
+			throw new DataContainerException("YAML object is not initialized or empty ==> No YAML content to read");
 		} else {
 			json.setJsonWithMap(content);
 		}
 	}
 
 	@Override
-	public void writeData(File outputFile) throws IOException {
-		yaml.dump(yaml.dumpAsMap(json.getJsonAsMap()), new FileWriter(outputFile.getPath()));	
+	public void writeData(Path outputFile) throws IOException {
+		yaml.dump(yaml.dumpAsMap(json.getJsonAsMap()), new FileWriter(outputFile.toFile()));
 	}
 
 	// The following methods just link to the JSONDataContainer
