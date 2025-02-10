@@ -12,21 +12,22 @@ import java.util.*;
  * company LK Test Solutions:
  * 
  * <pre>
- * DataContainer container = new DataContainer("contacts.csv");
+ * DataContainer container = DataContainer.newContainer("contacts.csv");
  * Filter filter = new Filter();
  * fltr.addFilterRule("Company", "LK Test Solutions", EOperator.STARTS_WITH);
- * List{@literal <String>} result = container.getValuesAsList("Surname", filter);
+ * List{@literal <String>} result = container.getValues("Surname", filter);
  * </pre>
  *
  * @author LK Test Solutions
  */
 public class Filter {
 	/**
-	 * Storage object for the filter rules that should be used for comparison.
+	 * Storage object for the filter rules that get used for comparison.
 	 */
 	private List<FilterRule> rules;
 	/**
-	 * This object can be used to only allow specific headers as filter criteria. They are not case-sensitive. So if this list has elements and any <code>addFilterRule</code> method gets called
+	 * This object can be used to only allow specific headers as filter criteria. They are not case-sensitive.
+	 * So if this list has elements and any <code>addFilterRule</code> method gets called
 	 * with an invalid header the rule will not be added to the {@link #rules} list.
 	 */
 	private List<String> plausibleHeaders;
@@ -40,7 +41,7 @@ public class Filter {
 	}
 
 	/**
-	 * Add a filter to the List property {@link #rules} by passing the whole condition as string.<br>
+	 * Add a filter to the {@link #rules} by passing the whole condition as string.<br>
 	 * e.g.: 
 	 * <pre> 
 	 * Filter fltr = new Filter();
@@ -54,7 +55,7 @@ public class Filter {
 	}
 
 	/**
-	 * Adds an instance of type {@link FilterRule} to the List property {@link #rules}.
+	 * Adds an instance of type {@link FilterRule} to the {@link #rules}.
 	 *
 	 * @param rule instance of type {@link FilterRule}
 	 */
@@ -214,10 +215,10 @@ public class Filter {
 	}
 
 	/**
-	 * Removes all entries from the <code>rules</code> List.
+	 * Removes all entries from the {@link #rules}.
 	 */
 	public void clear() {
-		rules.clear();
+		rules = new ArrayList<>();
 	}
 
 	/**
@@ -230,9 +231,14 @@ public class Filter {
 	 */
 	public boolean deleteRule(FilterRule rule) {
 		boolean ret = false;
+		int ruleIndex = 0;
 		for (FilterRule r : rules) {
-			if (r.getHeaderName().equals(rule.getHeaderName()))
-				ret = rules.remove(r);
+			if (r.getHeaderName().equals(rule.getHeaderName())) {
+				rules.remove(ruleIndex);
+				ret = true;
+				break;
+			}
+			ruleIndex++;
 		}
 		return ret;
 	}
@@ -272,7 +278,6 @@ public class Filter {
 	 * @return True, if the rule has been deleted, else false.
 	 */
 	public boolean deleteRule(int index) {
-		boolean ret = rules.remove(index) != null;
-		return ret;
+		return rules.remove(index) != null;
 	}
 }

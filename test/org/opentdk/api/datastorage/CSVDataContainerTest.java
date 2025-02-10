@@ -1,5 +1,7 @@
 package org.opentdk.api.datastorage;
 
+import org.opentdk.api.filter.EOperator;
+import org.opentdk.api.filter.Filter;
 import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.BeforeTest;
@@ -10,6 +12,7 @@ import java.nio.file.FileAlreadyExistsException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Arrays;
 import java.util.List;
 
 public class CSVDataContainerTest {
@@ -36,8 +39,19 @@ public class CSVDataContainerTest {
     @Test
     public void getRow() throws IOException {
         DataContainer dc = prepareFile();
-        List<String> actual = dc.tabInstance().getRow(3);
+        List<String> actual = Arrays.asList(dc.tabInstance().getRow(3));
         List<String> expected = List.of("3", "Hannah" , "35", "Österreich");
+        Assert.assertEquals(actual, expected);
+        System.out.println("Success: Row is " + actual);
+    }
+
+    @Test
+    public void getRows() throws IOException {
+        DataContainer dc = prepareFile();
+        Filter filter = new Filter();
+        filter.addFilterRule("Name", "Ben", EOperator.EQUALS);
+        List<String> actual = Arrays.asList(dc.tabInstance().getRow(filter));
+        List<String> expected = List.of("4", "Ben" , "19", "Frankreich");
         Assert.assertEquals(actual, expected);
         System.out.println("Success: Row is " + actual);
     }

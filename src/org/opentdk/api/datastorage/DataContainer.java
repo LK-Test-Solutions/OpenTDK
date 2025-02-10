@@ -421,8 +421,12 @@ public class DataContainer implements SpecificContainer {
 	public void add(String name, String value, Filter filter) {
 		checkInstance();
 		if (isTabular()) {
-//			tabInstance().addRow(name);
-		} else if (isTree()) {
+            try {
+                tabInstance().addRow(new String[]{value});
+            } catch (IOException e) {
+                throw new UncheckedIOException(e);
+            }
+        } else if (isTree()) {
 			if(isXML()) {
 				xmlInstance().add(name, value, filter);
 			} else if (isJSON()) {
@@ -460,7 +464,7 @@ public class DataContainer implements SpecificContainer {
 		String[] ret = new String[0];
 		checkInstance();
 		if (isTabular()) {
-			ret = null;
+			ret = tabInstance().getRow(fltr);
 		} else if (isTree()) {
 			if(isXML()) {
 				try {
