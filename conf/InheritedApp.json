@@ -1,0 +1,6 @@
+{
+  "traceLevel": "INFO",
+  "logKeepAge": 10,
+  "logFileSize": 1064960,
+  "logArchiveSize": 5
+}
