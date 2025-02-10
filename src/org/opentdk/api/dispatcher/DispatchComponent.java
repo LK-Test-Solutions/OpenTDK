@@ -4,7 +4,7 @@ import org.opentdk.api.datastorage.DataContainer;
 import org.opentdk.api.datastorage.EContainerFormat;
 import org.opentdk.api.exception.DataContainerException;
 import org.opentdk.api.filter.Filter;
-import org.opentdk.api.mapping.EOperator;
+import org.opentdk.api.filter.EOperator;
 import org.apache.commons.lang3.StringUtils;
 import org.xml.sax.SAXException;
 

@@ -1,7 +1,6 @@
 package org.opentdk.api.filter;
 
 import org.opentdk.api.filter.FilterRule.ERuleFormat;
-import org.opentdk.api.mapping.EOperator;
 
 import java.util.*;
 

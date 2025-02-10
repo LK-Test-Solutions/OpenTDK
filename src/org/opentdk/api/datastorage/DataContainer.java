@@ -40,7 +40,7 @@ public class DataContainer implements SpecificContainer {
 
 	/**
 	 * The object that will be adapted to a specific data container like
-	 * {@link XMLDataContainer} or {@link PropertiesDataContainer}. The caller does
+	 * {@link XMLDataContainer} or {@link CSVDataContainer}. The caller does
 	 * not need to know about the adaption process.
 	 */
 	private SpecificContainer instance;
@@ -53,10 +53,6 @@ public class DataContainer implements SpecificContainer {
     @Setter
     private InputStream inputStream;
 
-	@Setter
-    @Getter
-    private ResultSet resultSet;
-
 	@Getter
     @Setter
     private Filter filter = new Filter();
@@ -66,7 +62,7 @@ public class DataContainer implements SpecificContainer {
 	 * {@link DataContainer} as an enumeration of type {@link EContainerFormat}.
      */
 	@Getter
-    private EContainerFormat containerFormat = EContainerFormat.TEXT;
+    private EContainerFormat containerFormat;
 
 	/**
 	 * The non argument constructor get used to have an empty container instance
@@ -117,7 +113,7 @@ public class DataContainer implements SpecificContainer {
 	 * Gets used if the exact type is known but without any present data. 
 	 * In this case no adaption process is necessary, because the format gets explicitly set.
 	 *
-	 * @param type {@link EHeader}
+	 * @param type {@link EContainerFormat}
 	 */
 	public static DataContainer newContainer(EContainerFormat type) {
 		return new DataContainer(type);
@@ -127,8 +123,6 @@ public class DataContainer implements SpecificContainer {
 		containerFormat = type;
 		switch (type) {
 			case CSV -> instance = CSVDataContainer.newInstance();
-			case PROPERTIES -> instance = PropertiesDataContainer.newInstance();
-			case RESULTSET -> instance = RSDataContainer.newInstance();
 			case XML -> {
 				try {
 					instance = XMLDataContainer.newInstance();
@@ -210,27 +204,6 @@ public class DataContainer implements SpecificContainer {
 	}
 
 	/**
-	 * Constructor that is called, when importing data from a database request to
-	 * the container. No filter will be used and the column delimiter for the
-	 * imported data is the semicolon.
-	 *
-	 * @param rs The result of the database request.
-	 */
-	public static DataContainer newContainer(ResultSet rs) {
-		return new DataContainer(rs);
-	}
-
-	private DataContainer(ResultSet rs) {
-		resultSet = rs;
-		try {
-			instance = adaptContainer();
-			rsInstance().readData(rs);
-		} catch (IOException | SQLException e) {
-			throw new DataContainerException(e);
-		}
-	}
-
-	/**
 	 * This method adapts the one {@link SpecificContainer} instance to a specific
 	 * {@link DataContainer} depending on the source file ending or existence of a
 	 * stream. It calls {@link #readData(Path)} at the end if there is a source.
@@ -240,8 +213,6 @@ public class DataContainer implements SpecificContainer {
 	private SpecificContainer adaptContainer() throws IOException {
 		return switch (detectDataFormat()) {
 			case CSV -> CSVDataContainer.newInstance();
-			case PROPERTIES -> PropertiesDataContainer.newInstance();
-			case RESULTSET -> RSDataContainer.newInstance();
 			case XML -> {
 				try {
 					yield XMLDataContainer.newInstance();
@@ -263,9 +234,7 @@ public class DataContainer implements SpecificContainer {
 	 * @return enumeration of type {@link EContainerFormat}
 	 */
 	private EContainerFormat detectDataFormat() throws IOException {
-		if (resultSet != null) {
-			containerFormat = EContainerFormat.RESULTSET;
-		} else if (inputStream != null && inputStream.available() > 0) {
+		if (inputStream != null && inputStream.available() > 0) {
 			try(Stream<String> streamOfString = new BufferedReader(new InputStreamReader(inputStream)).lines()) {
 				String inputContent = streamOfString.collect(Collectors.joining());
 
@@ -293,9 +262,7 @@ public class DataContainer implements SpecificContainer {
 			String fileName = inputFile.toFile().getName();
 			if (StringUtils.isNotBlank(fileName)) {
 				if (fileName.endsWith(".txt")) {
-					containerFormat = EContainerFormat.TEXT;
-				} else if (fileName.endsWith(".properties")) {
-					containerFormat = EContainerFormat.PROPERTIES;
+					containerFormat = EContainerFormat.CSV;
 				} else if (fileName.endsWith(".csv")) {
 					containerFormat = EContainerFormat.CSV;
 				} else if (fileName.endsWith(".xml")) {
@@ -311,30 +278,12 @@ public class DataContainer implements SpecificContainer {
 	}
 
 	public CSVDataContainer tabInstance() {
-		if (instance instanceof RSDataContainer) {
-			return (RSDataContainer) instance;
-		} else if (instance instanceof CSVDataContainer) {
+		if (instance instanceof CSVDataContainer) {
 			return (CSVDataContainer) instance;
 		} else {
 			throw new NullPointerException("TabularContainer not initialized");
 		}
 	}
-
-	public PropertiesDataContainer propInstance() {
-		if (instance instanceof PropertiesDataContainer) {
-			return (PropertiesDataContainer) instance;
-		} else {
-			throw new NullPointerException("PropertiesDataContainer not initialized");
-		}
-	}
-	
-	public RSDataContainer rsInstance() {
-		if (instance instanceof RSDataContainer) {
-			return (RSDataContainer) instance;
-		} else {
-			throw new NullPointerException("RSDataContainer not initialized");
-		}
-	} 
 	
 	public XMLDataContainer xmlInstance() {
 		if (instance instanceof XMLDataContainer) {
@@ -370,11 +319,7 @@ public class DataContainer implements SpecificContainer {
 	 */
 	public boolean isTabular() {
 		boolean ret = false;
-		if (instance instanceof PropertiesDataContainer) {
-			ret = true;
-		} else if (instance instanceof RSDataContainer) {
-			ret = true;
-		} else if (instance instanceof CSVDataContainer) {
+		if (instance instanceof CSVDataContainer) {
 			ret = true;
 		}
 		return ret;
@@ -476,7 +421,7 @@ public class DataContainer implements SpecificContainer {
 	public void add(String name, String value, Filter filter) {
 		checkInstance();
 		if (isTabular()) {
-			tabInstance().addRow(name);
+//			tabInstance().addRow(name);
 		} else if (isTree()) {
 			if(isXML()) {
 				xmlInstance().add(name, value, filter);

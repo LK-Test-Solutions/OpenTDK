@@ -5,7 +5,7 @@ ID,Name,Alter,Land
 4,Ben,19,Frankreich
 5,Greta,51,Spanien
 6,Felix,27,Italien
-7,Julia,22,Deutschland
+7,Julia,null,Deutschland
 8,David,41,Österreich
-9,Ivan,60,Schweiz
+9,'Ivan',60,Schweiz
 10,Anna,31,Frankreich

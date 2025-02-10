@@ -1,4 +1,4 @@
-package org.opentdk.api.mapping;
+package org.opentdk.api.filter;
 
 import lombok.Getter;
 

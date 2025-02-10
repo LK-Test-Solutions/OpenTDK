@@ -1,7 +1,6 @@
 package org.opentdk.api.filter;
 
 import org.opentdk.api.util.DateUtil;
-import org.opentdk.api.mapping.EOperator;
 
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;

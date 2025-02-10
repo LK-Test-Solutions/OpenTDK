@@ -34,7 +34,6 @@ import java.util.List;
  * 
  * @author LK Test Solutions
  */
-@Deprecated
 public class XMLEditor {
 	/**
 	 * File object with the relative or absolute path and filename of the XML file.

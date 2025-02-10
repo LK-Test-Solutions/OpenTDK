@@ -175,12 +175,11 @@ public class CSVUtil {
 		return result.toString();
 	}
 
-	public static void writeFile(List<String[]> data, String outputPath, String delimiter, Charset encoding) throws IOException {
-		File outputFile = new File(outputPath);
+	public static void writeFile(List<String[]> data, File outputFile, String delimiter, Charset encoding) throws IOException {
 		if (!outputFile.exists()) {
 			outputFile.createNewFile();
 		}
-		try (BufferedWriter writer = new BufferedWriter(new FileWriter(outputPath, encoding))) {
+		try (BufferedWriter writer = new BufferedWriter(new FileWriter(outputFile, encoding))) {
 			for (String[] row : data) {
 				StringBuilder line = new StringBuilder();
 				for (String value : row) {
