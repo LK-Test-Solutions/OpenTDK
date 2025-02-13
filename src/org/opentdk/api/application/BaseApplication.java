@@ -124,7 +124,6 @@ public abstract class BaseApplication {
     /**
      * Loads the JSON content from the {@link #settingsFile} into the {@link #settings}. If no program parameter 'settings'
      * was committed, the default 'conf/MainClass.json' gets used. Or the {@link #settingsFile} gets overwritten before calling this method.
-     * @throws IOException
      */
     public void initSettings() throws IOException {
         Files.createDirectories(settingsFile.getParent());
@@ -134,6 +133,22 @@ public abstract class BaseApplication {
         }
         try (FileReader reader = new FileReader(settingsFile.toFile())) {
             settings = new GsonBuilder().setPrettyPrinting().create().fromJson(reader, AppSettings.class);
+        }
+        // Overwrite settings with program parameter if required
+        mergeSettingsAndProps();
+    }
+
+    /**
+     * Works like {@link #initSettings()} but with the possibility to use a custom settings class that inherits from {@link AppSettings}.
+     */
+    public void initSettings(AppSettings customSettings) throws IOException {
+        Files.createDirectories(settingsFile.getParent());
+        if(Files.notExists(settingsFile)) {
+            Files.createFile(settingsFile);
+            Files.writeString(settingsFile, "{}");
+        }
+        try (FileReader reader = new FileReader(settingsFile.toFile())) {
+            settings = new GsonBuilder().setPrettyPrinting().create().fromJson(reader, customSettings.getClass());
         }
         // Overwrite settings with program parameter if required
         mergeSettingsAndProps();

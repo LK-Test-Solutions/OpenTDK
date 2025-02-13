@@ -14,7 +14,7 @@ import java.util.*;
  * <pre>
  * DataContainer container = DataContainer.newContainer("contacts.csv");
  * Filter filter = new Filter();
- * fltr.addFilterRule("Company", "LK Test Solutions", EOperator.STARTS_WITH);
+ * filter.addFilterRule("Company", "LK Test Solutions", EOperator.STARTS_WITH);
  * List{@literal <String>} result = container.getValues("Surname", filter);
  * </pre>
  *
@@ -75,8 +75,8 @@ public class Filter {
 	/**
 	 * Creates a new instance of type {@link FilterRule} and adds the instance to the {@link #rules} list.
 	 *
-	 * @param headerName	Name of the field or column header, where the rule 
-	 * @param value
+	 * @param headerName	Name of the field or column header
+	 * @param value			Filter criteria in the field or column
 	 * @param mode			An instance of type {@link EOperator} e.g. <code>EOperator.CONTAINS</code>
 	 */
 	public void addFilterRule(String headerName, String value, EOperator mode) {
@@ -106,7 +106,7 @@ public class Filter {
 	 * @param headerName Header or key to search for the defined values
 	 * @param values     Array with multiple values that will be checked by the operation.
 	 * @param mode       The operator that defines the filter operation for the value e.g.
-	 *                   EOperator.EQUALS, EOperator.STARTS_WITH, EOperator.CONTAINS etc.
+	 *                   EOperator.EQUALS, EOperator.STARTS_WITH etc.
 	 * @param ruleFormat See {@link FilterRule.ERuleFormat}
 	 */
 	public void addFilterRule(String headerName, String[] values, EOperator mode, FilterRule.ERuleFormat ruleFormat) {
@@ -222,6 +222,34 @@ public class Filter {
 	}
 
 	/**
+	 * Deletes a rule from the filter instance. The rule has to have the same headerName, value and mode
+	 * as the rule that has to be deleted in the filter.
+	 *
+	 * @param headerName Header of the column or row within a tabular format.
+	 * @param value      The value.
+	 * @param mode       The operator, used to the values e.g. EOperator.EQUALS,
+	 *                   EOperator.STARTS_WITH etc.
+	 * @return True, if the rule has been deleted, else false.
+	 */
+	public boolean deleteRule(String headerName, String value, EOperator mode) {
+		return deleteRule(new FilterRule(headerName, value, mode));
+	}
+
+	/**
+	 * Deletes a rule from the filter instance. The rule has to have the same headerName, values and
+	 * mode as the rule that has to be deleted in the filter.
+	 *
+	 * @param headerName Header of the column or row within a tabular format.
+	 * @param values     The values array.
+	 * @param mode       The operator, used to the values e.g. EOperator.EQUALS,
+	 *                   EOperator.STARTS_WITH etc.
+	 * @return True, if the rule has been deleted, else false.
+	 */
+	public boolean deleteRule(String headerName, String[] values, EOperator mode) {
+		return deleteRule(new FilterRule(headerName, values, mode));
+	}
+
+	/**
 	 * Deletes a rule from the filter instance. For example the rule can be created with new
 	 * FilterRule(), but has to have the same headerName, value and mode as the rule that has to be
 	 * deleted in the filter.
@@ -244,38 +272,10 @@ public class Filter {
 	}
 
 	/**
-	 * Deletes a rule from the filter instance. The rule has to have the same headerName, value and mode
-	 * as the rule that has to be deleted in the filter.
-	 *
-	 * @param headerName Header of the column or row within a tabular format.
-	 * @param value      The value.
-	 * @param mode       The operator, used to the values e.g. EOperator.EQUALS,
-	 *                   EOperator.STARTS_WITH, EOperator.CONTAINS etc.
-	 * @return True, if the rule has been deleted, else false.
-	 */
-	public boolean deleteRule(String headerName, String value, EOperator mode) {
-		return deleteRule(new FilterRule(headerName, value, mode));
-	}
-
-	/**
-	 * Deletes a rule from the filter instance. The rule has to have the same headerName, values and
-	 * mode as the rule that has to be deleted in the filter.
-	 *
-	 * @param headerName Header of the column or row within a tabular format.
-	 * @param values     The values array.
-	 * @param mode       The operator, used to the values e.g. EOperator.EQUALS,
-	 *                   EOperator.STARTS_WITH, EOperator.CONTAINS etc.
-	 * @return True, if the rule has been deleted, else false.
-	 */
-	public boolean deleteRule(String headerName, String[] values, EOperator mode) {
-		return deleteRule(new FilterRule(headerName, values, mode));
-	}
-
-	/**
 	 * Deletes a rule from the filter instance, specified through an index.
 	 *
 	 * @param index Index of the rule in the rules property of the filter instance.
-	 * @return True, if the rule has been deleted, else false.
+	 * @return True, if the rule has been deleted, false otherwise.
 	 */
 	public boolean deleteRule(int index) {
 		return rules.remove(index) != null;

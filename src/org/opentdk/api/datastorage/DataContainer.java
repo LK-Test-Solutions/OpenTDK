@@ -19,8 +19,6 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.sql.ResultSet;
-import java.sql.SQLException;
 import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -222,7 +220,6 @@ public class DataContainer implements SpecificContainer {
 			}
 			case JSON -> JSONDataContainer.newInstance();
 			case YAML -> YAMLDataContainer.newInstance();
-            default -> throw new IllegalStateException("Unexpected value: " + detectDataFormat());
         };
 	}
 
@@ -318,11 +315,7 @@ public class DataContainer implements SpecificContainer {
 	 * @return true: is tree format, false otherwise
 	 */
 	public boolean isTabular() {
-		boolean ret = false;
-		if (instance instanceof CSVDataContainer) {
-			ret = true;
-		}
-		return ret;
+        return instance instanceof CSVDataContainer;
 	}
 
 	/**
@@ -421,11 +414,7 @@ public class DataContainer implements SpecificContainer {
 	public void add(String name, String value, Filter filter) {
 		checkInstance();
 		if (isTabular()) {
-            try {
-                tabInstance().addRow(new String[]{value});
-            } catch (IOException e) {
-                throw new UncheckedIOException(e);
-            }
+			throw new IllegalStateException("Facade methods not supported for tabular container");
         } else if (isTree()) {
 			if(isXML()) {
 				xmlInstance().add(name, value, filter);
@@ -440,7 +429,7 @@ public class DataContainer implements SpecificContainer {
 	public void delete(String params, String attrName, String attrValue, Filter fltr) {
 		checkInstance();
 		if (isTabular()) {
-			tabInstance().deleteRow(params);
+			throw new IllegalStateException("Facade methods not supported for tabular container");
 		} else if (isTree()) {
 			if(isXML()) {
 				try {
@@ -464,7 +453,7 @@ public class DataContainer implements SpecificContainer {
 		String[] ret = new String[0];
 		checkInstance();
 		if (isTabular()) {
-			ret = tabInstance().getRow(fltr);
+			throw new IllegalStateException("Facade methods not supported for tabular container");
 		} else if (isTree()) {
 			if(isXML()) {
 				try {
@@ -495,7 +484,7 @@ public class DataContainer implements SpecificContainer {
 	public void set(String parameterName, String value, Filter fltr, boolean allOccurences) {
 		checkInstance();
 		if (isTabular()) {
-			tabInstance().setRow(parameterName, value, fltr, allOccurences);
+			throw new IllegalStateException("Facade methods not supported for tabular container");
 		} else if (isTree()) {
 			if(isXML()) {
 				try {

@@ -1,12 +1,16 @@
 package org.opentdk.api.filter;
 
+import lombok.Getter;
+import lombok.Setter;
 import org.opentdk.api.util.DateUtil;
 
+import java.util.Objects;
+import java.util.Optional;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
- * This class is used to define rules that will be used for filtering data from tabular data formats.
+ * This class is used to define rules to filter data from tabular data formats.
  *
  * @author LK Test Solutions
  */
@@ -20,37 +24,48 @@ public class FilterRule {
     }
 
     /**
-     * headerName defines the name of the sequence, where the rules for specified value(s) will be checked. A sequence can be a column or row.
+     * Defines the name of the sequence, where the rules for specified value(s) will be checked. A sequence can be a column or row.
      */
+    @Getter
     private String headerName;
 
     /**
      * Defines the value, used by check operation of the rule.
      */
+    @Getter
     private String value;
 
     /**
      * An array with multiple values, used by check operation of the rule.
      */
+    @Getter
     private String[] values;
 
     /**
      * The operator used by check operation for the defined value of the rule.
      */
+    @Getter
     private EOperator filterOperator;
 
     /**
      * The operator used to concatenate the rule with other rules of this filter instance.
      */
+    @Getter
     private EOperator ruleConcatenationOperator;
 
     /**
-     * The complete rule including ruleConcatenationOperator, headerName, filterOperator and value.<br> e.g. "and company = 'LK Test Solutions GmbH'"
+     * The complete rule including {@link #ruleConcatenationOperator}, {@link #headerName}, {@link #filterOperator} and {@link #value}.
+     * <br> e.g. "and company = 'LK Test Solutions GmbH'"
      */
+    @Getter
+    @Setter
     private String ruleString;
 
+    /**
+     * See {@link ERuleFormat}
+     */
+    @Setter
     private ERuleFormat ruleFormat = ERuleFormat.STRING;
-    private Boolean quoteRule = false;
 
     /**
      * Constructor that is called when creating an instance of FilterRule with the full rule definition as String. This string will be parsed into the single rule elements like headerName, value,
@@ -139,22 +154,22 @@ public class FilterRule {
      * for checking the rule against multiple values.
      *
      * @param hName  String value with the Header name of the DataSet to which the rule applies.
-     * @param values Array of Strings, used by the check operation of the FilterRule.
+     * @param inValues Array of Strings, used by the check operation of the FilterRule.
      * @param m      Value of type EOperator, used for the check operation.
      */
-    public FilterRule(String hName, String[] values, EOperator m) {
-        this(hName, values, m, ERuleFormat.STRING);
+    public FilterRule(String hName, String[] inValues, EOperator m) {
+        this(hName, inValues, m, ERuleFormat.STRING);
     }
 
-    public FilterRule(String hName, String[] values, EOperator m, ERuleFormat ruleFormat) {
-        if (isValidOperator(values, m)) {
-            this.headerName = hName;
-            if (values.length == 1) {
-                this.value = values[0];
+    public FilterRule(String hName, String[] inValues, EOperator operator, ERuleFormat ruleFormat) {
+        if (isValidOperator(inValues, operator)) {
+            headerName = hName;
+            if (inValues.length == 1) {
+                this.value = inValues[0];
             }
-            this.values = values;
-            this.filterOperator = m;
-            this.ruleConcatenationOperator = EOperator.AND;
+            values = inValues;
+            filterOperator = operator;
+            ruleConcatenationOperator = EOperator.AND;
             assignRuleString(ruleFormat);
         } else {
             throw new IllegalArgumentException("Operator doesn't comply to values!");
@@ -213,23 +228,13 @@ public class FilterRule {
 
     public void assignRuleString() {
         StringBuffer sb = new StringBuffer();
-//        sb.append(ruleConcatenationOperator.getDVal());
-        sb.append(" ");
-        sb.append(headerName);
-        sb.append(" ");
-//        sb.append(filterOperator.getDVal());
-        sb.append(" ");
+        sb.append(" ").append(headerName).append(" ");
 
         String quote = "";
         switch (ruleFormat) {
             case QUOTED_STRING, QUOTED_REGEX -> quote = "'";
         }
 
-        // for backward compatibility, until the methods using quoteRuleString will be removed
-        // Boolean quoteString has been replaced by ERuleFormat ruleFormat [hwa; 2022-06-06]
-        if ((ruleFormat.equals(ERuleFormat.STRING)) && (quoteRule)) {
-            quote = "'";
-        }
         if (filterOperator.equals(EOperator.IN)) {
             sb.append("(");
         }
@@ -238,14 +243,14 @@ public class FilterRule {
         if (values.length > 1) {
             for (int i = 0; i < values.length; i++) {
                 String val = values[i];
-                if (i > 0 && i < values.length) {
+                if (i > 0) {
                     sb.append(",");
                 }
-                if (val instanceof String) {
-                    sb.append("'" + val + "'");
-                } else {
+//                if (val instanceof String) {
+//                    sb.append("'" + val + "'");
+//                } else {
                     sb.append(val);
-                }
+//                }
             }
         } else {
             sb.append(values[0]);
@@ -297,64 +302,6 @@ public class FilterRule {
     }
 
     /**
-     * Get the filterOperator attribute which is used for validation of the filtered values.
-     *
-     * @return filterOperator of type EOperator.
-     */
-    public EOperator getFilterOperator() {
-        return filterOperator;
-    }
-
-    /**
-     * Get the value of the <code>headerName</code> property,
-     *
-     * @return Value of type string
-     */
-    public String getHeaderName() {
-        return headerName;
-    }
-
-    /**
-     * Get the ruleConcatenationOperator attribute which is used to concatenate multiple filter rules. Valid operators can be <code>EOperator.AND</code> and
-     * <code>EOperator.OR</code>.
-     *
-     * @return The Operator of type EOperator.
-     */
-    public EOperator getRuleConcatenationOperator() {
-        return ruleConcatenationOperator;
-    }
-
-
-    public ERuleFormat getRuleFormat() {
-        return ruleFormat;
-    }
-
-    /**
-     * Get the complete rule including ruleConcatenationOperator, headerName, filterOperator and value as String.<br> e.g. <code>"and company = 'LK Test Solutions GmbH'"</code>
-     *
-     * @return complete rule as String
-     */
-    public String getRuleString() {
-        return ruleString;
-    }
-
-    /**
-     * Get the value, used by check operation of the rule.
-     *
-     * @return Value of type string
-     */
-    public String getValue() {
-        return value;
-    }
-
-    /**
-     * @return the values Array, used by check operation of the rule.
-     */
-    public String[] getValues() {
-        return values;
-    }
-
-    /**
      * Checks if the operator is applicable to the value.
      *
      * @param value Value which the operator should be applied to.
@@ -402,6 +349,9 @@ public class FilterRule {
      * @return boolean value; true = rule matches to the defined value; false = rule doesn't match to the defined value.
      */
     public boolean isValidValue(String val, String filterValue) {
+        if(val.contentEquals("null") || filterValue.contentEquals("null") ) {
+            return false;
+        }
         return switch (filterOperator) {
             case CONTAINS -> {
                 if ((ruleFormat == ERuleFormat.QUOTED_REGEX) || (ruleFormat == ERuleFormat.REGEX)) {
@@ -410,9 +360,27 @@ public class FilterRule {
                     yield val.trim().contains(filterValue);
                 }
             }
-//            case CONTAINS_DATE -> DateUtil.compare(DateUtil.parse(val, EFormat.getDateEFormat(filterValue).getFormatPattern()), filterValue) == 0;
-//            case CONTAINS_DATE_AFTER -> DateUtil.compare(DateUtil.parse(val, EFormat.getDateEFormat(filterValue).getFormatPattern()), filterValue) > 0;
-//            case CONTAINS_DATE_BEFORE -> DateUtil.compare(DateUtil.parse(val, EFormat.getDateEFormat(filterValue).getFormatPattern()), filterValue) < 0;
+            case CONTAINS_DATE -> {
+                Optional<String> result = DateUtil.findDate(val);
+                if(result.isPresent()) {
+                    yield DateUtil.compare(result.get(), filterValue) == 0;
+                }
+                yield false;
+            }
+            case CONTAINS_DATE_AFTER -> {
+                Optional<String> result = DateUtil.findDate(val);
+                if(result.isPresent()) {
+                    yield DateUtil.compare(result.get(), filterValue) > 0;
+                }
+                yield false;
+            }
+            case CONTAINS_DATE_BEFORE -> {
+                Optional<String> result = DateUtil.findDate(val);
+                if(result.isPresent()) {
+                    yield DateUtil.compare(result.get(), filterValue) < 0;
+                }
+                yield false;
+            }
             case CONTAINS_IGNORE_CASE -> {
                 if ((ruleFormat.equals(ERuleFormat.QUOTED_REGEX)) || (ruleFormat.equals(ERuleFormat.REGEX))) {
                     yield isValidExpression(".*" + filterValue + ".*", val, true);
@@ -487,7 +455,6 @@ public class FilterRule {
             case OR -> throw new IllegalArgumentException("OR not supported as comparator");
             case IN -> throw new IllegalArgumentException("IN not supported as comparator");
             case BETWEEN -> throw new IllegalArgumentException("BETWEEN not supported as comparator");
-            default -> throw new IllegalArgumentException("Unexpected value: " + filterOperator);
         };
     }
 
@@ -500,19 +467,6 @@ public class FilterRule {
         }
         Matcher match = pat.matcher(val);
         return match.matches();
-    }
-
-    public void setRuleFormat(ERuleFormat format) {
-        ruleFormat = format;
-    }
-
-    /**
-     * Set the ruleString property with the complete rule including ruleConcatenationOperator, headerName, filterOperator and value.<br> e.g. <code>"and company = 'LK Test Solutions GmbH'"</code>
-     *
-     * @param ruleStr Complete filter rule with all rule elements as String
-     */
-    public void setRuleString(String ruleStr) {
-        ruleString = ruleStr;
     }
 
 }

@@ -29,8 +29,7 @@ public class CSVDataContainer implements SpecificContainer {
     @Getter
     private Map<String, Integer> headerMap;
 
-    @Getter
-    @Setter
+    @Getter @Setter
     private String delimiter = ";";
 
     public static CSVDataContainer newInstance() {
@@ -39,18 +38,27 @@ public class CSVDataContainer implements SpecificContainer {
 
     protected CSVDataContainer() {
         rows = new ArrayList<>();
+        headers = new ArrayList<>();
+        headerMap = new HashMap<>();
     }
 
     @Override
     public String asString() {
-        return null;
+        StringBuilder result = new StringBuilder();
+        for (String[] row : rows) {
+            for (String cell : row) {
+                result.append(cell).append("\t");
+            }
+            result.append("\n");
+        }
+        return result.toString();
     }
 
     @Override
     public void readData(Path sourceFile) throws IOException {
         rows = CSVUtil.readFile(sourceFile.toFile(), delimiter, StandardCharsets.UTF_8);
-        headers = Arrays.asList(rows.get(0));
-        headerMap = new HashMap<>();
+        headers = Arrays.asList(rows.getFirst());
+//        rows.removeFirst(); // Headers are stored and can be removed from the rows list
         for(int i = 0; i < headers.size(); i++) {
             headerMap.put(headers.get(i), i);
         }
@@ -63,7 +71,7 @@ public class CSVDataContainer implements SpecificContainer {
         if (stream != null) {
             InputStreamReader inputStreamReader = new InputStreamReader(stream);
             Stream<String> streamOfString = new BufferedReader(inputStreamReader).lines();
-            content = streamOfString.collect(Collectors.toList());
+            content = streamOfString.toList();
 
             streamOfString.close();
             inputStreamReader.close();
@@ -77,15 +85,16 @@ public class CSVDataContainer implements SpecificContainer {
 
     @Override
     public void writeData(Path outputFile) throws IOException {
-        CSVUtil.writeFile(rows, outputFile.toFile(), delimiter, StandardCharsets.UTF_8);
+        CSVUtil.writeFile(rows, outputFile, delimiter, StandardCharsets.UTF_8);
     }
+
+    // GET
 
     public String[] getRow(int rowIndex) {
         if (rows.isEmpty()) {
             return null;
         }
-        // Check if the row index is valid (header is at index 0, so start at 1)
-        if (rowIndex >= 1 && rowIndex < rows.size()) {
+        if (rowIndex >= 0 && rowIndex < rows.size()) {
             return rows.get(rowIndex);
         }
         throw new DataContainerException("Row index is out of range");
@@ -108,10 +117,13 @@ public class CSVDataContainer implements SpecificContainer {
             return null;
         }
         List<String[]> ret = new ArrayList<>();
+        int rowIndex = 0;
         for(String[] row : rows) {
-            if(checkValuesFilter(row, filter)) {
+            // Column header row needs no check
+            if(rowIndex > 0 && checkValuesFilter(row, filter)) {
                 ret.add(row);
             }
+            rowIndex++;
         }
         return ret;
     }
@@ -126,23 +138,30 @@ public class CSVDataContainer implements SpecificContainer {
         } catch (NullPointerException e) {
             throw new DataContainerException("Column '" + columnHeader + "' not found.");
         }
-        // Check if the row index is valid (header is at index 0, so start at 1)
-        if (rowIndex >= 1 && rowIndex < rows.size()) {
+        if (rowIndex >= 0 && rowIndex < rows.size()) {
             return rows.get(rowIndex)[columnIndex];
         }
         throw new DataContainerException("Row index is out of range");
     }
 
-    public String getValue(Filter filter) {
-        return null;
-    }
-
-    public List<String> getValues(String columnHeader) {
+    public List<String> getColumn(String columnHeader) {
         if (rows.isEmpty()) {
             return null;
         }
-        return CSVUtil.getColumn(rows, columnHeader);
+        List<String> ret = CSVUtil.getColumn(rows, columnHeader);
+        ret.removeFirst(); // Remove column header
+        return ret;
     }
+
+    public List<String> getColumn(String columnHeader, Filter filter) {
+        List<String[]> filteredRows = getRows(filter);
+        filteredRows.addFirst(headers.toArray(String[]::new));
+        List<String> ret = CSVUtil.getColumn(filteredRows, columnHeader);
+        ret.removeFirst();
+        return ret;
+    }
+
+    // ADD
 
     public void addRow(List<String> row) throws IOException {
         rows.add(row.toArray(String[]::new));
@@ -152,27 +171,70 @@ public class CSVDataContainer implements SpecificContainer {
         rows.add(row);
     }
 
-    public void deleteRow(String params) {
-
+    public void addColumn(String column) {
+        addColumn(column, false);
     }
 
-    public void setRow(String parameterName, String value, Filter fltr, boolean allOccurences) {
+    public void addColumn(String column, boolean useExisting) {
+        CSVUtil.addColumn(rows, headerMap, column, useExisting, 0);
+    }
 
+    // SET
+
+    public void setRow(String updateColumn, String oldValue, String newValue) {
+        CSVUtil.updateRow(rows, updateColumn, oldValue, newValue);
+    }
+
+    // DELETE
+
+    public void deleteValue(String headerName) {
+        int headerIndex = headerMap.get(headerName);
+        rows.getFirst()[headerIndex] = null;
+    }
+
+    public void deleteRow(int index) {
+        rows.remove(index);
+    }
+
+    public void deleteRows(Filter filter) {
+        int[] indexes = getRowsIndexes(filter);
+        for (int index : indexes) {
+            rows.remove(index);
+        }
+    }
+
+    // HELPER
+
+    private int[] getRowsIndexes(Filter filter) {
+        StringBuilder indexBuffer = new StringBuilder();
+        for (int i = 0; i < rows.size(); i++) {
+            if (checkValuesFilter(rows.get(i), filter)) {
+                if (!indexBuffer.isEmpty()) {
+                    indexBuffer.append(";");
+                }
+                indexBuffer.append(i);
+            }
+        }
+        if (!indexBuffer.isEmpty()) {
+            return Arrays.stream(indexBuffer.toString().split(";")).mapToInt(Integer::parseInt).toArray();
+        } else {
+            return new int[] {};
+        }
     }
 
     /**
      * Checks if the filter rules match to the values of the given data set.
      *
      * @param values String array with all values of a defined data set (row).
-     * @param fltr   Object of type {@link Filter}, which includes one or more filter rules
+     * @param filter   Object of type {@link Filter}, which includes one or more filter rules
      * @return true = values match to the filter; false = values don't match to the filter
      */
-    private boolean checkValuesFilter(String[] values, Filter fltr)  {
+    private boolean checkValuesFilter(String[] values, Filter filter)  {
         boolean returnCode = false;
-        if (fltr.getFilterRules().isEmpty()) {
+        if (filter.getFilterRules().isEmpty()) {
             returnCode = true; // No filter defined
         } else {
-            for (FilterRule fr : fltr.getFilterRules()) {
+            for (FilterRule fr : filter.getFilterRules()) {
                 // Wild cards * and % will accept any value
                 if (fr.getValue() != null) {
                     if ((fr.getValue().equals("*")) || (fr.getValue().equals("%"))) {

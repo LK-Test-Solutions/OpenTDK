@@ -1,4 +1,5 @@
 {
+  "customSetting": "Test",
   "traceLevel": "INFO",
   "logKeepAge": 10,
   "logFileSize": 1064960,

@@ -2,6 +2,8 @@ package org.opentdk.api.util;
 
 import java.io.*;
 import java.nio.charset.Charset;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -27,7 +29,7 @@ public class CSVUtil {
 
 		// Find the index in the column
 		int columnIndex = -1;
-		if (data.size() > 0) {
+		if (!data.isEmpty()) {
 			String[] header = data.get(0);
 			for (int i = 0; i < header.length; i++) {
 				if (header[i].equals(columnName)) {
@@ -55,9 +57,7 @@ public class CSVUtil {
 
 		if (rowIndex >= 0 && rowIndex < data.size()) {
 			String[] row = data.get(rowIndex);
-			for (String value : row) {
-				rowData.add(value);
-			}
+            rowData.addAll(Arrays.asList(row));
 		}
 
 		return rowData;
@@ -79,7 +79,7 @@ public class CSVUtil {
 		List<String> columnData = new ArrayList<>();
 
 		int columnIndex = -1;
-		if (data.size() > 0) {
+		if (!data.isEmpty()) {
 			// Assuming the column names are in the first row
 			String[] header = data.get(0);
 
@@ -103,10 +103,11 @@ public class CSVUtil {
 	}
 	
 	public static void addColumn(List<String[]> data, Map<String, Integer> headerNames, String column) {
-		addColumn(data, headerNames, column, false);
+		addColumn(data, headerNames, column, false, 0);
 	}
 	
-	public static void addColumn(List<String[]> data, Map<String, Integer> headerNames, String column, boolean useExisting) {
+	public static void addColumn(List<String[]> data, Map<String, Integer> headerNames, String column, boolean useExisting, int startIndex) {
+		String newColumn = column;
 		if (!headerNames.containsKey(column)) {
 			headerNames.put(column, headerNames.size());
 		} else if (!useExisting) {
@@ -117,12 +118,17 @@ public class CSVUtil {
 				count++;
 			}
 			headerNames.put(col_tmp, headerNames.size());
+			newColumn = col_tmp;
 		} else {
 			return;
 		}
-		for (int i = 0; i < data.size(); i++) {
+		for (int i = startIndex; i < data.size(); i++) {
 			String[] newArr = Arrays.copyOf(data.get(i), data.get(i).length + 1);
-			newArr[newArr.length - 1] = "";
+			if(i == 0) {
+				newArr[newArr.length - 1] = newColumn;
+			} else {
+				newArr[newArr.length - 1] = "";
+			}
 			data.set(i, newArr);
 		}
 	}
@@ -143,8 +149,8 @@ public class CSVUtil {
 	public static void updateRow(List<String[]> data, String updateColumn, String oldValue, String newValue) {
 		// Assume that the first row contains the headers
 		int columnIndex = -1;
-		for (int i = 0; i < data.get(0).length; i++) {
-			if (data.get(0)[i].equalsIgnoreCase(updateColumn)) {
+		for (int i = 0; i < data.getFirst().length; i++) {
+			if (data.getFirst()[i].equalsIgnoreCase(updateColumn)) {
 				columnIndex = i;
 				break;
 			}
@@ -175,11 +181,12 @@ public class CSVUtil {
 		return result.toString();
 	}
 
-	public static void writeFile(List<String[]> data, File outputFile, String delimiter, Charset encoding) throws IOException {
-		if (!outputFile.exists()) {
-			outputFile.createNewFile();
+	public static void writeFile(List<String[]> data, Path outputFile, String delimiter, Charset encoding) throws IOException {
+		Files.createDirectories(outputFile.getParent());
+		if(Files.notExists(outputFile)) {
+			Files.createFile(outputFile);
 		}
-		try (BufferedWriter writer = new BufferedWriter(new FileWriter(outputFile, encoding))) {
+		try (BufferedWriter writer = new BufferedWriter(new FileWriter(outputFile.toFile(), encoding))) {
 			for (String[] row : data) {
 				StringBuilder line = new StringBuilder();
 				for (String value : row) {
