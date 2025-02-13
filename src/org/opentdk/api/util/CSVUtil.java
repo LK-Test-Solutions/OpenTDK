@@ -30,7 +30,7 @@ public class CSVUtil {
 		// Find the index in the column
 		int columnIndex = -1;
 		if (!data.isEmpty()) {
-			String[] header = data.get(0);
+			String[] header = data.getFirst();
 			for (int i = 0; i < header.length; i++) {
 				if (header[i].equals(columnName)) {
 					columnIndex = i;
@@ -48,41 +48,34 @@ public class CSVUtil {
 				}
 			}
 		}
-
 		return filteredData;
 	}
 
 	public static List<String> getRow(List<String[]> data, int rowIndex) {
 		List<String> rowData = new ArrayList<>();
-
 		if (rowIndex >= 0 && rowIndex < data.size()) {
 			String[] row = data.get(rowIndex);
             rowData.addAll(Arrays.asList(row));
 		}
-
 		return rowData;
 	}
 
 	public static List<String> getColumn(List<String[]> data, int columnIndex) {
 		List<String> columnData = new ArrayList<>();
-
 		for (String[] row : data) {
 			if (columnIndex >= 0 && columnIndex < row.length) {
 				columnData.add(row[columnIndex]);
 			}
 		}
-
 		return columnData;
 	}
 
 	public static List<String> getColumn(List<String[]> data, String columnName) {
 		List<String> columnData = new ArrayList<>();
-
 		int columnIndex = -1;
 		if (!data.isEmpty()) {
 			// Assuming the column names are in the first row
-			String[] header = data.get(0);
-
+			String[] header = data.getFirst();
 			for (int i = 0; i < header.length; i++) {
 				if (header[i].equalsIgnoreCase(columnName)) {
 					columnIndex = i;
@@ -90,7 +83,6 @@ public class CSVUtil {
 				}
 			}
 		}
-
 		if (columnIndex != -1) {
 			for (String[] row : data) {
 				if (columnIndex < row.length) {
@@ -98,16 +90,10 @@ public class CSVUtil {
 				}
 			}
 		}
-
 		return columnData;
 	}
 	
-	public static void addColumn(List<String[]> data, Map<String, Integer> headerNames, String column) {
-		addColumn(data, headerNames, column, false, 0);
-	}
-	
-	public static void addColumn(List<String[]> data, Map<String, Integer> headerNames, String column, boolean useExisting, int startIndex) {
-		String newColumn = column;
+	public static void addColumn(List<String[]> data, Map<String, Integer> headerNames, String column, boolean useExisting) {
 		if (!headerNames.containsKey(column)) {
 			headerNames.put(column, headerNames.size());
 		} else if (!useExisting) {
@@ -118,31 +104,24 @@ public class CSVUtil {
 				count++;
 			}
 			headerNames.put(col_tmp, headerNames.size());
-			newColumn = col_tmp;
 		} else {
 			return;
 		}
-		for (int i = startIndex; i < data.size(); i++) {
+		for (int i = 1; i < data.size(); i++) {
 			String[] newArr = Arrays.copyOf(data.get(i), data.get(i).length + 1);
-			if(i == 0) {
-				newArr[newArr.length - 1] = newColumn;
-			} else {
-				newArr[newArr.length - 1] = "";
-			}
+			newArr[newArr.length - 1] = "";
 			data.set(i, newArr);
 		}
 	}
 
 	public static String getValue(List<String[]> data, int rowIndex, int columnIndex) {
 		String value = "";
-
 		if (rowIndex >= 0 && rowIndex < data.size()) {
 			String[] row = data.get(rowIndex);
 			if (columnIndex >= 0 && columnIndex < row.length) {
 				value = row[columnIndex];
 			}
 		}
-
 		return value;
 	}
 
@@ -155,10 +134,9 @@ public class CSVUtil {
 				break;
 			}
 		}
-
 		// If a column could be detected, update the data
 		if (columnIndex != -1) {
-			for (int i = 1; i < data.size(); i++) { // // Start index is 1 to jump over the header row
+			for (int i = 1; i < data.size(); i++) { // Start index is 1 to jump over the header row
 				if (data.get(i)[columnIndex].equalsIgnoreCase(oldValue)) {
 					// Update the value of the detected row 
 					data.get(i)[columnIndex] = newValue;
@@ -170,14 +148,12 @@ public class CSVUtil {
 
 	public static String asString(List<String[]> data) {
 		StringBuilder result = new StringBuilder();
-
 		for (String[] row : data) {
 			for (String cell : row) {
 				result.append(cell).append("\t");
 			}
 			result.append("\n");
 		}
-
 		return result.toString();
 	}
 

@@ -125,7 +125,7 @@ public final class DatabaseExecuter {
 				String col = rsmd.getColumnName(i);
 				columns.add(col);
 			}
-			dc.tabInstance().setHeaders(columns);
+			dc.tabInstance().setHeaders(columns.toArray(String[]::new));
 			while (result.next()) {
 				String[] row = new String[cols];
 				for (int i = 0; i < cols; i++) {

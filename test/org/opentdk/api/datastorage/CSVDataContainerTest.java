@@ -28,7 +28,7 @@ public class CSVDataContainerTest {
     @Test
     public void getHeaders() throws IOException {
         DataContainer dc = prepareFile();
-        List<String> actual = dc.tabInstance().getHeaders();
+        List<String> actual = Arrays.stream(dc.tabInstance().getHeaders()).toList();
         List<String> expected = List.of("ID", "Name", "Alter", "Land");
         Assert.assertEquals(actual, expected);
         System.out.println("Success: Headers are " + actual);
@@ -37,7 +37,7 @@ public class CSVDataContainerTest {
     @Test
     public void getRow() throws IOException {
         DataContainer dc = prepareFile();
-        List<String> actual = Arrays.asList(dc.tabInstance().getRow(3));
+        List<String> actual = Arrays.asList(dc.tabInstance().getRow(2));
         List<String> expected = List.of("3", "Hannah" , "35", "Österreich");
         Assert.assertEquals(actual, expected);
         System.out.println("Success: Row is " + actual);
@@ -64,7 +64,7 @@ public class CSVDataContainerTest {
     @Test
     public void getValue() throws IOException {
         DataContainer dc = prepareFile();
-        String actual = dc.tabInstance().getValue(2, "Land");
+        String actual = dc.tabInstance().getValue(1, "Land");
         String expected = "Schweiz";
         Assert.assertEquals(actual, expected);
         System.out.println("Success: Country is " + actual);
@@ -83,7 +83,7 @@ public class CSVDataContainerTest {
         actual = dc.tabInstance().getColumn("Name", filter);
         expected = List.of("Greta", "'Ivan'");
         Assert.assertEquals(actual, expected);
-        System.out.println("Success: Country is " + actual);
+        System.out.println("Success: Names are " + actual);
     }
 
     @Test
@@ -109,6 +109,11 @@ public class CSVDataContainerTest {
         System.out.println("Success: column created " + actual);
     }
 
+    @Test
+    public void setValue() throws IOException {
+        DataContainer dc = prepareFile();
+        dc.tabInstance().setRow("ID", "8", "20");
+    }
     // TODO setRow
 
     // TODO delete 3x

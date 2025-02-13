@@ -24,7 +24,7 @@ public class CSVDataContainer implements SpecificContainer {
     private List<String[]> rows;
 
     @Getter @Setter
-    private List<String> headers;
+    private String[] headers;
 
     @Getter
     private Map<String, Integer> headerMap;
@@ -38,29 +38,22 @@ public class CSVDataContainer implements SpecificContainer {
 
     protected CSVDataContainer() {
         rows = new ArrayList<>();
-        headers = new ArrayList<>();
+        headers = new String[0];
         headerMap = new HashMap<>();
     }
 
     @Override
     public String asString() {
-        StringBuilder result = new StringBuilder();
-        for (String[] row : rows) {
-            for (String cell : row) {
-                result.append(cell).append("\t");
-            }
-            result.append("\n");
-        }
-        return result.toString();
+       return CSVUtil.asString(getRowsWithHeader());
     }
 
     @Override
     public void readData(Path sourceFile) throws IOException {
         rows = CSVUtil.readFile(sourceFile.toFile(), delimiter, StandardCharsets.UTF_8);
-        headers = Arrays.asList(rows.getFirst());
-//        rows.removeFirst(); // Headers are stored and can be removed from the rows list
-        for(int i = 0; i < headers.size(); i++) {
-            headerMap.put(headers.get(i), i);
+        headers = rows.getFirst();
+        rows.removeFirst(); // Headers are stored and can be removed from the rows list
+        for(int i = 0; i < headers.length; i++) {
+            headerMap.put(headers[i], i);
         }
     }
 
@@ -80,12 +73,14 @@ public class CSVDataContainer implements SpecificContainer {
             for(String row : content) {
                 rows.add(row.split(delimiter));
             }
+            headers = rows.getFirst();
+            rows.removeFirst();
         }
     }
 
     @Override
     public void writeData(Path outputFile) throws IOException {
-        CSVUtil.writeFile(rows, outputFile, delimiter, StandardCharsets.UTF_8);
+        CSVUtil.writeFile(getRowsWithHeader(), outputFile, delimiter, StandardCharsets.UTF_8);
     }
 
     // GET
@@ -117,13 +112,10 @@ public class CSVDataContainer implements SpecificContainer {
             return null;
         }
         List<String[]> ret = new ArrayList<>();
-        int rowIndex = 0;
         for(String[] row : rows) {
-            // Column header row needs no check
-            if(rowIndex > 0 && checkValuesFilter(row, filter)) {
+            if(checkValuesFilter(row, filter)) {
                 ret.add(row);
             }
-            rowIndex++;
         }
         return ret;
     }
@@ -148,14 +140,16 @@ public class CSVDataContainer implements SpecificContainer {
         if (rows.isEmpty()) {
             return null;
         }
+        rows.addFirst(headers);
         List<String> ret = CSVUtil.getColumn(rows, columnHeader);
-        ret.removeFirst(); // Remove column header
+        rows.removeFirst();
+        ret.removeFirst(); // Without header
         return ret;
     }
 
     public List<String> getColumn(String columnHeader, Filter filter) {
         List<String[]> filteredRows = getRows(filter);
-        filteredRows.addFirst(headers.toArray(String[]::new));
+        filteredRows.addFirst(headers);
         List<String> ret = CSVUtil.getColumn(filteredRows, columnHeader);
         ret.removeFirst();
         return ret;
@@ -176,13 +170,24 @@ public class CSVDataContainer implements SpecificContainer {
     }
 
     public void addColumn(String column, boolean useExisting) {
-        CSVUtil.addColumn(rows, headerMap, column, useExisting, 0);
+        rows.addFirst(headers);
+        CSVUtil.addColumn(rows, headerMap, column, useExisting);
+        rows.removeFirst();
+        mergeHeaderMapWithHeader();
     }
 
     // SET
 
-    public void setRow(String updateColumn, String oldValue, String newValue) {
+    public void setValue(String updateColumn, String oldValue, String newValue) {
+        rows.addFirst(headers);
         CSVUtil.updateRow(rows, updateColumn, oldValue, newValue);
+        rows.removeFirst();
+    }
+
+    public void setRow(String updateColumn, String oldValue, String newValue) {
+        rows.addFirst(headers);
+        CSVUtil.updateRow(rows, updateColumn, oldValue, newValue);
+        rows.removeFirst();
     }
 
     // DELETE
@@ -204,6 +209,24 @@ public class CSVDataContainer implements SpecificContainer {
     }
 
     // HELPER
+
+    // Only for export
+    private List<String[]> getRowsWithHeader() {
+        List<String[]> ret = new ArrayList<>();
+        ret.add(headers);
+        ret.addAll(rows);
+        return ret;
+    }
+
+    private void mergeHeaderMapWithHeader() {
+        int maxIndex = Collections.max(headerMap.values());
+        headers = new ArrayList<>(Collections.nCopies(maxIndex + 1, null)).toArray(String[]::new);
+        // Place headers at the correct position
+        for (Map.Entry<String, Integer> entry : headerMap.entrySet()) {
+            headers[entry.getValue()] = entry.getKey();
+        }
+
+    }
 
     private int[] getRowsIndexes(Filter filter) {
         StringBuilder indexBuffer = new StringBuilder();
