@@ -1,14 +1,6 @@
 # OpenTDK
 
-The `Open Tool Development Kit` provides packages and classes for easy implementation of Java tools or applications. Developers don't need to take care about implementing code for the handling of data souces. Once a data source is required within an application it can be connected to the application by one of the concepts, provided by OpenTDK. These data sources can be configuration files, result sets of DB requests, Webservice responses (JSON, XML, YAML) and several more.
-There are two Java projects includes in this repository, which are:
-
-| Project name | Project purpose |
-|--------------|-----------------|
-| opentdk_api | Implements the functional concepts of OpenTDK to create non-GUI applications |
-| opentdk_gui | Implements concepts and base classes to create JavaFX GUI applications and charts |
-
-The opentdk_api project includes the following packages:
+The `Open Tool Development Kit` provides packages and classes for easy implementation of Java tools or applications. Developers don't need to take care about implementing code for the handling of data sources. Once a data source is required within an application it can be connected to the application by one of the concepts, provided by OpenTDK. These data sources can be configuration files, result sets of DB requests, Webservice responses (JSON, XML, YAML) and several more.
 
 ## Base Application
 
@@ -19,8 +11,12 @@ Base class for applications providing essential initialization and utility funct
 - Parsing command-line arguments into key-value pairs for dynamic runtime configuration.
 Classes extending this base should utilize its functionality to ensure structured application setup and maintenance.
 
-## DataContainer
+## Data Container
 
 The DataContainer class provides a standardized data container interface and supports multiple data formats including CSV, XML, JSON, and YAML. It acts as a data structure primarily for interacting with data from various sources like files, streams, or external inputs. The class offers factory methods for creation and utility methods for data processing and manipulation.
 
-...
+## Filter
+
+Represents a configurable filter mechanism with the ability to manage multiple filter rules. A filter consists of rules that define specific criteria for filtering data. Allows the addition of rules using different formats and parameters and includes functionality for managing allowable headers for filtering.
+
+See classes and test cases for more detailed descriptions and examples.
