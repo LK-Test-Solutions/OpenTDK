@@ -2,7 +2,6 @@ package org.opentdk.api.datastorage;
 
 import org.opentdk.api.filter.EOperator;
 import org.opentdk.api.filter.Filter;
-import org.opentdk.api.filter.FilterRule;
 import org.testng.Assert;
 import org.testng.annotations.BeforeTest;
 import org.testng.annotations.Test;
@@ -112,11 +111,45 @@ public class CSVDataContainerTest {
     @Test
     public void setValue() throws IOException {
         DataContainer dc = prepareFile();
-        dc.tabInstance().setRow("ID", "8", "20");
+        dc.tabInstance().setValue("ID", "8", "20");
+        writeFile(dc);
+        Filter filter = new Filter();
+        filter.addFilterRule("ID", "20", EOperator.EQUALS);
+        List<String> actual = List.of(dc.tabInstance().getRow(filter));
+        List<String> expected = List.of("20", "David", "41", "Österreich");
+        Assert.assertEquals(actual, expected);
+        System.out.println("Success: Value changed " + actual);
     }
-    // TODO setRow
 
-    // TODO delete 3x
+    @Test
+    public void setRow() throws IOException {
+        DataContainer dc = prepareFile();
+        Filter filter = new Filter();
+        filter.addFilterRule("Name", "Jul", EOperator.STARTS_WITH);
+        dc.tabInstance().setRow(List.of("7", "Julia", "31", "Deutschland").toArray(String[]::new), filter);
+        writeFile(dc);
+        filter.clear();
+        filter.addFilterRule("ID", "7", EOperator.EQUALS);
+        List<String> actual = List.of(dc.tabInstance().getRow(filter));
+        List<String> expected = List.of("7", "Julia", "31", "Deutschland");
+        Assert.assertEquals(actual, expected);
+        System.out.println("Success: Value changed " + actual);
+    }
+
+    @Test
+    public void deleteRow() throws IOException {
+        DataContainer dc = prepareFile();
+        Filter filter = new Filter();
+        filter.addFilterRule("Name", "Ben", EOperator.EQUALS);
+        dc.tabInstance().deleteRows(filter);
+        writeFile(dc);
+
+        filter.clear();
+        filter.addFilterRule("Name", "Ben", EOperator.EQUALS);
+        List<String[]> actual = dc.tabInstance().getRows(filter);
+        Assert.assertEquals(actual.isEmpty(), true);
+        System.out.println("Success: Row for 'Ben' is deleted");
+    }
 
     private DataContainer prepareFile() throws IOException {
         String filePath = "tmp/CSVDataContainerTest.csv";
