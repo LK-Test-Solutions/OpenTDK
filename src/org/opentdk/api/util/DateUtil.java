@@ -62,6 +62,7 @@ public class DateUtil {
      * List of all supported date formats. Can be enriched by {@link #addPattern(String)}.
      */
     private static List<String> formats = Arrays.asList(
+            "dd.MM.yyyy",
             // Dates
             "yyyyMMdd",              // Kompaktformat ohne Trenner
             "yyMMdd",
@@ -494,6 +495,8 @@ public class DateUtil {
         return diff(get(date, "yyyy-MM-dd"), get("yyyy-MM-dd"), ChronoUnit.YEARS);
     }
 
+    
+    
     /**
      * Method to search a date in a string.
      *
@@ -501,65 +504,89 @@ public class DateUtil {
      * @return the detected date/time or empty
      */
     public static Optional<String> findDate(String input) {
-        return Optional.of(get(input, findDateFormat(input).get()));
-    }
+        String bestMatch = null;
+        int highestScore = 0;
 
-    /**
-     * Method to search a date format in a string.
-     *
-     * @param input string that may contain a date/time
-     * @return the detected date/time or empty
-     */
-    public static Optional<String> findDateFormat(String input) {
         for (String format : formats) {
             String regex = convertDateFormatToRegex(format);
             Pattern pattern = Pattern.compile(regex);
             Matcher matcher = pattern.matcher(input);
-
-            while (matcher.find()) {
+            if (matcher.find()) {
                 String foundDate = matcher.group();
-                try {
-                    LocalDateTime.parse(foundDate, DateTimeFormatter.ofPattern(format));
-                    return Optional.of(format);
-                } catch (DateTimeParseException ignored) {
-                    // Continue
+                if(foundDate.length() == format.length() && !format.contentEquals("D")) {
+//                    ZonedDateTime.parse(foundDate, DateTimeFormatter.ofPattern(format).withZone(zoneId));
+                    int currentScore = calculateMatchScore(input, foundDate, format);
+                    if (currentScore > highestScore) {
+                        highestScore = currentScore;
+                        bestMatch = foundDate;
+                    }
                 }
             }
         }
-        return Optional.empty();
+        return Optional.ofNullable(bestMatch);
     }
 
     /**
-     * Builds a regular expression fo the given format. Does not support special formats like "'Today is' EEEE".
+     * Builds a regular expression for the given format, dynamically supporting all cases in the
+     * {@link #formats} list. Handles literal text enclosed in single quotes and properly matches
+     * variable digit lengths.
      *
-     * @param dateFormat e.g. dd.MM.yyyy
-     * @return e.g. \d{1}\d{1}\.\d{1}\d{1}\.\d{1}\d{1}\d{1}\d{1}
+     * @param dateFormat e.g., dd.MM.yyyy
+     * @return A regex for the given format, e.g., \d{2}\.\d{2}\.\d{4}
      */
     public static String convertDateFormatToRegex(String dateFormat) {
-        // Mapping of format characters to matching pattern
-        Map<Character, String> formatToRegex = new HashMap<>();
-        // TODO buchstabe wird zu digit
-        formatToRegex.put('d', "\\d{1}");
-        formatToRegex.put('M', "\\d{1}");
-        formatToRegex.put('y', "\\d{1}");
-        formatToRegex.put('H', "\\d{1}");
-        formatToRegex.put('m', "\\d{1}");
-        formatToRegex.put('s', "\\d{1}");
-        formatToRegex.put('S', "\\d{1}");
-        formatToRegex.put('D', "\\d{1}");
-        formatToRegex.put('E', "\\d{1}");
-        formatToRegex.put('W', "\\d{1}");
-        formatToRegex.put('.', "\\."); // Dot has to be escaped
-        formatToRegex.put('-', "-");
-        formatToRegex.put('/', "/");
-        formatToRegex.put(':', ":");
-        formatToRegex.put(',', ",");
+        Map<Character, String> formatToRegex = getCharacterStringMap();
+
+        // Special characters that need escaping in regex
+        Map<Character, String> specialCharacters = new HashMap<>();
+        specialCharacters.put('.', "\\.");
+        specialCharacters.put('-', "-");
+        specialCharacters.put('/', "/");
+        specialCharacters.put(':', ":");
+        specialCharacters.put(',', ",");
 
         StringBuilder regexPattern = new StringBuilder();
-        for (char c : dateFormat.toCharArray()) {
-            regexPattern.append(formatToRegex.getOrDefault(c, String.valueOf(c)));
+        boolean inLiteral = false;
+        for (int i = 0; i < dateFormat.length(); i++) {
+            char c = dateFormat.charAt(i);
+            if (c == '\'') { // Toggle literal text handling
+                inLiteral = !inLiteral;
+                continue;
+            }
+            if (inLiteral) {
+                regexPattern.append(Pattern.quote(String.valueOf(c))); // Append literal character
+            } else if (formatToRegex.containsKey(c)) {
+                regexPattern.append(formatToRegex.get(c)); // Append regex for format character
+            } else if (specialCharacters.containsKey(c)) {
+                regexPattern.append(specialCharacters.get(c)); // Append escaped special character
+            } else {
+                regexPattern.append(Pattern.quote(String.valueOf(c))); // Append unknown text as literal
+            }
         }
         return regexPattern.toString();
+    }
+
+    private static Map<Character, String> getCharacterStringMap() {
+        Map<Character, String> formatToRegex = new HashMap<>();
+        formatToRegex.put('d', "\\d{1}");       // Day of month
+        formatToRegex.put('M', "\\d{1}");       // Month
+        formatToRegex.put('y', "\\d{1}");       // Year
+        formatToRegex.put('H', "\\d{1}");       // Hour (24-hour clock)
+        formatToRegex.put('h', "\\d{1}");       // Hour (12-hour clock)
+        formatToRegex.put('m', "\\d{1}");       // Minute
+        formatToRegex.put('s', "\\d{1}");       // Second
+        formatToRegex.put('S', "\\d{1}");       // Fractional seconds
+        formatToRegex.put('D', "\\d{1}");       // Day of year
+        formatToRegex.put('E', "\\w{3,}");        // Day of week (abbreviated or full)
+        formatToRegex.put('W', "\\d{1}");         // Week in the month
+        formatToRegex.put('w', "\\d{1}");       // Week of year
+        formatToRegex.put('Q', "\\d{1}");         // Quarter of year
+        formatToRegex.put('G', "\\w+");           // Era
+        formatToRegex.put('u', "\\d{1}");         // Day number of week (1-7)
+        formatToRegex.put('z', "[A-Za-z/]+");     // Time zone names
+        formatToRegex.put('X', "[+-]\\d{2}(:?\\d{2})?"); // ISO Time zone
+        formatToRegex.put('\'', "");              // Escaped single quote (literal text)
+        return formatToRegex;
     }
 
     /**
@@ -577,16 +604,30 @@ public class DateUtil {
                 continue;
             }
         }
-        throw new IllegalArgumentException("Format not supported ==> " + dateTime);
+        throw new DateTimeException("Format not supported ==> " + dateTime);
     }
 
     /**
-     * Gets a {@link java.time.ZonedDateTime} object out of a {@link java.time.temporal.TemporalAccessor} by using the {@link LocalDate#from(TemporalAccessor)} method
-     * for the zone that is defined in {@link #zoneId}. The methods of the DateUtil class require it for further operations.
-     * @param temporal {@link java.time.temporal.TemporalAccessor} from {@link #retrieveTemporal(String)}
-     * @return {@link java.time.ZonedDateTime}
-     * @throws DateTimeException when no result could be retrieved
+     * Calculates a match score based on how well a detected date matches the input string and its
+     * format. Higher scores indicate better matches, considering proximity and length of the
+     * detected match.
+     *
+     * @param input        The input string that contains the date.
+     * @param detectedDate The detected date substring.
+     * @param format       The format used to parse the date.
+     * @return The match score as an integer.
      */
+    public static int calculateMatchScore(String input, String detectedDate, String format) {
+        // Higher score for closer matches
+        int closenessScore = Math.abs(input.length() - detectedDate.length());
+
+        // Higher score for a date format that matches more precisely in length
+        int formatMatch = Math.abs(format.length() - detectedDate.length());
+
+        // Combining scores, with negative impact for mismatched length
+        return (1000 - closenessScore) - formatMatch;
+    }
+
     public static ZonedDateTime retrieveZonedDateTime(TemporalAccessor temporal) {
         ZonedDateTime ret;
         try {

@@ -114,16 +114,22 @@ public class DateUtilTest {
 
     @Test
     public void findDate() {
+        
         String input = "Das Event findet am 15.02.2025 um 10:00:30 Uhr statt.";
-        Assert.assertEquals(DateUtil.findDate(input).get(), "15.02.2025");
+        Assert.assertTrue(DateUtil.findDate(input).isPresent(), "Date was found successfully.");
+        Assert.assertEquals(DateUtil.findDate(input).orElse(""), "15.02.2025");
+        System.out.println("Success: Extracted date matches the expected value ==> 15.02.2025" );
 
         input = "Treffen am 2023-08-15 14:45.";
-        Assert.assertEquals(DateUtil.findDate(input).get(), "2023-08-15 14:45");
+        Assert.assertTrue(DateUtil.findDate(input).isPresent(), "Date was found successfully.");
+        Assert.assertEquals(DateUtil.findDate(input).orElse(""), "2023-08-15 14:45", "Extracted date matches the expected value.");
 
         input = "Backup wurde am 12/31/2024 durchgeführt.";
-        Assert.assertEquals(DateUtil.findDate(input).get(), "12/31/2024");
+        Assert.assertTrue(DateUtil.findDate(input).isPresent(), "Date was found successfully.");
+        Assert.assertEquals(DateUtil.findDate(input).orElse(""), "12/31/2024", "Extracted date matches the expected value.");
 
-        input =  "Die Uhrzeit ist 23:59.";
-        Assert.assertEquals(DateUtil.findDate(input).get(), "23:59");
+        input = "Die Uhrzeit ist 23:59.";
+        Assert.assertTrue(DateUtil.findDate(input).isPresent(), "Date was found successfully.");
+        Assert.assertEquals(DateUtil.findDate(input).orElse(""), "23:59", "Extracted date matches the expected value.");
     }
 }
