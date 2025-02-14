@@ -42,6 +42,17 @@ import java.nio.file.Paths;
 import java.util.Properties;
 import java.util.logging.*;
 
+
+/**
+ * Base class for applications providing essential initialization and utility functionalities such as logging,
+ * application settings management, and runtime configuration parsing. It implements support for:
+ * - Singleton application instance management.
+ * - Initializing and configuring a file-based logger.
+ * - Loading, merging, and saving application-specific settings via a JSON file.
+ * - Parsing command-line arguments into key-value pairs for dynamic runtime configuration.
+ *
+ * Classes extending this base should utilize its functionality to ensure structured application setup and maintenance.
+ */
 public abstract class BaseApplication {
     /**
      * The one and only instance of this class to get access from other classes.

@@ -6,6 +6,9 @@ import org.testng.annotations.Test;
 import java.time.DateTimeException;
 import java.time.temporal.ChronoField;
 import java.time.temporal.ChronoUnit;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
 public class DateUtilTest {
 
@@ -131,5 +134,80 @@ public class DateUtilTest {
         input = "Die Uhrzeit ist 23:59.";
         Assert.assertTrue(DateUtil.findDate(input).isPresent(), "Date was found successfully.");
         Assert.assertEquals(DateUtil.findDate(input).orElse(""), "23:59", "Extracted date matches the expected value.");
+    }
+
+    @Test
+    public void generateFormats() {
+        List<String> formats = new ArrayList<>();
+        // Komponenten für die dynamische Generierung
+        String[] yearPatterns = {"yyyy", "yyy", "yy", "y"};
+        String[] monthPatterns = {"MM", "M"};
+        String[] dayPatterns = {"dd", "d"};
+        String[] dateSeparators = {"-", ".", "/", ""};
+
+        String[] hourPatterns = {"HH", "H", "hh", "h"};
+        String[] minuteSecondPatterns = {"mm", "m", "ss", "s"};
+        String[] timeSeparators = {":", "", ".", "-"};
+
+        // Typisches Wochen-, Monats- und Zeitstempelformat
+        String[] specialFormats = {"E, MMM dd yyyy",         // Abgekürzter Wochentag, Monat, Tag, Jahr
+                "EEEE, MMMM dd, yyyy",    // Vollständiger Wochentag, Monat, Tag, Jahr
+                "MMMM dd, yyyy",          // Vollständiger Monat, Tag, Jahr
+                "EEE, d MMM yyyy",        // Abgekürzter Wochentag, Tag, abgekürzter Monat, Jahr
+                "yyyy-MM-dd'T'HH:mm:ss",  // ISO 8601-Timestamp ohne Zone
+                "yyyy-MM-dd'T'HH:mm:ss.SSSX", // ISO mit Millisekunden und Zone
+                "HH:mm",                  // Stunden und Minuten
+                "HH:mm:ss"                // Stunden, Minuten und Sekunden
+        };
+
+        // Basiskombinationen für Datum erstellen
+        for (String year : yearPatterns) {
+            for (String month : monthPatterns) {
+                for (String day : dayPatterns) {
+                    for (String sep : dateSeparators) {
+                        // Jahr-Monat-Tag
+                        formats.add(String.format("%s%s%s%s%s", year, sep, month, sep, day));
+                        // Tag-Monat-Jahr
+                        formats.add(String.format("%s%s%s%s%s", day, sep, month, sep, year));
+                        // Monat-Tag-Jahr (z. B. für US-Formate)
+                        formats.add(String.format("%s%s%s%s%s", month, sep, day, sep, year));
+                    }
+                }
+            }
+        }
+        // Dynamische Zeitformate hinzufügen
+        for (String hour : hourPatterns) {
+            for (String minSec : minuteSecondPatterns) {
+                for (String sep : timeSeparators) {
+                    // Stunden:Minuten
+                    formats.add(String.format("%s%s%s", hour, sep, minSec));
+                    // Stunden:Minuten:Sekunden
+                    for (String secondPattern : minuteSecondPatterns) {
+                        String second = secondPattern;
+                        formats.add(String.format("%s%s%s%s%s", hour, sep, minSec, sep, second));
+                    }
+                    // Zeitstempel mit Datum und Zeit
+                    for (String year : yearPatterns) {
+                        for (String month : monthPatterns) {
+                            for (String day : dayPatterns) {
+                                for (String dateSep : dateSeparators) {
+                                    formats.add(String.format("%s%s%s%s%s %s%s%s", year, dateSep, month, dateSep, day, hour, sep, minSec));
+                                    for (int fractionalDigits = 1; fractionalDigits <= 9; fractionalDigits++) {
+                                        String second = "S".repeat(fractionalDigits);
+                                        formats.add(String.format("%s%s%s%s%s %s%s%s%s%s", year, dateSep, month, dateSep, day, hour, sep, minSec, sep, second));
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        // Zusatzformate hinzufügen
+        Collections.addAll(formats, specialFormats);
+
+        for(String format : formats) {
+            System.out.println(format);
+        }
     }
 }

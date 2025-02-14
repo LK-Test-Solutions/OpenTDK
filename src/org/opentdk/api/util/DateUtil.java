@@ -38,7 +38,7 @@ import java.util.regex.Pattern;
 /**
  * Class with static utility methods to work with date, time and time stamp formats using the {@link java.time} package.
  *
- * @author LK Test Solutions
+ * @author FME (LK Test Solutions)
  *
  */
 public class DateUtil {
