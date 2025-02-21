@@ -54,3 +54,4 @@ javadoc*
 **/RegressionTestData_Extracted/**
 **/output/**
 /target/
+**/tmp/**

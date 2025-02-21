@@ -38,7 +38,7 @@ import java.util.regex.Pattern;
 /**
  * Class with static utility methods to work with date, time and time stamp formats using the {@link java.time} package.
  *
- * @author FME (LK Test Solutions)
+ * @author LK Test Solutions
  *
  */
 public class DateUtil {
@@ -132,6 +132,7 @@ public class DateUtil {
             "EEE, MMM d, ''yy h:mm a",          // Abgekürzter Wochentag, Monat, Jahr, Zeit
             "yyyy.MM.dd G 'at' HH:mm:ss z",     // ISO mit Ära und Zeitzone
             "EEE, d MMM yyyy HH:mm:ss Z",       // HTTP-Datum
+            "MMM dd, yyyy, HH:mm:ss a",
             "yyyyMMddHHmmss",                   // Kompaktformat Datum und Zeit
             "yyyy-MM-dd'T'HH:mm:ss.SSSZ",        // ISO-Standard mit Zeitzone
             "yyyy.MM.dd HH:mm:ss",
@@ -525,6 +526,26 @@ public class DateUtil {
         }
         return Optional.ofNullable(bestMatch);
     }
+    
+    public static Optional<String> findDate(String input, String format) {
+        String bestMatch = null;
+        int highestScore = 0;
+
+        String regex = convertDateFormatToRegex(format);
+        Pattern pattern = Pattern.compile(regex);
+        Matcher matcher = pattern.matcher(input);
+        while (matcher.find()) {
+            String foundDate = matcher.group();
+            if(foundDate.length() == format.length() && !format.contentEquals("D")) {
+                int currentScore = calculateMatchScore(input, foundDate, format);
+                if (currentScore > highestScore) {
+                    highestScore = currentScore;
+                    bestMatch = foundDate;
+                }
+            }
+        }
+        return Optional.ofNullable(bestMatch);
+    }
 
     /**
      * Builds a regular expression for the given format, dynamically supporting all cases in the
@@ -605,6 +626,21 @@ public class DateUtil {
             }
         }
         throw new DateTimeException("Format not supported ==> " + dateTime);
+    }
+    
+    public static boolean isTemporal(String dateTime) {
+        for(String pattern : getAllFormats()) {
+        	if(!pattern.contentEquals("D")) {
+	            DateTimeFormatter formatter = DateTimeFormatter.ofPattern(pattern);
+	            try {
+	                formatter.parse(dateTime);
+	                return true;
+	            } catch(DateTimeParseException e) {
+	                continue;
+	            }
+        	}
+        }
+        return false;
     }
 
     /**

@@ -2,7 +2,6 @@ package org.opentdk.api.datastorage;
 
 import lombok.Getter;
 import lombok.Setter;
-
 import org.opentdk.api.exception.DataContainerException;
 import org.opentdk.api.filter.Filter;
 import org.opentdk.api.filter.FilterRule;
@@ -21,13 +20,13 @@ import java.util.stream.Stream;
  *
  * @author FME (LK Test Solutions)
  */
-@Getter
 public class CSVDataContainer implements SpecificContainer {
 
     /**
      * Represents a collection of rows where each row is an array of strings.
      * Used to store tabular data or structured information.
      */
+    @Getter
     private List<String[]> rows;
 
     /**
@@ -35,13 +34,14 @@ public class CSVDataContainer implements SpecificContainer {
      * or processing structured data. Each element in the array corresponds to
      * a specific header value.
      */
-    @Setter
+    @Getter @Setter
     private String[] headers;
 
     /**
      * A map that associates header names with their respective integer values.
      * This can be used to map and retrieve specific header-related data based on header names as keys.
      */
+    @Getter
     private final Map<String, Integer> headerMap;
 
     /**
@@ -204,6 +204,43 @@ public class CSVDataContainer implements SpecificContainer {
         }
         return ret;
     }
+    
+    public List<String[]> getRows(String[] headers, Filter filter) {
+        if (rows.isEmpty()) {
+            return null;
+        }
+        List<String[]> ret = new ArrayList<>(headers.length);
+        for(String[] row : rows) {
+            if(checkValuesFilter(row, filter)) {
+            	String[] outRow = Collections.nCopies(headers.length, "").toArray(String[]::new);
+            	for(String header : headers) {
+            		int headerIndex = headerMap.get(header);
+            		outRow[headerIndex] = row[headerIndex];
+            	}
+                ret.add(outRow);
+            }
+        }
+        return ret;
+    }
+    
+    public String getValue(String columnHeader, Filter filter) {
+    	return getValue(0, columnHeader, filter);
+    }
+    
+    public String getValue(int rowIndex, String columnHeader, Filter filter) {
+    	// Like getValue(int,String) but with a filtered row
+    	List<String[]> filtered = getRows(filter);
+    	int columnIndex;
+        try {
+            columnIndex = headerMap.get(columnHeader);
+        } catch (NullPointerException e) {
+            throw new DataContainerException("Column '" + columnHeader + "' not found.");
+        }
+        if (rowIndex >= 0 && rowIndex < filtered.size()) {
+            return filtered.get(rowIndex)[columnIndex];
+        }
+        throw new DataContainerException("Row index is out of range");
+    }
 
     /**
      * Retrieves the value from a specific row and column in the data container.
@@ -244,7 +281,9 @@ public class CSVDataContainer implements SpecificContainer {
         rows.addFirst(headers);
         List<String> ret = CSVUtil.getColumn(rows, columnHeader);
         rows.removeFirst();
-        ret.removeFirst(); // Without header
+        if(!ret.isEmpty()) {
+        	ret.removeFirst(); // Without header
+        }
         return ret;
     }
 
@@ -256,8 +295,22 @@ public class CSVDataContainer implements SpecificContainer {
      * @param filter an object of type Filter that specifies the criteria for selecting rows
      * @return a list of strings containing the values from the specified column, filtered by the given criteria
      */
+
     public List<String> getColumn(String columnHeader, Filter filter) {
         List<String[]> filteredRows = getRows(filter);
+        if(filteredRows == null) {
+        	return null;
+        }
+        filteredRows.addFirst(headers);
+        List<String> ret = CSVUtil.getColumn(filteredRows, columnHeader);
+        ret.removeFirst();
+        return ret;
+    }
+    
+    public List<String> getColumn(String columnHeader, String filterColumn, String filterValue) {
+        rows.addFirst(headers);
+        List<String[]> filteredRows = CSVUtil.filterData(rows, filterColumn, filterValue);
+        rows.removeFirst();
         filteredRows.addFirst(headers);
         List<String> ret = CSVUtil.getColumn(filteredRows, columnHeader);
         ret.removeFirst();
@@ -462,4 +515,13 @@ public class CSVDataContainer implements SpecificContainer {
         }
         return returnCode;
     }
+    
+    public void initHeaders(String[] headers) {
+		this.headers = headers;
+		int headerIndex = 0;
+		for(String header : headers) {
+			headerMap.put(header, headerIndex);
+			headerIndex++;
+		}
+	}
 }
