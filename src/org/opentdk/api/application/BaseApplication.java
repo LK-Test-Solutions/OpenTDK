@@ -29,8 +29,9 @@ package org.opentdk.api.application;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+
 import lombok.Getter;
-import lombok.Setter;
+import org.opentdk.api.logger.LogArchiver;
 import org.opentdk.api.logger.LogFactory;
 
 import java.io.File;
@@ -42,23 +43,7 @@ import java.nio.file.Paths;
 import java.util.Properties;
 import java.util.logging.*;
 
-
-/**
- * Base class for applications providing essential initialization and utility functionalities such as logging,
- * application settings management, and runtime configuration parsing. It implements support for:
- * - Singleton application instance management.
- * - Initializing and configuring a file-based logger.
- * - Loading, merging, and saving application-specific settings via a JSON file.
- * - Parsing command-line arguments into key-value pairs for dynamic runtime configuration.
- *
- * Classes extending this base should utilize its functionality to ensure structured application setup and maintenance.
- */
 public abstract class BaseApplication {
-    /**
-     * The one and only instance of this class to get access from other classes.
-     */
-    @Getter
-    private static BaseApplication instance;
     /**
      * Logger for the whole application.
      */
@@ -67,12 +52,11 @@ public abstract class BaseApplication {
     /**
      * File for the {@link #logger}.
      */
-    @Getter @Setter
     private Path logFile = Paths.get("logs" + File.separator + getClass().getSimpleName() + ".log");
     /**
      * True: Log file gets written, false: No logging at all.
      */
-    @Getter @Setter
+    @Getter
     private boolean logEnabled = true;
     /**
      * Storage object for all specific application settings.
@@ -82,7 +66,7 @@ public abstract class BaseApplication {
     /**
      * File for the {@link #settings}.
      */
-    @Getter @Setter
+    @Getter
     private Path settingsFile = Paths.get("conf" + File.separator + getClass().getSimpleName() + ".json");
     /**
      * Storage object for all main application settings.
@@ -101,9 +85,6 @@ public abstract class BaseApplication {
      * Where <b>InheritedApp</b> inherits from {@link BaseApplication}. The minus prefix is optional.
      */
     public BaseApplication(String[] args) {
-        if (instance == null) {
-            instance = this;
-        }
         properties = new Properties();
         for (String arg : args) {
             if(arg.contains("=")) {
@@ -129,7 +110,11 @@ public abstract class BaseApplication {
         if(properties.containsKey("logEnabled")) {
             logEnabled = Boolean.parseBoolean(properties.getProperty("logEnabled"));
         }
-        logger = LogFactory.buildLogger(logFile, properties.getProperty("traceLevel"), logEnabled);
+        String traceLevel = "INFO";
+        if(properties.containsKey("traceLevel")) {
+        	traceLevel = properties.getProperty("traceLevel");
+        }
+        logger = LogFactory.buildLogger(logFile, traceLevel, logEnabled);      
     }
 
     /**
@@ -137,32 +122,39 @@ public abstract class BaseApplication {
      * was committed, the default 'conf/MainClass.json' gets used. Or the {@link #settingsFile} gets overwritten before calling this method.
      */
     public void initSettings() throws IOException {
-        Files.createDirectories(settingsFile.getParent());
-        if(Files.notExists(settingsFile)) {
-            Files.createFile(settingsFile);
-            Files.writeString(settingsFile, "{}");
-        }
-        try (FileReader reader = new FileReader(settingsFile.toFile())) {
-            settings = new GsonBuilder().setPrettyPrinting().create().fromJson(reader, AppSettings.class);
-        }
-        // Overwrite settings with program parameter if required
-        mergeSettingsAndProps();
+        initSettings(AppSettings.class);
     }
 
     /**
      * Works like {@link #initSettings()} but with the possibility to use a custom settings class that inherits from {@link AppSettings}.
      */
-    public void initSettings(AppSettings customSettings) throws IOException {
+    public AppSettings initSettings(Class<? extends AppSettings> settingsClass) throws IOException {
+    	if(properties.containsKey("settings")) {
+            settingsFile = Paths.get(properties.getProperty("settings"));
+            logger.log(Level.INFO, "Settings file argument is set ==> " + settingsFile.toString());
+        }
         Files.createDirectories(settingsFile.getParent());
         if(Files.notExists(settingsFile)) {
+            logger.log(Level.INFO, "Settings file does not exist and gets created ==> " + settingsFile.toString());
             Files.createFile(settingsFile);
             Files.writeString(settingsFile, "{}");
         }
         try (FileReader reader = new FileReader(settingsFile.toFile())) {
-            settings = new GsonBuilder().setPrettyPrinting().create().fromJson(reader, customSettings.getClass());
+        	settings = new GsonBuilder().setPrettyPrinting().create().fromJson(reader, settingsClass);
+            logger.log(Level.INFO, "Settings file loaded into class ==> " + settingsClass.getSimpleName());
         }
         // Overwrite settings with program parameter if required
         mergeSettingsAndProps();
+        
+        long logSize = settings.getLogFileSize();
+		int keepAge = settings.getLogKeepAge();
+		int archiveSize = settings.getLogArchiveSize();
+		try {
+			LogArchiver.archiveIfNecessary(logFile, logSize, keepAge, archiveSize);
+		} catch (IOException e) {
+			logger.log(Level.WARNING, "Log archive routine failed");
+		}
+		return settings;
     }
 
     private void mergeSettingsAndProps() {
@@ -193,4 +185,5 @@ public abstract class BaseApplication {
             logger.severe(e.getMessage());
         }
     }
+
 }
