@@ -2,6 +2,7 @@ package org.opentdk.api.datastorage;
 
 import org.opentdk.api.filter.EOperator;
 import org.opentdk.api.filter.Filter;
+import org.opentdk.api.helper.CSVFileGenerator;
 import org.testng.Assert;
 import org.testng.annotations.BeforeTest;
 import org.testng.annotations.Test;
@@ -10,6 +11,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.time.LocalTime;
 import java.util.Arrays;
 import java.util.List;
 
@@ -22,6 +24,11 @@ public class CSVDataContainerTest {
         try {
             Files.createDirectory(Paths.get("tmp"));
         } catch(IOException ignored) {}
+
+        Path filePath = Paths.get("tmp/CSVDataContainerTest.csv");
+        if(!Files.exists(filePath)) {
+            CSVFileGenerator.newCSVFile("tmp/CSVDataContainerTest.csv");
+        }
     }
 
     @Test
@@ -53,9 +60,21 @@ public class CSVDataContainerTest {
     public void getRows() throws IOException {
         DataContainer dc = prepareFile();
         Filter filter = new Filter();
-        filter.addFilterRule("Name", "Ben", EOperator.EQUALS);
+        filter.addFilterRule("Name", "Dave", EOperator.EQUALS);
+
+        System.out.println("getRows start ==> " + LocalTime.now());
         List<String> actual = List.of(dc.tabInstance().getRows(filter).getFirst());
-        List<String> expected = List.of("4", "Ben" , "19", "Frankreich");
+        System.out.println("getRows end ==> " + LocalTime.now());
+
+        List<String> expected = List.of("17", "Dave", "62", "Australia");
+        Assert.assertEquals(actual, expected);
+        System.out.println("Success: Row is " + actual);
+
+        System.out.println("getRows start ==> " + LocalTime.now());
+        actual = List.of(dc.tabInstance().getRows(new String[]{"Name"}, filter).getFirst());
+        System.out.println("getRows end ==> " + LocalTime.now());
+
+        expected = List.of("Dave");
         Assert.assertEquals(actual, expected);
         System.out.println("Success: Row is " + actual);
     }
@@ -152,25 +171,16 @@ public class CSVDataContainerTest {
     }
 
     private DataContainer prepareFile() throws IOException {
-        String filePath = "tmp/CSVDataContainerTest.csv";
-        Path tempFile = Paths.get(filePath);
-        try {
-            Files.createFile(tempFile);
-        } catch(IOException ignored) {}
-
-        Files.writeString(tempFile, content);
-        String delimiter = ",";
         DataContainer dc = DataContainer.newContainer(EContainerFormat.CSV);
-        dc.tabInstance().setDelimiter(delimiter);
-        dc.readData(tempFile);
+        dc.tabInstance().setDelimiter(",");
+        dc.readData(Paths.get("tmp/CSVDataContainerTest.csv"));
         return dc;
     }
 
     private void writeFile(DataContainer dc) throws IOException {
-        String filePath = "tmp/CSVDataContainerTest.csv";
+        String filePath = "tmp/writeCSVDataContainerTest.csv";
         Path tempFile = Paths.get(filePath);
         dc.writeData(tempFile);
     }
-
 
 }

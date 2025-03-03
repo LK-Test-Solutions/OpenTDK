@@ -11,6 +11,7 @@ import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 import java.util.*;
+import java.util.function.Predicate;
 import java.util.stream.Stream;
 
 /**
@@ -196,26 +197,23 @@ public class CSVDataContainer implements SpecificContainer {
         if (rows.isEmpty()) {
             return null;
         }
-        List<String[]> ret = new ArrayList<>();
-        for(String[] row : rows) {
-            if(checkValuesFilter(row, filter)) {
-                ret.add(row);
-            }
-        }
-        return ret;
+        Predicate<String[]> predicate = row -> checkValuesFilter(row, filter);
+        return rows.stream().filter(predicate).toList();
     }
-    
+
     public List<String[]> getRows(String[] headers, Filter filter) {
         if (rows.isEmpty()) {
             return null;
         }
-        List<String[]> ret = new ArrayList<>(headers.length);
+        List<String[]> ret = new ArrayList<>();
         for(String[] row : rows) {
             if(checkValuesFilter(row, filter)) {
             	String[] outRow = Collections.nCopies(headers.length, "").toArray(String[]::new);
-            	for(String header : headers) {
+            	int outHeaderIndex = 0;
+                for(String header : headers) {
             		int headerIndex = headerMap.get(header);
-            		outRow[headerIndex] = row[headerIndex];
+            		outRow[outHeaderIndex] = row[headerIndex];
+                    outHeaderIndex++;
             	}
                 ret.add(outRow);
             }
