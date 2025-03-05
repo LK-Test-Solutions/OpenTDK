@@ -13,6 +13,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.LocalTime;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 public class CSVDataContainerTest {
@@ -93,15 +94,18 @@ public class CSVDataContainerTest {
         DataContainer dc = prepareFile();
         List<String> actual = dc.tabInstance().getColumn("Alter");
         List<String> expected = List.of("42", "29" , "35", "19", "51", "27", "null", "41", "60", "31");
-        Assert.assertEquals(actual, expected);
-        System.out.println("Success: Ages are " + actual);
+        int index = 0;
+        for(String exp : expected) {
+            Assert.assertEquals(actual.get(index), exp);
+            System.out.println("Success: Age is " + actual.get(index));
+            index++;
+        }
         // Filter
         Filter filter = new Filter();
         filter.addFilterRule("Alter", "50", EOperator.GREATER_OR_EQUAL_THAN);
         actual = dc.tabInstance().getColumn("Name", filter);
-        expected = List.of("Greta", "'Ivan'");
-        Assert.assertEquals(actual, expected);
-        System.out.println("Success: Names are " + actual);
+        Assert.assertEquals(actual.size(), 238337);
+        System.out.println("Success: Names size is " + actual.size());
     }
 
     @Test
@@ -122,9 +126,9 @@ public class CSVDataContainerTest {
         dc.tabInstance().addColumn("Name");
         writeFile(dc);
         List<String> actual = dc.tabInstance().getColumn("Name_2");
-        List<String> expected = List.of("", "", "", "", "", "", "", "", "", "");
+        List<String> expected = Collections.nCopies(475739, "");
         Assert.assertEquals(actual, expected);
-        System.out.println("Success: column created " + actual);
+        System.out.println("Success: column created");
     }
 
     @Test

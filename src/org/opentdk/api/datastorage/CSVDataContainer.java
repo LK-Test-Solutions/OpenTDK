@@ -293,12 +293,8 @@ public class CSVDataContainer implements SpecificContainer {
      * @param filter an object of type Filter that specifies the criteria for selecting rows
      * @return a list of strings containing the values from the specified column, filtered by the given criteria
      */
-
     public List<String> getColumn(String columnHeader, Filter filter) {
-        List<String[]> filteredRows = getRows(filter);
-        if(filteredRows == null) {
-        	return null;
-        }
+        List<String[]> filteredRows = new ArrayList<>(getRows(filter));
         filteredRows.addFirst(headers);
         List<String> ret = CSVUtil.getColumn(filteredRows, columnHeader);
         ret.removeFirst();
