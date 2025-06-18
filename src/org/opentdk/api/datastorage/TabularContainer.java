@@ -21,7 +21,7 @@ import java.util.stream.Stream;
  *
  * @author FME (LK Test Solutions)
  */
-public class CSVDataContainer implements SpecificContainer {
+public class TabularContainer implements SpecificContainer {
 
     /**
      * Represents a collection of rows where each row is an array of strings.
@@ -57,8 +57,8 @@ public class CSVDataContainer implements SpecificContainer {
      *
      * @return a new CSVDataContainer instance.
      */
-    public static CSVDataContainer newInstance() {
-        return new CSVDataContainer();
+    public static TabularContainer newInstance() {
+        return new TabularContainer();
     }
 
     /**
@@ -67,7 +67,7 @@ public class CSVDataContainer implements SpecificContainer {
      * and an empty map for the header mapping. It is protected to restrict instantiation
      * to the containing class or subclasses.
      */
-    protected CSVDataContainer() {
+    protected TabularContainer() {
         rows = new ArrayList<>();
         headers = new String[0];
         headerMap = new HashMap<>();
@@ -159,7 +159,7 @@ public class CSVDataContainer implements SpecificContainer {
      */
     public String[] getRow(int rowIndex) {
         if (rows.isEmpty()) {
-            return null;
+            return new String[0];
         }
         if (rowIndex >= 0 && rowIndex < rows.size()) {
             return rows.get(rowIndex);
@@ -176,7 +176,7 @@ public class CSVDataContainer implements SpecificContainer {
      */
     public String[] getRow(Filter filter) {
         if (rows.isEmpty()) {
-            return null;
+            return new String[0];
         }
         for(String[] row : rows) {
             if(checkValuesFilter(row, filter)) {
@@ -195,25 +195,25 @@ public class CSVDataContainer implements SpecificContainer {
      */
     public List<String[]> getRows(Filter filter) {
         if (rows.isEmpty()) {
-            return null;
+            return new ArrayList<>();
         }
         Predicate<String[]> predicate = row -> checkValuesFilter(row, filter);
         return rows.stream().filter(predicate).toList();
     }
 
-    public List<String[]> getRows(String[] headers, Filter filter) {
+    public List<String[]> getRows(String[] outHeaders, Filter filter) {
         if (rows.isEmpty()) {
-            return null;
+            return new ArrayList<>();
         }
         List<String[]> ret = new ArrayList<>();
         for(String[] row : rows) {
             if(checkValuesFilter(row, filter)) {
-            	String[] outRow = Collections.nCopies(headers.length, "").toArray(String[]::new);
-            	int outHeaderIndex = 0;
-                for(String header : headers) {
-            		int headerIndex = headerMap.get(header);
+            	String[] outRow = Collections.nCopies(outHeaders.length, "").toArray(String[]::new);
+            	int outHeaderIndex = 0; // Header index in the output list
+            	for(String header : outHeaders) {
+            		int headerIndex = headerMap.get(header); // Header index in all rows
             		outRow[outHeaderIndex] = row[headerIndex];
-                    outHeaderIndex++;
+            		outHeaderIndex++;
             	}
                 ret.add(outRow);
             }
@@ -241,6 +241,13 @@ public class CSVDataContainer implements SpecificContainer {
     }
 
     /**
+     * Like {@link #getValue(int, String)} for index 0.
+     */
+    public String getValue(String columnHeader) {
+        return getValue(0, columnHeader);
+    }
+
+    /**
      * Retrieves the value from a specific row and column in the data container.
      *
      * @param rowIndex The index of the row to retrieve the value from. Must be a valid index within the range of available rows.
@@ -250,7 +257,7 @@ public class CSVDataContainer implements SpecificContainer {
      */
     public String getValue(int rowIndex, String columnHeader) {
         if (rows.isEmpty()) {
-            return null;
+            return "";
         }
         int columnIndex;
         try {
@@ -274,7 +281,7 @@ public class CSVDataContainer implements SpecificContainer {
      */
     public List<String> getColumn(String columnHeader) {
         if (rows.isEmpty()) {
-            return null;
+            return new ArrayList<>();
         }
         rows.addFirst(headers);
         List<String> ret = CSVUtil.getColumn(rows, columnHeader);
@@ -302,9 +309,10 @@ public class CSVDataContainer implements SpecificContainer {
     }
     
     public List<String> getColumn(String columnHeader, String filterColumn, String filterValue) {
-        rows.addFirst(headers);
+    	rows.addFirst(headers);
         List<String[]> filteredRows = CSVUtil.filterData(rows, filterColumn, filterValue);
         rows.removeFirst();
+
         filteredRows.addFirst(headers);
         List<String> ret = CSVUtil.getColumn(filteredRows, columnHeader);
         ret.removeFirst();
@@ -390,6 +398,25 @@ public class CSVDataContainer implements SpecificContainer {
     }
 
     /**
+     * Updates a row in the data container matching the specified index with the provided new row data.
+     *
+     * @param index The index used to identify the row to be updated.
+     * @param updateRow The new row data to replace the existing row. The length of this array must match the length of the existing row being updated.
+     * @throws DataContainerException If the length of updateRow does not match the length of the row being updated.
+     */
+    public void setRow(int index, String[] updateRow) {
+        rows.addFirst(headers);
+        String[] targetRow = getRow(index);
+        if(targetRow.length != updateRow.length) {
+            throw new DataContainerException("Old row and new row do not have the same length in setRow");
+        }
+        for(int i = 0; i < targetRow.length; i++) {
+            CSVUtil.updateRow(rows, headers[i], targetRow[i], updateRow[i]);
+        }
+        rows.removeFirst();
+    }
+
+    /**
      * Deletes a specific value from a column identified by its header name by replacing
      * the value with an empty string.
      *
@@ -462,7 +489,7 @@ public class CSVDataContainer implements SpecificContainer {
      * @return an array of integers representing the indexes of the rows that match the filter criteria.
      *         If no row matches the filter, returns an empty array.
      */
-    private int[] getRowsIndexes(Filter filter) {
+    public int[] getRowsIndexes(Filter filter) {
         StringBuilder indexBuffer = new StringBuilder();
         for (int i = 0; i < rows.size(); i++) {
             if (checkValuesFilter(rows.get(i), filter)) {

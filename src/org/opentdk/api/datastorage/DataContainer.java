@@ -170,7 +170,7 @@ public class DataContainer implements SpecificContainer {
     private DataContainer(EContainerFormat type) {
         containerFormat = type;
         switch (type) {
-            case CSV -> instance = CSVDataContainer.newInstance();
+            case CSV -> instance = TabularContainer.newInstance();
             case XML -> {
                 try {
                     instance = XMLDataContainer.newInstance();
@@ -267,7 +267,7 @@ public class DataContainer implements SpecificContainer {
      */
     private SpecificContainer adaptContainer() throws IOException {
         return switch (detectDataFormat()) {
-            case CSV -> CSVDataContainer.newInstance();
+            case CSV -> TabularContainer.newInstance();
             case XML -> {
                 try {
                     yield XMLDataContainer.newInstance();
@@ -315,7 +315,7 @@ public class DataContainer implements SpecificContainer {
             }
         } else if (inputFile != null) {
             String fileName = inputFile.toFile().getName();
-            if (StringUtils.isNotBlank(fileName)) {
+            if (!fileName.isBlank()) {
                 if (fileName.endsWith(".txt")) {
                     containerFormat = EContainerFormat.CSV;
                 } else if (fileName.endsWith(".csv")) {
@@ -341,9 +341,9 @@ public class DataContainer implements SpecificContainer {
      * @throws NullPointerException if the instance is not initialized or is not of type
      *                              CSVDataContainer
      */
-    public CSVDataContainer tabInstance() {
-        if (instance instanceof CSVDataContainer) {
-            return (CSVDataContainer) instance;
+    public TabularContainer tabInstance() {
+        if (instance instanceof TabularContainer) {
+            return (TabularContainer) instance;
         } else {
             throw new NullPointerException("TabularContainer not initialized");
         }
@@ -401,7 +401,7 @@ public class DataContainer implements SpecificContainer {
      * @return true if the instance is of type CSVDataContainer, otherwise false
      */
     public boolean isTabular() {
-        return instance instanceof CSVDataContainer;
+        return instance instanceof TabularContainer;
     }
 
     /**

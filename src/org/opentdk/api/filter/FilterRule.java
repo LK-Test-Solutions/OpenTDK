@@ -233,6 +233,7 @@ public class FilterRule {
         String quote = "";
         switch (ruleFormat) {
             case QUOTED_STRING, QUOTED_REGEX -> quote = "'";
+            default -> quote = "";
         }
 
         if (filterOperator.equals(EOperator.IN)) {

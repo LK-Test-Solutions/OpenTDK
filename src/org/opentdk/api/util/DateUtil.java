@@ -124,6 +124,7 @@ public class DateUtil {
             "dd.MM.yyyy HH:mm:ss:SS",
 
             "yyyy-MM-dd HH:mm:ss",              // ISO-Datum mit Zeit
+            "yyyy-MM-dd HH:mm",
             "yyyy-MM-dd'T'HH:mm:ss",            // ISO 8601 Standard
             "yyyy-MM-dd'T'HH:mm:ss.SSS",        // ISO 8601 mit Millisekunden
             "yyyy-MM-dd'T'HH:mm:ss.SSSXXX",     // ISO 8601 mit Millisekunden und Zeitzone

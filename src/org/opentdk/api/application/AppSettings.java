@@ -16,5 +16,7 @@ public class AppSettings {
     private long logFileSize = 10 * 104 * 1024;
     @Getter @Setter
     private int logArchiveSize = 10;
+	@Getter @Setter
+	private String appLanguage = "en";
 
 }

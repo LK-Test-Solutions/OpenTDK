@@ -120,7 +120,7 @@ public final class DatabaseExecuter {
 				String col = rsmd.getColumnName(i);
 				columns.add(col);
 			}
-			dc.tabInstance().setHeaders(columns.toArray(String[]::new));
+			dc.tabInstance().initHeaders(columns.toArray(String[]::new));
 			while (result.next()) {
 				String[] row = new String[cols];
 				for (int i = 0; i < cols; i++) {
@@ -188,25 +188,26 @@ public final class DatabaseExecuter {
 			// Fetch
 			ResultSetMetaData rsmd = result.getMetaData();
 			
-			BufferedWriter writer = new BufferedWriter(new FileWriter(exportPath.toFile(), true));
-			int cols = rsmd.getColumnCount(); // Fetch
-			if(addHeader) {
-				List<String> columns = new ArrayList<String>();
-				for (int i = 1; i <= cols; i++) {
-					String col = rsmd.getColumnName(i); // Fetch
-					columns.add(col);
-				}	
-				writer.write(String.join(columnDelimiter, columns)); // Export headers
-				writer.newLine();
-			}
-			while (result.next()) {
-				String[] row = new String[cols];
-				for (int i = 0; i < cols; i++) {
-					row[i] = String.valueOf(result.getObject(i + 1)); // Fetch
+			try(BufferedWriter writer = new BufferedWriter(new FileWriter(exportPath.toFile(), true))) {
+				int cols = rsmd.getColumnCount(); // Fetch
+				if(addHeader) {
+					List<String> columns = new ArrayList<String>();
+					for (int i = 1; i <= cols; i++) {
+						String col = rsmd.getColumnName(i); // Fetch
+						columns.add(col);
+					}	
+					writer.write(String.join(columnDelimiter, columns)); // Export headers
+					writer.newLine();
 				}
-				writer.write(String.join(columnDelimiter, row)); // Export values
-				writer.newLine(); 
-			} 
+				while (result.next()) {
+					String[] row = new String[cols];
+					for (int i = 0; i < cols; i++) {
+						row[i] = String.valueOf(result.getObject(i + 1)); // Fetch
+					}
+					writer.write(String.join(columnDelimiter, row)); // Export values
+					writer.newLine(); 
+				} 
+			}
 		} finally {
 			if(result != null) {
 				result.close();
